@@ -159,8 +159,6 @@ class enrol_arlo_plugin extends enrol_plugin {
     // Function to get the group from eventcode, group will be created if it doesnt exist
     private function get_group($instance, $eventcode){
     	global $DB, $CFG;
-        var_dump($instance);
-        //var_dump($instance->courseid);
     	// Create Group if group doesnt exist within current course
         if (!$group = $this->get_group_instance($eventcode, $instance->courseid)){
         	require_once($CFG->dirroot.'/group/lib.php');
@@ -178,7 +176,6 @@ class enrol_arlo_plugin extends enrol_plugin {
     	global $DB, $CFG;
         var_dump($instance->courseid);
     	require_once($CFG->dirroot.'/group/lib.php');
-        //var_dump($instance->courseid);
 		$group = $this->get_group($instance, $event->code);
 		if ($registration->status != "Approved"){
 			$this->enrol_user($instance, $user->id, $instance->roleid, $event->starttime, $event->finishtime, 0);
