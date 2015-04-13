@@ -174,7 +174,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 
     public function create_Enrolment($registration, $instance, $event, $user){
     	global $DB, $CFG;
-        var_dump($instance->courseid);
+        //var_dump($instance->courseid);
     	require_once($CFG->dirroot.'/group/lib.php');
 		$group = $this->get_group($instance, $event->code);
 		if ($registration->status != "Approved"){
@@ -187,7 +187,7 @@ class enrol_arlo_plugin extends enrol_plugin {
     }
     public function update_Enrolment($registration, $instance, $event, $user){
     	global $DB;
-        var_dump($instance->courseid);
+        //var_dump($instance->courseid);
 		if ($registration->status != "Approved"){
 			$this->update_user_enrol($instance, $user->id, 0, $event->starttime, $event->finishtime);
 		}else{
