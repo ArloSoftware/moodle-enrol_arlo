@@ -116,10 +116,6 @@ class enrol_arlo_plugin extends enrol_plugin {
 			if (!$this->get_enrol_instance($value->code)){
 				$templateCodes[$value->code] = $value->code;
 			}
-            // Same check for coaching courses
-            if (!$this->get_enrol_instance($value->code . "_coach")){
-                $templateCodes[$value->code . "_coach"] = $value->code . "_coach";
-            }
 		}
 		if (count($templateCodes) == 0){
 			return null;
@@ -160,13 +156,9 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
     }
     // Function to get the group from eventcode, group will be created if it doesnt exist
-    private function get_group($instance, $eventcode, $manager = null){
+    private function get_group($instance, $eventcode){
     	global $DB, $CFG;
-        if ($manager){
-            $groupname = $eventcode . $manager->firstname . $manager->arlocontactid;
-        }else {
-            $groupname = $eventcode;
-        }
+        $groupname = $eventcode;
     	// Create Group if group doesnt exist within current course
         if (!$group = $DB->get_record('groups', array('name' => $groupname, 'courseid' => $instance->courseid))){
         	require_once($CFG->dirroot.'/group/lib.php');
@@ -192,10 +184,10 @@ class enrol_arlo_plugin extends enrol_plugin {
         return $group;
     }
 
-    public function create_Enrolment($registration, $instance, $event, $user, $manager = null){
+    public function create_Enrolment($registration, $instance, $event, $user){
     	global $DB, $CFG;
     	require_once($CFG->dirroot.'/group/lib.php');
-		$group = $this->get_group($instance, $event->code, $manager);
+		$group = $this->get_group($instance, $event->code);
         if ($registration->status != "Cancelled"){
 			$this->enrol_user($instance, $user->id, $instance->roleid, $event->starttime, $event->finishtime, 0);
 		}else{
