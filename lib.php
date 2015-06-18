@@ -106,6 +106,7 @@ class enrol_arlo_plugin extends enrol_plugin {
     	global $DB;
     	return $DB->get_record("local_arlo_templates", array('code' => $templateCode));
     }
+    // This function gets the list of code's for the enrolment page
     public function getTemplateCodes($instance){
 		global $DB;
 		$templates = $DB->get_records('local_arlo_templates');
@@ -115,6 +116,10 @@ class enrol_arlo_plugin extends enrol_plugin {
 			if (!$this->get_enrol_instance($value->code)){
 				$templateCodes[$value->code] = $value->code;
 			}
+            // Same check for coaching courses
+            if (!$this->get_enrol_instance($value->code . "_coach")){
+                $templateCodes[$value->code . "_coach"] = $value->code . "_coach";
+            }
 		}
 		if (count($templateCodes) == 0){
 			return null;
@@ -124,29 +129,35 @@ class enrol_arlo_plugin extends enrol_plugin {
     // Function to loop though all events to ensure a matching group exists
     public function update_groups($instance, $oldInstance = null){
     	global $DB, $CFG;
-    	$template = $this->get_template($instance->customchar1); 
-    	if ($oldInstance){
-    		// Remove group's assoiated with old method
-    		$oldTemplate = $this->get_template($oldInstance->customchar1); 
-    		$oldEvents = $DB->get_records("local_arlo_events", array('arlotemplateid' => $oldTemplate->arlotemplateid));
-    		require_once($CFG->dirroot.'/group/lib.php');
-    		foreach ($oldEvents as $key => $event) {
-    			$oldGroup = $this->get_group($instance, $event->code);
-    			groups_delete_group($oldGroup->id);
-	    	}
-    		$groups = $DB->get_records('groups', array('courseid' => $oldInstance->courseid));
-    	}
-    	$events = $DB->get_records("local_arlo_events", array('arlotemplateid' => $template->arlotemplateid));
-    	foreach ($events as $key => $event) {
-    		// Creates group if it doesnt exist
-    		$group = $this->get_group($instance, $event->code);
-    		// We need to blank all registration's timeSynced inorder to get the cron to update these
-    		$registrations = $DB->get_records("local_arlo_registrations", array('arloeventid' =>  $event->arloeventid));
-    		foreach ($registrations as $key => $value) {
-    			$value->lastsynced = 0;
-    			$DB->update_record("local_arlo_registrations", $value);
-    		}
-    	}
+         // Is this a coaching course?
+        if (strpos($instance->customchar1,'_coach') !== false) {
+
+        }else{
+            $template = $this->get_template($instance->customchar1); 
+            if ($oldInstance){
+                // Remove group's assoiated with old method
+                $oldTemplate = $this->get_template($oldInstance->customchar1); 
+                $oldEvents = $DB->get_records("local_arlo_events", array('arlotemplateid' => $oldTemplate->arlotemplateid));
+                require_once($CFG->dirroot.'/group/lib.php');
+                foreach ($oldEvents as $key => $event) {
+                    $oldGroup = $this->get_group($instance, $event->code);
+                    groups_delete_group($oldGroup->id);
+                }
+                $groups = $DB->get_records('groups', array('courseid' => $oldInstance->courseid));
+            }
+           
+            $events = $DB->get_records("local_arlo_events", array('arlotemplateid' => $template->arlotemplateid));
+            foreach ($events as $key => $event) {
+                // Creates group if it doesnt exist
+                $group = $this->get_group($instance, $event->code);
+                // We need to blank all registration's timeSynced inorder to get the cron to update these
+                $registrations = $DB->get_records("local_arlo_registrations", array('arloeventid' =>  $event->arloeventid));
+                foreach ($registrations as $key => $value) {
+                    $value->lastsynced = 0;
+                    $DB->update_record("local_arlo_registrations", $value);
+                }
+            }
+        }
     }
     // Function to get the group from eventcode, group will be created if it doesnt exist
     private function get_group($instance, $eventcode, $manager = null){
@@ -181,7 +192,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         return $group;
     }
 
-    public function create_Enrolment($registration, $instance, $event, $user, $manager){
+    public function create_Enrolment($registration, $instance, $event, $user, $manager = null){
     	global $DB, $CFG;
     	require_once($CFG->dirroot.'/group/lib.php');
 		$group = $this->get_group($instance, $event->code, $manager);
@@ -192,6 +203,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 		}
 		groups_add_member($group, $user->id);
 		$this->email_welcome_message($instance, $user);
+
     }
     public function update_Enrolment($registration, $instance, $event, $user){
     	global $DB;
