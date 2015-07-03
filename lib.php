@@ -112,6 +112,9 @@ class enrol_arlo_plugin extends enrol_plugin {
 		$templates = $DB->get_records('local_arlo_templates');
 		$templateCodes = array();
 		foreach ($templates as $key => $value) {
+            // Scan Events/OnlineActivities to make sure this has an active item
+            $events = $DB->get_records("local_arlo_events", array('arlotemplateid' => $value->arlotemplateid ));
+            $OAevents = $DB->get_records("local_arlo_onlineactivities", array('arlotemplateid' => $value->arlotemplateid ));
 			// Only allow templates not already assigned to courses to be added
 			if (!$this->get_enrol_instance($value->code)){
 				$templateCodes[$value->code] = $value->code;
