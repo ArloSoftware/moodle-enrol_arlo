@@ -123,6 +123,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 		if (count($templateCodes) == 0){
 			return null;
 		}
+        ksort($templateCodes);
 		return $templateCodes;
 	}
     // Function to loop though all events to ensure a matching group exists
@@ -205,7 +206,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 		if ($registration->status != "Cancelled"){
 			$this->update_user_enrol($instance, $user->id, 0, $event->starttime, $event->finishtime);
 		}else{
-			$this->update_user_enrol($instance, $user->id, 1, $event->starttime, $event->finishtime);
+			$this->unenrol_user($instance, $user->id);
 		}
     }
     public function get_enrol_instance($templateID){
