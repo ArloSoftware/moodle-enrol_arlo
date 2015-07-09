@@ -150,21 +150,25 @@ class enrol_arlo_plugin extends enrol_plugin {
             foreach ($events as $key => $event) {
                 // Creates group if it doesnt exist
                 $group = $this->get_group($instance, $event->code);
-                // We need to blank all registration's timeSynced inorder to get the cron to update these
-                $registrations = $DB->get_records("local_arlo_registrations", array('arloeventid' =>  $event->arloeventid));
-                foreach ($registrations as $key => $value) {
-                    $value->lastsynced = 0;
-                    $DB->update_record("local_arlo_registrations", $value);
+                // // We need to blank all registration's timeSynced inorder to get the cron to update these
+                if ($group->new){
+                    $registrations = $DB->get_records("local_arlo_registrations", array('arloeventid' =>  $event->arloeventid));
+                    foreach ($registrations as $key => $value) {
+                        $value->lastsynced = 0;
+                        $DB->update_record("local_arlo_registrations", $value);
+                    }
                 }
             }
             $OnlineActivities = $DB->get_records("local_arlo_onlineactivities", array('arlotemplateid' => $template->arlotemplateid));
             foreach ($OnlineActivities as $key => $OnlineActivity) {
                 // Creates group if it doesnt exist
                 $group = $this->get_group($instance, $OnlineActivity->code);
-                $registrations = $DB->get_records("local_arlo_registrations", array('onlineactivityid' =>  $OnlineActivity->onlineactivityid));
-                foreach ($registrations as $key => $value) {
-                    $value->lastsynced = 0;
-                    $DB->update_record("local_arlo_registrations", $value);
+                if ($group->new){
+                    $registrations = $DB->get_records("local_arlo_registrations", array('onlineactivityid' =>  $OnlineActivity->onlineactivityid));
+                    foreach ($registrations as $key => $value) {
+                        $value->lastsynced = 0;
+                        $DB->update_record("local_arlo_registrations", $value);
+                    }
                 }
             }
         }
@@ -183,6 +187,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             $group->courseid = $instance->courseid;
             $group->id = groups_create_group($group);
             $group = $DB->get_record('groups', array('name' => $groupname, 'courseid' => $instance->courseid));
+            $group->new = true;
             // Create and assign the grouping
             if (!$grouping = $DB->get_record('groupings', array('name' => $eventcode, 'courseid' => $instance->courseid))){
                 require_once($CFG->dirroot.'/group/lib.php');
@@ -193,8 +198,10 @@ class enrol_arlo_plugin extends enrol_plugin {
                 $grouping->id = groups_create_grouping($grouping);
                 $grouping = $DB->get_record('groupings', array('name' => $eventcode, 'courseid' => $instance->courseid));
             }
-            groups_assign_grouping($grouping->id, $group->id); 
+            groups_assign_grouping($grouping->id, $group->id);
+            return $group; 
         }
+        $group->new = false;
         return $group;
     }
 
