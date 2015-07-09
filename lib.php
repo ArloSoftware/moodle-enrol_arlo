@@ -157,6 +157,16 @@ class enrol_arlo_plugin extends enrol_plugin {
                     $DB->update_record("local_arlo_registrations", $value);
                 }
             }
+            $OnlineActivities = $DB->get_records("local_arlo_onlineactivities", array('arlotemplateid' => $template->arlotemplateid));
+            foreach ($OnlineActivities as $key => $OnlineActivity) {
+                // Creates group if it doesnt exist
+                $group = $this->get_group($instance, $OnlineActivity->code);
+                $registrations = $DB->get_records("local_arlo_registrations", array('onlineactivityid' =>  $OnlineActivity->onlineactivityid));
+                foreach ($registrations as $key => $value) {
+                    $value->lastsynced = 0;
+                    $DB->update_record("local_arlo_registrations", $value);
+                }
+            }
         }
     }
     // Function to get the group from eventcode, group will be created if it doesnt exist
@@ -193,9 +203,9 @@ class enrol_arlo_plugin extends enrol_plugin {
     	require_once($CFG->dirroot.'/group/lib.php');
 		$group = $this->get_group($instance, $event->code);
         if ($registration->status != "Cancelled"){
-			$this->enrol_user($instance, $user->id, $instance->roleid, $event->starttime, $event->finishtime, 0);
+			$this->enrol_user($instance, $user->id, $instance->roleid, 0, 0, 0);
 		}else{
-			$this->enrol_user($instance, $user->id, $instance->roleid, $event->starttime, $event->finishtime, 1);
+			//$this->enrol_user($instance, $user->id, $instance->roleid, $event->starttime, 0, 1);
 		}
 		groups_add_member($group, $user->id);
 		$this->email_welcome_message($instance, $user);
@@ -204,7 +214,7 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function update_Enrolment($registration, $instance, $event, $user){
     	global $DB;
 		if ($registration->status != "Cancelled"){
-			$this->update_user_enrol($instance, $user->id, 0, $event->starttime, $event->finishtime);
+			$this->update_user_enrol($instance, $user->id, 0, 0, 0);
 		}else{
 			$this->unenrol_user($instance, $user->id);
 		}
