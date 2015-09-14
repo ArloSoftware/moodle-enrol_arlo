@@ -109,7 +109,8 @@ class enrol_arlo_plugin extends enrol_plugin {
     // This function gets the list of code's for the enrolment page
     public function getTemplateCodes($instance){
 		global $DB;
-		$templates = $DB->get_records('local_arlo_templates');
+        $params = array('status' => 'Active');
+		$templates = $DB->get_records('local_arlo_templates', $params);
 		$templateCodes = array();
 		foreach ($templates as $key => $value) {
             // Scan Events/OnlineActivities to make sure this has an active item
