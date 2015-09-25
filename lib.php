@@ -20,7 +20,7 @@
  * @package     enrol_arlo
  * @author      Troy Williams
  * @author      Corey Davis
- * @copyright   2015 LearningWorks Ltd <http://www.learningworks.co.nz>
+ * @copyright   2015 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
