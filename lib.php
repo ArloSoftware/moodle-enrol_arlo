@@ -17,60 +17,141 @@
 /**
  * Arlo enrolment plugin.
  *
- * @package     enrol_arlo
  * @author      Troy Williams
  * @author      Corey Davis
+ * @package     local_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright   2015 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * ARLO_CREATE_GROUP constant for automatically creating a group matched to enrolment instance.
+ */
+define('ARLO_CREATE_GROUP', -1);
+
+
 class enrol_arlo_plugin extends enrol_plugin {
-    public function __construct() {
-        global $CFG;
-        $this->load_config();
+    /**
+     * Does this plugin allow manual changes in user_enrolments table?
+     *
+     * All plugins allowing this must implement 'enrol/xxx:manage' capability
+     *
+     * @param stdClass $instance course enrol instance
+     * @return bool - true means it is possible to change enrol period and status in user_enrolments table
+     */
+    public function allow_manage(stdClass $instance) {
+        return true;
     }
+    /**
+     * Does this plugin allow manual unenrolment of a specific user?
+     * Yes, but only if user suspended...
+     *
+     * @param stdClass $instance course enrol instance
+     * @param stdClass $ue record from user_enrolments table
+     *
+     * @return bool - true means user with 'enrol/xxx:unenrol' may unenrol this user,
+     * false means nobody may touch this user enrolment
+     */
+    public function allow_unenrol_user(stdClass $instance, stdClass $ue) {
+        if ($ue->status == ENROL_USER_SUSPENDED) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Is it possible to delete enrol instance via standard UI?
+     *
+     * @param object $instance
+     * @return bool
+     */
+    public function can_delete_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/arlo:config', $context);
+    }
+
+    /**
+     * Is it possible to hide/show enrol instance via standard UI?
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
+    public function can_hide_show_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/arlo:config', $context);
+    }
+
+    /**
+     * Send welcome email to specified user.
+     *
+     * @param stdClass $instance
+     * @param stdClass $user user record
+     * @return void
+     */
     protected function email_welcome_message($instance, $user) {
         global $CFG, $DB;
-        $course = $DB->get_record('course', array('id'=>$instance->courseid), '*', MUST_EXIST);
+
+        $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
         $context = context_course::instance($course->id);
 
         $a = new stdClass();
-        $a->coursename = format_string($course->fullname, true, array('context'=>$context));
+        $a->coursename = format_string($course->fullname, true, array('context' => $context));
         $a->courseurl = "$CFG->wwwroot/course/view.php?id=$course->id";
 
-        $messagetext = get_string('welcometocoursetext', 'enrol_arlo', $a);
-        $messagehtml = text_to_html($messagetext, null, false, true);
+        if (trim($instance->customtext1) !== '') {
+            $message = $instance->customtext1;
+            $key = array('{$a->coursename}', '{$a->courseurl}', '{$a->fullname}', '{$a->email}');
+            $value = array($a->coursename, $a->courseurl, fullname($user), $user->email);
+            $message = str_replace($key, $value, $message);
+            if (strpos($message, '<') === false) {
+                // Plain text only.
+                $messagetext = $message;
+                $messagehtml = text_to_html($messagetext, null, false, true);
+            } else {
+                // This is most probably the tag/newline soup known as FORMAT_MOODLE.
+                $messagehtml = format_text($message, FORMAT_MOODLE,
+                    array('context' => $context, 'para' => false, 'newlines' => true, 'filter' => true));
+                $messagetext = html_to_text($messagehtml);
+            }
+        } else {
+            $messagetext = get_string('welcometocoursetext', 'enrol_arlo', $a);
+            $messagehtml = text_to_html($messagetext, null, false, true);
+        }
 
-        $subject = get_string('welcometocourse', 'enrol_arlo', format_string($course->fullname, true, array('context'=>$context)));
+        $subject = get_string('welcometocourse', 'enrol_arlo',
+            format_string($course->fullname, true, array('context' => $context)));
 
-        $contact = core_user::get_support_user();
+        $rusers = array();
+        if (!empty($CFG->coursecontact)) {
+            $croles = explode(',', $CFG->coursecontact);
+            list($sort, $sortparams) = users_order_by_sql('u');
+            // We only use the first user.
+            $i = 0;
+            do {
+                $rusers = get_role_users($croles[$i], $context, true, '',
+                    'r.sortorder ASC, ' . $sort, null, '', '', '', '', $sortparams);
+                $i++;
+            } while (empty($rusers) && !empty($croles[$i]));
+        }
+        if ($rusers) {
+            $contact = reset($rusers);
+        } else {
+            $contact = core_user::get_support_user();
+        }
+
         // Directly emailing welcome message rather than using messaging.
         email_to_user($user, $contact, $subject, $messagetext, $messagehtml);
     }
-    public function allow_enrol(stdClass $instance) {
-        // Users with enrol cap may unenrol other users manually manually.
-        return true;
-    }
-    public function allow_unenrol(stdClass $instance) {
-        // Users with unenrol cap may unenrol other users manually manually.
-        return true;
-    }
-    public function allow_manage(stdClass $instance) {
-        // Users with manage cap may tweak period and status.
-        return true;
-    }
-    public function get_newinstance_link($courseid) {
-        global $DB;
 
-        if ($DB->record_exists('enrol', array('courseid'=>$courseid, 'enrol'=>'arlo'))) {
-            // only one instance allowed, sorry
-            return NULL;
-        }
-
-        return new moodle_url('/enrol/arlo/edit.php', array('courseid'=>$courseid));
-    }
+    /**
+     * Returns edit icons for the page with list of instances.
+     *
+     * @param stdClass $instance
+     * @return array
+     * @throws coding_exception
+     */
     public function get_action_icons(stdClass $instance) {
         global $OUTPUT;
 
@@ -81,36 +162,57 @@ class enrol_arlo_plugin extends enrol_plugin {
 
         $icons = array();
 
-        if (has_capability('enrol/manual:config', $context)) {
-            $editlink = new moodle_url("/enrol/arlo/edit.php", array('courseid'=>$instance->courseid, 'id'=>$instance->id));
-            $icons[] = $OUTPUT->action_icon($editlink, new pix_icon('t/edit', get_string('edit'), 'core', array('class' => 'iconsmall')));
+        if (has_capability('enrol/arlo:config', $context)) {
+            $editlink = new moodle_url("/enrol/arlo/edit.php",
+                array('courseid' => $instance->courseid, 'id' => $instance->id));
+            $icons[] = $OUTPUT->action_icon($editlink,
+                new pix_icon('t/edit', get_string('edit'), 'core', array('class' => 'iconsmall')));
         }
         
         return $icons;
     }
-    public function can_delete_instance($instance) {
-        $context = context_course::instance($instance->courseid);
-        return has_capability('enrol/arlo:manage', $context);
-    }
+
+    /**
+     * Returns Arlo Code for Event or Online Activity instance.
+     *
+     * @param object $instance
+     * @return string
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
     public function get_instance_name($instance) {
         global $DB;
 
+        $enrol = $this->get_name();
+
         if (empty($instance->name)) {
-            if (!empty($instance->roleid) and $role = $DB->get_record('role', array('id'=>$instance->roleid))) {
-                $role = ' (' . role_get_name($role, context_course::instance($instance->courseid, IGNORE_MISSING)) . ')';
-            } else {
-                $role = '';
-            }
-            $enrol = $this->get_name();
-            return get_string('pluginname', 'enrol_'.$enrol) . " (" . $instance->customchar1 . ")";
-        } else {
-            return format_string($instance->name);
+            throw new moodle_exception('Arlo code does not exist.');
         }
+
+        if (!empty($instance->roleid) and $role = $DB->get_record('role', array('id' => $instance->roleid))) {
+            $role = ' (' . role_get_name($role, context_course::instance($instance->courseid, IGNORE_MISSING)) . ')';
+        } else {
+            $role = '';
+        }
+
+        return get_string('pluginname', 'enrol_' . $enrol) .  ' : ' . format_string($instance->name) . $role;
     }
-    public function can_hide_show_instance($instance) {
-        $context = context_course::instance($instance->courseid);
-        return has_capability('enrol/arlo:manage', $context);
-    } 
+
+    /**
+     * Returns link to page which may be used to add new instance of enrolment plugin in course.
+     *
+     * @param int $courseid
+     * @return moodle_url page url
+     */
+    public function get_newinstance_link($courseid) {
+        $context = context_course::instance($courseid, MUST_EXIST);
+        if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/arlo:config', $context)) {
+            return null;
+        }
+        // Multiple instances supported.
+        return new moodle_url('/enrol/arlo/edit.php', array('courseid' => $courseid));
+    }
+
     public function check_enrolment($instance, $user){
         global $DB;
         if ($enrolments = $DB->get_record("user_enrolments", array('userid' => $user->id, 'enrolid' => $instance->id))){
