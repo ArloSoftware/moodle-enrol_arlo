@@ -51,7 +51,7 @@ if ($instances = $DB->get_records('enrol', array('courseid'=>$course->id, 'enrol
     $instance->courseid        = $course->id;
 }
 
-$mform = new enrol_arlo_edit_form(null, array($instance, $plugin, $context));
+$mform = new enrol_arlo_edit_form(null, array($instance, $plugin, $course));
 
 if ($mform->is_cancelled()) {
     redirect($return);
