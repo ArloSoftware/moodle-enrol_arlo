@@ -56,14 +56,14 @@ class enrol_arlo_edit_form extends moodleform {
         if ($instance->id) {
 
         } else {
-            $events = arlo_get_events($instance);
-            $onlineactivities = arlo_get_online_activities($instance);
+            //$events = arlo_get_events($instance);
+            //$onlineactivities = arlo_get_online_activities($instance);
         }
 
         $mform->addElement('select', 'customint2', get_string('addgroup', 'enrol_arlo'), $groups);
 
-        $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_self'));
-        $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_self');
+        $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
+        $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
         $mform->setDefault('customint8', 1);
 
         $mform->addElement('textarea', 'customtext1',
