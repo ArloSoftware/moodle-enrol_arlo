@@ -61,6 +61,7 @@ class enrol_arlo_edit_form extends moodleform {
         }
 
         $mform->addElement('select', 'customint2', get_string('addgroup', 'enrol_arlo'), $groups);
+        $mform->setDefault('customint2', ARLO_CREATE_GROUP);
 
         $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
         $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
