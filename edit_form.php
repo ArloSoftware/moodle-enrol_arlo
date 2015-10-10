@@ -27,8 +27,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/arlo/lib.php');
+require_once($CFG->libdir  . '/formslib.php');
+require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
 class enrol_arlo_edit_form extends moodleform {
     public function definition() {
