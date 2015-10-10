@@ -28,10 +28,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/cohort/lib.php');
+require_once($CFG->dirroot.'/arlo/lib.php');
 
 class enrol_arlo_edit_form extends moodleform {
     public function definition() {
+        global $DB;
         $mform = $this->_form;
 
         list($instance, $plugin, $course) = $this->_customdata;
@@ -52,16 +53,57 @@ class enrol_arlo_edit_form extends moodleform {
             ENROL_INSTANCE_DISABLED => get_string('no'));
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
 
+        // Build event options group.
+        foreach (\local_arlo\arlo::get_active_events() as $event) {
+            $events[ARLO_TYPE_EVENT . '-' . $event->eventid] = $event->code . ' ' . $event->name;
+        }
+        // Build online activity options group.
+        foreach (\local_arlo\arlo::get_active_online_activities() as $onlineactivity) {
+            $onlineactivities[ARLO_TYPE_ONLINEACTIVITY. '-' . $onlineactivity->onlineactivityid]
+                = $onlineactivity->code . ' ' . $onlineactivity->name;
+        }
+
         // @TODO this is need to build selector.
         if ($instance->id) {
+            // Platform name.
+            $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
+            // Get Resource type and id.
+            $type = $instance->customint3;
+            $identifier = $instance->customint4;
+            if ($type == ARLO_TYPE_EVENT) {
+                $table = 'local_arlo_events';
+                $field = 'eventid';
+            } else if ($type == ARLO_TYPE_ONLINEACTIVITY) {
+                $table = 'local_arlo_onlineactivities';
+                $field = 'onlineactivityid';
+            }
+
+            // Get Resource record either Event or Online Activity.
+            $params = array($field => $identifier, 'arloinstance' => $arloinstance);
+            $resource = $DB->get_record($table, $params, '*', MUST_EXIST);
+            if (! $resource) {
+                $options = array(get_string('error') => array());
+            } else {
+                $options = array(get_string('events', 'enrol_arlo') => $events,
+                    get_string('onlineactivities', 'enrol_arlo') => $onlineactivities);
+
+            }
+
+            $key = $type . '-' . $identifier;
+            $mform->addElement('selectgroups', 'event', get_string('event', 'enrol_arlo'), $options);
+            $mform->setConstant('event', $key);
+            $mform->hardFreeze('event', $key);
 
         } else {
-            //$events = arlo_get_events($instance);
-            //$onlineactivities = arlo_get_online_activities($instance);
+
+            $options = array(get_string('events', 'enrol_arlo') => $events,
+                             get_string('onlineactivities', 'enrol_arlo') => $onlineactivities);
+
+            $mform->addElement('selectgroups', 'event', get_string('event', 'enrol_arlo'), $options);
+
         }
 
         $mform->addElement('select', 'customint2', get_string('addgroup', 'enrol_arlo'), $groups);
-        $mform->setDefault('customint2', ARLO_CREATE_GROUP);
 
         $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
         $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
@@ -76,13 +118,13 @@ class enrol_arlo_edit_form extends moodleform {
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
-
+/*
         if (enrol_accessing_via_instance($instance)) {
             $mform->addElement('static', 'selfwarn',
                 get_string('instanceeditselfwarning', 'core_enrol'),
                 get_string('instanceeditselfwarningtext', 'core_enrol'));
         }
-
+*/
         $this->add_action_buttons(true, ($instance->id ? null : get_string('addinstance', 'enrol')));
 
         $this->set_data($instance);
