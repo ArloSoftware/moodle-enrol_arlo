@@ -45,3 +45,12 @@ The following placeholders may be included in the message:
 
 $string['sendcoursewelcomemessage'] = 'Send course welcome message';
 $string['sendcoursewelcomemessage_help'] = 'If enabled, users receive a welcome message via email when they are enrolled in a course.';
+
+$string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
+$string['event'] = 'Event';
+$string['events'] = 'Events';
+$string['onlineactivity'] = 'Online Activity';
+$string['onlineactivities'] = 'Online Activities';
+
+$string['type'] = 'Type of Event';
+$string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
