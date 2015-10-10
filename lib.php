@@ -31,6 +31,9 @@ defined('MOODLE_INTERNAL') || die();
  */
 define('ARLO_CREATE_GROUP', -1);
 
+define('ARLO_TYPE_EVENT', 0);
+define('ARLO_TYPE_ONLINEACTIVITY', 1);
+
 
 class enrol_arlo_plugin extends enrol_plugin {
     /**
@@ -171,7 +174,6 @@ class enrol_arlo_plugin extends enrol_plugin {
         
         return $icons;
     }
-
     /**
      * Returns Arlo Code for Event or Online Activity instance.
      *
@@ -350,4 +352,60 @@ class enrol_arlo_plugin extends enrol_plugin {
         global $DB;
         return $DB->get_record('enrol',array('enrol'=>"arlo",'customchar1'=>$templateID));
     }
+}
+
+/**
+ * Create new group
+ *
+ * @param $courseid
+ * @param $cohortid
+ * @return id
+ * @throws coding_exception
+ * @throws moodle_exception
+ */
+function enrol_arlo_create_new_group($courseid, $table, $field, $identifier) {
+    global $DB;
+
+    // @TODO get name and code.
+    $params = array();
+    $groupname = $DB->get_field($table, 'code', array($field => $identifier), MUST_EXIST);
+    $a = new stdClass();
+    $a->name = $groupname;
+    $a->increment = '';
+    $groupname = trim(get_string('defaultgroupnametext', 'enrol_arlo', $a));
+    $inc = 1;
+    // Check to see if the cohort group name already exists. Add an incremented number if it does.
+    while ($DB->record_exists('groups', array('name' => $groupname, 'courseid' => $courseid))) {
+        $a->increment = '(' . (++$inc) . ')';
+        $newshortname = trim(get_string('defaultgroupnametext', 'enrol_arlo', $a));
+        $groupname = $newshortname;
+    }
+    // Create a new group for the cohort.
+    $groupdata = new stdClass();
+    $groupdata->courseid = $courseid;
+    $groupdata->name = $groupname;
+    $groupdata->idnumber = $groupname;
+
+    $groupid = groups_create_group($groupdata);
+
+    return $groupid;
+}
+
+/**
+ * Splits string combined of Arlo Resource type and identifier into their
+ * separate parts.
+ *
+ * @param $key
+ * @return array type of resource and a identifier
+ */
+function enrol_arlo_get_type_and_id($key) {
+    $type = '';
+    $id = 0;
+    $pattern = '/(\d.*)-(\d.*)/'; // Break apart (type) - (id).
+    preg_match($pattern, $key, $matches);
+    if (!empty($matches)) {
+        $type = $matches[1];
+        $id = $matches[2];
+    }
+    return array($type, $id);
 }
