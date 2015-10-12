@@ -32,6 +32,7 @@ defined('MOODLE_INTERNAL') || die();
 define('ARLO_CREATE_GROUP', -1);
 
 define('ARLO_TYPE_EVENT', 0);
+
 define('ARLO_TYPE_ONLINEACTIVITY', 1);
 
 
@@ -352,6 +353,18 @@ class enrol_arlo_plugin extends enrol_plugin {
         global $DB;
         return $DB->get_record('enrol',array('enrol'=>"arlo",'customchar1'=>$templateID));
     }
+}
+
+/**
+ * Prevent removal of enrol roles.
+ *
+ * @param int $itemid
+ * @param int $groupid
+ * @param int $userid
+ * @return bool
+*/
+function enrol_arlo_allow_group_member_remove($itemid, $groupid, $userid) {
+    return false;
 }
 
 /**
