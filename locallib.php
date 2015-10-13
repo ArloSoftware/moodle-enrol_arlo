@@ -50,6 +50,10 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     $instances = array(); // Cache.
 
     $plugin = enrol_get_plugin('arlo');
+
+    $student = get_archetype_roles('student');
+    $student = reset($student);
+    $defaultroleid = $plugin->get_config('roleid', $student->id);
     $unenrolaction = $plugin->get_config('unenrolaction', ENROL_EXT_REMOVED_UNENROL);
 
     // Iterate through all not enrolled yet users.
@@ -80,12 +84,14 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
             //$trace->output("unsuspending: $ue->userid ==> $instance->courseid via arlo $instance->customint1", 1);
             $trace->output('suspended', 1);
         } else {
-            $plugin->enrol_user($instance, $ue->userid);
+            $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
             $trace->output("enrolling: $ue->userid > $instance->courseid via Arlo", 1);
         }
     }
     $rs->close();
+    // Unenrol as necessary.
 
+    // Now assign all necessary roles to enrolled users - skip suspended instances and users.
 
     // Sync groups.
     $affectedusers = groups_sync_with_enrolment('arlo', $courseid);
