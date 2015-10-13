@@ -53,14 +53,28 @@ class enrol_arlo_edit_form extends moodleform {
             ENROL_INSTANCE_DISABLED => get_string('no'));
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
 
+        //
+        $currentinstancekeys = array();
+        $params = array('courseid' => $course->id, 'enrol' => 'arlo');
+        $arloenrolinstances = $DB->get_records('enrol', $params, '', 'id, customint3, customchar3');
+        foreach ($arloenrolinstances as $arloenrolinstance) {
+            $key = enrol_arlo_make_select_key($arloenrolinstance->customint3, $arloenrolinstance->customchar3);
+            $currentinstancekeys[] = $key;
+        }
+
         // Build event options group.
         foreach (\local_arlo\arlo::get_active_events() as $event) {
-            $events[ARLO_TYPE_EVENT . '-' . $event->eventid] = $event->code . ' ' . $event->name;
+            $key = enrol_arlo_make_select_key(ARLO_TYPE_EVENT, $event->eventguid);
+            if (! in_array($key, $currentinstancekeys)) {
+                $events[$key] = $event->code . ' ' . $event->name;
+            }
         }
         // Build online activity options group.
         foreach (\local_arlo\arlo::get_active_online_activities() as $onlineactivity) {
-            $onlineactivities[ARLO_TYPE_ONLINEACTIVITY. '-' . $onlineactivity->onlineactivityid]
-                = $onlineactivity->code . ' ' . $onlineactivity->name;
+            $key = enrol_arlo_make_select_key(ARLO_TYPE_ONLINEACTIVITY, $onlineactivity->onlineactivityguid);
+            if (! in_array($key, $currentinstancekeys)) {
+                $onlineactivities[$key] = $onlineactivity->code . ' ' . $onlineactivity->name;
+            }
         }
 
         // @TODO this is need to build selector.

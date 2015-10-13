@@ -84,13 +84,14 @@ if ($mform->is_cancelled()) {
     $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
 
     // Split the event string to get Resource type and the identifier, used later on as well.
-    list($type, $identifier) = enrol_arlo_get_type_and_id($data->event);
+    list($type, $identifier) = enrol_arlo_break_apart_key($data->event);
+
     if ($type == ARLO_TYPE_EVENT) {
         $table = 'local_arlo_events';
-        $field = 'eventid';
+        $field = 'eventguid';
     } else if ($type == ARLO_TYPE_ONLINEACTIVITY) {
         $table = 'local_arlo_onlineactivities';
-        $field = 'onlineactivityid';
+        $field = 'onlineactivityguid';
     } else {
         print_error('Arlo resource type not supported!');
     }
@@ -100,7 +101,7 @@ if ($mform->is_cancelled()) {
     $resource = $DB->get_record($table, $params, '*', MUST_EXIST);
 
     // Get associated Template.
-    $params = array('templateid' => $resource->templateid, 'arloinstance' => $arloinstance);
+    $params = array('templateguid' => $resource->templateguid, 'arloinstance' => $arloinstance);
     $template = $DB->get_record('local_arlo_templates', $params);
 
     // Setup name.
@@ -110,13 +111,11 @@ if ($mform->is_cancelled()) {
         $instance->name         = $data->name;
         $instance->status       = $data->status;
         $instance->roleid       = $defaultroleid;
-        $instance->customint1   = $resource->templateid; // Template id.
         $instance->customint2   = $data->customint2;
-        $instance->customint3   = $type; // Type.
-        $instance->customint4   = $identifier; // Identifier.
-        $instance->customchar1  = $template->code; // Template Code.
+        $instance->customint3   = $type; // Resource type.
+        $instance->customchar1  = $template->templateguid; // Template unique identifier.
         $instance->customchar2  = $arloinstance; // Platform name.
-        $instance->customchar3  = $resource->uniqueidentifier; // Unique identifier.
+        $instance->customchar3  = $identifier; // Resource unique identifier.
         $instance->customtext1  = $data->customtext1;
         $instance->timemodified = time();
         // Create a new group for the arlo if requested.
@@ -131,12 +130,10 @@ if ($mform->is_cancelled()) {
         $newinstance['name']        = $data->name;
         $newinstance['status']      = $data->status;
         $newinstance['roleid']      = $defaultroleid;
-        $newinstance['customint1']  = $resource->templateid; // Template id.
-        $newinstance['customint3']  = $type; // Type.
-        $newinstance['customint4']  = $identifier; // Identifier.
-        $newinstance['customchar1'] = $template->code; // Template Code.
+        $newinstance['customint3']  = $type; // Resource type.
+        $newinstance['customchar1'] = $template->templateguid; // Template unique identifier.
         $newinstance['customchar2'] = $arloinstance; // Platform name.
-        $newinstance['customchar3'] = $resource->uniqueidentifier; // Unique identifier.
+        $newinstance['customchar3'] = $identifier; // Resource unique identifier.
         $newinstance['customtext1'] = $data->customtext1;
 
         // Create a new group for the arlo if requested.
