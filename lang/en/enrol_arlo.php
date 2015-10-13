@@ -54,3 +54,6 @@ $string['onlineactivities'] = 'Online Activities';
 
 $string['type'] = 'Type of Event';
 $string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
+$string['linktemplatetocourse'] = 'Link Arlo template to this course';
+$string['remove'] = 'Remove';
+$string['template'] = 'Template';
