@@ -64,7 +64,7 @@ if ($instanceid) {
     $instance->courseid   = $course->id;
     $instance->enrol      = 'enrol';
     $instance->customint1 = ''; // Template id.
-    $instance->customint2 = '-1'; // Optional group id.
+    $instance->customint2 = '-1'; // Optional group id (Default to create new).
 }
 
 // Try and make the manage instances node on the navigation active.
@@ -130,6 +130,7 @@ if ($mform->is_cancelled()) {
         $newinstance['name']        = $data->name;
         $newinstance['status']      = $data->status;
         $newinstance['roleid']      = $defaultroleid;
+        $newinstance['customint2']  = $data->customint2; // Group selected or none.
         $newinstance['customint3']  = $type; // Resource type.
         $newinstance['customchar1'] = $template->templateguid; // Template unique identifier.
         $newinstance['customchar2'] = $arloinstance; // Platform name.
@@ -142,6 +143,7 @@ if ($mform->is_cancelled()) {
             $groupid = enrol_arlo_create_new_group($course->id, $table, $field, $identifier);
             $newinstance['customint2'] = $groupid;
             $plugin->add_instance($course, $newinstance);
+//@TODO send course welcome message.
         } else {
             $plugin->add_instance($course, $newinstance);
         }
