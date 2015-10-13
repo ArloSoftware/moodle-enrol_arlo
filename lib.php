@@ -405,20 +405,31 @@ function enrol_arlo_create_new_group($courseid, $table, $field, $identifier) {
 }
 
 /**
- * Splits string combined of Arlo Resource type and identifier into their
- * separate parts.
+ * Break key string which is combination of Arlo resource type and
+ * guid identifier into their separate parts.
  *
  * @param $key
- * @return array type of resource and a identifier
+ * @return array
  */
-function enrol_arlo_get_type_and_id($key) {
+function enrol_arlo_break_apart_key($key) {
     $type = '';
-    $id = 0;
-    $pattern = '/(\d.*)-(\d.*)/'; // Break apart (type) - (id).
+    $guid = '';
+    $pattern = '/(\d.*):(.*)/'; // Break apart (type) : (guid).
     preg_match($pattern, $key, $matches);
     if (!empty($matches)) {
         $type = $matches[1];
-        $id = $matches[2];
+        $guid = $matches[2];
     }
-    return array($type, $id);
+    return array($type, $guid);
+}
+
+/**
+ * Make key based on Arlo resource type ans guid identifier.
+ *
+ * @param $type
+ * @param $guid
+ * @return string
+ */
+function enrol_arlo_make_select_key($type, $guid) {
+    return $type . ':' . $guid;
 }
