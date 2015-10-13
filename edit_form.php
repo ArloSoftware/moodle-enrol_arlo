@@ -64,14 +64,22 @@ class enrol_arlo_edit_form extends moodleform {
         // Build event options group.
         foreach (\local_arlo\arlo::get_active_events() as $event) {
             $key = enrol_arlo_make_select_key(ARLO_TYPE_EVENT, $event->eventguid);
-            if (! in_array($key, $currentinstancekeys)) {
+            if (! $instance->id) {
+                if (!in_array($key, $currentinstancekeys)) {
+                    $events[$key] = $event->code . ' ' . $event->name;
+                }
+            } else {
                 $events[$key] = $event->code . ' ' . $event->name;
             }
         }
         // Build online activity options group.
         foreach (\local_arlo\arlo::get_active_online_activities() as $onlineactivity) {
             $key = enrol_arlo_make_select_key(ARLO_TYPE_ONLINEACTIVITY, $onlineactivity->onlineactivityguid);
-            if (! in_array($key, $currentinstancekeys)) {
+            if (! $instance->id) {
+                if (!in_array($key, $currentinstancekeys)) {
+                    $onlineactivities[$key] = $onlineactivity->code . ' ' . $onlineactivity->name;
+                }
+            } else {
                 $onlineactivities[$key] = $onlineactivity->code . ' ' . $onlineactivity->name;
             }
         }
