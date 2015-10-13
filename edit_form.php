@@ -53,7 +53,7 @@ class enrol_arlo_edit_form extends moodleform {
             ENROL_INSTANCE_DISABLED => get_string('no'));
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
 
-        //
+        // Build array of keys of current Arlo instances to hide later.
         $currentinstancekeys = array();
         $params = array('courseid' => $course->id, 'enrol' => 'arlo');
         $arloenrolinstances = $DB->get_records('enrol', $params, '', 'id, customint3, customchar3');
@@ -61,7 +61,6 @@ class enrol_arlo_edit_form extends moodleform {
             $key = enrol_arlo_make_select_key($arloenrolinstance->customint3, $arloenrolinstance->customchar3);
             $currentinstancekeys[] = $key;
         }
-
         // Build event options group.
         foreach (\local_arlo\arlo::get_active_events() as $event) {
             $key = enrol_arlo_make_select_key(ARLO_TYPE_EVENT, $event->eventguid);
@@ -77,19 +76,20 @@ class enrol_arlo_edit_form extends moodleform {
             }
         }
 
-        // @TODO this is need to build selector.
+        // @TODO build better selector = ajax for bigger installs.
         if ($instance->id) {
             // Platform name.
             $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
+
             // Get Resource type and id.
             $type = $instance->customint3;
-            $identifier = $instance->customint4;
+            $identifier = $instance->customchar3;
             if ($type == ARLO_TYPE_EVENT) {
                 $table = 'local_arlo_events';
-                $field = 'eventid';
+                $field = 'eventguid';
             } else if ($type == ARLO_TYPE_ONLINEACTIVITY) {
                 $table = 'local_arlo_onlineactivities';
-                $field = 'onlineactivityid';
+                $field = 'onlineactivityguid';
             }
 
             // Get Resource record either Event or Online Activity.
@@ -103,7 +103,7 @@ class enrol_arlo_edit_form extends moodleform {
 
             }
 
-            $key = $type . '-' . $identifier;
+            $key = enrol_arlo_make_select_key($type, $identifier);
             $mform->addElement('selectgroups', 'event', get_string('event', 'enrol_arlo'), $options);
             $mform->setConstant('event', $key);
             $mform->hardFreeze('event', $key);
