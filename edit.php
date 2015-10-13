@@ -151,7 +151,7 @@ if ($mform->is_cancelled()) {
         }
     }
     $trace = new null_progress_trace();
-    //enrol_arlo_sync($trace, $course->id);
+    enrol_arlo_sync($trace, $course->id);
     $trace->finished();
     redirect($returnurl);
 }
