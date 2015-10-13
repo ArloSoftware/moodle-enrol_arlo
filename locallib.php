@@ -56,9 +56,11 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     $defaultroleid = $plugin->get_config('roleid', $student->id);
     $unenrolaction = $plugin->get_config('unenrolaction', ENROL_EXT_REMOVED_UNENROL);
 
-    // Iterate through all not enrolled yet users.
+    // Just the one or all.
     $onecourse = $courseid ? "AND e.courseid = :courseid" : "";
-    $sql = "SELECT u.id AS userid, e.id AS enrolid, ue.status
+
+    // Iterate through all not enrolled yet users.
+    $sql = "SELECT u.id AS userid, e.id AS enrolid, r.status AS arlostatus, ue.status
               FROM {user} u
               JOIN {user_info_data} AS uid
                 ON (uid.userid = u.id AND u.deleted = 0)
@@ -79,19 +81,67 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
             $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
         }
         $instance = $instances[$ue->enrolid];
-        if ($ue->status == ENROL_USER_SUSPENDED) {
+        if ($ue->status == ENROL_USER_SUSPENDED) { // @TODO is this condition needed in Arlo Cancellded is remove?
             //$plugin->update_user_enrol($instance, $ue->userid, ENROL_USER_ACTIVE);
             //$trace->output("unsuspending: $ue->userid ==> $instance->courseid via arlo $instance->customint1", 1);
-            $trace->output('suspended', 1);
+            //$trace->output('suspended', 1);
         } else {
-            $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
-            $trace->output("enrolling: $ue->userid > $instance->courseid via Arlo", 1);
+            // Only people that have 'Approved' or 'Completed' Arlo status get enrolled.
+            if ($ue->arlostatus == 'Approved' or $ue->arlostatus == 'Completed') {
+                $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
+                $trace->output("enrolling: $ue->userid > $instance->courseid via Arlo with status > $ue->arlostatus", 1);
+            }
         }
     }
     $rs->close();
-    // Unenrol as necessary.
 
-    // Now assign all necessary roles to enrolled users - skip suspended instances and users.
+    // Unenrol as necessary - Cancelled status.
+    $sql = "SELECT ue.*, e.courseid, r.status AS arlostatus
+              FROM {user_enrolments} ue
+              JOIN {enrol} e
+                ON (e.id = ue.enrolid AND e.enrol = 'arlo' $onecourse)
+              JOIN {user} u
+                ON (u.id = ue.userid)
+              JOIN {user_info_data} AS uid
+                ON (uid.userid = u.id AND u.deleted = 0)
+              JOIN {user_info_field} AS uif
+                ON (uid.fieldid = uif.id AND uif.shortname = 'arloguid')
+         LEFT JOIN {local_arlo_registrations} r
+                ON r.contactguid = uid.data
+               AND (e.customchar3 = r.eventguid OR e.customchar3 = r.onlineactivityguid)
+             WHERE r.status = :arlostatus ";
+
+    $params = array();
+    $params['courseid'] = $courseid;
+    $params['arlostatus'] = 'Cancelled';
+
+    $rs = $DB->get_recordset_sql($sql, $params);
+    foreach($rs as $ue) {
+        if (!isset($instances[$ue->enrolid])) {
+            $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+        }
+        $instance = $instances[$ue->enrolid];
+        if ($unenrolaction == ENROL_EXT_REMOVED_UNENROL) {
+            // Remove enrolment together with group membership, grades, preferences, etc.
+            $plugin->unenrol_user($instance, $ue->userid);
+            $trace->output("unenrolling: $ue->userid > $instance->courseid via Arlo with status > $ue->arlostatus", 1);
+        } else { // ENROL_EXT_REMOVED_SUSPENDNOROLES
+            // Just disable and ignore any changes.
+            if ($ue->status != ENROL_USER_SUSPENDED) {
+                $plugin->update_user_enrol($instance, $ue->userid, ENROL_USER_SUSPENDED);
+                $context = context_course::instance($instance->courseid);
+                $unenrolparams = array();
+                $unenrolparams['userid'] = $ue->userid;
+                $unenrolparams['contextid'] = $context->id;
+                $unenrolparams['component'] = 'enrol_arlo';
+                $unenrolparams['itemid'] = $instance->id;
+                role_unassign_all($unenrolparams);
+                $trace->output("suspending and unassigning all roles: $ue->userid > $instance->courseid", 1);
+            }
+        }
+    }
+    $rs->close();
+    unset($instances);
 
     // Sync groups.
     $affectedusers = groups_sync_with_enrolment('arlo', $courseid);
@@ -102,7 +152,7 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
         $trace->output("adding user to group: $ue->userid > $ue->courseid - $ue->groupname", 1);
     }
 
-    $trace->output('...user enrolment synchronisation finished.');
+    $trace->output('User enrolment synchronisation finished.');
 
     return 0;
 }
