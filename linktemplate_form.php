@@ -35,16 +35,20 @@ class enrol_arlo_linktemplate_form extends moodleform{
         list($link, $course) = $this->_customdata;
 
         $templates = array();
-        // Build online activity options group.
+        $templates[''] = get_string("select") . '...';
+        // Build templates options group.
         foreach (\local_arlo\arlo::get_active_templates() as $key => $template) {
-            $templates[$key] = $template->code . ' ' . $template->name;
+            $templates[$template->templateguid] = $template->code . ' ' . $template->name;
         }
+        $mform->addElement('static', '', get_string('linktemplatetocourse_description', 'enrol_arlo'));
+        $mform->addElement('html', get_string('linktemplatetocourse_description', 'enrol_arlo'));
         if ($link->id) {
             $mform->addElement('select', 'template', get_string('template', 'enrol_arlo'), $templates);
             $mform->setConstant('template', $link->arloguid);
             $mform->hardFreeze('template', $link->arloguid);
         } else {
             $mform->addElement('select', 'template', get_string('template', 'enrol_arlo'), $templates);
+            $mform->addRule('template', get_string('required'), 'required', null, 'client');
         }
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
