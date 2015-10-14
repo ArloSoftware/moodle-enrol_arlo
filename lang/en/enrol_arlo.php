@@ -57,3 +57,16 @@ $string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
 $string['linktemplatetocourse'] = 'Link Arlo template to this course';
 $string['remove'] = 'Remove';
 $string['template'] = 'Template';
+
+$string['linktemplatenotice'] =
+'<div class="alert alert-info" role="alert">
+<strong>Notice</strong>
+<p>This will add every event or online activity using the template as enrolment instances to this course.</p>
+</div>';
+
+$string['warningnotice'] =
+'<div class="alert alert-warning" role="alert">
+<strong>WARNING</strong>
+<p>Removing the template link will remove all people from the course that are in the following enrolment instances:</p>
+{$a}
+</div>';

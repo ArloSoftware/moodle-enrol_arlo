@@ -49,8 +49,11 @@ $mform = new enrol_arlo_linktemplate_form(null, array($link, $course));
 if ($mform->is_cancelled()) {
     redirect($returnurl);
 } else if ($data = $mform->get_data()) {
+    $trace = new \null_progress_trace();
     if ($data->id) {
         if (isset($data->submitbuttonremove)) {
+            // Remove associated instances and mapping.
+            enrol_arlo_remove_course_instances($trace, $data->courseid);
             $DB->delete_records('local_arlo_course', array('courseid' => $data->courseid));
         }
     } else {
@@ -60,7 +63,6 @@ if ($mform->is_cancelled()) {
         $link->modified = time();
         $link->id = $DB->insert_record('local_arlo_course', $link);
     }
-    $trace = new null_progress_trace();
     //enrol_arlo_sync($trace, $course->id);
     $trace->finished();
     redirect($returnurl);
@@ -70,6 +72,19 @@ $PAGE->set_heading($course->fullname);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('linktemplatetocourse', 'enrol_arlo'));
+if ($link->id) {
+    $a = '';
+    $rs = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $course->id), '', 'id, name');
+    if ($rs) {
+        foreach ($rs as $instance) {
+            $a .= '<span>' . $instance->name . '</span><br>';
+        }
+        $message = get_string('warningnotice', 'enrol_arlo', $a);
+        echo $OUTPUT->box($message, 'generalbox');
+    }
+} else {
+    echo $OUTPUT->box(get_string('linktemplatenotice', 'enrol_arlo'), 'generalbox');
+}
 $mform->display();
 echo $OUTPUT->footer();
 

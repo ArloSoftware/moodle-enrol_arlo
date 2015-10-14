@@ -40,8 +40,6 @@ class enrol_arlo_linktemplate_form extends moodleform{
         foreach (\local_arlo\arlo::get_active_templates() as $key => $template) {
             $templates[$template->templateguid] = $template->code . ' ' . $template->name;
         }
-        $mform->addElement('static', '', get_string('linktemplatetocourse_description', 'enrol_arlo'));
-        $mform->addElement('html', get_string('linktemplatetocourse_description', 'enrol_arlo'));
         if ($link->id) {
             $mform->addElement('select', 'template', get_string('template', 'enrol_arlo'), $templates);
             $mform->setConstant('template', $link->arloguid);
