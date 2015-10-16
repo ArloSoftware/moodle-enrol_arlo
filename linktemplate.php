@@ -53,8 +53,7 @@ if ($mform->is_cancelled()) {
     if ($data->id) {
         if (isset($data->submitbuttonremove)) {
             // Remove associated instances and mapping.
-            enrol_arlo_remove_course_instances($trace, $data->courseid);
-            $DB->delete_records('local_arlo_course', array('courseid' => $data->courseid));
+            enrol_arlo_course_remove_all_instances($trace, $data->courseid);
         }
     } else {
         $link = new \stdClass();
@@ -63,7 +62,7 @@ if ($mform->is_cancelled()) {
         $link->modified = time();
         $link->id = $DB->insert_record('local_arlo_course', $link);
     }
-    //enrol_arlo_sync($trace, $course->id);
+    enrol_arlo_sync($trace, $course->id);
     $trace->finished();
     redirect($returnurl);
 }
