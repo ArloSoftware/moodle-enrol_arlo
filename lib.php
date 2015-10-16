@@ -368,10 +368,13 @@ function enrol_arlo_allow_group_member_remove($itemid, $groupid, $userid) {
 }
 
 /**
- * Create new group
+ * Create new group or returns the existing group id based on matching
+ * code to group idnumber.
  *
- * @param $courseid
- * @param $cohortid
+ * @param $courseid - course where to create group.
+ * @param $table - resource table local_arlo_events or local_arlo_onlineactivities.
+ * @param $field - guid field eventguid or onlineactivityguid.
+ * @param $identifier - resource guid.
  * @return id
  * @throws coding_exception
  * @throws moodle_exception
@@ -379,25 +382,24 @@ function enrol_arlo_allow_group_member_remove($itemid, $groupid, $userid) {
 function enrol_arlo_create_new_group($courseid, $table, $field, $identifier) {
     global $DB;
 
-    // @TODO get name and code.
-    $params = array();
-    $groupname = $DB->get_field($table, 'code', array($field => $identifier), MUST_EXIST);
+    $code = $DB->get_field($table, 'code', array($field => $identifier), MUST_EXIST);
+
+    // Already have group, return id.
+    $exists = $DB->get_record('groups', array('idnumber' => $code, 'courseid' => $courseid));
+    if ($exists) {
+        return $exists->id;
+    }
+
     $a = new stdClass();
-    $a->name = $groupname;
+    $a->name = $code;
     $a->increment = '';
     $groupname = trim(get_string('defaultgroupnametext', 'enrol_arlo', $a));
-    $inc = 1;
-    // Check to see if the cohort group name already exists. Add an incremented number if it does.
-    while ($DB->record_exists('groups', array('name' => $groupname, 'courseid' => $courseid))) {
-        $a->increment = '(' . (++$inc) . ')';
-        $newshortname = trim(get_string('defaultgroupnametext', 'enrol_arlo', $a));
-        $groupname = $newshortname;
-    }
-    // Create a new group for the cohort.
+
+    // Create a new group for the for event or online activity.
     $groupdata = new stdClass();
     $groupdata->courseid = $courseid;
     $groupdata->name = $groupname;
-    $groupdata->idnumber = $groupname;
+    $groupdata->idnumber = $code;
 
     $groupid = groups_create_group($groupdata);
 
