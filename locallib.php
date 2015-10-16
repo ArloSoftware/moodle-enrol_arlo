@@ -22,6 +22,143 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Remove all Arlo instances for a course.
+ *
+ * @param progress_trace $trace
+ * @param $courseid
+ * @throws coding_exception
+ */
+function enrol_arlo_course_remove_all_instances(progress_trace $trace, $courseid) {
+    global $DB;
+
+    $plugin = enrol_get_plugin('arlo');
+    $templateguid = $DB->get_field('local_arlo_course', 'arloguid', array('courseid' => $courseid), MUST_EXIST);
+    $instances = $DB->get_records('enrol', array('enrol' => 'arlo', 'customchar1' => $templateguid));
+    foreach ($instances as $instance) {
+        if ($plugin->can_delete_instance($instance)) {
+            $plugin->delete_instance($instance);
+        }
+    }
+    $DB->delete_records('local_arlo_course', array('courseid' => $courseid));
+}
+
+/**
+ * Adds or removes Arlo enrolment instances from a course and creates associated groups.
+ *
+ * Does not sync user enrolments that is handled by enrol_arlo_sync().
+ *
+ * @param progress_trace $trace
+ * @param $courseid
+ * @param null $templateguid
+ * @throws Exception
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $templateguid = null) {
+    global $CFG, $DB;
+    require_once($CFG->dirroot . '/group/lib.php');
+
+    // Caches.
+    static $templates = array();
+    static $courses = array();
+    $instances = array();
+
+
+    $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
+    $plugin = enrol_get_plugin('arlo');
+
+    $student = get_archetype_roles('student');
+    $student = reset($student);
+    $defaultroleid = $plugin->get_config('roleid', $student->id);
+
+    if (! isset($courses[$courseid])) {
+        $courses[$courseid] = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+    }
+
+    if (is_null($templateguid)) {
+        $templateguid = $DB->get_field('local_arlo_course', 'arloguid', array('courseid' => $courseid), '*', MUST_EXIST);
+    }
+    if (!isset($templates[$templateguid])) {
+        $templates[$templateguid] = $DB->get_record('local_arlo_templates', array('templateguid' => $templateguid), '*', MUST_EXIST);
+    }
+    // Get current instances and load to cache array.
+    $current = $DB->get_records('enrol', array('enrol' => 'arlo', 'customchar1' => $templateguid));
+    foreach ($current as $c) {
+        $instances[$c->customchar3] = $c;
+    }
+    // Process events.
+    $events = $DB->get_records('local_arlo_events', array('templateguid' => $templateguid));
+    foreach ($events as $event) {
+        $course = $courses[$courseid];
+        $name = $event->code . ' ' . $templates[$templateguid]->name;
+        if (isset($instances[$event->eventguid])) {
+            // Do we need to remove.
+            if ($event->status == 'Cancelled') {
+                $instance = $instances[$event->eventguid];
+                if ($plugin->can_delete_instance($instance)) {
+                    //$plugin->delete_instance($instance);
+                    $trace->output("cancelled, remove enrol instance {$instance->name}", 1);
+                }
+            }
+            continue;
+        } else {
+            $newinstance = array();
+            $newinstance['name'] = $name;
+            $newinstance['status'] = ENROL_INSTANCE_ENABLED;
+            $newinstance['roleid'] = $defaultroleid;
+            $newinstance['customint2'] = -1; // Group selected or none.
+            $newinstance['customint3'] = ARLO_TYPE_EVENT; // Resource type.
+            $newinstance['customchar1'] = $event->templateguid; // Template unique identifier.
+            $newinstance['customchar2'] = $arloinstance; // Platform name.
+            $newinstance['customchar3'] = $event->eventguid; // Resource unique identifier.
+            $newinstance['customint8'] = 1;
+            // Create a new group for the arlo if requested.
+            if ($newinstance['customint2'] == ARLO_CREATE_GROUP) {
+                $groupid = enrol_arlo_create_new_group($course->id, 'local_arlo_events', 'eventguid', $event->eventguid);
+                $newinstance['customint2'] = $groupid;
+            } else {
+                $newinstance['customint2'] = 0;
+            }
+            $plugin->add_instance($course, $newinstance);
+            $trace->output("adding enrol instance for event {$name}", 1);
+        }
+    }
+    // Process online activities.
+    $onlineactivities = $DB->get_records('local_arlo_onlineactivities', array('templateguid' => $templateguid));
+    foreach ($onlineactivities as $onlineactivity) {
+        $course = $courses[$courseid];
+        $name = $onlineactivity->code . ' ' . $templates[$templateguid]->name;
+        if (isset($instances[$onlineactivity->onlineactivityguid])) {
+            // @TODO Do we need to do anything i.e remove statuses?
+            continue;
+        } else {
+            $newinstance = array();
+            $newinstance['name'] = $name;
+            $newinstance['status'] = ENROL_INSTANCE_ENABLED;
+            $newinstance['roleid'] = $defaultroleid;
+            $newinstance['customint2'] = -1; // Group selected or none.
+            $newinstance['customint3'] = ARLO_TYPE_ONLINEACTIVITY; // Resource type.
+            $newinstance['customchar1'] = $onlineactivity->templateguid; // Template unique identifier.
+            $newinstance['customchar2'] = $arloinstance; // Platform name.
+            $newinstance['customchar3'] = $onlineactivity->onlineactivityguid; // Resource unique identifier.
+            $newinstance['customint8'] = 1;
+            // Create a new group for the arlo if requested.
+            if ($newinstance['customint2'] == ARLO_CREATE_GROUP) {
+                $groupid = enrol_arlo_create_new_group($course->id,
+                    'local_arlo_onlineactivities', 'onlineactivityguid', $onlineactivity->onlineactivityguid);
+                $newinstance['customint2'] = $groupid;
+            } else {
+                $newinstance['customint2'] = 0;
+            }
+            $plugin->add_instance($course, $newinstance);
+            $trace->output("adding enrol instance for online activity {$name}", 1);
+        }
+    }
+    return;
+}
 /**
  *
  * A lot of Code borrowed from Cohort enrolment plugin.
@@ -34,8 +171,8 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     global $CFG, $DB;
     require_once($CFG->dirroot . '/group/lib.php');
 
-    // Purge all roles if cohort sync disabled, those can be recreated later here by cron or CLI.
-    if (!enrol_is_enabled('arlo')) {
+    // Purge all roles if Arlo sync disabled, those can be recreated later here by cron or CLI.
+    if (! enrol_is_enabled('arlo')) {
         $trace->output('Arlo enrolment plugin is disabled, unassigning all plugin roles and stopping.');
         role_unassign_all(array('component' => 'enrol_arlo'));
         return 2;
@@ -56,7 +193,17 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     $defaultroleid = $plugin->get_config('roleid', $student->id);
     $unenrolaction = $plugin->get_config('unenrolaction', ENROL_EXT_REMOVED_UNENROL);
 
-    // Just the one or all.
+    // Get mapped Templates and create associated enrolment instances.
+    $params = array();
+    if ($courseid) {
+        $params['courseid'] = $courseid;
+    }
+    $rs = $DB->get_records('local_arlo_course', $params);
+    foreach ($rs as $link) {
+        enrol_arlo_sync_course_instances($trace, $link->courseid);
+    }
+    return;
+    // Just the one or all. Possible use in enrol and unenrol.
     $onecourse = $courseid ? "AND e.courseid = :courseid" : "";
 
     // Iterate through all not enrolled yet users.
