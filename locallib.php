@@ -99,12 +99,17 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
             if ($event->status == 'Cancelled') {
                 $instance = $instances[$event->eventguid];
                 if ($plugin->can_delete_instance($instance)) {
-                    //$plugin->delete_instance($instance);
+                    $plugin->delete_instance($instance);
                     $trace->output("cancelled, remove enrol instance {$instance->name}", 1);
                 }
             }
             continue;
         } else {
+            // Is already 'Cancelled' don't bother adding.
+            if ($event->status == 'Cancelled') {
+                $trace->output("cancelled, don't add {$name}", 1);
+                continue;
+            }
             $newinstance = array();
             $newinstance['name'] = $name;
             $newinstance['status'] = ENROL_INSTANCE_ENABLED;
@@ -135,6 +140,11 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
             // @TODO Do we need to do anything i.e remove statuses?
             continue;
         } else {
+            // Is already 'Cancelled' don't bother adding.
+            if ($onlineactivity->status == 'Cancelled') {
+                $trace->output("cancelled, don't add {$name}", 1);
+                continue;
+            }
             $newinstance = array();
             $newinstance['name'] = $name;
             $newinstance['status'] = ENROL_INSTANCE_ENABLED;
