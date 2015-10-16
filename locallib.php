@@ -237,6 +237,8 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
             if ($ue->arlostatus == 'Approved' or $ue->arlostatus == 'Completed') {
                 $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
                 $trace->output("enrolling: $ue->userid > $instance->courseid via Arlo with status > $ue->arlostatus", 1);
+                $user = core_user::get_user($ue->userid);
+                $plugin->email_welcome_message($instance, $user);
             }
         }
     }
