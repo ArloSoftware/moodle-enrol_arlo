@@ -202,7 +202,7 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     foreach ($rs as $link) {
         enrol_arlo_sync_course_instances($trace, $link->courseid);
     }
-    return;
+
     // Just the one or all. Possible use in enrol and unenrol.
     $onecourse = $courseid ? "AND e.courseid = :courseid" : "";
 
