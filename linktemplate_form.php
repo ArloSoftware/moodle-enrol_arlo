@@ -42,8 +42,8 @@ class enrol_arlo_linktemplate_form extends moodleform{
         }
         if ($link->id) {
             $mform->addElement('select', 'template', get_string('template', 'enrol_arlo'), $templates);
-            $mform->setConstant('template', $link->arloguid);
-            $mform->hardFreeze('template', $link->arloguid);
+            $mform->setConstant('template', $link->templateguid);
+            $mform->hardFreeze('template', $link->templateguid);
         } else {
             $mform->addElement('select', 'template', get_string('template', 'enrol_arlo'), $templates);
             $mform->addRule('template', get_string('required'), 'required', null, 'client');

@@ -35,14 +35,14 @@ function enrol_arlo_course_remove_all_instances(progress_trace $trace, $courseid
     global $DB;
 
     $plugin = enrol_get_plugin('arlo');
-    $templateguid = $DB->get_field('local_arlo_course', 'arloguid', array('courseid' => $courseid), MUST_EXIST);
+    $templateguid = $DB->get_field('enrol_arlo_templatelink', 'templateguid', array('courseid' => $courseid), MUST_EXIST);
     $instances = $DB->get_records('enrol', array('enrol' => 'arlo', 'customchar1' => $templateguid));
     foreach ($instances as $instance) {
         if ($plugin->can_delete_instance($instance)) {
             $plugin->delete_instance($instance);
         }
     }
-    $DB->delete_records('local_arlo_course', array('courseid' => $courseid));
+    $DB->delete_records('enrol_arlo_templatelink', array('courseid' => $courseid));
 }
 
 /**
@@ -75,11 +75,17 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
     $defaultroleid = $plugin->get_config('roleid', $student->id);
 
     if (! isset($courses[$courseid])) {
-        $courses[$courseid] = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+        //$courses[$courseid] = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+        // @TODO need to remove template link when course deleted.
+        $course = $DB->get_record('course', array('id' => $courseid));
+        if ($course) {
+            $courses[$courseid] = $course;
+        }
+        return false;
     }
 
     if (is_null($templateguid)) {
-        $templateguid = $DB->get_field('local_arlo_course', 'arloguid', array('courseid' => $courseid), '*', MUST_EXIST);
+        $templateguid = $DB->get_field('enrol_arlo_templatelink', 'arloguid', array('courseid' => $courseid), '*', MUST_EXIST);
     }
     if (!isset($templates[$templateguid])) {
         $templates[$templateguid] = $DB->get_record('local_arlo_templates', array('templateguid' => $templateguid), '*', MUST_EXIST);
@@ -181,6 +187,8 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     global $CFG, $DB;
     require_once($CFG->dirroot . '/group/lib.php');
 
+    raise_memory_limit(MEMORY_HUGE);
+
     // Purge all roles if Arlo sync disabled, those can be recreated later here by cron or CLI.
     if (! enrol_is_enabled('arlo')) {
         $trace->output('Arlo enrolment plugin is disabled, unassigning all plugin roles and stopping.');
@@ -208,7 +216,7 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     if ($courseid) {
         $params['courseid'] = $courseid;
     }
-    $rs = $DB->get_records('local_arlo_course', $params);
+    $rs = $DB->get_records('enrol_arlo_templatelink', $params);
     foreach ($rs as $link) {
         enrol_arlo_sync_course_instances($trace, $link->courseid);
     }

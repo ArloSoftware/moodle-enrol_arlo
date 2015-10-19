@@ -38,7 +38,7 @@ require_capability('enrol/arlo:config', $context);
 $returnurl = new moodle_url('/enrol/instances.php', array('id' => $course->id));
 $PAGE->set_url('/enrol/arlo/linktemplate.php', array('courseid' => $course->id));
 
-$link = $DB->get_record('local_arlo_course', array('courseid' => $course->id));
+$link = $DB->get_record('enrol_arlo_templatelink', array('courseid' => $course->id));
 if (! $link) {
     $link = new stdClass();
     $link->id         = 0;
@@ -58,9 +58,9 @@ if ($mform->is_cancelled()) {
     } else {
         $link = new \stdClass();
         $link->courseid = $data->courseid;
-        $link->arloguid = $data->template;
+        $link->templateguid = $data->template;
         $link->modified = time();
-        $link->id = $DB->insert_record('local_arlo_course', $link);
+        $link->id = $DB->insert_record('enrol_arlo_templatelink', $link);
     }
     enrol_arlo_sync($trace, $course->id);
     $trace->finished();
