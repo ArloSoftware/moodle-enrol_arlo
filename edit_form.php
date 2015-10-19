@@ -117,6 +117,20 @@ class enrol_arlo_edit_form extends moodleform {
             $mform->hardFreeze('event', $key);
 
         } else {
+            // Remove active instances from options.
+            $activeinstances = $DB->get_records('enrol', array('enrol' => 'arlo'));
+            foreach ($activeinstances as $activeinstance) {
+                // Unset any active events being used as enrolment instance.
+                if ($activeinstance->customint3 == ARLO_TYPE_EVENT) {
+                    $key = enrol_arlo_make_select_key(ARLO_TYPE_EVENT, $activeinstance->customchar3);
+                    unset($events[$key]);
+                }
+                // Unset any active online activities being used as enrolment instance.
+                if ($activeinstance->customint3 == ARLO_TYPE_ONLINEACTIVITY) {
+                    $key = enrol_arlo_make_select_key(ARLO_TYPE_ONLINEACTIVITY, $activeinstance->customchar3);
+                    unset($onlineactivities[$key]);
+                }
+            }
 
             $options = array(get_string('events', 'enrol_arlo') => $events,
                              get_string('onlineactivities', 'enrol_arlo') => $onlineactivities);
