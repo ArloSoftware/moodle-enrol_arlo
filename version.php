@@ -19,7 +19,7 @@
  *
  * @author    Troy Williams
  * @author    Corey Davis
- * @package   local_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2015 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
