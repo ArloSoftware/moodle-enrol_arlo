@@ -66,7 +66,6 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
     static $courses = array();
     $instances = array();
 
-
     $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
     $plugin = enrol_get_plugin('arlo');
 
@@ -85,7 +84,7 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
     }
 
     if (is_null($templateguid)) {
-        $templateguid = $DB->get_field('enrol_arlo_templatelink', 'arloguid', array('courseid' => $courseid), '*', MUST_EXIST);
+        $templateguid = $DB->get_field('enrol_arlo_templatelink', 'templateguid', array('courseid' => $courseid), '*', MUST_EXIST);
     }
     if (!isset($templates[$templateguid])) {
         $templates[$templateguid] = $DB->get_record('local_arlo_templates', array('templateguid' => $templateguid), '*', MUST_EXIST);
