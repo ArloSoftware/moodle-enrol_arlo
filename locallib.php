@@ -79,8 +79,10 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
         $course = $DB->get_record('course', array('id' => $courseid));
         if ($course) {
             $courses[$courseid] = $course;
+        } else {
+            // @TODO recover gracefully.
+            return false;
         }
-        return false;
     }
 
     if (is_null($templateguid)) {
