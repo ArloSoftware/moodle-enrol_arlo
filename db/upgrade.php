@@ -38,7 +38,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     // Moodle v2.9.0 release upgrade line.
     // Put any upgrade step following this.
 
-    // Migration step 2 - Setup link table.
+    // Migration step 1 - Setup link table.
     if ($oldversion < 2015101502) {
         // Conditionally install.
         if (!$dbman->table_exists('enrol_arlo_templatelink')) {
@@ -46,6 +46,27 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->install_from_xmldb_file($installfile);
         }
         upgrade_plugin_savepoint(true, 2015101502, 'enrol', 'arlo');
+    }
+
+    // Migration step 2 - Move old enrolments over to template links.
+    if ($oldversion < 2015101503) {
+        // Conditionally move old enrolment methods.
+        $rs = $DB->get_records('enrol', array('enrol' => 'arlo'), '', 'id, enrol, courseid, customchar1');
+        foreach ($rs as $record) {
+            $params = array('code' => $record->customchar1);
+            $templateguid = $DB->get_field('local_arlo_templates', 'uniqueidentifier', $params);
+            if ($templateguid) {
+                $link = new \stdClass();
+                $link->courseid = $record->courseid;
+                $link->templateguid = $templateguid;
+                if (!$DB->record_exists('enrol_arlo_templatelink', (array) $link)) {
+                    $link->modified = time();
+                    $DB->insert_record('enrol_arlo_templatelink', $link);
+                }
+            }
+
+        }
+        upgrade_plugin_savepoint(true, 2015101503, 'enrol', 'arlo');
     }
 
     return true;
