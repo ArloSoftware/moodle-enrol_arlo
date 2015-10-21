@@ -109,16 +109,16 @@ if ($mform->is_cancelled()) {
     $data->name = $resource->code . ' ' . $template->name;
 
     if ($data->id) {
-        $instance->name         = $data->name;
-        $instance->status       = $data->status;
-        $instance->roleid       = $defaultroleid;
-        $instance->customint2   = $data->customint2;
-        $instance->customint3   = $type; // Resource type.
-        $instance->customint8   = $data->customint8; // Send welcome message.
-        $instance->customchar1  = $template->templateguid; // Template unique identifier.
-        $instance->customchar2  = $arloinstance; // Platform name.
-        $instance->customchar3  = $identifier; // Resource unique identifier.
-        $instance->customtext1  = $data->customtext1;
+        $instance->name = $data->name;
+        $instance->status = $data->status;
+        $instance->roleid = $defaultroleid;
+        $instance->customint2 = $data->customint2;
+        $instance->customint3 = $type; // Resource type.
+        $instance->customint8 = $data->customint8; // Send welcome message.
+        $instance->customchar1 = $template->templateguid; // Template unique identifier.
+        $instance->customchar2 = $arloinstance; // Platform name.
+        $instance->customchar3 = $identifier; // Resource unique identifier.
+        $instance->customtext1 = $data->customtext1;
         $instance->timemodified = time();
         // Create a new group for the arlo if requested.
         if ($data->customint2 == ARLO_CREATE_GROUP) {
@@ -127,14 +127,14 @@ if ($mform->is_cancelled()) {
             $instance->customint2 = $groupid;
         }
         $DB->update_record('enrol', $instance);
-    }  else {
+    } else {
         $newinstance = array();
-        $newinstance['name']        = $data->name;
-        $newinstance['status']      = $data->status;
-        $newinstance['roleid']      = $defaultroleid;
-        $newinstance['customint2']  = $data->customint2; // Group selected or none.
-        $newinstance['customint3']  = $type; // Resource type.
-        $newinstance['customint8']  = $data->customint8; // Send welcome message.
+        $newinstance['name'] = $data->name;
+        $newinstance['status'] = $data->status;
+        $newinstance['roleid'] = $defaultroleid;
+        $newinstance['customint2'] = $data->customint2; // Group selected or none.
+        $newinstance['customint3'] = $type; // Resource type.
+        $newinstance['customint8'] = $data->customint8; // Send welcome message.
         $newinstance['customchar1'] = $template->templateguid; // Template unique identifier.
         $newinstance['customchar2'] = $arloinstance; // Platform name.
         $newinstance['customchar3'] = $identifier; // Resource unique identifier.
@@ -154,9 +154,13 @@ if ($mform->is_cancelled()) {
             $returnurl->param('message', 'added');
         }
     }
-    $trace = new null_progress_trace();
-    enrol_arlo_sync($trace, $course->id);
-    $trace->finished();
+    // Can we sync now?
+    $syncinstanceonadd = $plugin->get_config('syncinstanceonadd');
+    if ($syncinstanceonadd) {
+        $trace = new null_progress_trace();
+        enrol_arlo_sync($trace, $course->id);
+        $trace->finished();
+    }
     redirect($returnurl);
 }
 

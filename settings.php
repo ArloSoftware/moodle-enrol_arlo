@@ -43,5 +43,10 @@ if ($ADMIN->fulltree) {
         $settings->add(new admin_setting_configselect('enrol_arlo/unenrolaction',
             get_string('extremovedaction', 'enrol'),
             get_string('extremovedaction_help', 'enrol'), ENROL_EXT_REMOVED_UNENROL, $options));
+
+        // Sync enrolment instance immediately on adding instance.
+        $settings->add(new admin_setting_configcheckbox('enrol_arlo/syncinstanceonadd',
+            get_string('syncinstanceonadd', 'enrol_arlo'),
+            get_string('syncinstanceonadd_help', 'enrol_arlo'), 0));
     }
 }

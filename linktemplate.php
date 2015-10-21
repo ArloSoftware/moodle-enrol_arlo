@@ -49,6 +49,7 @@ $mform = new enrol_arlo_linktemplate_form(null, array($link, $course));
 if ($mform->is_cancelled()) {
     redirect($returnurl);
 } else if ($data = $mform->get_data()) {
+    $plugin = enrol_get_plugin('arlo');
     $trace = new \null_progress_trace();
     if ($data->id) {
         if (isset($data->submitbuttonremove)) {
@@ -62,7 +63,11 @@ if ($mform->is_cancelled()) {
         $link->modified = time();
         $link->id = $DB->insert_record('enrol_arlo_templatelink', $link);
     }
-    enrol_arlo_sync($trace, $course->id);
+    // Can we sync now?
+    $syncinstanceonadd = $plugin->get_config('syncinstanceonadd');
+    if ($syncinstanceonadd) {
+        enrol_arlo_sync($trace, $course->id);
+    }
     $trace->finished();
     redirect($returnurl);
 }

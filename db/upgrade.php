@@ -54,7 +54,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         $rs = $DB->get_records('enrol', array('enrol' => 'arlo'), '', 'id, enrol, courseid, customchar1');
         foreach ($rs as $record) {
             $params = array('code' => $record->customchar1);
-            $templateguid = $DB->get_field('local_arlo_templates', 'uniqueidentifier', $params);
+            $templateguid = $DB->get_field('local_arlo_templates', 'templateguid', $params);
             if ($templateguid) {
                 $link = new \stdClass();
                 $link->courseid = $record->courseid;
@@ -64,7 +64,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                     $DB->insert_record('enrol_arlo_templatelink', $link);
                 }
             }
-
+            $DB->set_field('enrol', 'name', 'LEGACY', array('id' => $record->id));
         }
         upgrade_plugin_savepoint(true, 2015101503, 'enrol', 'arlo');
     }

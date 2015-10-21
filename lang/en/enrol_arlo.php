@@ -22,15 +22,13 @@ You may access this course at the following url:
 
   {$a->courseurl}';
 
-$string['addgroup'] = 'Add to group';
+$string['assignedgroup'] = 'Assigned group';
 $string['assignrole'] = 'Assign role';
 $string['arlo:config'] = 'Configure Arlo instances';
 $string['arlo:manage'] = 'Manage Arlo instances';
 $string['arlo:unenrol'] = 'Unenrol suspended users';
 $string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
 $string['instanceexists'] = 'Arlo is already synchronised with selected role';
-//$string['pluginname'] = 'Arlo sync';
-//$string['pluginname_desc'] = 'Cohort enrolment plugin synchronises cohort members with course participants.';
 $string['status'] = 'Active';
 $string['creategroup'] = 'Create new group';
 
@@ -70,3 +68,8 @@ $string['warningnotice'] =
 <p>Removing the template link will remove all people from the course that are in the following enrolment instances:</p>
 {$a}
 </div>';
+
+$string['syncinstanceonadd'] = 'Synchronise instance on adding';
+$string['syncinstanceonadd_help'] = '
+This will synchronise enrolments for a instance immediately after adding. If not enabled enrolments will be synchronised each time cron is run.
+<p><strong>Note:</strong> Enabling this option can degrade user experience due to the time it takes to execute.</p>';

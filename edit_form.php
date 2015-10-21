@@ -116,6 +116,12 @@ class enrol_arlo_edit_form extends moodleform {
             $mform->setConstant('event', $key);
             $mform->hardFreeze('event', $key);
 
+            $mform->addElement('select', 'customint2', get_string('assignedgroup', 'enrol_arlo'), $groups);
+            if ($instance->customint2 != '-1' or $instance->customint2 == '0') {
+                $mform->setConstant('customint2', $instance->customint2);
+                $mform->hardFreeze('customint2', $instance->customint2);
+            }
+
         } else {
             // Remove active instances from options.
             $activeinstances = $DB->get_records('enrol', array('enrol' => 'arlo'));
@@ -136,10 +142,10 @@ class enrol_arlo_edit_form extends moodleform {
                              get_string('onlineactivities', 'enrol_arlo') => $onlineactivities);
 
             $mform->addElement('selectgroups', 'event', get_string('event', 'enrol_arlo'), $options);
+            $mform->addElement('hidden', 'customint2');
+            $mform->setType('customint2', PARAM_INT);
 
         }
-
-        $mform->addElement('select', 'customint2', get_string('addgroup', 'enrol_arlo'), $groups);
 
         $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
         $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
