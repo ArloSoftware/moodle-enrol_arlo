@@ -25,46 +25,73 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Remove all Arlo instances for a course.
+ * Removes all Arlo enrolment instances for events that have been cancelled. If course
+ * identifier is passed in it will remove all Arlo instances for that course and deletes
+ * any template association - link.
  *
  * @param progress_trace $trace
- * @param $courseid
+ * @param null $courseid
+ * @return bool
  * @throws coding_exception
  */
-function enrol_arlo_course_remove_all_instances(progress_trace $trace, $courseid) {
-    global $DB;
+function enrol_arlo_remove_instances(progress_trace $trace, $courseid = null) {
+    global $CFG, $DB;
+    require_once($CFG->dirroot . '/group/lib.php');
 
     $plugin = enrol_get_plugin('arlo');
-    $templateguid = $DB->get_field('enrol_arlo_templatelink', 'templateguid', array('courseid' => $courseid), MUST_EXIST);
-    $instances = $DB->get_records('enrol', array('enrol' => 'arlo', 'customchar1' => $templateguid));
+
+    // Remove all Arlo enrolment instances in a course.
+    if (!is_null($courseid)) {
+        $instances = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $courseid));
+        foreach ($instances as $instance) {
+            if ($plugin->can_delete_instance($instance)) {
+                $plugin->delete_instance($instance);
+                groups_delete_group($instance->customint2);
+                $trace->output("Removed Arlo enrolment instance: {$instance->name}");
+            }
+        }
+        // Delete template link if any.
+        $DB->delete_records('enrol_arlo_templatelink', array('courseid' => $courseid));
+        return true;
+    }
+    // Remove events that have been cancelled.
+    $sql = "SELECT en.*, ev.status AS eventstatus
+              FROM {enrol} en
+         LEFT JOIN {local_arlo_events} ev ON ev.eventguid = en.customchar3
+             WHERE en.enrol = 'arlo' AND ev.status = :status";
+    $params = array('status' => 'Cancelled');
+    $instances = $DB->get_records_sql($sql, $params);
     foreach ($instances as $instance) {
         if ($plugin->can_delete_instance($instance)) {
             $plugin->delete_instance($instance);
+            groups_delete_group($instance->customint2);
+            $trace->output("Removed Arlo enrolment instance: {$instance->name}");
         }
     }
-    $DB->delete_records('enrol_arlo_templatelink', array('courseid' => $courseid));
+    return true;
 }
 
 /**
- * Adds or removes Arlo enrolment instances from a course and creates associated groups.
- *
- * Does not sync user enrolments that is handled by enrol_arlo_sync().
+ * Create Arlo enrolment instances in a course that is linked to a Arlo template.
  *
  * @param progress_trace $trace
  * @param $courseid
- * @param null $templateguid
+ * @return bool
  * @throws Exception
  * @throws coding_exception
  * @throws dml_exception
  */
-function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $templateguid = null) {
+function enrol_arlo_create_instances_from_template(progress_trace $trace, $courseid) {
     global $CFG, $DB;
     require_once($CFG->dirroot . '/group/lib.php');
 
-    // Caches.
-    static $templates = array();
-    static $courses = array();
-    $instances = array();
+    $course = $DB->get_record('course', array('id' => $courseid));
+    if (!$course) {
+        return false;
+    }
+
+    $currentinstances = array();
+    $templateassociations = array();
 
     $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
     $plugin = enrol_get_plugin('arlo');
@@ -73,83 +100,60 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
     $student = reset($student);
     $defaultroleid = $plugin->get_config('roleid', $student->id);
 
-    if (! isset($courses[$courseid])) {
-        //$courses[$courseid] = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-        // @TODO need to remove template link when course deleted.
-        $course = $DB->get_record('course', array('id' => $courseid));
-        if ($course) {
-            $courses[$courseid] = $course;
-        } else {
-            // @TODO recover gracefully.
-            return false;
-        }
+    $templateguid = $DB->get_field('enrol_arlo_templatelink', 'templateguid', array('courseid' => $courseid));
+    if (! $templateguid) {
+        $this->trace("No Arlo template associated with Moodle course {$course->shortname}");
+        return false;
     }
-
-    if (is_null($templateguid)) {
-        $templateguid = $DB->get_field('enrol_arlo_templatelink', 'templateguid', array('courseid' => $courseid), '*', MUST_EXIST);
+    // Get full template information.
+    $template = $DB->get_record('local_arlo_templates', array('templateguid' => $templateguid), '*', MUST_EXIST);
+    if ($template->status == 'Cancelled') {
+        $trace->output("Template cancelled, don't add anything.", 1);
     }
-    if (!isset($templates[$templateguid])) {
-        $templates[$templateguid] = $DB->get_record('local_arlo_templates', array('templateguid' => $templateguid), '*', MUST_EXIST);
-    }
-    // Get current instances and load to cache array.
-    $current = $DB->get_records('enrol', array('enrol' => 'arlo', 'customchar1' => $templateguid));
-    foreach ($current as $c) {
-        $instances[$c->customchar3] = $c;
-    }
-    // Process events.
+    // Get all event associated with the template.
     $events = $DB->get_records('local_arlo_events', array('templateguid' => $templateguid));
     foreach ($events as $event) {
-        $course = $courses[$courseid];
-        $name = $event->code . ' ' . $templates[$templateguid]->name;
-        if (isset($instances[$event->eventguid])) {
-            // Do we need to remove.
-            if ($event->status == 'Cancelled') {
-                $instance = $instances[$event->eventguid];
-                if ($plugin->can_delete_instance($instance)) {
-                    $plugin->delete_instance($instance);
-                    $trace->output("cancelled, remove enrol instance {$instance->name}", 1);
-                }
-            }
-            continue;
-        } else {
-            // Is already 'Cancelled' don't bother adding.
-            if ($event->status == 'Cancelled') {
-                $trace->output("cancelled, don't add {$name}", 1);
-                continue;
-            }
-            $newinstance = array();
-            $newinstance['name'] = $name;
-            $newinstance['status'] = ENROL_INSTANCE_ENABLED;
-            $newinstance['roleid'] = $defaultroleid;
-            $newinstance['customint2'] = -1; // Group selected or none.
-            $newinstance['customint3'] = ARLO_TYPE_EVENT; // Resource type.
-            $newinstance['customchar1'] = $event->templateguid; // Template unique identifier.
-            $newinstance['customchar2'] = $arloinstance; // Platform name.
-            $newinstance['customchar3'] = $event->eventguid; // Resource unique identifier.
-            $newinstance['customint8'] = 1;
-            // Create a new group for the arlo if requested.
-            if ($newinstance['customint2'] == ARLO_CREATE_GROUP) {
-                $groupid = enrol_arlo_create_new_group($course->id, 'local_arlo_events', 'eventguid', $event->eventguid);
-                $newinstance['customint2'] = $groupid;
-            } else {
-                $newinstance['customint2'] = 0;
-            }
-            $plugin->add_instance($course, $newinstance);
-            $trace->output("adding enrol instance for event {$name}", 1);
-        }
+        $event->type = ARLO_TYPE_EVENT;
+        $templateassociations[$event->eventguid] = $event;
     }
-    // Process online activities.
+    // Get all online activities associated with the template.
     $onlineactivities = $DB->get_records('local_arlo_onlineactivities', array('templateguid' => $templateguid));
     foreach ($onlineactivities as $onlineactivity) {
-        $course = $courses[$courseid];
-        $name = $onlineactivity->code . ' ' . $templates[$templateguid]->name;
-        if (isset($instances[$onlineactivity->onlineactivityguid])) {
-            // @TODO Do we need to do anything i.e remove statuses?
+        $onlineactivity->type = ARLO_TYPE_ONLINEACTIVITY;
+        $templateassociations[$onlineactivity->onlineactivityguid] = $onlineactivity;
+    }
+    // Get current Arlo enrolment instances. Will use to check against later on.
+    $enrolinstances = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $course->id));
+    foreach ($enrolinstances as $enrolinstance) {
+        $currentinstances[$enrolinstance->customchar3] = $enrolinstance;
+    }
+    // Process template associations creating enrolment instances if missing.
+    foreach ($templateassociations as $templateassociation) {
+        $name = $templateassociation->code . ' ' . $template->name;
+        // Arlo event.
+        if ($templateassociation->type == ARLO_TYPE_EVENT) {
+            $customint3 = ARLO_TYPE_EVENT;
+            $customchar1 = $templateassociation->templateguid;
+            $customchar3 = $templateassociation->eventguid;
+            $table = 'local_arlo_events';
+            $field = 'eventguid';
+        }
+        // Arlo online activity.
+        if ($templateassociation->type == ARLO_TYPE_ONLINEACTIVITY) {
+            $customint3 = ARLO_TYPE_ONLINEACTIVITY;
+            $customchar1 = $templateassociation->templateguid;
+            $customchar3 = $templateassociation->onlineactivityguid;
+            $table = 'local_arlo_onlineactivities';
+            $field = 'onlineactivityguid';
+        }
+        // Can we create.
+        if (isset($currentinstances[$customchar3])) {
+            // Enrolment instance already exists, do nothing.
             continue;
         } else {
             // Is already 'Cancelled' don't bother adding.
-            if ($onlineactivity->status == 'Cancelled') {
-                $trace->output("cancelled, don't add {$name}", 1);
+            if ($templateassociation->status == 'Cancelled') {
+                $trace->output("cancelled, don't add event {$name}", 1);
                 continue;
             }
             $newinstance = array();
@@ -157,15 +161,15 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
             $newinstance['status'] = ENROL_INSTANCE_ENABLED;
             $newinstance['roleid'] = $defaultroleid;
             $newinstance['customint2'] = -1; // Group selected or none.
-            $newinstance['customint3'] = ARLO_TYPE_ONLINEACTIVITY; // Resource type.
-            $newinstance['customchar1'] = $onlineactivity->templateguid; // Template unique identifier.
+            $newinstance['customint3'] = $customint3; // Resource type.
+            $newinstance['customchar1'] = $customchar1; // Template unique identifier.
             $newinstance['customchar2'] = $arloinstance; // Platform name.
-            $newinstance['customchar3'] = $onlineactivity->onlineactivityguid; // Resource unique identifier.
+            $newinstance['customchar3'] = $customchar3; // Resource unique identifier.
             $newinstance['customint8'] = 1;
             // Create a new group for the arlo if requested.
             if ($newinstance['customint2'] == ARLO_CREATE_GROUP) {
                 $groupid = enrol_arlo_create_new_group($course->id,
-                    'local_arlo_onlineactivities', 'onlineactivityguid', $onlineactivity->onlineactivityguid);
+                    $table, $field, $customchar3);
                 $newinstance['customint2'] = $groupid;
             } else {
                 $newinstance['customint2'] = 0;
@@ -174,8 +178,8 @@ function enrol_arlo_sync_course_instances(progress_trace $trace, $courseid, $tem
             $trace->output("adding enrol instance for online activity {$name}", 1);
         }
     }
-    return;
 }
+
 /**
  *
  * A lot of Code borrowed from Cohort enrolment plugin.
@@ -203,7 +207,8 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
 
     $trace->output('Starting user enrolment synchronisation...');
 
-    $instances = array(); // Cache.
+    // Caches.
+    $instances = array();
 
     $plugin = enrol_get_plugin('arlo');
 
@@ -212,20 +217,11 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     $defaultroleid = $plugin->get_config('roleid', $student->id);
     $unenrolaction = $plugin->get_config('unenrolaction', ENROL_EXT_REMOVED_UNENROL);
 
-    // Get mapped Templates and create associated enrolment instances.
-    $params = array();
-    if ($courseid) {
-        $params['courseid'] = $courseid;
-    }
-    $rs = $DB->get_records('enrol_arlo_templatelink', $params);
-    foreach ($rs as $link) {
-        enrol_arlo_sync_course_instances($trace, $link->courseid);
-    }
-
-    // Just the one or all. Possible use in enrol and unenrol.
+    // Process enrolments.
     $onecourse = $courseid ? "AND e.courseid = :courseid" : "";
-
-    // Iterate through all not enrolled yet users.
+    // Construct sql and params for enrolments, registrations with status active or completed.
+    list($insql, $inparams) = $DB->get_in_or_equal(array('Active', 'Completed'), SQL_PARAMS_NAMED);
+    // Enrolments sql.
     $sql = "SELECT u.id AS userid, e.id AS enrolid, r.status AS arlostatus, ue.status
               FROM {user} u
               JOIN {user_info_data} AS uid
@@ -236,16 +232,21 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
               JOIN {enrol} e ON ((e.customchar3 = r.eventguid OR e.customchar3 = r.onlineactivityguid)
                AND e.enrol = 'arlo' $onecourse)
          LEFT JOIN {user_enrolments} ue ON (ue.enrolid = e.id AND ue.userid = u.id)
-             WHERE ue.id IS NULL OR ue.status = :suspended";
-
+             WHERE (ue.id IS NULL OR ue.status = :suspended)
+               AND r.status $insql";
+    //Enrolment params.
     $params = array();
     $params['courseid'] = $courseid;
     $params['suspended'] = ENROL_USER_SUSPENDED;
+    $params = array_merge($params, $inparams);
+    // Get records and iterate.
     $rs = $DB->get_recordset_sql($sql, $params);
     foreach($rs as $ue) {
+        // Fetch enrolment instance from cache or get from DB and save to cache.
         if (!isset($instances[$ue->enrolid])) {
             $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
         }
+        // Get enrolment instance.
         $instance = $instances[$ue->enrolid];
         if ($ue->status == ENROL_USER_SUSPENDED) { // @TODO is this condition needed in Arlo Cancellded is remove?
             //$plugin->update_user_enrol($instance, $ue->userid, ENROL_USER_ACTIVE);
@@ -263,7 +264,11 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     }
     $rs->close();
 
-    // Unenrol as necessary - Cancelled status.
+    // Process withdrawals.
+    $onecourse = $courseid ? "AND e.courseid = :courseid" : "";
+    // Construct sql and params for withdrawals, registrations with status cancelled.
+    list($insql, $inparams) = $DB->get_in_or_equal(array('Cancelled'), SQL_PARAMS_NAMED);
+    // Withdrawals sql.
     $sql = "SELECT ue.*, e.courseid, r.status AS arlostatus
               FROM {user_enrolments} ue
               JOIN {enrol} e
@@ -277,12 +282,12 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
          LEFT JOIN {local_arlo_registrations} r
                 ON r.contactguid = uid.data
                AND (e.customchar3 = r.eventguid OR e.customchar3 = r.onlineactivityguid)
-             WHERE r.status = :arlostatus ";
-
+             WHERE r.status $insql";
+    // Withdrawal params.
     $params = array();
     $params['courseid'] = $courseid;
-    $params['arlostatus'] = 'Cancelled';
-
+    $params = array_merge($params, $inparams);
+    // Get records and iterate.
     $rs = $DB->get_recordset_sql($sql, $params);
     foreach($rs as $ue) {
         if (!isset($instances[$ue->enrolid])) {
