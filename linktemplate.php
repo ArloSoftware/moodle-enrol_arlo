@@ -54,7 +54,7 @@ if ($mform->is_cancelled()) {
     if ($data->id) {
         if (isset($data->submitbuttonremove)) {
             // Remove associated instances and mapping.
-            enrol_arlo_course_remove_all_instances($trace, $data->courseid);
+            enrol_arlo_remove_instances($trace, $data->courseid);
         }
     } else {
         $link = new \stdClass();
@@ -62,6 +62,7 @@ if ($mform->is_cancelled()) {
         $link->templateguid = $data->template;
         $link->modified = time();
         $link->id = $DB->insert_record('enrol_arlo_templatelink', $link);
+        enrol_arlo_create_instances_from_template($trace, $data->courseid);
     }
     // Can we sync now?
     $syncinstanceonadd = $plugin->get_config('syncinstanceonadd');
