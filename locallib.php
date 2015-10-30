@@ -219,10 +219,10 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
 
     // Process enrolments.
     $onecourse = $courseid ? "AND e.courseid = :courseid" : "";
-    // Construct sql and params for enrolments, registrations with status active or completed.
-    list($insql, $inparams) = $DB->get_in_or_equal(array('Active', 'Completed'), SQL_PARAMS_NAMED);
+    // Construct sql and params for enrolments, registrations with status approved or completed.
+    list($insql, $inparams) = $DB->get_in_or_equal(array('Approved', 'Completed'), SQL_PARAMS_NAMED);
     // Enrolments sql.
-    $sql = "SELECT u.id AS userid, e.id AS enrolid, r.status AS arlostatus, ue.status
+    $sql = "SELECT u.id AS userid, e.id AS enrolid, ue.status
               FROM {user} u
               JOIN {user_info_data} AS uid
                 ON (uid.userid = u.id AND u.deleted = 0)
@@ -253,13 +253,10 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
             //$trace->output("unsuspending: $ue->userid ==> $instance->courseid via arlo $instance->customint1", 1);
             //$trace->output('suspended', 1);
         } else {
-            // Only people that have 'Approved' or 'Completed' Arlo status get enrolled.
-            if ($ue->arlostatus == 'Approved' or $ue->arlostatus == 'Completed') {
-                $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
-                $trace->output("enrolling: $ue->userid > $instance->courseid via Arlo with status > $ue->arlostatus", 1);
-                $user = core_user::get_user($ue->userid);
-                $plugin->email_welcome_message($instance, $user);
-            }
+            $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
+            $trace->output("enrolling: userid $ue->userid > courseid $instance->courseid", 1);
+            $user = core_user::get_user($ue->userid);
+            $plugin->email_welcome_message($instance, $user);
         }
     }
     $rs->close();
@@ -269,7 +266,7 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     // Construct sql and params for withdrawals, registrations with status cancelled.
     list($insql, $inparams) = $DB->get_in_or_equal(array('Cancelled'), SQL_PARAMS_NAMED);
     // Withdrawals sql.
-    $sql = "SELECT ue.*, e.courseid, r.status AS arlostatus
+    $sql = "SELECT ue.*, e.courseid, r.flag
               FROM {user_enrolments} ue
               JOIN {enrol} e
                 ON (e.id = ue.enrolid AND e.enrol = 'arlo' $onecourse)
@@ -290,6 +287,11 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     // Get records and iterate.
     $rs = $DB->get_recordset_sql($sql, $params);
     foreach($rs as $ue) {
+        // Record been flagged then skip.
+        if ($ue->flag) {
+            continue;
+        }
+
         if (!isset($instances[$ue->enrolid])) {
             $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
         }
@@ -297,7 +299,7 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
         if ($unenrolaction == ENROL_EXT_REMOVED_UNENROL) {
             // Remove enrolment together with group membership, grades, preferences, etc.
             $plugin->unenrol_user($instance, $ue->userid);
-            $trace->output("unenrolling: $ue->userid > $instance->courseid via Arlo with status > $ue->arlostatus", 1);
+            $trace->output("unenrolling: $ue->userid > $instance->courseid", 1);
         } else { // ENROL_EXT_REMOVED_SUSPENDNOROLES
             // Just disable and ignore any changes.
             if ($ue->status != ENROL_USER_SUSPENDED) {
