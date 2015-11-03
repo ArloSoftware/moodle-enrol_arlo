@@ -24,8 +24,8 @@ You may access this course at the following url:
 
 $string['assignedgroup'] = 'Assigned group';
 $string['assignrole'] = 'Assign role';
-$string['arlo:config'] = 'Configure Arlo instances';
-$string['arlo:manage'] = 'Manage Arlo instances';
+$string['arlo:config'] = 'Configure Arlo enrolment instances';
+$string['arlo:manage'] = 'Manage Arlo enrolment instances';
 $string['arlo:unenrol'] = 'Unenrol suspended users';
 $string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
 $string['instanceexists'] = 'Arlo is already synchronised with selected role';
