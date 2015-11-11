@@ -46,7 +46,7 @@ $PAGE->set_pagelayout('admin');
 
 $returnurl = new moodle_url('/enrol/instances.php', array('id' => $course->id));
 if (!enrol_is_enabled('arlo')) {
-    redirect($return);
+    redirect($returnurl);
 }
 
 $plugin = enrol_get_plugin('arlo');
@@ -77,7 +77,7 @@ if ($courseadmin && $courseadmin->get('users') && $courseadmin->get('users')->ge
 // Handle form.
 $mform = new enrol_arlo_edit_form(null, array($instance, $plugin, $course));
 if ($mform->is_cancelled()) {
-    redirect($return);
+    redirect($returnurl);
 } else if ($data = $mform->get_data()) {
     // Get default roleid.
     $defaultroleid = $plugin->get_config('roleid');
