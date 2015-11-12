@@ -257,7 +257,10 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
             $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
             $trace->output("enrolling: userid $ue->userid > courseid $instance->courseid", 1);
             $user = core_user::get_user($ue->userid);
-            $plugin->email_welcome_message($instance, $user);
+            // Send welcome message.
+            if ($instance->customint8) {
+                $plugin->email_welcome_message($instance, $user);
+            }
         }
     }
     $rs->close();
