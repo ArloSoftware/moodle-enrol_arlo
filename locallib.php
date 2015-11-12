@@ -230,13 +230,14 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
                 ON (uid.fieldid = uif.id AND uif.shortname = 'arloguid')
               JOIN {local_arlo_registrations} r ON r.contactguid = uid.data
               JOIN {enrol} e ON ((e.customchar3 = r.eventguid OR e.customchar3 = r.onlineactivityguid)
-               AND e.enrol = 'arlo' $onecourse)
+               AND e.enrol = 'arlo' AND e.status = :instenabled $onecourse)
          LEFT JOIN {user_enrolments} ue ON (ue.enrolid = e.id AND ue.userid = u.id)
              WHERE (ue.id IS NULL OR ue.status = :suspended)
                AND r.status $insql";
     //Enrolment params.
     $params = array();
     $params['courseid'] = $courseid;
+    $params['instenabled'] = ENROL_INSTANCE_ENABLED;
     $params['suspended'] = ENROL_USER_SUSPENDED;
     $params = array_merge($params, $inparams);
     // Get records and iterate.
