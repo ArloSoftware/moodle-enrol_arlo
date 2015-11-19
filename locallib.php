@@ -295,7 +295,6 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
         if ($ue->flag) {
             continue;
         }
-
         if (!isset($instances[$ue->enrolid])) {
             $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
         }
@@ -320,6 +319,40 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
         }
     }
     $rs->close();
+
+    // Remove user enrolments that don't have registration (Change/transfers) of registrations.
+    $onecourse = $courseid ? "AND e.courseid = :courseid" : "";
+    // Remove sql.
+    $sql = "SELECT ue.*
+              FROM {user_enrolments} ue
+              JOIN {enrol} e
+                ON (e.id = ue.enrolid AND e.enrol = 'arlo' $onecourse)
+              JOIN {user} u
+                ON (u.id = ue.userid)
+              JOIN {user_info_data} AS uid
+                ON (uid.userid = u.id AND u.deleted = 0)
+              JOIN {user_info_field} AS uif
+                ON (uid.fieldid = uif.id AND uif.shortname = 'arloguid')
+         LEFT JOIN {local_arlo_registrations} r
+                ON ((e.customchar3 = r.eventguid) OR (e.customchar3 = r.onlineactivityguid))
+               AND uid.data = r.contactguid
+             WHERE r.contactguid IS NULL";
+    // Remove params.
+    $params = array();
+    $params['courseid'] = $courseid;
+    // Get records and iterate.
+    $rs = $DB->get_recordset_sql($sql, $params);
+    foreach($rs as $ue) {
+        if (!isset($instances[$ue->enrolid])) {
+            $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+        }
+        $instance = $instances[$ue->enrolid];
+        // Remove enrolment together with group membership, grades, preferences, etc.
+        $plugin->unenrol_user($instance, $ue->userid);
+        $trace->output("unenrolling: $ue->userid > $instance->courseid", 1);
+    }
+    $rs->close();
+
     unset($instances);
 
     // Sync groups.
