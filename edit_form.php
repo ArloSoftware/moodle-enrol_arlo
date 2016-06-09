@@ -40,6 +40,9 @@ class enrol_arlo_edit_form extends moodleform {
 
         $enrol = enrol_get_plugin('arlo');
 
+        $events = array();
+        $onlineactivities = array();
+
         $groups = array(0 => get_string('none'));
         if (has_capability('moodle/course:managegroups', $context)) {
             $groups[ARLO_CREATE_GROUP] = get_string('creategroup', 'enrol_arlo');
