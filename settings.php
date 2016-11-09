@@ -40,9 +40,26 @@ if ($ADMIN->fulltree) {
         $options = array(
             ENROL_EXT_REMOVED_UNENROL        => get_string('extremovedunenrol', 'enrol'),
             ENROL_EXT_REMOVED_SUSPENDNOROLES => get_string('extremovedsuspendnoroles', 'enrol'));
+
         $settings->add(new admin_setting_configselect('enrol_arlo/unenrolaction',
             get_string('extremovedaction', 'enrol'),
             get_string('extremovedaction_help', 'enrol'), ENROL_EXT_REMOVED_UNENROL, $options));
+
+        // Note: let's reuse the ext sync constants and strings here, internally it is very similar,
+        //       it describes what should happend when users are not supposed to be enerolled any more.
+        $options = array(
+            ENROL_EXT_REMOVED_KEEP           => get_string('extremovedkeep', 'enrol'),
+            ENROL_EXT_REMOVED_SUSPEND        => get_string('extremovedsuspend', 'enrol'),
+            ENROL_EXT_REMOVED_SUSPENDNOROLES => get_string('extremovedsuspendnoroles', 'enrol'),
+            ENROL_EXT_REMOVED_UNENROL        => get_string('extremovedunenrol', 'enrol'),
+        );
+        $settings->add(new admin_setting_configselect('enrol_arlo/expiredaction', get_string('expiredaction', 'enrol_arlo'), get_string('expiredaction_help', 'enrol_arlo'), ENROL_EXT_REMOVED_KEEP, $options));
+
+        $options = array();
+        for ($i=0; $i<24; $i++) {
+            $options[$i] = $i;
+        }
+        $settings->add(new admin_setting_configselect('enrol_arlo/expirynotifyhour', get_string('expirynotifyhour', 'core_enrol'), '', 6, $options));
 
         // Sync enrolment instance immediately on adding instance.
         $settings->add(new admin_setting_configcheckbox('enrol_arlo/syncinstanceonadd',

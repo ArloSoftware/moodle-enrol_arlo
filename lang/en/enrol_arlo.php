@@ -28,6 +28,9 @@ $string['arlo:config'] = 'Configure Arlo enrolment instances';
 $string['arlo:manage'] = 'Manage Arlo enrolment instances';
 $string['arlo:unenrol'] = 'Unenrol suspended users';
 $string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
+$string['defaultperiod'] = 'Default enrolment duration';
+$string['defaultperiod_desc'] = 'Default length of time that the enrolment is valid. If set to zero, the enrolment duration will be unlimited by default.';
+$string['defaultperiod_help'] = 'Default length of time that the enrolment is valid, starting with the moment the user is enrolled. If disabled, the enrolment duration will be unlimited by default.';
 $string['instanceexists'] = 'Arlo is already synchronised with selected role';
 $string['status'] = 'Active';
 $string['creategroup'] = 'Create new group';
@@ -73,3 +76,17 @@ $string['syncinstanceonadd'] = 'Synchronise instance on adding';
 $string['syncinstanceonadd_help'] = '
 This will synchronise enrolments for a instance immediately after adding. If not enabled enrolments will be synchronised each time cron is run.
 <p><strong>Note:</strong> Enabling this option can degrade user experience due to the time it takes to execute.</p>';
+
+$string['enrolusers'] = 'Enrol users';
+$string['expiredaction'] = 'Enrolment expiration action';
+$string['expiredaction_help'] = 'Select action to carry out when user enrolment expires. Please note that some user data and settings are purged from course during course unenrolment.';
+$string['expirymessageenrollersubject'] = 'Enrolment expiry notification';
+$string['expirymessageenrollerbody'] = 'Enrolment in the course \'{$a->course}\' will expire within the next {$a->threshold} for the following users:
+
+{$a->users}
+
+To extend their enrolment, go to {$a->extendurl}';
+$string['expirymessageenrolledsubject'] = 'Enrolment expiry notification';
+$string['expirymessageenrolledbody'] = 'Dear {$a->user},
+
+This is a notification that your enrolment in the course \'{$a->course}\' is due to expire on {$a->timeend}.';

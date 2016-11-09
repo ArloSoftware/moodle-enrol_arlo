@@ -56,6 +56,17 @@ class enrol_arlo_edit_form extends moodleform {
             ENROL_INSTANCE_DISABLED => get_string('no'));
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
 
+        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_self'), array('optional' => true, 'defaultunit' => 86400));
+        $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
+
+        $options = array(0 => get_string('no'), 1 => get_string('expirynotifyenroller', 'core_enrol'), 2 => get_string('expirynotifyall', 'core_enrol'));
+        $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'core_enrol'), $options);
+        $mform->addHelpButton('expirynotify', 'expirynotify', 'core_enrol');
+
+        $mform->addElement('duration', 'expirythreshold', get_string('expirythreshold', 'core_enrol'), array('optional' => false, 'defaultunit' => 86400));
+        $mform->addHelpButton('expirythreshold', 'expirythreshold', 'core_enrol');
+        $mform->disabledIf('expirythreshold', 'expirynotify', 'eq', 0);
+
         // Build array of keys of current Arlo instances to hide later.
         $currentinstancekeys = array();
         $params = array('courseid' => $course->id, 'enrol' => 'arlo');
@@ -101,6 +112,13 @@ class enrol_arlo_edit_form extends moodleform {
             } else if ($type == ARLO_TYPE_ONLINEACTIVITY) {
                 $table = 'local_arlo_onlineactivities';
                 $field = 'onlineactivityguid';
+            }
+
+            if (empty($onlineactivities)) {
+                $onlineactivities = [''=>''];
+            }
+            if (empty($events)) {
+                $events = [''=>''];
             }
 
             // Get Resource record either Event or Online Activity.

@@ -60,12 +60,13 @@ if ($instanceid) {
     }
     navigation_node::override_active_url(new moodle_url('/enrol/instances.php', array('id'=>$course->id)));
     $instance = new stdClass();
-    $instance->id         = null;
-    $instance->courseid   = $course->id;
-    $instance->enrol      = 'enrol';
-    $instance->customint1 = ''; // Template id.
-    $instance->customint2 = '-1'; // Optional group id (Default to create new).
-    $instance->customint8 = 1; // Switch on email welcome message by default.
+    $instance->id           = null;
+    $instance->courseid     = $course->id;
+    $instance->enrol        = 'enrol';
+    $instance->enrolperiod  = 0; // Enrolment duration.
+    $instance->customint1   = ''; // Template id.
+    $instance->customint2   = '-1'; // Optional group id (Default to create new).
+    $instance->customint8   = 1; // Switch on email welcome message by default.
 }
 
 // Try and make the manage instances node on the navigation active.
@@ -111,6 +112,10 @@ if ($mform->is_cancelled()) {
     if ($data->id) {
         $instance->name = $data->name;
         $instance->status = $data->status;
+        $instance->enrolperiod    = $data->enrolperiod;
+        $instance->expirynotify   = $data->expirynotify;
+        //$instance->notifyall      = $data->notifyall;
+        $instance->expirythreshold = $data->expirythreshold;
         $instance->roleid = $defaultroleid;
         $instance->customint2 = $data->customint2;
         $instance->customint3 = $type; // Resource type.
@@ -131,6 +136,10 @@ if ($mform->is_cancelled()) {
         $newinstance = array();
         $newinstance['name'] = $data->name;
         $newinstance['status'] = $data->status;
+        $newinstance['enrolperiod'] = $data->enrolperiod;
+        $newinstance['expirynotify'] = $data->expirynotify;
+        //$newinstance['notifyall'] = $data->notifyall;
+        $newinstance['expirythreshold'] = $data->expirythreshold;
         $newinstance['roleid'] = $defaultroleid;
         $newinstance['customint2'] = $data->customint2; // Group selected or none.
         $newinstance['customint3'] = $type; // Resource type.

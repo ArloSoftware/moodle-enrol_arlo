@@ -254,7 +254,13 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
             //$trace->output("unsuspending: $ue->userid ==> $instance->courseid via arlo $instance->customint1", 1);
             //$trace->output('suspended', 1);
         } else {
-            $plugin->enrol_user($instance, $ue->userid, $defaultroleid);
+            $timestart = time();
+            if ($instance->enrolperiod) {
+                $timeend = $timestart + $instance->enrolperiod;
+            } else {
+                $timeend = 0;
+            }
+            $plugin->enrol_user($instance, $ue->userid, $defaultroleid, $timestart, $timeend);
             $trace->output("enrolling: userid $ue->userid > courseid $instance->courseid", 1);
             $user = core_user::get_user($ue->userid);
             // Send welcome message.
