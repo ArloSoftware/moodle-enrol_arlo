@@ -95,5 +95,6 @@ if (empty($options['verbose'])) {
     $trace = new text_progress_trace();
 }
 $courseid = $options['courseid'];
-$result = enrol_arlo_sync($trace, $courseid);
-exit($result);
+enrol_arlo_sync($trace, $courseid); // @TODO move sync function to method in class.
+$plugin = enrol_get_plugin('arlo');
+$plugin->process_expirations($trace, $courseid);

@@ -53,6 +53,11 @@ $plugin = enrol_get_plugin('arlo');
 if ($instanceid) {
     $instance = $DB->get_record('enrol',
         array('courseid' => $course->id, 'enrol' => 'arlo', 'id' => $instanceid), '*', MUST_EXIST);
+    // Merge these two settings to one value for the single selection element.
+    if ($instance->notifyall and $instance->expirynotify) {
+        $instance->expirynotify = 2;
+    }
+    unset($instance->notifyall);
 } else {
     // No instance yet, we have to add new instance.
     if (! $plugin->get_newinstance_link($course->id)) {
@@ -80,6 +85,7 @@ $mform = new enrol_arlo_edit_form(null, array($instance, $plugin, $course));
 if ($mform->is_cancelled()) {
     redirect($returnurl);
 } else if ($data = $mform->get_data()) {
+
     // Get default roleid.
     $defaultroleid = $plugin->get_config('roleid');
     // Platform name.
@@ -114,8 +120,6 @@ if ($mform->is_cancelled()) {
         $instance->status = $data->status;
         $instance->enrolperiod    = $data->enrolperiod;
         $instance->expirynotify   = $data->expirynotify;
-        //$instance->notifyall      = $data->notifyall;
-        $instance->expirythreshold = $data->expirythreshold;
         $instance->roleid = $defaultroleid;
         $instance->customint2 = $data->customint2;
         $instance->customint3 = $type; // Resource type.
@@ -138,8 +142,6 @@ if ($mform->is_cancelled()) {
         $newinstance['status'] = $data->status;
         $newinstance['enrolperiod'] = $data->enrolperiod;
         $newinstance['expirynotify'] = $data->expirynotify;
-        //$newinstance['notifyall'] = $data->notifyall;
-        $newinstance['expirythreshold'] = $data->expirythreshold;
         $newinstance['roleid'] = $defaultroleid;
         $newinstance['customint2'] = $data->customint2; // Group selected or none.
         $newinstance['customint3'] = $type; // Resource type.

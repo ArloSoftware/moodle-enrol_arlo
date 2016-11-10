@@ -80,13 +80,11 @@ This will synchronise enrolments for a instance immediately after adding. If not
 $string['enrolusers'] = 'Enrol users';
 $string['expiredaction'] = 'Enrolment expiration action';
 $string['expiredaction_help'] = 'Select action to carry out when user enrolment expires. Please note that some user data and settings are purged from course during course unenrolment.';
-$string['expirymessageenrollersubject'] = 'Enrolment expiry notification';
-$string['expirymessageenrollerbody'] = 'Enrolment in the course \'{$a->course}\' will expire within the next {$a->threshold} for the following users:
 
-{$a->users}
+$string['expirymessagesubject'] = 'Enrolment expiry notification';
+$string['expirymessagetext'] = 'Dear {$a->user},
 
-To extend their enrolment, go to {$a->extendurl}';
-$string['expirymessageenrolledsubject'] = 'Enrolment expiry notification';
-$string['expirymessageenrolledbody'] = 'Dear {$a->user},
+This is a notification that your enrolment in the course \'{$a->coursename}\' has expired.';
 
-This is a notification that your enrolment in the course \'{$a->course}\' is due to expire on {$a->timeend}.';
+$string['expirynotify'] = 'Notify user of enrolment expiration';
+$string['expirynotify_help'] = 'This setting determines whether enrolment expiry notification messages are sent.';

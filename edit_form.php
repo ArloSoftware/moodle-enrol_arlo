@@ -59,13 +59,9 @@ class enrol_arlo_edit_form extends moodleform {
         $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_self'), array('optional' => true, 'defaultunit' => 86400));
         $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
 
-        $options = array(0 => get_string('no'), 1 => get_string('expirynotifyenroller', 'core_enrol'), 2 => get_string('expirynotifyall', 'core_enrol'));
-        $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'core_enrol'), $options);
-        $mform->addHelpButton('expirynotify', 'expirynotify', 'core_enrol');
-
-        $mform->addElement('duration', 'expirythreshold', get_string('expirythreshold', 'core_enrol'), array('optional' => false, 'defaultunit' => 86400));
-        $mform->addHelpButton('expirythreshold', 'expirythreshold', 'core_enrol');
-        $mform->disabledIf('expirythreshold', 'expirynotify', 'eq', 0);
+        $options = array(0 => get_string('no'), 1 => get_string('yes'));
+        $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'enrol_arlo'), $options);
+        $mform->addHelpButton('expirynotify', 'expirynotify', 'enrol_arlo');
 
         // Build array of keys of current Arlo instances to hide later.
         $currentinstancekeys = array();

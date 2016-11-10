@@ -91,6 +91,35 @@ class enrol_arlo_plugin extends enrol_plugin {
         return has_capability('enrol/arlo:config', $context);
     }
 
+
+    /**
+     * Notify user their course expiry. it is called only if notification of enrolled users (aka students) is enabled in course.
+     *
+     * @param stdClass $instance
+     * @param stdClass $user
+     */
+    private function email_expiry_message($instance, $user) {
+        global $CFG, $DB;
+
+        $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
+        $context = context_course::instance($course->id);
+        // Get contact user.
+        $contact = self::get_contact_user($instance);
+
+        $a = new stdClass();
+        $a->coursename = format_string($course->fullname, true, array('context' => $context));
+        $a->courseurl  = "$CFG->wwwroot/course/view.php?id=$course->id";
+        $a->user       = fullname($user, true);
+        $a->contact    = fullname($contact, has_capability('moodle/site:viewfullnames', $context, $user));
+
+        $subject = get_string('expirymessagesubject', 'enrol_arlo', $a);
+        $messagetext = get_string('expirymessagetext', 'enrol_arlo', $a);
+        $messagehtml = text_to_html($messagetext, null, false, true);
+
+        // Directly emailing welcome message rather than using messaging.
+        email_to_user($user, $contact, $subject, $messagetext, $messagehtml);
+    }
+
     /**
      * Send welcome email to specified user.
      *
@@ -131,26 +160,46 @@ class enrol_arlo_plugin extends enrol_plugin {
         $subject = get_string('welcometocourse', 'enrol_arlo',
             format_string($course->fullname, true, array('context' => $context)));
 
-        $rusers = array();
-        if (!empty($CFG->coursecontact)) {
-            $croles = explode(',', $CFG->coursecontact);
-            list($sort, $sortparams) = users_order_by_sql('u');
-            // We only use the first user.
-            $i = 0;
-            do {
-                $rusers = get_role_users($croles[$i], $context, true, '',
-                    'r.sortorder ASC, ' . $sort, null, '', '', '', '', $sortparams);
-                $i++;
-            } while (empty($rusers) && !empty($croles[$i]));
-        }
-        if ($rusers) {
-            $contact = reset($rusers);
-        } else {
-            $contact = core_user::get_support_user();
-        }
+        // Get contact user.
+        self::get_contact_user($instance);
 
         // Directly emailing welcome message rather than using messaging.
         email_to_user($user, $contact, $subject, $messagetext, $messagehtml);
+    }
+
+    /**
+     * Get user account to send emails out from.
+     *
+     * @return bool|mixed|stdClass
+     */
+    public function get_contact_user($instance) {
+        global $CFG;
+
+        if (!empty($CFG->arlocontactuserid)) {
+            $contact = core_user::get_user($CFG->arlocontactuserid, '*', MUST_EXIST);
+        } else {
+            $rusers = array();
+            if (!empty($CFG->coursecontact)) {
+                $context = context_course::instance($instance->courseid);
+                $croles = explode(',', $CFG->coursecontact);
+                list($sort, $sortparams) = users_order_by_sql('u');
+                // We only use the first user.
+                $i = 0;
+                do {
+                    $rusers = get_role_users($croles[$i], $context, true, '',
+                        'r.sortorder ASC, ' . $sort, null, '', '', '', '', $sortparams);
+                    $i++;
+                } while (empty($rusers) && !empty($croles[$i]));
+            }
+            if ($rusers) {
+                $contact = reset($rusers);
+            } else {
+                $contact = core_user::get_support_user();
+            }
+        }
+        // Unset emailstop to make sure support message is sent.
+        $contact->emailstop = 0;
+        return $contact;
     }
 
     /**
@@ -243,6 +292,136 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         return $actions;
     }
+
+    /**
+     * Overrides parent implementation to allow user notification on enrolment expiration.
+     *
+     *
+     * @param progress_trace $trace
+     * @param int $courseid one course, empty mean all
+     * @return bool true if any data processed, false if not
+     */
+    public function process_expirations(progress_trace $trace, $courseid = null) {
+        global $DB;
+
+        $name = $this->get_name();
+        if (!enrol_is_enabled($name)) {
+            $trace->finished();
+            return false;
+        }
+
+        $processed = false;
+        $params = array();
+        $coursesql = "";
+        if ($courseid) {
+            $coursesql = "AND e.courseid = :courseid";
+        }
+
+        // Deal with expired accounts.
+        $action = $this->get_config('expiredaction', ENROL_EXT_REMOVED_KEEP);
+
+        if ($action == ENROL_EXT_REMOVED_UNENROL) {
+            $instances = array();
+            $sql = "SELECT ue.*, e.courseid, c.id AS contextid
+                      FROM {user_enrolments} ue
+                      JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = :enrol)
+                      JOIN {context} c ON (c.instanceid = e.courseid AND c.contextlevel = :courselevel)
+                     WHERE ue.timeend > 0 AND ue.timeend < :now $coursesql";
+            $params = array('now'=>time(), 'courselevel'=>CONTEXT_COURSE, 'enrol'=>$name, 'courseid'=>$courseid);
+
+            $rs = $DB->get_recordset_sql($sql, $params);
+            foreach ($rs as $ue) {
+                if (!$processed) {
+                    $trace->output("Starting processing of enrol_$name expirations...");
+                    $processed = true;
+                }
+                if (empty($instances[$ue->enrolid])) {
+                    $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+                }
+                $instance = $instances[$ue->enrolid];
+                if (!$this->roles_protected()) {
+                    // Let's just guess what extra roles are supposed to be removed.
+                    if ($instance->roleid) {
+                        role_unassign($instance->roleid, $ue->userid, $ue->contextid);
+                    }
+                }
+                // The unenrol cleans up all subcontexts if this is the only course enrolment for this user.
+                $this->unenrol_user($instance, $ue->userid);
+                $trace->output("Unenrolling expired user $ue->userid from course $instance->courseid", 1);
+                if ($instance->expirynotify) {
+                    $user = $DB->get_record('user', array('id'=>$ue->userid));
+                    $this->email_expiry_message($instance, $user );
+                }
+            }
+            $rs->close();
+            unset($instances);
+
+        } else if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES or $action == ENROL_EXT_REMOVED_SUSPEND) {
+
+            $instances = array();
+            $sql = "SELECT ue.*, e.courseid, c.id AS contextid
+                      FROM {user_enrolments} ue
+                      JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = :enrol)
+                      JOIN {context} c ON (c.instanceid = e.courseid AND c.contextlevel = :courselevel)
+                     WHERE ue.timeend > 0 AND ue.timeend < :now
+                           AND ue.status = :useractive $coursesql";
+            $params = array('now'=>time(), 'courselevel'=>CONTEXT_COURSE, 'useractive'=>ENROL_USER_ACTIVE, 'enrol'=>$name, 'courseid'=>$courseid);
+            $rs = $DB->get_recordset_sql($sql, $params);
+            foreach ($rs as $ue) {
+                if (!$processed) {
+                    $trace->output("Starting processing of enrol_$name expirations...");
+                    $processed = true;
+                }
+                if (empty($instances[$ue->enrolid])) {
+                    $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+                }
+                $instance = $instances[$ue->enrolid];
+
+                if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
+                    if (!$this->roles_protected()) {
+                        // Let's just guess what roles should be removed.
+                        $count = $DB->count_records('role_assignments', array('userid'=>$ue->userid, 'contextid'=>$ue->contextid));
+                        if ($count == 1) {
+                            role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'', 'itemid'=>0));
+
+                        } else if ($count > 1 and $instance->roleid) {
+                            role_unassign($instance->roleid, $ue->userid, $ue->contextid, '', 0);
+                        }
+                    }
+                    // In any case remove all roles that belong to this instance and user.
+                    role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'enrol_'.$name, 'itemid'=>$instance->id), true);
+                    // Final cleanup of subcontexts if there are no more course roles.
+                    if (0 == $DB->count_records('role_assignments', array('userid'=>$ue->userid, 'contextid'=>$ue->contextid))) {
+                        role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'', 'itemid'=>0), true);
+                    }
+                }
+
+                $this->update_user_enrol($instance, $ue->userid, ENROL_USER_SUSPENDED);
+                $trace->output("Suspending expired user $ue->userid in course $instance->courseid", 1);
+                if ($instance->expirynotify) {
+                    $user = $DB->get_record('user', array('id'=>$ue->userid));
+                    $this->email_expiry_message($instance, $user );
+                }
+
+            }
+            $rs->close();
+            unset($instances);
+
+        } else {
+            // ENROL_EXT_REMOVED_KEEP means no changes.
+        }
+
+        if ($processed) {
+            $trace->output("...finished processing of enrol_$name expirations");
+        } else {
+            $trace->output("No expired enrol_$name enrolments detected");
+        }
+        $trace->finished();
+
+        return $processed;
+    }
+
+
 
 }
 
