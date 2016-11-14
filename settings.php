@@ -51,7 +51,7 @@ if ($ADMIN->fulltree) {
             ENROL_EXT_REMOVED_KEEP           => get_string('extremovedkeep', 'enrol'),
             ENROL_EXT_REMOVED_SUSPEND        => get_string('extremovedsuspend', 'enrol'),
             ENROL_EXT_REMOVED_SUSPENDNOROLES => get_string('extremovedsuspendnoroles', 'enrol'),
-            ENROL_EXT_REMOVED_UNENROL        => get_string('extremovedunenrol', 'enrol'),
+            // ENROL_EXT_REMOVED_UNENROL        => get_string('extremovedunenrol', 'enrol'),
         );
         $settings->add(new admin_setting_configselect('enrol_arlo/expiredaction', get_string('expiredaction', 'enrol_arlo'), get_string('expiredaction_help', 'enrol_arlo'), ENROL_EXT_REMOVED_SUSPEND , $options));
 
