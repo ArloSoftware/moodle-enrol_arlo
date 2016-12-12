@@ -15,26 +15,13 @@ $string['customchar1_help'] = 'Set this value to the Template Code in Arlo, Warn
 
 $string['notemplatesavali'] = 'There are currently no unassigned templates available to be added to this course.';
 
-$string['welcometocourse'] = 'Welcome to {$a}';
-$string['welcometocoursetext'] = 'Welcome to {$a->coursename}!
 
-You may access this course at the following url:
-
-  {$a->courseurl}';
 
 $string['assignedgroup'] = 'Assigned group';
 $string['assignrole'] = 'Assign role';
 $string['arlo:config'] = 'Configure Arlo enrolment instances';
 $string['arlo:manage'] = 'Manage Arlo enrolment instances';
 $string['arlo:unenrol'] = 'Unenrol suspended users';
-$string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
-$string['defaultperiod'] = 'Default enrolment duration';
-$string['defaultperiod_desc'] = 'Default length of time that the enrolment is valid. If set to zero, the enrolment duration will be unlimited by default.';
-$string['defaultperiod_help'] = 'Default length of time that the enrolment is valid, starting with the moment the user is enrolled. If disabled, the enrolment duration will be unlimited by default.';
-$string['instanceexists'] = 'Arlo is already synchronised with selected role';
-$string['status'] = 'Active';
-$string['creategroup'] = 'Create new group';
-
 $string['customwelcomemessage'] = 'Custom welcome message';
 $string['customwelcomemessage_help'] = 'A custom welcome message may be added as plain text or Moodle-auto format, including HTML tags and multi-lang tags.
 
@@ -42,7 +29,17 @@ The following placeholders may be included in the message:
 
 * Course name {$a->coursename}
 * Course url {$a->courseurl}
-* User fullname {$a->fullname}';
+* User fullname {$a->fullname}
+* User username {$a->username}
+* Forgot password url {$a->forgotpasswordurl}';
+
+$string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
+$string['defaultperiod'] = 'Default enrolment duration';
+$string['defaultperiod_desc'] = 'Default length of time that the enrolment is valid. If set to zero, the enrolment duration will be unlimited by default.';
+$string['defaultperiod_help'] = 'Default length of time that the enrolment is valid, starting with the moment the user is enrolled. If disabled, the enrolment duration will be unlimited by default.';
+$string['instanceexists'] = 'Arlo is already synchronised with selected role';
+$string['status'] = 'Active';
+$string['creategroup'] = 'Create new group';
 
 $string['sendcoursewelcomemessage'] = 'Send course welcome message';
 $string['sendcoursewelcomemessage_help'] = 'If enabled, users receive a welcome message via email when they are enrolled in a course.';
@@ -88,3 +85,18 @@ This is a notification that your enrolment in the course \'{$a->coursename}\' ha
 
 $string['expirynotify'] = 'Notify user of enrolment expiration';
 $string['expirynotify_help'] = 'This setting determines whether enrolment expiry notification messages are sent.';
+
+$string['welcometocourse'] = 'Welcome to {$a}';
+$string['welcometocoursetext'] = 'Welcome to {$a->coursename}!
+
+Your username: {$a->username}
+
+Forgotten your password?
+
+You can reset your password using following url:
+
+  {$a->forgotpasswordurl}
+
+You may access this course at the following url:
+
+  {$a->courseurl}';

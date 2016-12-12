@@ -89,7 +89,7 @@ if ($mform->is_cancelled()) {
     // Get default roleid.
     $defaultroleid = $plugin->get_config('roleid');
     // Platform name.
-    $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
+    $arloinstance = \local_arlo\arlo::get_platform_name();
 
     // Split the event string to get Resource type and the identifier, used later on as well.
     list($type, $identifier) = enrol_arlo_break_apart_key($data->event);

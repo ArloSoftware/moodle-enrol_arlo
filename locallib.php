@@ -93,7 +93,7 @@ function enrol_arlo_create_instances_from_template(progress_trace $trace, $cours
     $currentinstances = array();
     $templateassociations = array();
 
-    $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
+    $arloinstance = \local_arlo\arlo::get_platform_name();
     $plugin = enrol_get_plugin('arlo');
 
     $student = get_archetype_roles('student');

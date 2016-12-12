@@ -136,11 +136,26 @@ class enrol_arlo_plugin extends enrol_plugin {
         $a = new stdClass();
         $a->coursename = format_string($course->fullname, true, array('context' => $context));
         $a->courseurl = "$CFG->wwwroot/course/view.php?id=$course->id";
+        $a->username = $user->username;
+        $a->forgotpasswordurl = "$CFG->wwwroot/login/forgot_password.php";
 
         if (trim($instance->customtext1) !== '') {
             $message = $instance->customtext1;
-            $key = array('{$a->coursename}', '{$a->courseurl}', '{$a->fullname}', '{$a->email}');
-            $value = array($a->coursename, $a->courseurl, fullname($user), $user->email);
+            $key = array(
+                '{$a->coursename}',
+                '{$a->courseurl}',
+                '{$a->fullname}',
+                '{$a->email}',
+                '{$a->username}',
+                '{$a->forgotpasswordurl}');
+            $value = array(
+                $a->coursename,
+                $a->courseurl,
+                fullname($user),
+                $user->email,
+                $user->username,
+                $a->forgotpasswordurl
+            );
             $message = str_replace($key, $value, $message);
             if (strpos($message, '<') === false) {
                 // Plain text only.
@@ -161,7 +176,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             format_string($course->fullname, true, array('context' => $context)));
 
         // Get contact user.
-        self::get_contact_user($instance);
+        $contact = self::get_contact_user($instance);
 
         // Directly emailing welcome message rather than using messaging.
         email_to_user($user, $contact, $subject, $messagetext, $messagehtml);

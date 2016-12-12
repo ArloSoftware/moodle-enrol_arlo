@@ -97,7 +97,7 @@ class enrol_arlo_edit_form extends moodleform {
         // @TODO build better selector = ajax for bigger installs.
         if ($instance->id) {
             // Platform name.
-            $arloinstance = get_config('local_arlo', 'setting_arlo_orgname');
+            $arloinstance = \local_arlo\arlo::get_platform_name();
 
             // Get Resource type and id.
             $type = $instance->customint3;
