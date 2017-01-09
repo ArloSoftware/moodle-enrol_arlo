@@ -1,6 +1,6 @@
 <?php
-//
 // This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -63,7 +63,7 @@ if ($instanceid) {
     if (! $plugin->get_newinstance_link($course->id)) {
         redirect($returnurl);
     }
-    navigation_node::override_active_url(new moodle_url('/enrol/instances.php', array('id'=>$course->id)));
+    navigation_node::override_active_url(new moodle_url('/enrol/instances.php', array('id' => $course->id)));
     $instance = new stdClass();
     $instance->id           = null;
     $instance->courseid     = $course->id;

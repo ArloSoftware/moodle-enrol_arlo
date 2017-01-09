@@ -1,6 +1,6 @@
 <?php
-//
 // This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -56,7 +56,10 @@ class enrol_arlo_edit_form extends moodleform {
             ENROL_INSTANCE_DISABLED => get_string('no'));
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
 
-        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_self'), array('optional' => true, 'defaultunit' => 86400));
+        $mform->addElement('duration',
+            'enrolperiod',
+            get_string('enrolperiod', 'enrol_self'),
+            array('optional' => true, 'defaultunit' => 86400));
         $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
 
         $options = array(0 => get_string('no'), 1 => get_string('yes'));
@@ -94,7 +97,7 @@ class enrol_arlo_edit_form extends moodleform {
             }
         }
 
-        // @TODO build better selector = ajax for bigger installs.
+        // ... @TODO build better selector = ajax for bigger installs.
         if ($instance->id) {
             // Platform name.
             $arloinstance = \local_arlo\arlo::get_platform_name();
@@ -111,10 +114,10 @@ class enrol_arlo_edit_form extends moodleform {
             }
 
             if (empty($onlineactivities)) {
-                $onlineactivities = [''=>''];
+                $onlineactivities = ['' => ''];
             }
             if (empty($events)) {
-                $events = [''=>''];
+                $events = ['' => ''];
             }
 
             // Get Resource record either Event or Online Activity.
@@ -170,20 +173,14 @@ class enrol_arlo_edit_form extends moodleform {
 
         $mform->addElement('textarea', 'customtext1',
             get_string('customwelcomemessage', 'enrol_arlo'),
-            array('cols'=>'60', 'rows'=>'8'));
+            array('cols' => '60', 'rows' => '8'));
         $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_arlo');
 
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
-/*
-        if (enrol_accessing_via_instance($instance)) {
-            $mform->addElement('static', 'selfwarn',
-                get_string('instanceeditselfwarning', 'core_enrol'),
-                get_string('instanceeditselfwarningtext', 'core_enrol'));
-        }
-*/
+
         $this->add_action_buttons(true, ($instance->id ? null : get_string('addinstance', 'enrol')));
 
         $this->set_data($instance);

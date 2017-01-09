@@ -230,7 +230,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         if ($instance->enrol !== 'arlo') {
             throw new coding_exception('invalid enrol instance!');
         }
-        $context =  context_course::instance($instance->courseid);
+        $context = context_course::instance($instance->courseid);
 
         $icons = array();
 
@@ -240,7 +240,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             $icons[] = $OUTPUT->action_icon($editlink,
                 new pix_icon('t/edit', get_string('edit'), 'core', array('class' => 'iconsmall')));
         }
-        
+
         return $icons;
     }
     /**
@@ -299,11 +299,18 @@ class enrol_arlo_plugin extends enrol_plugin {
         $params['ue'] = $ue->id;
         if ($this->allow_unenrol($instance) && has_capability("enrol/arlo:unenrol", $context)) {
             $url = new moodle_url('/enrol/unenroluser.php', $params);
-            $actions[] = new user_enrolment_action(new pix_icon('t/delete', ''), get_string('unenrol', 'enrol'), $url, array('class'=>'unenrollink', 'rel'=>$ue->id));
+            $actions[] = new user_enrolment_action(
+                new pix_icon('t/delete', ''),
+                get_string('unenrol', 'enrol'),
+                $url, array('class' => 'unenrollink', 'rel' => $ue->id));
         }
         if ($this->allow_manage($instance) && has_capability("enrol/arlo:manage", $context)) {
             $url = new moodle_url('/enrol/editenrolment.php', $params);
-            $actions[] = new user_enrolment_action(new pix_icon('t/edit', ''), get_string('edit'), $url, array('class'=>'editenrollink', 'rel'=>$ue->id));
+            $actions[] = new user_enrolment_action(
+                new pix_icon('t/edit', ''),
+                get_string('edit'),
+                $url,
+                array('class' => 'editenrollink', 'rel' => $ue->id));
         }
         return $actions;
     }
@@ -342,7 +349,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                       JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = :enrol)
                       JOIN {context} c ON (c.instanceid = e.courseid AND c.contextlevel = :courselevel)
                      WHERE ue.timeend > 0 AND ue.timeend < :now $coursesql";
-            $params = array('now'=>time(), 'courselevel'=>CONTEXT_COURSE, 'enrol'=>$name, 'courseid'=>$courseid);
+            $params = array('now' => time(), 'courselevel' => CONTEXT_COURSE, 'enrol' => $name, 'courseid' => $courseid);
 
             $rs = $DB->get_recordset_sql($sql, $params);
             foreach ($rs as $ue) {
@@ -351,7 +358,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                     $processed = true;
                 }
                 if (empty($instances[$ue->enrolid])) {
-                    $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+                    $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
                 }
                 $instance = $instances[$ue->enrolid];
                 if (!$this->roles_protected()) {
@@ -364,7 +371,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                 $this->unenrol_user($instance, $ue->userid);
                 $trace->output("Unenrolling expired user $ue->userid from course $instance->courseid", 1);
                 if ($instance->expirynotify) {
-                    $user = $DB->get_record('user', array('id'=>$ue->userid));
+                    $user = $DB->get_record('user', array('id' => $ue->userid));
                     $this->email_expiry_message($instance, $user );
                 }
             }
@@ -380,7 +387,8 @@ class enrol_arlo_plugin extends enrol_plugin {
                       JOIN {context} c ON (c.instanceid = e.courseid AND c.contextlevel = :courselevel)
                      WHERE ue.timeend > 0 AND ue.timeend < :now
                            AND ue.status = :useractive $coursesql";
-            $params = array('now'=>time(), 'courselevel'=>CONTEXT_COURSE, 'useractive'=>ENROL_USER_ACTIVE, 'enrol'=>$name, 'courseid'=>$courseid);
+            $params = array('now' => time(),
+                'courselevel' => CONTEXT_COURSE, 'useractive' => ENROL_USER_ACTIVE, 'enrol' => $name, 'courseid' => $courseid);
             $rs = $DB->get_recordset_sql($sql, $params);
             foreach ($rs as $ue) {
                 if (!$processed) {
@@ -388,33 +396,43 @@ class enrol_arlo_plugin extends enrol_plugin {
                     $processed = true;
                 }
                 if (empty($instances[$ue->enrolid])) {
-                    $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+                    $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
                 }
                 $instance = $instances[$ue->enrolid];
 
                 if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
                     if (!$this->roles_protected()) {
                         // Let's just guess what roles should be removed.
-                        $count = $DB->count_records('role_assignments', array('userid'=>$ue->userid, 'contextid'=>$ue->contextid));
+                        $count = $DB->count_records('role_assignments',
+                            array('userid' => $ue->userid, 'contextid' => $ue->contextid));
                         if ($count == 1) {
-                            role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'', 'itemid'=>0));
+                            role_unassign_all(array('userid' => $ue->userid,
+                                'contextid' => $ue->contextid,
+                                'component' => '',
+                                'itemid' => 0));
 
                         } else if ($count > 1 and $instance->roleid) {
                             role_unassign($instance->roleid, $ue->userid, $ue->contextid, '', 0);
                         }
                     }
                     // In any case remove all roles that belong to this instance and user.
-                    role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'enrol_'.$name, 'itemid'=>$instance->id), true);
+                    role_unassign_all(array('userid' => $ue->userid,
+                        'contextid' => $ue->contextid,
+                        'component' => 'enrol_'.$name,
+                        'itemid' => $instance->id), true);
                     // Final cleanup of subcontexts if there are no more course roles.
-                    if (0 == $DB->count_records('role_assignments', array('userid'=>$ue->userid, 'contextid'=>$ue->contextid))) {
-                        role_unassign_all(array('userid'=>$ue->userid, 'contextid'=>$ue->contextid, 'component'=>'', 'itemid'=>0), true);
+                    if (0 == $DB->count_records('role_assignments', ['userid' => $ue->userid, 'contextid' => $ue->contextid])) {
+                        role_unassign_all(array('userid' => $ue->userid,
+                            'contextid' => $ue->contextid,
+                            'component' => '',
+                            'itemid' => 0), true);
                     }
                 }
 
                 $this->update_user_enrol($instance, $ue->userid, ENROL_USER_SUSPENDED);
                 $trace->output("Suspending expired user $ue->userid in course $instance->courseid", 1);
                 if ($instance->expirynotify) {
-                    $user = $DB->get_record('user', array('id'=>$ue->userid));
+                    $user = $DB->get_record('user', array('id' => $ue->userid));
                     $this->email_expiry_message($instance, $user );
                 }
 
@@ -422,8 +440,6 @@ class enrol_arlo_plugin extends enrol_plugin {
             $rs->close();
             unset($instances);
 
-        } else {
-            // ENROL_EXT_REMOVED_KEEP means no changes.
         }
 
         if ($processed) {
@@ -447,7 +463,7 @@ class enrol_arlo_plugin extends enrol_plugin {
  * @param int $groupid
  * @param int $userid
  * @return bool
-*/
+ */
 function enrol_arlo_allow_group_member_remove($itemid, $groupid, $userid) {
     return false;
 }

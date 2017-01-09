@@ -234,7 +234,7 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
          LEFT JOIN {user_enrolments} ue ON (ue.enrolid = e.id AND ue.userid = u.id)
              WHERE (ue.id IS NULL OR ue.status = :suspended)
                AND r.status $insql";
-    //Enrolment params.
+    // Enrolment params.
     $params = array();
     $params['courseid'] = $courseid;
     $params['instenabled'] = ENROL_INSTANCE_ENABLED;
@@ -242,17 +242,15 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     $params = array_merge($params, $inparams);
     // Get records and iterate.
     $rs = $DB->get_recordset_sql($sql, $params);
-    foreach($rs as $ue) {
+    foreach ($rs as $ue) {
         // Fetch enrolment instance from cache or get from DB and save to cache.
         if (!isset($instances[$ue->enrolid])) {
             $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
         }
         // Get enrolment instance.
         $instance = $instances[$ue->enrolid];
-        if ($ue->status == ENROL_USER_SUSPENDED) { // @TODO is this condition needed in Arlo Cancellded is remove?
-            //$plugin->update_user_enrol($instance, $ue->userid, ENROL_USER_ACTIVE);
-            //$trace->output("unsuspending: $ue->userid ==> $instance->courseid via arlo $instance->customint1", 1);
-            //$trace->output('suspended', 1);
+        if ($ue->status == ENROL_USER_SUSPENDED) { // ... @todo is this condition needed in Arlo Cancellded is remove?
+            continue;
         } else {
             $timestart = time();
             if ($instance->enrolperiod) {
@@ -296,13 +294,13 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     $params = array_merge($params, $inparams);
     // Get records and iterate.
     $rs = $DB->get_recordset_sql($sql, $params);
-    foreach($rs as $ue) {
+    foreach ($rs as $ue) {
         // Record been flagged then skip.
         if ($ue->flag) {
             continue;
         }
         if (!isset($instances[$ue->enrolid])) {
-            $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+            $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
         }
         $instance = $instances[$ue->enrolid];
         if ($unenrolaction == ENROL_EXT_REMOVED_UNENROL) {
@@ -348,9 +346,9 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
     $params['courseid'] = $courseid;
     // Get records and iterate.
     $rs = $DB->get_recordset_sql($sql, $params);
-    foreach($rs as $ue) {
+    foreach ($rs as $ue) {
         if (!isset($instances[$ue->enrolid])) {
-            $instances[$ue->enrolid] = $DB->get_record('enrol', array('id'=>$ue->enrolid));
+            $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
         }
         $instance = $instances[$ue->enrolid];
         // Remove enrolment together with group membership, grades, preferences, etc.

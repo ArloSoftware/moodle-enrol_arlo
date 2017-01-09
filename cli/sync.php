@@ -64,7 +64,7 @@ Options:
 
 Example:
 \$sudo -u www-data /usr/bin/php enrol/arlo/cli/sync.php
-"; //TODO: localize - to be translated later when everything is finished
+";
 
     echo $help;
     die;
@@ -95,6 +95,6 @@ if (empty($options['verbose'])) {
     $trace = new text_progress_trace();
 }
 $courseid = $options['courseid'];
-enrol_arlo_sync($trace, $courseid); // @TODO move sync function to method in class.
+enrol_arlo_sync($trace, $courseid);
 $plugin = enrol_get_plugin('arlo');
 $plugin->process_expirations($trace, $courseid);
