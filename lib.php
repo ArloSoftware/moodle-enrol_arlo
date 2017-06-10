@@ -457,7 +457,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 }
 
 /**
- * Display the Associate Arlo temple link in the course administration menu.
+ * Display the associate Arlo template link in the course administration menu.
  *
  * @param settings_navigation $navigation The settings navigation object
  * @param stdClass $course The course
