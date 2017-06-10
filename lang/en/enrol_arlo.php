@@ -22,6 +22,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['arloconnection'] = 'Arlo connection';
+$string['managearlo'] = 'Manage Arlo';
 $string['pluginname'] = 'Arlo enrolment';
 $string['pluginname_desc'] = '<p>These enrolments are managed by local_arlo</p>';
 
@@ -119,3 +121,7 @@ You may access this course at the following url:
   {$a->courseurl}';
 
 $string['associatearlotemplate'] = 'Associate Arlo template';
+$string['platformname'] = 'Platform name';
+$string['platformname_desc'] = 'This is name of platform on Arlo e.g https://{platform}.arlo.co';
+$string['apiusername'] = 'API username';
+$string['apipassword'] = 'API password';
