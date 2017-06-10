@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/arlo/db" VERSION="20170508" COMMENT="XMLDB file for Moodle enrol/arlo"
+<XMLDB PATH="enrol/arlo/db" VERSION="20170610" COMMENT="XMLDB file for Moodle enrol/arlo"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="enrol_arlo_templatelink" COMMENT="Arlo Template linked to Moodle course.">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Standard Moodle primary key."/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle course id."/>
-        <FIELD NAME="templateguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="Arlo template GUID."/>
-        <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-      </KEYS>
-    </TABLE>
     <TABLE NAME="enrol_arlo_contact" COMMENT="Arlo contact information that relates to specific Moodle user account">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="plaform" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Moodle userid"/>
         <FIELD NAME="arlocontactid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Reference identifier for use against contact end-point"/>
         <FIELD NAME="arloguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="Arlo unique contact record identifier"/>
@@ -39,6 +29,17 @@
     <TABLE NAME="enrol_arlo_result" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="enrol_arlo_templatelink" COMMENT="Arlo Template linked to Moodle course.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Standard Moodle primary key."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle course id."/>
+        <FIELD NAME="templateguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="Arlo template GUID."/>
+        <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
