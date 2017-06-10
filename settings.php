@@ -58,12 +58,12 @@ if ($ADMIN->fulltree) {
         $name = new lang_string('configuration', 'enrol_arlo'),
         new moodle_url('/enrol/arlo/admin/configuration.php')));
 
-    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapiresponselog',
+    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapilog',
         $name = new lang_string('apilog', 'enrol_arlo'),
         new moodle_url('/enrol/arlo/admin/apilog.php')));
 
     $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloemaillog',
         $name = new lang_string('emaillog', 'enrol_arlo'),
         new moodle_url('/enrol/arlo/admin/emaillog.php')));
-    
+
 }
