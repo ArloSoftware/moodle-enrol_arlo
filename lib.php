@@ -457,6 +457,29 @@ class enrol_arlo_plugin extends enrol_plugin {
 }
 
 /**
+ * Display the Associate Arlo temple link in the course administration menu.
+ *
+ * @param settings_navigation $navigation The settings navigation object
+ * @param stdClass $course The course
+ * @param stdclass $context Course context
+ */
+function enrol_arlo_extend_navigation_course($navigation, $course, $context) {
+    // Check that the Arlo plugin is enabled.
+    if (enrol_is_enabled('arlo')) {
+        // Check that they can add an instance.
+        $plugin = enrol_get_plugin('arlo');
+        if ($plugin->can_add_instance($course->id)) {
+            $url = new moodle_url('/enrol/arlo/linktemplate.php', array('courseid' => $context->instanceid));
+            $label = get_string('associatearlotemplate', 'enrol_arlo');
+            $settingsnode = navigation_node::create($label, $url, navigation_node::TYPE_SETTING,
+                null, null, new pix_icon('i/twoway', ''));
+            $navigation->add_node($settingsnode);
+        }
+    }
+}
+
+
+/**
  * Prevent removal of enrol roles.
  *
  * @param int $itemid

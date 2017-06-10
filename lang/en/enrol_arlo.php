@@ -115,3 +115,5 @@ You can reset your password using following url:
 You may access this course at the following url:
 
   {$a->courseurl}';
+
+$string['associatearlotemplate'] = 'Associate Arlo template';
