@@ -42,6 +42,17 @@ $capabilities = array(
             'manager' => CAP_ALLOW,
         )
     ),
+    'enrol/arlo:synchronizecore' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+    ),
+    'enrol/arlo:synchronizeinstance' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW,
+        )
+    )
 );
 
 

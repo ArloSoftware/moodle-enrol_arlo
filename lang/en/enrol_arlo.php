@@ -37,6 +37,8 @@ $string['assignrole'] = 'Assign role';
 $string['arlo:config'] = 'Configure Arlo enrolment instances';
 $string['arlo:manage'] = 'Manage Arlo enrolment instances';
 $string['arlo:unenrol'] = 'Unenrol suspended users';
+$string['enrol/arlo:synchronizecore'] = 'Manually pull new core resources';
+$string['enrol/arlo:synchronizeinstance'] = 'Manually pull new registrations and push new results for an enrolment instance';
 $string['customwelcomemessage'] = 'Custom welcome message';
 $string['customwelcomemessage_help'] = 'A custom welcome message may be added as plain text or Moodle-auto format, including HTML tags and multi-lang tags.
 
