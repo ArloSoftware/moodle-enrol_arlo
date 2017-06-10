@@ -27,40 +27,43 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
+    // Things that can be used.
+    //$ADMIN = $adminroot; // May be used in settings.php.
+    //$plugininfo = $this; // Also can be used inside settings.php.
+    //$enrol = $this;      // Also can be used inside settings.php.
+    //$settings->add(new admin_setting_heading('enrol_arlo_settings', '', get_string('pluginname_desc', 'enrol_arlo')));
 
-    $settings->add(new admin_setting_heading('enrol_arlo_settings', '', get_string('pluginname_desc', 'enrol_arlo')));
+    $name = get_string('arloconnection', 'enrol_arlo');
+    $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
 
-    if (!during_initial_install()) {
-        $options = get_default_enrol_roles(context_system::instance());
-        $student = get_archetype_roles('student');
-        $student = reset($student);
-        $settings->add(new admin_setting_configselect('enrol_arlo/roleid',
-            get_string('defaultrole', 'role'), '', $student->id, $options));
+    $name = get_string('platformname', 'enrol_arlo');
+    $description = get_string('platformname_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configtext('enrol_arlo/platformname', $name, $description, ''));
 
-        $options = array(
-            ENROL_EXT_REMOVED_UNENROL        => get_string('extremovedunenrol', 'enrol'),
-            ENROL_EXT_REMOVED_SUSPENDNOROLES => get_string('extremovedsuspendnoroles', 'enrol'));
+    $name = get_string('apiusername', 'enrol_arlo');
+    $settings->add(new admin_setting_configtext('enrol_arlo/apiusername', $name, '', ''));
 
-        $settings->add(new admin_setting_configselect('enrol_arlo/unenrolaction',
-            get_string('extremovedaction', 'enrol'),
-            get_string('extremovedaction_help', 'enrol'), ENROL_EXT_REMOVED_UNENROL, $options));
+    $name = get_string('apipassword', 'enrol_arlo');
+    $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, '', ''));
 
-        // Note: let's reuse the ext sync constants and strings here, internally it is very similar,
-        //       it describes what should happend when users are not supposed to be enerolled any more.
-        $options = array(
-            ENROL_EXT_REMOVED_KEEP           => get_string('extremovedkeep', 'enrol'),
-            ENROL_EXT_REMOVED_SUSPEND        => get_string('extremovedsuspend', 'enrol'),
-            ENROL_EXT_REMOVED_SUSPENDNOROLES => get_string('extremovedsuspendnoroles', 'enrol'),
-        );
-        $settings->add(new admin_setting_configselect('enrol_arlo/expiredaction',
-            get_string('expiredaction', 'enrol_arlo'),
-            get_string('expiredaction_help', 'enrol_arlo'),
-            ENROL_EXT_REMOVED_SUSPEND,
-            $options));
+    $name = get_string('managearlo', 'enrol_arlo');
+    $category = new admin_category('enrolsettingsarlomanage', $name);
+    $ADMIN->add('enrolments', $category);
 
-        // Sync enrolment instance immediately on adding instance.
-        $settings->add(new admin_setting_configcheckbox('enrol_arlo/syncinstanceonadd',
-            get_string('syncinstanceonadd', 'enrol_arlo'),
-            get_string('syncinstanceonadd_help', 'enrol_arlo'), 0));
-    }
+    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlostatus',
+        $name = new lang_string('pluginstatus', 'enrol_arlo'),
+        new moodle_url('/enrol/arlo/admin/status.php')));
+
+    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloconfiguration',
+        $name = new lang_string('configuration', 'enrol_arlo'),
+        new moodle_url('/enrol/arlo/admin/configuration.php')));
+
+    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapiresponselog',
+        $name = new lang_string('apilog', 'enrol_arlo'),
+        new moodle_url('/enrol/arlo/admin/apilog.php')));
+
+    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloemaillog',
+        $name = new lang_string('emaillog', 'enrol_arlo'),
+        new moodle_url('/enrol/arlo/admin/emaillog.php')));
+    
 }

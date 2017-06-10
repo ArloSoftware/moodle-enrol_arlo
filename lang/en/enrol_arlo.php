@@ -23,6 +23,10 @@
  */
 
 $string['arloconnection'] = 'Arlo connection';
+$string['configuration'] = 'Configuration';
+$string['pluginstatus'] = 'Status';
+$string['emaillog'] = 'Email log';
+$string['apilog'] = 'API log';
 $string['managearlo'] = 'Manage Arlo';
 $string['pluginname'] = 'Arlo enrolment';
 $string['pluginname_desc'] = '<p>These enrolments are managed by local_arlo</p>';
