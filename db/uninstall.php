@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 function xmldb_enrol_arlo_uninstall() {
     global $CFG, $DB;

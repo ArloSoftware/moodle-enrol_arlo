@@ -25,7 +25,7 @@
  */
 
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 $capabilities = array(
     'enrol/arlo:manage' => array(
