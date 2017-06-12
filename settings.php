@@ -38,7 +38,7 @@ if ($ADMIN->fulltree) {
 
     $name = get_string('platformname', 'enrol_arlo');
     $description = get_string('platformname_desc', 'enrol_arlo');
-    $settings->add(new admin_setting_configtext('enrol_arlo/platformname', $name, $description, ''));
+    $settings->add(new admin_setting_configtext('enrol_arlo/platformname', $name, $description, 'arlo.co', PARAM_HOST));
 
     $name = get_string('apiusername', 'enrol_arlo');
     $settings->add(new admin_setting_configtext('enrol_arlo/apiusername', $name, '', ''));
@@ -47,7 +47,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, '', ''));
 
     // Only display management category if plugin enabled.
-    if (enrol_is_enabled('arlo')) {
+    if ($enrol->is_enabled()) {
         $name = get_string('managearlo', 'enrol_arlo');
         $category = new admin_category('enrolsettingsarlomanage', $name);
         $ADMIN->add('enrolments', $category);
