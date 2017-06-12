@@ -46,24 +46,27 @@ if ($ADMIN->fulltree) {
     $name = get_string('apipassword', 'enrol_arlo');
     $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, '', ''));
 
-    $name = get_string('managearlo', 'enrol_arlo');
-    $category = new admin_category('enrolsettingsarlomanage', $name);
-    $ADMIN->add('enrolments', $category);
+    // Only display management category if plugin enabled.
+    if (enrol_is_enabled('arlo')) {
+        $name = get_string('managearlo', 'enrol_arlo');
+        $category = new admin_category('enrolsettingsarlomanage', $name);
+        $ADMIN->add('enrolments', $category);
 
-    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlostatus',
-        $name = new lang_string('pluginstatus', 'enrol_arlo'),
-        new moodle_url('/enrol/arlo/admin/status.php')));
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlostatus',
+            $name = new lang_string('pluginstatus', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/status.php')));
 
-    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloconfiguration',
-        $name = new lang_string('configuration', 'enrol_arlo'),
-        new moodle_url('/enrol/arlo/admin/configuration.php')));
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloconfiguration',
+            $name = new lang_string('configuration', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/configuration.php')));
 
-    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapilog',
-        $name = new lang_string('apilog', 'enrol_arlo'),
-        new moodle_url('/enrol/arlo/admin/apilog.php')));
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapilog',
+            $name = new lang_string('apilog', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/apilog.php')));
 
-    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloemaillog',
-        $name = new lang_string('emaillog', 'enrol_arlo'),
-        new moodle_url('/enrol/arlo/admin/emaillog.php')));
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloemaillog',
+            $name = new lang_string('emaillog', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/emaillog.php')));
+    }
 
 }
