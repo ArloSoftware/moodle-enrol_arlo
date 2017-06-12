@@ -1,26 +1,81 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/arlo/db" VERSION="20170610" COMMENT="XMLDB file for Moodle enrol/arlo"
+<XMLDB PATH="enrol/arlo/db" VERSION="20170612" COMMENT="XMLDB file for Moodle enrol/arlo"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="enrol_arlo_contact" COMMENT="Arlo contact information that relates to specific Moodle user account">
+    <TABLE NAME="enrol_arlo_contact" COMMENT="Arlo contact mapped to a Moodle user.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="plaform" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="plaform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Moodle userid"/>
-        <FIELD NAME="arlocontactid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Reference identifier for use against contact end-point"/>
-        <FIELD NAME="arloguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="Arlo unique contact record identifier"/>
-        <FIELD NAME="updaterequired" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Local update required status flag"/>
-        <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Last time this record was modified"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="sourcecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch when this resource was created on Arlo"/>
+        <FIELD NAME="sourcemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch indicating when this resource was last modified on Arlo"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="enrol_arlo_registration" COMMENT="@todo">
+    <TABLE NAME="enrol_arlo_event" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="start" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="finish" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="sourcestatus" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="An EventStatus value representing the current state of this event, such as draft, active, completed or cancelled."/>
+        <FIELD NAME="sourcecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch when this resource was created on Arlo"/>
+        <FIELD NAME="sourcemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch indicating when this resource was last modified on Arlo"/>
+        <FIELD NAME="sourcetemplateid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourcetemplateguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="enrol_arlo_onlineactivity" COMMENT="Default comment for the table, please edit me">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform."/>
+        <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="contenturi" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourcestatus" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourcecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="sourcemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="enrol_arlo_registration" COMMENT="Write some stuff here">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Associated enrolment instance"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle user account associated with this resource"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="attendance" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="A RegistrationContactAttendance value indicating whether the Contact attended the Event."/>
+        <FIELD NAME="grade" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="An string representing the grade associated with this resource"/>
+        <FIELD NAME="lastactivity" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Time when there was some activity"/>
+        <FIELD NAME="progressstatus" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="A user-readable string representing the status of the registration"/>
+        <FIELD NAME="progresspercent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourcestatus" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="A RegistrationStatus value representing the current state of this registration, such as pending approval, approved, cancelled, or completed."/>
+        <FIELD NAME="sourcecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch when this resource was created on Arlo"/>
+        <FIELD NAME="sourcemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch indicating when this resource was last modified on Arlo"/>
+        <FIELD NAME="sourcecontactid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Related contact resource mapped contact.sourceid"/>
+        <FIELD NAME="sourcecontactguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourceeventid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceeventguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceonlineactivityid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceonlineactivtyguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -29,6 +84,22 @@
     <TABLE NAME="enrol_arlo_result" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="enrol_arlo_template" COMMENT="Default comment for the table, please edit me">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="A string representing the short code used when referring to this template"/>
+        <FIELD NAME="sourcestatus" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourcecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch when this resource was created on Arlo."/>
+        <FIELD NAME="sourcemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Epoch indicating when this resource was last modified on Arlo"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
