@@ -26,7 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-if ($ADMIN->fulltree) {
+//if ($ADMIN->fulltree) {
+if ($hassiteconfig) {
     // Things that can be used.
     //$ADMIN = $adminroot; // May be used in settings.php.
     //$plugininfo = $this; // Also can be used inside settings.php.
