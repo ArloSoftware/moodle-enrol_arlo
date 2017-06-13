@@ -129,3 +129,5 @@ $string['platformname'] = 'Platform name';
 $string['platformname_desc'] = 'This is name of platform on Arlo e.g https://{platform}.arlo.co';
 $string['apiusername'] = 'API username';
 $string['apipassword'] = 'API password';
+$string['savechanges'] = 'Save changes';
+$string['enrolment'] = 'Enrolment';
