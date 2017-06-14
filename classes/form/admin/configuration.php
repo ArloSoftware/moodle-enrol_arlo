@@ -32,6 +32,42 @@ class configuration extends \moodleform {
 
         $form = $this->_form;
 
+        $form->addElement('header', 'user', get_string('user'));
+
+        // User account matching.
+        $options = array();
+        $options[\enrol_arlo\user_match::BY_USER_DETAILS] = get_string('matchbyarlouserdetails', 'enrol_arlo');
+        $options[\enrol_arlo\user_match::BY_CODE_PRIMARY] = get_string('matchbyarlocodeprimary', 'enrol_arlo');
+        $options[\enrol_arlo\user_match::AUTO] = get_string('matchbyauto', 'enrol_arlo');
+
+
+        $form->addElement('select', 'matchuseraccountsby', get_string('matchuseraccountsby', 'enrol_arlo'), $options);
+        $default = \enrol_arlo\user_match::BY_DEFAULT;
+        $form->setDefault('matchuseraccountsby', $default);
+        $form->addHelpButton('matchuseraccountsby', 'matchuseraccountsby', 'enrol_arlo');
+
+
+        $auths = \core_component::get_plugin_list('auth');
+        $options = array();
+        foreach ($auths as $auth => $unused) {
+            $plugin = get_auth_plugin($auth);
+            if (is_enabled_auth($auth)) {
+                // Check plugin allows resetting of internal password.
+                if ($plugin->can_reset_password()) {
+                    $options[$auth] = get_string('pluginname', "auth_{$auth}");
+                }
+            }
+        }
+
+        $form->addElement('select', 'authplugin', get_string('chooseauthmethod', 'enrol_arlo'), $options);
+        $form->setDefault('authplugin', 'manual');
+
+
+        $form->addElement('editor', 'newuserdefaultemail',
+            get_string('newuserdefaultemail', 'enrol_arlo'),
+            null, self::editor_options());
+        $form->setType('newuserdefaultemail', PARAM_RAW);
+
         $form->addElement('header', 'enrolment', get_string('enrolment', 'enrol_arlo'));
 
         $student = get_archetype_roles('student');
@@ -62,7 +98,43 @@ class configuration extends \moodleform {
         $form->setDefault('expiredaction', ENROL_EXT_REMOVED_SUSPEND);
         $form->addHelpButton('expiredaction', 'expiredaction', 'enrol_arlo');
 
+        $form->addElement('header', 'resulting', get_string('resulting', 'enrol_arlo'));
+
+        $form->addElement('advcheckbox', 'pushonlineactivityresults',
+            get_string('pushonlineactivityresults', 'enrol_arlo'));
+        $form->setDefault('pushonlineactivityresults', 1);
+        $form->addHelpButton('pushonlineactivityresults', 'pushonlineactivityresults', 'enrol_arlo');
+
+        $form->addElement('advcheckbox', 'pusheventresults',
+            get_string('pusheventresults', 'enrol_arlo'));
+        $form->setDefault('pusheventresults', 0);
+        $form->addHelpButton('pusheventresults', 'pusheventresults', 'enrol_arlo');
+
+        $form->addElement('header', 'alert', get_string('alert', 'enrol_arlo'));
+
+        $form->addElement('advcheckbox', 'alertsiteadmins',
+            get_string('siteadmins', 'enrol_arlo'));
+
 
         $this->add_action_buttons(true, get_string('savechanges', 'enrol_arlo'));
+    }
+
+    /**
+     * Returns the options array to use in text editor.
+     *
+     * @return array
+     */
+    public static function editor_options() {
+        global $CFG, $PAGE;
+
+        $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes);
+        return array(
+            'collapsed' => true,
+            'maxfiles' => 0,
+            'maxbytes' => $maxbytes,
+            'trusttext'=> true,
+            'accepted_types' => 'web_image',
+            'return_types'=> FILE_INTERNAL | FILE_EXTERNAL
+        );
     }
 }

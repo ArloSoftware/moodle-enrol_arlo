@@ -131,3 +131,41 @@ $string['apiusername'] = 'API username';
 $string['apipassword'] = 'API password';
 $string['savechanges'] = 'Save changes';
 $string['enrolment'] = 'Enrolment';
+$string['usercreation'] = 'User creation';
+$string['chooseauthmethod'] = 'Default authentication method';
+$string['matchbyarlocodeprimary'] = 'Arlo Contact CodePrimary';
+$string['matchbyarlouserdetails'] = 'Arlo Contact FirstName, LastName and Email';
+$string['matchbyauto'] = 'Arlo Contact CodePrimary then Arlo Contact FirstName, LastName and Email';
+$string['matchuseraccountsby'] = 'Match user accounts by';
+$string['matchuseraccountsby_help'] = '
+<p>
+Before creating a new Moodle account the plugin will attempt to match against an Arlo contact record. The options for matching are:
+</p>
+<p>
+<strong>Method 1</strong>
+<br>
+Arlo FirstName, LastName and Email - This will attempt a match between the group of fields (Arlo Contact FirstName, LastName and Email) and (Moodle user firstname, lastname and email).
+</p>
+<p>
+<strong>Method 2</strong>
+<br>
+Arlo CodePrimary - This will attempt a match between fields Arlo Contact CodePrimary and Moodle user idnumber.
+</p>
+<p>
+<strong>Method 3</strong>
+<br>
+Will try <strong>Method 1</strong> if no match will then try <strong>Method 2</strong>.
+</p>
+<p>
+If no match is found using any of the Methods a Moodle user account will be created based on Arlo Contact details.
+</p>';
+$string['newuserdefaultemail'] = 'New user default email';
+$string['newuserdefaultemail_help'] = 'New user default email';
+$string['alert'] = 'Alert';
+$string['resulting'] = 'Resulting';
+
+$string['pushonlineactivityresults'] = 'Push OnlineActivity results';
+$string['pushonlineactivityresults_help'] = 'Push result information from enrolment instances mapped to <strong>OnlineActivities</strong> back to Arlo';
+$string['pusheventresults'] = 'Push Event results';
+$string['pusheventresults_help'] = 'Push result information from enrolment instances mapped to <strong>Events</strong> back to Arlo';
+$string['siteadmins'] = 'Site administrators';
