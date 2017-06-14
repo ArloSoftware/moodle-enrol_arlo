@@ -31,7 +31,7 @@ class AbstractCollection implements \IteratorAggregate {
      */
     public function addLink(Link $link) {
         $this->links[] = $link;
-        if (is_set($link->rel) && strtolower($link->rel) === 'next') {
+        if (isset($link->rel) && strtolower($link->rel) === 'next') {
             $this->hasNext = true;
         }
     }
