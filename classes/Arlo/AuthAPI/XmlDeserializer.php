@@ -4,12 +4,14 @@ namespace enrol_arlo\Arlo\AuthAPI;
 
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
 
 class XmlDeserializer {
-    private $rootNodeName;
-    private $rootClass;
+    //private $rootNodeName;
+    private $rootClassInstance;
     private $resourceClassPath;
 
     private $propertyInformer;
@@ -32,10 +34,16 @@ class XmlDeserializer {
      * @return PropertyInfoExtractor
      */
     public function getPropertyInformer() {
-        if (!is_null($this->propertyInformer)) {
+        if (is_null($this->propertyInformer)) {
             $reflectionExtractor = new ReflectionExtractor();
             $listExtractors = array($reflectionExtractor);
-            $this->propertyInformer = new PropertyInfoExtractor($listExtractors);
+            $accessExtractors = array($reflectionExtractor);
+            $this->propertyInformer = new PropertyInfoExtractor(
+                $listExtractors,
+                array(),
+                array(),
+                $accessExtractors
+            );
         }
         return $this->propertyInformer;
     }
@@ -64,8 +72,58 @@ class XmlDeserializer {
             throw new \Exception($error->message);
         }
 
-        $this->parseRoot($dom);
+        $rootNode = $dom->firstChild;
+        if (!$rootNode->hasChildNodes()) {
+            throw new \Exception('Root node has no children.');
+        }
+
+        $rootClassName = $this->resourceClassPath . $rootNode->nodeName;
+        if (!class_exists($rootClassName)) {
+            throw new \Exception('Root class ' . $rootNode->nodeName . ' does not exist.');
+        }
+
+        $rootClassInstance = new $rootClassName();
+        $this->parseRootNode($rootNode, $rootClassInstance);
+        print_object($rootClassInstance);
+
     }
-    private function parseRoot(\DOMDocument $dom) {}
-    private function parseLinkNode(\DOMNode $node, $parentClass) {}
+    private function parseRootNode(\DOMNode $node, $classInstance) {
+        foreach ($node->childNodes as $node) {
+            // Handle Link.
+            if ($node->nodeName === 'Link') {
+                $this->parseLinkNode($node, $classInstance);
+            }
+        }
+    }
+    private function parseLinkNode(\DOMNode $node, $classInstance) {
+        $propertyInfo = $this->getPropertyInformer();
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        if (!$node->hasChildNodes()) {
+            $linkClassName = $this->resourceClassPath . $node->nodeName;
+            if (!class_exists($linkClassName)) {
+                throw new \Exception('Class ' . $node->nodeName . ' does not exist.');
+            }
+            $link = new $linkClassName();
+            if ($node->hasAttributes()) {
+                $properties = $propertyInfo->getProperties(get_class($link));
+                foreach ($node->attributes as $attribute) {
+                    $attributeName = $attribute->name;
+                    $attributeValue = (string) $attribute->value;
+                    if (in_array($attributeName, $properties)) {
+                        if ($propertyInfo->isWritable($linkClassName, $attributeName)) {
+                            $propertyAccessor->setValue($link, $attributeName, $attributeValue);
+                        }
+                    }
+                }
+                // Add Link attributes.
+                $adder = 'addLink';
+                if (method_exists($classInstance, $adder)) {
+                    $classInstance->{$adder}($link);
+                }
+            }
+
+        } else {
+
+        }
+    }
 }
