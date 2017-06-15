@@ -10,10 +10,13 @@ use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
 
 class XmlDeserializer {
-    //private $rootNodeName;
-    private $rootClassInstance;
+    /**
+     * @var null|string $resourceClassPath custom path to resource classes.
+     */
     private $resourceClassPath;
-
+    /**
+     * @var object $propertyInformer return a single PropertyInfo instance.
+     */
     private $propertyInformer;
 
     /**
@@ -29,7 +32,7 @@ class XmlDeserializer {
 
     /**
      * Return a property info extractor singleton. Will use to check what
-     * resource class properties are assessible or writable.
+     * resource class properties are writable.
      *
      * @return PropertyInfoExtractor
      */
@@ -48,10 +51,13 @@ class XmlDeserializer {
         return $this->propertyInformer;
     }
 
-
-    private function setValue() {} // TODO setter for public properties, class setter methods.
-    private function addValue() {} // TODO adder for class adder methods.
-
+    /**
+     * Main public method to accept Xml and deserialize it.
+     *
+     * @param $data
+     * @return mixed
+     * @throws \Exception
+     */
     public function deserialize($data) {
         if ('' === trim($data)) {
             throw new \Exception('Invalid XML data, it can not be empty.'); // @todo custom exception class
@@ -84,20 +90,44 @@ class XmlDeserializer {
 
         $rootClassInstance = new $rootClassName();
         $this->parseRootNode($rootNode, $rootClassInstance);
-        print_object($rootClassInstance);
+        return $rootClassInstance;
 
     }
+
+    /**
+     * Basic method to direct collection or resource parser.
+     *
+     * @param \DOMNode $node
+     * @param $classInstance
+     */
     private function parseRootNode(\DOMNode $node, $classInstance) {
-        foreach ($node->childNodes as $node) {
-            // Handle Link.
-            if ($node->nodeName === 'Link') {
-                $this->parseLinkNode($node, $classInstance);
-            }
+        // Root node is a collection of resources.
+        if ($classInstance instanceof AbstractCollection) {
+            $this->parseCollectionNode($node, $classInstance);
+
+        }
+        // Root node is a single resource.
+        if ($classInstance instanceof AbstractResource) {
+            $this->parseResourceNode($node, $classInstance);
+
         }
     }
+
+    /**
+     * Parse a link node.
+     *
+     * @param \DOMNode $node
+     * @param $classInstance
+     * @throws \Exception
+     */
     private function parseLinkNode(\DOMNode $node, $classInstance) {
         $propertyInfo = $this->getPropertyInformer();
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        // Make sure a Link.
+        if ($node->nodeName !== 'Link') {
+            throw new \Exception('Not a Link');
+        }
+        // Deal with straight Link that has no expansions.
         if (!$node->hasChildNodes()) {
             $linkClassName = $this->resourceClassPath . $node->nodeName;
             if (!class_exists($linkClassName)) {
@@ -105,10 +135,10 @@ class XmlDeserializer {
             }
             $link = new $linkClassName();
             if ($node->hasAttributes()) {
-                $properties = $propertyInfo->getProperties(get_class($link));
+                $properties = $propertyInfo->getProperties($link);
                 foreach ($node->attributes as $attribute) {
                     $attributeName = $attribute->name;
-                    $attributeValue = (string) $attribute->value;
+                    $attributeValue = (string)$attribute->value;
                     if (in_array($attributeName, $properties)) {
                         if ($propertyInfo->isWritable($linkClassName, $attributeName)) {
                             $propertyAccessor->setValue($link, $attributeName, $attributeValue);
@@ -121,9 +151,84 @@ class XmlDeserializer {
                     $classInstance->{$adder}($link);
                 }
             }
+        }
+        // Deal with Link that has expansions.
+        if ($node->hasChildNodes()){
+            foreach($node->childNodes as $childNode) {
+                $childClassName = $this->resourceClassPath . $childNode->nodeName;
+                if (!class_exists($childClassName)) {
+                    throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                }
+                $childClassInstance = new $childClassName();
+                $this->parseResourceNode($childNode, $childClassInstance);
+                // Do we have a setter on the passed in class.
+                $setter = 'set' . $childNode->nodeName;
+                if (method_exists($classInstance, $setter)) {
+                    $classInstance->{$setter}($childClassInstance);
+                }
+                // Do we have an adder on the passed in class.
+                $adder = 'add' . $childNode->nodeName;
+                if (method_exists($classInstance, $adder)) {
+                    $classInstance->{$adder}($childClassInstance);
+                }
+            }
+        }
+    }
 
-        } else {
+    /**
+     * Parse a collection node, direct to link parser.
+     *
+     * @param \DOMNode $node
+     * @param AbstractCollection $classInstance
+     */
+    private function parseCollectionNode(\DOMNode $node, AbstractCollection $classInstance) {
+        foreach ($node->childNodes as $childNode) {
+            if ($childNode->nodeName === 'Link') {
+                $this->parseLinkNode($childNode, $classInstance);
+            }
+        }
+    }
 
+    /**
+     * Parse a resource node.
+     *
+     * @param \DOMNode $node
+     * @param AbstractResource $classInstance
+     * @throws \Exception
+     */
+    private function parseResourceNode(\DOMNode $node, AbstractResource $classInstance) {
+        $propertyInfo = $this->getPropertyInformer();
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        foreach ($node->childNodes as $childNode) {
+            if ($childNode->nodeName === 'Link') {
+                $this->parseLinkNode($childNode, $classInstance);
+            } else {
+                if ($childNode->hasChildNodes()) {
+                    // Single element.
+                    if (1 === $childNode->childNodes->length) {
+                        if ($propertyInfo->isWritable($classInstance, $childNode->nodeName)) {
+                            $propertyAccessor->setValue($classInstance, $childNode->nodeName, $childNode->nodeValue);
+                        }
+                        continue;
+                    }
+                    // Has multiple elements, parse as resource.
+                    if (1 < $childNode->childNodes->length) {
+                        // Make class name based on class path and tag name.
+                        $childClassName = $this->resourceClassPath . $childNode->nodeName;
+                        if (!class_exists($childClassName)) {
+                            throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                        }
+                        // Initiate class and parse.
+                        $childClassInstance = new $childClassName();
+                        $this->parseResourceNode($childNode, $childClassInstance);
+                        // Do we have a setter on the passed in class.
+                        $setter = 'set' . $childNode->nodeName;
+                        if (method_exists($classInstance, $setter)) {
+                            $classInstance->{$setter}($childClassInstance);
+                        }
+                    }
+                }
+            }
         }
     }
 }
