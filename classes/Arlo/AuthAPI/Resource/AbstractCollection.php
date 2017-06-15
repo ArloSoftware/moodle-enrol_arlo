@@ -20,7 +20,7 @@ class AbstractCollection implements \IteratorAggregate {
      * @return ArrayIterator
      */
     public function getIterator() {
-        return new ArrayIterator($this->collection);
+        return new \ArrayIterator($this->collection);
     }
 
     /**
@@ -43,5 +43,12 @@ class AbstractCollection implements \IteratorAggregate {
      */
     public function hasCollection() {
         return 0 !== count($this->collection);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasNext() {
+        return $this->hasNext;
     }
 }
