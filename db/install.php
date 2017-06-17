@@ -24,9 +24,21 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\plugin_config;
+
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 function xmldb_enrol_arlo_install() {
     global $CFG, $DB;
+
+    plugin_config::set('apistatus', plugin_config::get_default('apistatus'));
+    plugin_config::set('authplugin', plugin_config::get_default('authplugin'));
+    plugin_config::set('matchuseraccountsby', plugin_config::get_default('matchuseraccountsby'));
+    plugin_config::set('unenrolaction', plugin_config::get_default('unenrolaction'));
+    plugin_config::set('expiredaction', plugin_config::get_default('expiredaction'));
+    plugin_config::set('pushonlineactivityresults', plugin_config::get_default('pushonlineactivityresults'));
+    plugin_config::set('pusheventresults', plugin_config::get_default('pusheventresults'));
+    plugin_config::set('alertsiteadmins', plugin_config::get_default('alertsiteadmins'));
+
     return true;
 }
