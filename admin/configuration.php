@@ -21,14 +21,27 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\plugin_config;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
-
 
 admin_externalpage_setup('enrolsettingsarloconfiguration');
 
 $form = new \enrol_arlo\form\admin\configuration();
 $data = $form->get_submitted_data();
+if ($data) {
+
+    plugin_config::set('authplugin', $data->authplugin);
+    plugin_config::set('matchuseraccountsby', $data->matchuseraccountsby);
+    plugin_config::set('unenrolaction', $data->unenrolaction);
+    plugin_config::set('expiredaction', $data->expiredaction);
+    plugin_config::set('pushonlineactivityresults', $data->pushonlineactivityresults);
+    plugin_config::set('pusheventresults', $data->pusheventresults);
+    plugin_config::set('alertsiteadmins', $data->alertsiteadmins);
+
+    redirect($PAGE->url, get_string('changessaved', 'enrol_arlo'));
+}
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('configuration'));
 $form->display();

@@ -116,6 +116,12 @@ class configuration extends \moodleform {
             get_string('siteadmins', 'enrol_arlo'));
 
 
+        // Hack - Quick load existing config if exists.
+        $config = (array) get_config('enrol_arlo');
+        if ($config) {
+            $this->set_data($config);
+        }
+
         $this->add_action_buttons(true, get_string('savechanges', 'enrol_arlo'));
     }
 
