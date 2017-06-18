@@ -170,3 +170,4 @@ $string['pusheventresults'] = 'Push Event results';
 $string['pusheventresults_help'] = 'Push result information from enrolment instances mapped to <strong>Events</strong> back to Arlo';
 $string['siteadmins'] = 'Site administrators';
 $string['changessaved'] = 'Changes saved';
+$string['synchronize'] = 'Synchronize';

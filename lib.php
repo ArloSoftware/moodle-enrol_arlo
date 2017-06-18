@@ -218,31 +218,45 @@ class enrol_arlo_plugin extends enrol_plugin {
     }
 
     /**
-     * Returns edit icons for the page with list of instances.
+     * Returns action icons for the page with list of instances.
      *
      * @param stdClass $instance
      * @return array
-     * @throws coding_exception
      */
     public function get_action_icons(stdClass $instance) {
         global $OUTPUT;
 
-        if ($instance->enrol !== 'arlo') {
-            throw new coding_exception('invalid enrol instance!');
-        }
         $context = context_course::instance($instance->courseid);
 
         $icons = array();
-
         if (has_capability('enrol/arlo:config', $context)) {
-            $editlink = new moodle_url("/enrol/arlo/edit.php",
+            $link = new moodle_url('/enrol/arlo/edit.php',
                 array('courseid' => $instance->courseid, 'id' => $instance->id));
-            $icons[] = $OUTPUT->action_icon($editlink,
-                new pix_icon('t/edit', get_string('edit'), 'core', array('class' => 'iconsmall')));
+            $icon = new pix_icon('t/edit', get_string('edit'), 'core', array('class' => 'iconsmall'));
+            $icons[] = $OUTPUT->action_icon($link, $icon);
         }
+        if (has_capability('enrol/arlo:synchronizeinstance', $context)) {
+            $link = new moodle_url('enrol/arlo/synchronizeinstance.php', array('id' => $instance->id));
+            $icon = new pix_icon('synchronize', get_string('synchronize', 'enrol_arlo'),
+                'enrol_arlo', array('class' => 'iconsmall'));
+            $icons[] = $OUTPUT->action_icon($link, $icon);
+        }
+        $parenticons = parent::get_action_icons($instance);
+        $icons = array_merge($icons, $parenticons);
 
         return $icons;
     }
+
+    /**
+     * We are a good plugin and don't invent our own UI/validation code path.
+     *
+     * @return boolean
+     */
+    public function use_standard_editing_ui() {
+        return false;
+    }
+
+
     /**
      * Returns Arlo Code for Event or Online Activity instance.
      *
