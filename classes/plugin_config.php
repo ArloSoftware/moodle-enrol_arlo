@@ -40,6 +40,12 @@ class plugin_config {
     public static function get_default($name) {
         static $studentroleid;
         switch ($name) {
+            case 'platformname':
+                return '';
+            case 'aspiusername':
+                return '';
+            case 'apipassword':
+                return '';
             case 'apistatus':
                 return 0;
             case 'authplugin':
