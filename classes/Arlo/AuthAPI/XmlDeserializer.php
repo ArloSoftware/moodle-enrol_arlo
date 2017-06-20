@@ -15,6 +15,10 @@ class XmlDeserializer {
      */
     private $resourceClassPath;
     /**
+     * @var bool
+     */
+    private $ignoreMissingClasses = false;
+    /**
      * @var object $propertyInformer return a single PropertyInfo instance.
      */
     private $propertyInformer;
@@ -25,8 +29,9 @@ class XmlDeserializer {
      * @param null $resourceClassPath
      * @param null $loadOptions A bit field of LIBXML_* constants
      */
-    public function __construct($resourceClassPath = null, $loadOptions = null) {
+    public function __construct($resourceClassPath = null, $ignoreMissingClasses = false, $loadOptions = null) {
         $this->resourceClassPath = null !== $resourceClassPath ? $resourceClassPath : '';
+        $this->ignoreMissingClasses = ($ignoreMissingClasses) ? true : false;
         $this->loadOptions = null !== $loadOptions ? $loadOptions : LIBXML_NONET | LIBXML_NOBLANKS;
     }
 
@@ -153,11 +158,14 @@ class XmlDeserializer {
             }
         }
         // Deal with Link that has expansions.
-        if ($node->hasChildNodes()){
+        if ($node->hasChildNodes()) {
             foreach($node->childNodes as $childNode) {
                 $childClassName = $this->resourceClassPath . $childNode->nodeName;
                 if (!class_exists($childClassName)) {
-                    throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                    if (!$this->ignoreMissingClasses) {
+                        throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                    }
+                    continue;
                 }
                 $childClassInstance = new $childClassName();
                 $this->parseResourceNode($childNode, $childClassInstance);
@@ -216,7 +224,10 @@ class XmlDeserializer {
                         // Make class name based on class path and tag name.
                         $childClassName = $this->resourceClassPath . $childNode->nodeName;
                         if (!class_exists($childClassName)) {
-                            throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                            if (!$this->ignoreMissingClasses) {
+                                throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                            }
+                            continue;
                         }
                         // Initiate class and parse.
                         $childClassInstance = new $childClassName();
