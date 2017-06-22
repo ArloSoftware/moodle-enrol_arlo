@@ -42,7 +42,7 @@ class plugin_config {
         switch ($name) {
             case 'platformname':
                 return '';
-            case 'aspiusername':
+            case 'apiusername':
                 return '';
             case 'apipassword':
                 return '';
