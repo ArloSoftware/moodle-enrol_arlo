@@ -2,69 +2,31 @@
 
 namespace enrol_arlo\Arlo\AuthAPI;
 
-use enrol_arlo\Arlo\AuthAPI\Filter;
-
 class RequestUri {
+    /** @var string Arlo API entry point. */
+    const API_ENTRY_POINT = '/api/2012-02-01/auth/resources/';
     /** @var int COLLECTION_TOP_MAXIMUM maximum records can be returned. */
     const COLLECTION_TOP_MAXIMUM = 100;
-
     /** @var string Uri host. */
     private $host = '';
-
-    /** @var int|null Uri port. */
-    private $port;
-
+    /** @var string Uri dummyhost. */
+    private $dummyhost = 'localhost';
     /** @var string Uri path. */
     private $path = '';
-
-    /** @var string Uri query string. */
-    private $query = '';
-
+    /** @var string resourcePath relative resource path to entry point path.  */
+    private $resourcePath = '';
     /** @var integer top number of records returned. */
     private $top;
     /** @var array expands array of expansion options. */
     private $expands = array();
     /** @var array filters array of filter options. */
     private $filters = array();
-    /** @var string  orderBy set order of records in collection. */
+    /** @var string orderBy set order of records in collection. */
     private $orderBy;
-
-    /**
-     * RequestUri constructor.
-     * @param string $uri
-     * @throws \Exception
-     */
-    public function __construct($uri = '') {
-        if ($uri != '') {
-            $parts = parse_url($uri);
-            if ($parts === false) {
-                throw new \Exception("Unable to parse URI: $uri");
-            }
-            $this->applyParts($parts);
-        }
-    }
 
     public function __toString() {
         return self::output(false);
 
-    }
-
-    /**
-     * Composes a URI string from its various components.
-     *
-     * @param bool $encode rawurlencode
-     * @return string
-     */
-    public function output($encode = true) {
-        $uri = '';
-
-        if ($this->scheme != '') {
-            $uri .= $this->scheme . '://';
-        }
-        $uri .= $this->host;
-        $uri .= $this->path;
-        $uri .= $this->getQueryString($encode);
-        return $uri;
     }
 
     /**
@@ -96,23 +58,41 @@ class RequestUri {
         $this->filters[] = $filter;
     }
 
-    /**
-     * Apply uri parts to member variables.
-     *
-     * @param array $parts
-     */
-    private function applyParts(array $parts) {
-        $this->scheme = isset($parts['scheme'])
-            ? strtolower($parts['scheme'])
-            : '';
-
-        $this->host = isset($parts['host'])
-            ? strtolower($parts['host'])
-            : '';
-
-        $this->path = isset($parts['path'])
-            ? strtolower($parts['path'])
-            : '';
+    public static function createFromUri($uri) {
+        if (empty($uri)) {
+            throw new \Exception('URI must is empty.');
+        }
+        if (!is_string($uri)) {
+            throw new \Exception('URI must be string.');
+        }
+        $requestUri = new RequestUri();
+        $parts = parse_url($uri);
+        if ($parts === false) {
+            throw new \Exception("Unable to parse: $uri");
+        }
+        if (!isset($parts['scheme'])) {
+            throw new \Exception("Scheme not present.");
+        }
+        $scheme = strtolower($parts['scheme']);
+        if ($scheme != 'https') {
+            throw new \Exception("Scheme must be https.");
+        }
+        if (!isset($parts['host'])) {
+            throw new \Exception("Host not present.");
+        }
+        $host = $parts['host'];
+        $requestUri->setHost($host);
+        if (isset($parts['path'])) {
+            $path = strtolower($parts['path']);
+            $requestUri->path = $path;
+            $strPos = strpos($path, self::API_ENTRY_POINT);
+            if ($strPos === 0) {
+                // Get and set resourcePath from path.
+                $resourcePath = substr($path, strlen(self::API_ENTRY_POINT), strlen($path));
+                $requestUri->setResourcePath($resourcePath);
+            }
+        }
+        return $requestUri;
     }
 
     /**
@@ -162,6 +142,92 @@ class RequestUri {
     }
 
     /**
+     * Return Host.
+     *
+     * @return string
+     */
+    public function getHost() {
+        return $this->host;
+    }
+
+    /**
+     * Return resourcePath.
+     *
+     * @return string
+     */
+    public function getResourcePath() {
+        return $this->resourcePath;
+    }
+
+    /**
+     * Return service root.
+     *
+     * Example:
+     *          https://domain/api/2012-02-01/auth/resources/
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public function getServiceRoot() {
+        if (!$this->isValid()) {
+            throw new \Exception('Invalid service root.');
+        }
+        return 'https://' . $this->host . self::API_ENTRY_POINT;
+    }
+
+    /**
+     * Is Host set.
+     *
+     * @return bool
+     */
+    public function isValid() {
+        if ($this->host != '') {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Composes a URI string from its various components.
+     *
+     * @param bool $encode rawurlencode
+     * @return string
+     */
+    public function output($encode = true) {
+        $uri = 'https://';
+        $uri .= ($this->host != '') ? $this->host : $this->dummyhost;
+        $uri .= self::API_ENTRY_POINT;
+        $uri .= $this->resourcePath;
+        $uri .= $this->getQueryString($encode);
+        return $uri;
+    }
+
+    /**
+     * Set host based on FQDN.
+     *
+     * @param $host
+     * @throws \Exception
+     */
+    public function setHost($host) {
+        if (!is_string($host)) {
+            throw new \Exception('Must be a string');
+        }
+        // Clean host.
+        $cleanedhost = preg_replace('/[^\.\d\w-]/', '', $host);
+        if ($cleanedhost == '') {
+            throw new \Exception("Invalid: $host");
+        }
+        $parts = parse_url($cleanedhost);
+        if ($parts === false) {
+            throw new \Exception("Unable to parse: $cleanedhost");
+        }
+        if (isset($parts['scheme'])) {
+            throw new \Exception("Invalid: $host");
+        }
+        $this->host = $cleanedhost;
+    }
+
+    /**
      * Order option.
      *
      * @param $orderBy
@@ -188,6 +254,23 @@ class RequestUri {
             $top = self::COLLECTION_TOP_MAXIMUM;
         }
         $this->top = $top;
+    }
+
+    /**
+     * Set a relative resource path.
+     *
+     * Example:
+     *          contacts/1/
+     *
+     * @param $resourcePath
+     * @throws \Exception
+     */
+    public function setResourcePath($resourcePath) {
+        if (strpos($resourcePath, '/') === 0) {
+            throw new \Exception('Cannot set resourcePath with a leading forward slash.');
+        }
+        // TODO potential check against resource types.
+        $this->resourcePath = $resourcePath;
     }
 
 }
