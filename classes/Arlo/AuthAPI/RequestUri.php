@@ -103,20 +103,20 @@ class RequestUri {
      */
     public function getQueryString($encode = true) {
         $params = array();
-        if (isset($this->top)) {
+        if (!empty($this->top)) {
             $params['top'] = $this->top;
         }
-        if (isset($this->expands)) {
+        if (!empty($this->expands)) {
             $params['expand'] = implode(',', $this->expands);
         }
-        if (isset($this->filters)) {
+        if (!empty($this->filters)) {
             $pieces = array();
             foreach ($this->filters as $filter) {
                 $pieces[] = $filter->export();
             }
             $params['filter'] = implode(' or ', $pieces);
         }
-        if (isset($this->orderBy)) {
+        if (!empty($this->orderBy)) {
             $params['orderby'] = $this->orderBy;
         }
         $pieces = array();
