@@ -171,3 +171,13 @@ $string['pusheventresults_help'] = 'Push result information from enrolment insta
 $string['siteadmins'] = 'Site administrators';
 $string['changessaved'] = 'Changes saved';
 $string['synchronize'] = 'Synchronize';
+
+$string['error_401_subject'] = '401 Unauthorized';
+$string['error_401_small'] = '401 Unauthorized';
+$string['error_401_full'] = '
+There is something wrong with your connection settings. Please check that the api username and api password are correct.
+
+Moodle Arlo connection settings: {$a->url}';
+$string['error_401_full_html'] = '
+<p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
+<p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
