@@ -26,6 +26,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/vendor/autoload.php');
+
 /**
  * ARLO_CREATE_GROUP constant for automatically creating a group matched to enrolment instance.
  */
