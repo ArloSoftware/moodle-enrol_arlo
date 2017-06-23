@@ -5,32 +5,61 @@ namespace enrol_arlo;
 use enrol_arlo\Arlo\AuthAPI\Client;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Filter;
+use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
+use enrol_arlo\Arlo\AuthAPI\Resource\ApiException;
 use GuzzleHttp\Psr7\Response;
 
 class manager {
+    private $platform;
+    private $apiusername;
+    private $apipassword;
+
+
+    private $lastresponsestatus;
+    private $lastresponsebody;
+
+
+    public function __construct($platform = null,
+                                $apiusername = null,
+                                $apipassword = null) {
+
+        $this->platform = $platform;
+        $this->apiusername = $apiusername;
+        $this->apipassword = $apipassword;
+    }
 
 
     public function get_templates() {
 
         // Can run? Check API status.
+        //self::check_apistatus();
 
         $timestart = microtime();
 
-        $platformname = plugin_config::get('platformname');
-        $apiusername  = plugin_config::get('apiusername');
-        $apipassword  = plugin_config::get('apipassword');
-
         try {
-
-            $client = new Client($platformname, $apiusername, $apipassword);
-
+            $client = new Client($this->platform, $this->apiusername, $this->apipassword);
+            // Setup RequestUri for getting Templates.
             $requesturi = new RequestUri();
-            $requesturi->setHost($platformname);
+            $requesturi->setHost($this->platform);
             $requesturi->setResourcePath('eventtemplates/');
             $requesturi->setPagingTop(5);
 
+            $log = array(
+                'timelogged' => $timestart,
+                'platform' => $this->platform,
+                'uri' => (string) $requesturi
+            );
             $response = $client->request('GET', $requesturi);
-            $this->response_ok($response);
+            $template = self::parse_response($response);
+            if (!$template) {
+
+            }
+
+            if (self::response_ok($response)) {
+
+            } else {
+
+            }
 
         } catch (\Exception $e) {
             mtrace($e->getMessage());
@@ -40,21 +69,72 @@ class manager {
         mtrace("Execution took {$difftime} seconds");
     }
 
+    /**
+     * @param $timelogged
+     * @param $uri
+     * @param $status
+     * @param string $info
+     */
+    private function log($timelogged, $uri, $status, $info = '') {
+        global $DB;
+
+        $item = new \stdClass();
+        $item->timelogged = $timelogged;
+        $item->uri = $uri;
+        $item->status = $status;
+        if ($info != '') {
+            $item->info = (string) $info;
+        }
+        $DB->insert_record('enrol_arlo_webservicelog', $item);
+    }
+
+
     private function response_ok(Response $response) {
         global $CFG;
         $status = (int) $response->getStatusCode();
-        // Handle client side errors
-        if ($status >= 400 || $status < 499) {
-            // Handle 401 Unauthorized, 403 Forbidden.
-            $params = array('url' => $CFG->wwwroot . '/admin/settings.php?section=enrolsettingsarlo', 'name' => 'wtf');
-            self::alert('error_401', $params);
-
+        plugin_config::set('apistatus', $status);
+        // Incorrect content-type.
+        $contenttype = $response->getHeaderLine('content-type');
+        if (strpos($contenttype, 'application/xml') === false) {
+            self::alert('error_incorrectcontenttype' , array('contenttype' => $contenttype));
+            return false;
         }
-        // Handle server side errors
-        if ($status >= 500 || $status < 599) {
-
+        // Handle HTTP Status errors.
+        if ($status >= 400 && $status < 599) {
+            $exception = self::parse_response($response);
+            $exceptioncode = '';
+            $exceptionmessage = '';
+            if ($exception instanceof ApiException) {
+                $exceptioncode = $exception->Code;
+                $exceptionmessage = $exception->Message;
+            }
+            // Custom 401 Unauthorized, 403 Forbidden messages.
+            if ($status == 401 || $status == 403) {
+                $params = array('url' => $CFG->wwwroot . '/admin/settings.php?section=enrolsettingsarlo');
+                self::alert('error_' . $status, $params);
+                return false;
+            } else {
+                $params = array(
+                    'status' => $status,
+                    'reason' => $response->getReasonPhrase(),
+                    'exceptioncode' => $exceptioncode,
+                    'exceptionmessage' => $exceptionmessage
+                );
+                self::alert('error_xxx', $params);
+                return false;
+            }
         }
+        return true;
+    }
 
+    private function parse_response(Response $response) {
+        $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
+        $stream = $response->getBody();
+        $body = $stream->getContents();
+        $this->lastresponsestatus = (int) $response->getStatusCode();
+        $this->lastresponsebody = $body;
+        if ($stream->eof()) $stream->rewind(); // Rewind stream.
+        return $deserializer->deserialize($body);
     }
 
     /**
