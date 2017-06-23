@@ -17,7 +17,7 @@ class XmlDeserializer {
     /**
      * @var bool
      */
-    private $ignoreMissingClasses = false;
+    private $ignoreMissingClasses = true;
     /**
      * @var object $propertyInformer return a single PropertyInfo instance.
      */
@@ -29,7 +29,7 @@ class XmlDeserializer {
      * @param null $resourceClassPath
      * @param null $loadOptions A bit field of LIBXML_* constants
      */
-    public function __construct($resourceClassPath = null, $ignoreMissingClasses = false, $loadOptions = null) {
+    public function __construct($resourceClassPath = null, $ignoreMissingClasses = true, $loadOptions = null) {
         $this->resourceClassPath = null !== $resourceClassPath ? $resourceClassPath : '';
         $this->ignoreMissingClasses = ($ignoreMissingClasses) ? true : false;
         $this->loadOptions = null !== $loadOptions ? $loadOptions : LIBXML_NONET | LIBXML_NOBLANKS;
