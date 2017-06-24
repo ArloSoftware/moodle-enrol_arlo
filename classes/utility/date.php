@@ -32,11 +32,16 @@ class date {
      * @return bool|\DateTime
      */
     public static function create($value) {
-        // Epoch or UTC.
-        if (is_int($value)){
-            $date = \DateTime::createFromFormat('U', $value, \core_date::get_server_timezone());
+        $tz = new \DateTimeZone('UTC');
+        // Moodle date - Epoch
+        if (is_int($value)) {
+            $date = \DateTime::createFromFormat('U', $value, $tz);
+        // Arlo date - UTC
+        } else if (is_string($value)) {
+            $date = new \DateTime($value, $tz);
+        // Null, make from January 1 1970 00:00:00.
         } else {
-            $date = new \DateTime($value, new \DateTimeZone('UTC'));
+            $date = \DateTime::createFromFormat('U', 0, $tz);
         }
         return $date;
     }
