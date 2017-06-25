@@ -162,13 +162,22 @@ class manager {
         $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
         $stream = $response->getBody();
         $contents = $stream->getContents();
-        if ($stream->eof()) $stream->rewind(); // Rewind stream.
+        if ($stream->eof()) {
+            $stream->rewind(); // Rewind stream.
+        }
+        // Throw exception if empty response body.
+        if (empty($contents)) {
+            throw new server_exception(
+                $reason,
+                $status,
+                'error_emptyresponse');
+        }
         $resourceclass = $deserializer->deserialize($contents);
         // Get api exception information if available.
-        $apiexceptioninfo = array();
+        $apiexception = array();
         if ($resourceclass instanceof ApiException) {
-            $apiexceptioninfo['code'] = $resourceclass->Code;
-            $apiexceptioninfo['message'] = $resourceclass->Message;
+            $apiexception['code'] = $resourceclass->Code;
+            $apiexception['message'] = $resourceclass->Message;
         }
         // Client side.
         if ($status >= 400 && $status < 499) {
@@ -184,7 +193,7 @@ class manager {
                 $status,
                 $identifier,
                 $params,
-                $apiexceptioninfo);
+                $apiexception);
         // Server side.
         } else if ($status >= 500 && $status < 599) {
             $identifier = 'error_5xx';
@@ -194,7 +203,7 @@ class manager {
                 $status,
                 $identifier,
                 $params,
-                $apiexceptioninfo);
+                $apiexception);
         }
         // If everything went OK a resource class will be returned.
         return $resourceclass;
