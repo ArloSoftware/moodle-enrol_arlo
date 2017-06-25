@@ -25,12 +25,12 @@ class Client {
     private $apiPassword;
     /** @var \GuzzleHttp\Client httpClient client to used to make requests. */
     private $httpClient;
-    /** @var \GuzzleHttp\Psr7\Request lastrequest returns last request. */
-    private $lastrequest;
-    /** @var int lastrequest timestamp of last request. */
-    private $lastrequesttime;
-    /** @var \GuzzleHttp\Psr7\Response lastresponse returns last response. */
-    private $lastresponse;
+    /** @var \GuzzleHttp\Psr7\Request lastRequest returns last request. */
+    private $lastRequest;
+    /** @var int lastRequestTime timestamp of last request. */
+    private $lastRequestTime;
+    /** @var \GuzzleHttp\Psr7\Response lastResponse returns last response. */
+    private $lastResponse;
 
     /**
      * Client constructor.
@@ -76,8 +76,8 @@ class Client {
      * @return bool
      */
     public static function responseBodyIsXml(Response $response) {
-        $contenttype = $response->getHeaderLine('content-type');
-        if (strpos($contenttype, 'application/xml') === false) {
+        $contentType = $response->getHeaderLine('content-type');
+        if (strpos($contentType, 'application/xml') === false) {
             return false;
         }
         return true;
@@ -101,13 +101,40 @@ class Client {
             $headers['Authorization'] = 'Basic '
                 . base64_encode("$this->apiUsername:$this->apiPassword");
             $request = new Request($method, $requestUri->output(), $headers, $body);
-            $this->lastrequest = $request;
-            $this->lastrequesttime = time();
+            $this->lastRequest = $request;
+            $this->lastRequestTime = time();
             $response = $this->httpClient->send($request);
-            $this->lastresponse = $response;
+            $this->lastResponse = $response;
         } catch (BadResponseException $e) {
             return $e->getResponse();
         }
         return $response;
+    }
+
+    /**
+     * Return last request.
+     *
+     * @return Request
+     */
+    public function getLastRequest() {
+        return $this->lastRequest;
+    }
+
+    /**
+     * Return last request timestamp.
+     *
+     * @return int
+     */
+    public function getLastRequestTime() {
+        return $this->lastRequestTime;
+    }
+
+    /**
+     * Return last response.
+     *
+     * @return Response
+     */
+    public function getLastResponse() {
+        return $this->lastResponse;
     }
 }
