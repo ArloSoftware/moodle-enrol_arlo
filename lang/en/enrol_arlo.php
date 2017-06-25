@@ -191,15 +191,27 @@ $string['error_403_full_html'] = '
 <p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
 <p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
 
-$string['error_xxx_subject'] = '[enrol/arlo] {$a->status} {$a->reason}';
-$string['error_xxx_small'] = '[enrol/arlo] {$a->status} {$a->reason}';
-$string['error_xxx_full'] = '{$a->exceptioncode} {$a->exceptionmessage}';
-$string['error_xxx_full_html'] = '
+$string['error_4xx_subject'] = '[enrol/arlo] {$a->status} {$a->reason}';
+$string['error_4xx_small'] = '[enrol/arlo] {$a->status} {$a->reason}';
+$string['error_4xx_full'] = '{$a->exceptioncode} {$a->exceptionmessage}';
+$string['error_4xx_full_html'] = '
 <p><strong>Code:</strong>{$a->exceptioncode}</p>
 <br>
 <p><strong>Message:</strong></p>
 <br>
 <p>{$a->exceptionmessage}</p>';
+
+$string['error_5xx_subject'] = '[enrol/arlo] {$a->status} {$a->reason}';
+$string['error_5xx_small'] = '[enrol/arlo] {$a->status} {$a->reason}';
+$string['error_5xx_full'] = '{$a->exceptioncode} {$a->exceptionmessage}';
+$string['error_5xx_full_html'] = '
+<p><strong>Code:</strong>{$a->exceptioncode}</p>
+<br>
+<p><strong>Message:</strong></p>
+<br>
+<p>{$a->exceptionmessage}</p>';
+
+
 $string['error_incorrectcontenttype_subject'] = '[enrol/arlo] Incorrect Content-Type';
 $string['error_incorrectcontenttype_small'] = '[enrol/arlo] Incorrect Content-Type';
 $string['error_incorrectcontenttype_full'] = '
