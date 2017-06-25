@@ -25,6 +25,12 @@ class Client {
     private $apiPassword;
     /** @var \GuzzleHttp\Client httpClient client to used to make requests. */
     private $httpClient;
+    /** @var \GuzzleHttp\Psr7\Request lastrequest returns last request. */
+    private $lastrequest;
+    /** @var int lastrequest timestamp of last request. */
+    private $lastrequesttime;
+    /** @var \GuzzleHttp\Psr7\Response lastresponse returns last response. */
+    private $lastresponse;
 
     /**
      * Client constructor.
@@ -64,26 +70,12 @@ class Client {
     }
 
     /**
-     * Apply Auth to options array.
-     *
-     * @param array $options
-     * @return array
-     */
-    private function applyAuth(array $options) {
-        $options['auth'] = [
-            $this->apiUsername,
-            $this->apiPassword
-        ];
-        return $options;
-    }
-
-    /**
      * Static method to pass response class to check if body contains Xml.
      *
      * @param Response $response
      * @return bool
      */
-    public static function isXml(Response $response) {
+    public static function responseBodyIsXml(Response $response) {
         $contenttype = $response->getHeaderLine('content-type');
         if (strpos($contenttype, 'application/xml') === false) {
             return false;
@@ -101,13 +93,18 @@ class Client {
      * @return mixed|null|\Psr\Http\Message\ResponseInterface
      * @throws \Exception
      */
-    public function request($method, RequestUri $requestUri, array $options = []) {
+    public function request($method, RequestUri $requestUri, array $options = [], $body = null) {
         if (!$requestUri->isValid()) {
             throw new \Exception('Invalid RequestUri.');
         }
-        $options = $this->applyAuth($options);
         try {
-            $response = $this->httpClient->request($method, $requestUri->output(), $options);
+            $headers['Authorization'] = 'Basic '
+                . base64_encode("$this->apiUsername:$this->apiPassword");
+            $request = new Request($method, $requestUri->output(), $headers, $body);
+            $this->lastrequest = $request;
+            $this->lastrequesttime = time();
+            $response = $this->httpClient->send($request);
+            $this->lastresponse = $response;
         } catch (BadResponseException $e) {
             return $e->getResponse();
         }
