@@ -32,7 +32,8 @@ class date {
      * @return bool|\DateTime
      */
     public static function create($value) {
-        $tz = new \DateTimeZone('UTC');
+        $servertimezone = \core_date::get_server_timezone();
+        $tz = new \DateTimeZone($servertimezone);
         // Moodle date - Epoch
         if (is_int($value)) {
             $date = \DateTime::createFromFormat('U', $value, $tz);
