@@ -26,9 +26,9 @@
         <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
         <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="start" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="finish" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="sourcestatus" TYPE="int" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="An EventStatus value representing the current state of this event, such as draft, active, completed or cancelled."/>
+        <FIELD NAME="startdatetime" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="finishdatetime" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourcestatus" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="An EventStatus value representing the current state of this event, such as draft, active, completed or cancelled."/>
         <FIELD NAME="sourcecreated" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was created on Arlo"/>
         <FIELD NAME="sourcemodified" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was last modified on Arlo"/>
         <FIELD NAME="sourcetemplateid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
