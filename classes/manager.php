@@ -56,11 +56,16 @@ class manager {
     public function fetch_events() {
         global $DB;
 
+        // Latest modified DateTime - High water mark.
+        $latestmodified = null;
+
         try {
             $hasnext = true; // Initialise to true for first fetch.
             while ($hasnext) {
                 $hasnext = false;
-                $latestmodified = self::get_latestmodified_field('enrol_arlo_event');
+                if (is_null($latestmodified)) {
+                    $latestmodified = self::get_latestmodified_field('enrol_arlo_event');
+                }
                 // Setup RequestUri for getting Templates.
                 $requesturi = new RequestUri();
                 $requesturi->setHost($this->platform);
@@ -95,15 +100,49 @@ class manager {
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $event) {
-                        self::process_event($event);
+                        $record = self::process_event($event);
+                        $latestmodified = $event->LastModifiedDateTime;
                     }
                 }
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            print_object($e);die;
+            self::handle_exception($e, $logitem);
+            return false;
         }
+        return true;
+    }
 
+    /**
+     * @param \Exception $exception
+     * @param null $logitem
+     * @return bool
+     */
+    private function handle_exception(\Exception $exception, $logitem = null) {
+        global $DB;
+        $code = $exception->getCode();
+        $message = $exception->getMessage();
+
+        // Add log extra info.
+        if (!is_null($logitem)) {
+            $DB->set_field('enrol_arlo_webservicelog', 'info', $message, array('id' => $logitem->id));
+        }
+        if (method_exists($exception, 'get_string_dentifier')) {
+            $stringidentifier = $exception->get_string_dentifier();
+        }
+        if (method_exists($exception, 'get_parameters')) {
+            $stringparameters = $exception->get_parameters();
+        }
+        if (method_exists($exception, 'get_api_exception')) {
+            $apiexception = $exception->get_api_exception();
+        }
+        // Client exception send a message.
+        if ($exception instanceof client_exception) {
+            self::alert($stringidentifier, $stringparameters);
+        } else {
+            print_object($exception);die; // TODO - Handle
+        }
+        return false;
     }
 
     public function process_event(Event $event) {
