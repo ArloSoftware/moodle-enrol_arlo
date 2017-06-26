@@ -30,21 +30,21 @@ class abstract_exception extends \Exception {
     /**
      * @return mixed
      */
-    public function getStringidentifier() {
-        return $this->stringidentifier;
+    public function get_string_dentifier() {
+        return $this->stringdentifier;
     }
 
     /**
      * @return mixed
      */
-    public function getParameters() {
+    public function get_parameters() {
         return $this->parameters;
     }
 
     /**
      * @return mixed
      */
-    public function getApiexception(){
+    public function get_api_exception(){
         return $this->apiexception;
     }
 }
