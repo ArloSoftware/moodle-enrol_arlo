@@ -32,7 +32,7 @@ class Client {
     /** @var \GuzzleHttp\Psr7\Response lastResponse returns last response. */
     private $lastResponse;
     /** @var int CONNECTION_TIMEOUT number of seconds to wait while trying to connect. */
-    const CONNECTION_TIMEOUT = 60;
+    const CONNECTION_TIMEOUT = 30;
 
     /**
      * Client constructor.
