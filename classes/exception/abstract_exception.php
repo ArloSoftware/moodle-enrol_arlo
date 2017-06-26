@@ -30,8 +30,8 @@ class abstract_exception extends \Exception {
     /**
      * @return mixed
      */
-    public function get_string_dentifier() {
-        return $this->stringdentifier;
+    public function get_string_identifier() {
+        return $this->stringidentifier;
     }
 
     /**
