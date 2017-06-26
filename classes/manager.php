@@ -37,12 +37,12 @@ class manager {
         }
     }
 
-    private function get_lastestmodified_field($table) {
+    private function get_latestmodified_field($table) {
         global $DB;
         $sql = "SELECT MAX(t.sourcemodified) AS latestmodified 
                   FROM {{$table}} t
                  WHERE t.platform = :platform";
-        return (int) $DB->get_field_sql($sql, array('platform' => $this->platform));
+        return $DB->get_field_sql($sql, array('platform' => $this->platform));
     }
 
     public static function update_api_status($status) {
@@ -61,7 +61,7 @@ class manager {
             $hasnext = true; // Initialise to true for first fetch.
             while ($hasnext) {
                 $hasnext = false;
-                $latestmodified = self::get_lastestmodified_field('enrol_arlo_template');
+                $latestmodified = self::get_latestmodified_field('enrol_arlo_template');
                 // Setup RequestUri for getting Templates.
                 $requesturi = new RequestUri();
                 $requesturi->setHost($this->platform);
@@ -72,11 +72,11 @@ class manager {
                     ->setResourceField('CreatedDateTime')
                     ->setOperator('gt')
                     ->setDateValue(date::create($latestmodified));
+                $requesturi->addFilter($createdfilter);
                 $modifiedfilter = Filter::create()
                     ->setResourceField('LastModifiedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified),true);
-                $requesturi->addFilter($createdfilter);
+                    ->setDateValue(date::create($latestmodified));
                 $requesturi->addFilter($modifiedfilter);
                 // Get HTTP client.
                 $client = new Client($this->platform, $this->apiusername, $this->apipassword);
@@ -89,8 +89,8 @@ class manager {
                 // Set API status.
                 self::update_api_status((int) $response->getStatusCode());
                 // Log the request uri and response status.
-                //$logentry = self::log(time(), (string) $requesturi, $status);
-
+                $logitem = self::log(time(), (string) $requesturi, (int) $response->getStatusCode());
+                // Parse response body.
                 $templates = self::parse_response($response);
                 if (!$templates) {
                     self::trace("No new or updated resources found.");
@@ -104,8 +104,9 @@ class manager {
                             $record->name = $template->Name;
                             $record->code = $template->Code;
                             $record->sourcestatus = $template->Status;
-                            $record->sourcecreated = date::create($template->CreatedDateTime)->getTimestamp();
-                            $record->sourcemodified = date::create($template->LastModifiedDateTime)->getTimestamp();
+                            $record->sourcecreated = $template->CreatedDateTime;
+                            $record->sourcemodified = $template->LastModifiedDateTime;
+                            $record->modified = time();
 
                             $params = array(
                                 'platform' => $this->platform,
@@ -127,12 +128,22 @@ class manager {
                 }
             }
         } catch (\Exception $e) {
-            // TODO Any extra handling/logging?
+            $code = $e->getCode();
+            $message = $e->getMessage();
+            // Add log extra info.
+            $DB->set_field('enrol_arlo_webservicelog', 'info', $message, array('id' => $logitem->id));
+            if (method_exists($e, 'get_string_dentifier')) {
+                $stringidentifier = $e->get_string_dentifier();
+            }
+            if (method_exists($e, 'get_parameters')) {
+                $stringparameters = $e->get_parameters();
+            }
+            if (method_exists($e, 'get_api_exception')) {
+                $apiexception = $e->get_api_exception();
+            }
+            // Client exception send a message.
             if ($e instanceof client_exception) {
-                self::trace($e->getCode() . ' ' . $e->getMessage());
-                $identifier = $e->getStringidentifier();
-                $params = $e->getParameters();
-                self::alert($identifier, $params);
+                self::alert($stringidentifier, $stringparameters);
             }
             return false;
         }
