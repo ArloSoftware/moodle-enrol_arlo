@@ -18,6 +18,14 @@ class Event extends AbstractResource {
      * @var EventTemplate associated resource.
      */
     protected $eventTemplate;
+
+    /**
+     * @return EventTemplate
+     */
+    public function getEventTemplate() {
+        return $this->eventTemplate;
+    }
+
     /**
      * @param EventTemplate $eventTemplate
      */
