@@ -31,6 +31,8 @@ class Client {
     private $lastRequestTime;
     /** @var \GuzzleHttp\Psr7\Response lastResponse returns last response. */
     private $lastResponse;
+    /** @var int CONNECTION_TIMEOUT number of seconds to wait while trying to connect. */
+    const CONNECTION_TIMEOUT = 60;
 
     /**
      * Client constructor.
@@ -98,12 +100,18 @@ class Client {
             throw new \Exception('Invalid RequestUri.');
         }
         try {
-            $headers['Authorization'] = 'Basic '
-                . base64_encode("$this->apiUsername:$this->apiPassword");
+            $headers = array();
+            $options = array();
+            $options['auth'] = array(
+                $this->apiUsername,
+                $this->apiPassword
+            );
+            $options['decode_content'] = 'gzip';
+            $options['connect_timeout'] = self::CONNECTION_TIMEOUT;
             $request = new Request($method, $requestUri->output(), $headers, $body);
             $this->lastRequest = $request;
             $this->lastRequestTime = time();
-            $response = $this->httpClient->send($request);
+            $response = $this->httpClient->send($request, $options);
             $this->lastResponse = $response;
         } catch (BadResponseException $e) {
             return $e->getResponse();
