@@ -8,6 +8,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
+use enrol_arlo\Arlo\AuthAPI\Exception\XMLDeserializerException;
 
 class XmlDeserializer {
     /**
@@ -65,7 +66,7 @@ class XmlDeserializer {
      */
     public function deserialize($data) {
         if ('' === trim($data)) {
-            throw new \Exception('Invalid XML data, it can not be empty.'); // @todo custom exception class
+            throw new XMLDeserializerException('Invalid XML data, it can not be empty.'); // @todo custom exception class
         }
 
         $internalErrors = libxml_use_internal_errors(true);
@@ -85,12 +86,12 @@ class XmlDeserializer {
 
         $rootNode = $dom->firstChild;
         if (!$rootNode->hasChildNodes()) {
-            throw new \Exception('Root node has no children.');
+            throw new XMLDeserializerException('Root node has no children.');
         }
 
         $rootClassName = $this->resourceClassPath . $rootNode->nodeName;
         if (!class_exists($rootClassName)) {
-            throw new \Exception('Root class ' . $rootNode->nodeName . ' does not exist.');
+            throw new XMLDeserializerException('Root class ' . $rootNode->nodeName . ' does not exist.');
         }
 
         $rootClassInstance = new $rootClassName();
@@ -130,13 +131,13 @@ class XmlDeserializer {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         // Make sure a Link.
         if ($node->nodeName !== 'Link') {
-            throw new \Exception('Not a Link');
+            throw new XMLDeserializerException('Not a Link');
         }
         // Deal with straight Link that has no expansions.
         if (!$node->hasChildNodes()) {
             $linkClassName = $this->resourceClassPath . $node->nodeName;
             if (!class_exists($linkClassName)) {
-                throw new \Exception('Class ' . $node->nodeName . ' does not exist.');
+                throw new XMLDeserializerException('Class ' . $node->nodeName . ' does not exist.');
             }
             $link = new $linkClassName();
             if ($node->hasAttributes()) {
@@ -163,7 +164,7 @@ class XmlDeserializer {
                 $childClassName = $this->resourceClassPath . $childNode->nodeName;
                 if (!class_exists($childClassName)) {
                     if (!$this->ignoreMissingClasses) {
-                        throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                        throw new XMLDeserializerException('Class ' . $childNode->nodeName . ' does not exist.');
                     }
                     continue;
                 }
@@ -225,7 +226,7 @@ class XmlDeserializer {
                         $childClassName = $this->resourceClassPath . $childNode->nodeName;
                         if (!class_exists($childClassName)) {
                             if (!$this->ignoreMissingClasses) {
-                                throw new \Exception('Class ' . $childNode->nodeName . ' does not exist.');
+                                throw new XMLDeserializerException('Class ' . $childNode->nodeName . ' does not exist.');
                             }
                             continue;
                         }
