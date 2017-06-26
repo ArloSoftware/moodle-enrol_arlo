@@ -9,6 +9,7 @@ use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
 use enrol_arlo\Arlo\AuthAPI\Resource\ApiException;
+use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\exception\client_exception;
 use enrol_arlo\exception\server_exception;
 use enrol_arlo\utility\date;
@@ -52,12 +53,106 @@ class manager {
         plugin_config::set('apistatus', $status);
     }
 
-    // Can run? Check API status.
-    //self::check_apistatus();
+    public function fetch_events() {
+        global $DB;
+
+        try {
+            $hasnext = true; // Initialise to true for first fetch.
+            while ($hasnext) {
+                $hasnext = false;
+                $latestmodified = self::get_latestmodified_field('enrol_arlo_event');
+                // Setup RequestUri for getting Templates.
+                $requesturi = new RequestUri();
+                $requesturi->setHost($this->platform);
+                $requesturi->setOrderBy('LastModifiedDateTime ASC'); // Important.
+                $requesturi->setResourcePath('events/');
+                $requesturi->addExpand('Event/EventTemplate');
+                $createdfilter = Filter::create()
+                    ->setResourceField('CreatedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue(date::create($latestmodified));
+                $requesturi->addFilter($createdfilter);
+                $modifiedfilter = Filter::create()
+                    ->setResourceField('LastModifiedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue(date::create($latestmodified));
+                $requesturi->addFilter($modifiedfilter);
+                // Get HTTP client.
+                $client = new Client($this->platform, $this->apiusername, $this->apipassword);
+                // Start the clock.
+                $timestart = microtime();
+                self::trace(sprintf('Fetching Events modified after: %s',
+                    date::create($latestmodified)->format(DATE_ISO8601)));
+                // Launch HTTP client request to API and get response.
+                $response = $client->request('GET', $requesturi);
+                // Set API status.
+                self::update_api_status((int) $response->getStatusCode());
+                // Log the request uri and response status.
+                $logitem = self::log(time(), (string) $requesturi, (int) $response->getStatusCode());
+                // Parse response body.
+                $collection = self::parse_response($response);
+                if (!$collection) {
+                    self::trace("No new or updated resources found.");
+                } else {
+                    foreach ($collection as $event) {
+                        self::process_event($event);
+                    }
+                }
+                $hasnext = (bool) $collection->hasNext();
+            }
+        } catch (\Exception $e) {
+            print_object($e);die;
+        }
+
+    }
+
+    public function process_event(Event $event) {
+        global $DB;
+
+        $record                 = new \stdClass();
+        $record->platform       = $this->platform;
+        $record->sourceid       = $event->EventID;
+        $record->sourceguid     = $event->UniqueIdentifier;
+
+        $record->code           = $event->Code;
+        $record->startdatetime  = $event->StartDateTime;
+        $record->finishdatetime = $event->FinishDateTime;
+
+        $record->sourcestatus   = $event->Status;
+        $record->sourcecreated  = $event->CreatedDateTime;
+        $record->sourcemodified = $event->LastModifiedDateTime;
+        $record->modified       = time();
+
+        $template = $event->getEventTemplate();
+        if ($template) {
+            $record->sourcetemplateid       = $template->TemplateID;
+            $record->sourcetemplateguid     = $template->UniqueIdentifier;
+        }
+
+        $params = array(
+            'platform'      => $this->platform,
+            'sourceid'      => $record->sourceid,
+            'sourceguid'    => $record->sourceguid
+        );
+        $record->id = $DB->get_field('enrol_arlo_event', 'id', $params);
+        if (empty($record->id)) {
+            unset($record->id);
+            $record->id = $DB->insert_record('enrol_arlo_event', $record);
+            self::trace(sprintf('Created: %s', $record->code));
+        } else {
+            $DB->update_record('enrol_arlo_event', $record);
+            self::trace(sprintf('Updated: %s', $record->code));
+        }
+        return $record;
+    }
+
+    public function process_template() {}
+
     public function get_templates() {
         global $DB;
 
         try {
+            //self::check_apistatus();
             $hasnext = true; // Initialise to true for first fetch.
             while ($hasnext) {
                 $hasnext = false;
