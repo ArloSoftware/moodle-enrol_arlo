@@ -34,8 +34,10 @@ if ($data) {
 
     plugin_config::set('authplugin', $data->authplugin);
     plugin_config::set('matchuseraccountsby', $data->matchuseraccountsby);
+    plugin_config::set('roleid', $data->roleid);
     plugin_config::set('unenrolaction', $data->unenrolaction);
     plugin_config::set('expiredaction', $data->expiredaction);
+    plugin_config::set('sendcoursewelcomemessage', $data->sendcoursewelcomemessage);
     plugin_config::set('pushonlineactivityresults', $data->pushonlineactivityresults);
     plugin_config::set('pusheventresults', $data->pusheventresults);
     plugin_config::set('alertsiteadmins', $data->alertsiteadmins);

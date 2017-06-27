@@ -98,6 +98,11 @@ class configuration extends \moodleform {
         $form->setDefault('expiredaction', ENROL_EXT_REMOVED_SUSPEND);
         $form->addHelpButton('expiredaction', 'expiredaction', 'enrol_arlo');
 
+        $form->addElement('advcheckbox', 'sendcoursewelcomemessage',
+            get_string('sendcoursewelcomemessage', 'enrol_arlo'));
+        $form->setDefault('sendcoursewelcomemessage', 1);
+        $form->addHelpButton('sendcoursewelcomemessage', 'sendcoursewelcomemessage', 'enrol_arlo');
+
         $form->addElement('header', 'resulting', get_string('resulting', 'enrol_arlo'));
 
         $form->addElement('advcheckbox', 'pushonlineactivityresults',
