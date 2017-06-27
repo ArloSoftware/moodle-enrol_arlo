@@ -10,6 +10,7 @@ use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
 use enrol_arlo\Arlo\AuthAPI\Resource\ApiException;
 use enrol_arlo\Arlo\AuthAPI\Resource\Event;
+use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
 use enrol_arlo\exception\client_exception;
 use enrol_arlo\exception\server_exception;
 use enrol_arlo\utility\date;
@@ -113,6 +114,71 @@ class manager {
         return true;
     }
 
+    public function fetch_templates() {
+        global $DB;
+
+        // self::check_apistatus();
+
+        // Latest modified DateTime - High water mark.
+        $latestmodified = null;
+
+        try {
+            $hasnext = true; // Initialise to true for first fetch.
+            while ($hasnext) {
+                $hasnext = false;
+                if (is_null($latestmodified)) {
+                    $latestmodified = self::get_latestmodified_field('enrol_arlo_template');
+                }
+                // Setup RequestUri for getting Templates.
+                $requesturi = new RequestUri();
+                $requesturi->setHost($this->platform);
+                $requesturi->setOrderBy('LastModifiedDateTime ASC'); // Important.
+                $requesturi->setResourcePath('eventtemplates/');
+                $requesturi->addExpand('EventTemplate');
+                $createdfilter = Filter::create()
+                    ->setResourceField('CreatedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue(date::create($latestmodified));
+                $requesturi->addFilter($createdfilter);
+                $modifiedfilter = Filter::create()
+                    ->setResourceField('LastModifiedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue(date::create($latestmodified));
+                $requesturi->addFilter($modifiedfilter);
+                // Get HTTP client.
+                $client = new Client($this->platform, $this->apiusername, $this->apipassword);
+                // Start the clock.
+                $timestart = microtime();
+                self::trace(sprintf('Fetching EventTemplates modified after: %s',
+                    date::create($latestmodified)->format(DATE_ISO8601)));
+                // Launch HTTP client request to API and get response.
+                $response = $client->request('GET', $requesturi);
+                // Set API status.
+                self::update_api_status((int) $response->getStatusCode());
+                // Log the request uri and response status.
+                $logitem = self::log(time(), (string) $requesturi, (int) $response->getStatusCode());
+                // Parse response body.
+                $collection = self::parse_response($response);
+                if (!$collection) {
+                    self::trace("No new or updated resources found.");
+                } else {
+                    foreach ($collection as $template) {
+                        $record = self::process_template($template);
+                        $latestmodified = $template->LastModifiedDateTime;
+                    }
+                }
+                $hasnext = (bool) $collection->hasNext();
+            }
+        } catch (\Exception $e) {
+            $self::handle_exception($e, $logitem);
+            return false;
+        }
+        $timefinish = microtime();
+        $difftime = microtime_diff($timestart, $timefinish);
+        self::trace("Execution took {$difftime} seconds");
+        return true;
+    }
+
     /**
      * @param \Exception $exception
      * @param null $logitem
@@ -185,107 +251,38 @@ class manager {
         return $record;
     }
 
-    public function process_template() {}
-
-    public function get_templates() {
+    public function process_template(EventTemplate $template) {
         global $DB;
 
-        try {
-            //self::check_apistatus();
-            $hasnext = true; // Initialise to true for first fetch.
-            while ($hasnext) {
-                $hasnext = false;
-                $latestmodified = self::get_latestmodified_field('enrol_arlo_template');
-                // Setup RequestUri for getting Templates.
-                $requesturi = new RequestUri();
-                $requesturi->setHost($this->platform);
-                $requesturi->setOrderBy('LastModifiedDateTime ASC'); // Important.
-                $requesturi->setResourcePath('eventtemplates/');
-                $requesturi->addExpand('EventTemplate');
-                $createdfilter = Filter::create()
-                    ->setResourceField('CreatedDateTime')
-                    ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
-                $requesturi->addFilter($createdfilter);
-                $modifiedfilter = Filter::create()
-                    ->setResourceField('LastModifiedDateTime')
-                    ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
-                $requesturi->addFilter($modifiedfilter);
-                // Get HTTP client.
-                $client = new Client($this->platform, $this->apiusername, $this->apipassword);
-                // Start the clock.
-                $timestart = microtime();
-                self::trace(sprintf('Fetching EventTemplates modified after: %s',
-                    date::create($latestmodified)->format(DATE_ISO8601)));
-                // Launch HTTP client request to API and get response.
-                $response = $client->request('GET', $requesturi);
-                // Set API status.
-                self::update_api_status((int) $response->getStatusCode());
-                // Log the request uri and response status.
-                $logitem = self::log(time(), (string) $requesturi, (int) $response->getStatusCode());
-                // Parse response body.
-                $templates = self::parse_response($response);
-                if (!$templates) {
-                    self::trace("No new or updated resources found.");
-                } else {
-                    if ($templates instanceof AbstractCollection) {
-                        foreach ($templates as $template) {
-                            $record = new \stdClass();
-                            $record->platform = $this->platform;
-                            $record->sourceid = $template->TemplateID;
-                            $record->sourceguid = $template->UniqueIdentifier;
-                            $record->name = $template->Name;
-                            $record->code = $template->Code;
-                            $record->sourcestatus = $template->Status;
-                            $record->sourcecreated = $template->CreatedDateTime;
-                            $record->sourcemodified = $template->LastModifiedDateTime;
-                            $record->modified = time();
+        $record = new \stdClass();
+        $record->platform       = $this->platform;
+        $record->sourceid       = $template->TemplateID;
+        $record->sourceguid     = $template->UniqueIdentifier;
+        $record->name           = $template->Name;
+        $record->code           = $template->Code;
+        $record->sourcestatus   = $template->Status;
+        $record->sourcecreated  = $template->CreatedDateTime;
+        $record->sourcemodified = $template->LastModifiedDateTime;
+        $record->modified       = time();
 
-                            $params = array(
-                                'platform' => $this->platform,
-                                'sourceid' => $template->TemplateID,
-                                'sourceguid' => $template->UniqueIdentifier
-                            );
-                            $record->id = $DB->get_field('enrol_arlo_template', 'id', $params);
-                            if (empty($record->id)) {
-                                unset($record->id);
-                                $DB->insert_record('enrol_arlo_template', $record);
-                                self::trace(sprintf('Created: %s', $record->name));
-                            } else {
-                                $DB->update_record('enrol_arlo_template', $record);
-                                self::trace(sprintf('Updated: %s', $record->name));
-                            }
-                        }
-                        $hasnext = (bool) $templates->hasNext();
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            $code = $e->getCode();
-            $message = $e->getMessage();
-            // Add log extra info.
-            $DB->set_field('enrol_arlo_webservicelog', 'info', $message, array('id' => $logitem->id));
-            if (method_exists($e, 'get_string_dentifier')) {
-                $stringidentifier = $e->get_string_dentifier();
-            }
-            if (method_exists($e, 'get_parameters')) {
-                $stringparameters = $e->get_parameters();
-            }
-            if (method_exists($e, 'get_api_exception')) {
-                $apiexception = $e->get_api_exception();
-            }
-            // Client exception send a message.
-            if ($e instanceof client_exception) {
-                self::alert($stringidentifier, $stringparameters);
-            }
-            return false;
+        $params = array(
+            'platform'      => $this->platform,
+            'sourceid'      => $record->sourceid,
+            'sourceguid'    => $record->sourceguid
+        );
+        $record->id = $DB->get_field('enrol_arlo_template', 'id', $params);
+        if (empty($record->id)) {
+            unset($record->id);
+            $record->id = $DB->insert_record('enrol_arlo_template', $record);
+            self::trace(sprintf('Created: %s', $record->name));
+        } else {
+            $DB->update_record('enrol_arlo_template', $record);
+            self::trace(sprintf('Updated: %s', $record->name));
         }
-        $timefinish = microtime();
-        $difftime = microtime_diff($timestart, $timefinish);
-        self::trace("Execution took {$difftime} seconds");
-        return true;
+        return $record;
     }
+
+
 
     private function parse_response(Response $response) {
         global $CFG;
