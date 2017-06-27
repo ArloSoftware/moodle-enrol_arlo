@@ -222,3 +222,6 @@ $string['error_incorrectcontenttype_full_html'] = '
 <p>Plugin detected Incorrect Content-Type in Response from Arlo API.<p>
 <br>
 <p>Response Content-type: {$a->contenttype}</p>';
+
+$string['enrolperiod'] = 'Enrolment duration';
+$string['status_help'] = '';
