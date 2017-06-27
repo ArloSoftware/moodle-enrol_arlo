@@ -11,6 +11,7 @@ use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
 use enrol_arlo\Arlo\AuthAPI\Resource\ApiException;
 use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
+use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\exception\client_exception;
 use enrol_arlo\exception\server_exception;
 use enrol_arlo\utility\date;
@@ -111,6 +112,71 @@ class manager {
             self::handle_exception($e, $logitem);
             return false;
         }
+        return true;
+    }
+
+    public function fetch_onlineactivities() {
+        global $DB;
+
+        // self::check_apistatus();
+
+        // Latest modified DateTime - High water mark.
+        $latestmodified = null;
+
+        try {
+            $hasnext = true; // Initialise to true for first fetch.
+            while ($hasnext) {
+                $hasnext = false;
+                if (is_null($latestmodified)) {
+                    $latestmodified = self::get_latestmodified_field('enrol_arlo_onlineactivity');
+                }
+                // Setup RequestUri for getting Templates.
+                $requesturi = new RequestUri();
+                $requesturi->setHost($this->platform);
+                $requesturi->setOrderBy('LastModifiedDateTime ASC'); // Important.
+                $requesturi->setResourcePath('onlineactivities/');
+                $requesturi->addExpand('EventTemplate');
+                $createdfilter = Filter::create()
+                    ->setResourceField('CreatedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue(date::create($latestmodified), true);
+                $requesturi->addFilter($createdfilter);
+                $modifiedfilter = Filter::create()
+                    ->setResourceField('LastModifiedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue(date::create($latestmodified), true);
+                $requesturi->addFilter($modifiedfilter);
+                // Get HTTP client.
+                $client = new Client($this->platform, $this->apiusername, $this->apipassword);
+                // Start the clock.
+                $timestart = microtime();
+                self::trace(sprintf('Fetching OnlineActivities modified after: %s',
+                    date::create($latestmodified)->format(DATE_ISO8601)));
+                // Launch HTTP client request to API and get response.
+                $response = $client->request('GET', $requesturi);
+                // Set API status.
+                self::update_api_status((int) $response->getStatusCode());
+                // Log the request uri and response status.
+                $logitem = self::log(time(), (string) $requesturi, (int) $response->getStatusCode());
+                // Parse response body.
+                $collection = self::parse_response($response);
+                if (!$collection) {
+                    self::trace("No new or updated resources found.");
+                } else {
+                    foreach ($collection as $onlineactivity) {
+                        $record = self::process_template($onlineactivity);
+                        $latestmodified = $template->LastModifiedDateTime;
+                    }
+                }
+                $hasnext = (bool) $collection->hasNext();
+            }
+        } catch (\Exception $e) {
+            $self::handle_exception($e, $logitem);
+            return false;
+        }
+        $timefinish = microtime();
+        $difftime = microtime_diff($timestart, $timefinish);
+        self::trace("Execution took {$difftime} seconds");
         return true;
     }
 
@@ -282,7 +348,35 @@ class manager {
         return $record;
     }
 
+    public function process_onlineactivity(OnlineActivity $onlineactivity) {
+        $record = new \stdClass();
+        $record->platform       = $this->platform;
+        $record->sourceid       = $onlineactivity->TemplateID;
+        $record->sourceguid     = $onlineactivity->UniqueIdentifier;
+        $record->name           = $onlineactivity->Name;
+        $record->code           = $onlineactivity->Code;
+        $record->contenturi     = $onlineactivity->ContentUri;
+        $record->sourcestatus   = $onlineactivity->Status;
+        $record->sourcecreated  = $onlineactivity->CreatedDateTime;
+        $record->sourcemodified = $onlineactivity->LastModifiedDateTime;
+        $record->modified       = time();
 
+        $params = array(
+            'platform'      => $this->platform,
+            'sourceid'      => $record->sourceid,
+            'sourceguid'    => $record->sourceguid
+        );
+        $record->id = $DB->get_field('enrol_arlo_onlineactivity', 'id', $params);
+        if (empty($record->id)) {
+            unset($record->id);
+            $record->id = $DB->insert_record('enrol_arlo_onlineactivity', $record);
+            self::trace(sprintf('Created: %s', $record->name));
+        } else {
+            $DB->update_record('enrol_arlo_template', $record);
+            self::trace(sprintf('Updated: %s', $record->name));
+        }
+        return $record;
+    }
 
     private function parse_response(Response $response) {
         global $CFG;
