@@ -165,13 +165,13 @@ class manager {
                 } else {
                     foreach ($collection as $onlineactivity) {
                         $record = self::process_template($onlineactivity);
-                        $latestmodified = $template->LastModifiedDateTime;
+                        $latestmodified = $onlineactivity->LastModifiedDateTime;
                     }
                 }
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            $self::handle_exception($e, $logitem);
+            self::handle_exception($e, $logitem);
             return false;
         }
         $timefinish = microtime();
@@ -236,7 +236,7 @@ class manager {
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            $self::handle_exception($e, $logitem);
+            self::handle_exception($e, $logitem);
             return false;
         }
         $timefinish = microtime();
@@ -349,6 +349,7 @@ class manager {
     }
 
     public function process_onlineactivity(OnlineActivity $onlineactivity) {
+        global $DB;
         $record = new \stdClass();
         $record->platform       = $this->platform;
         $record->sourceid       = $onlineactivity->TemplateID;
