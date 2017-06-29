@@ -117,12 +117,11 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function update_instance($instance, $data) {
-        global $DB;
-
-        //parent::update_instance($instance, $data);
-        die('Add to Arlo instance table.');
-
-        //return parent::update_instance($instance, $data);
+        // Unset Arlo instance data, should not be updated when updating enrol instance.
+        unset($data->arlotype);
+        unset($data->arloevent);
+        unset($data->arloonlineactivity);
+        return parent::update_instance($instance, $data);
     }
 
     /**
@@ -252,8 +251,9 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return bool
      */
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
-        global $CFG;
+        global $DB;
 
+        $typeoptions = $this->get_type_options();
         $eventoptions = $this->get_event_options();
         $onlineactivityoptions = $this->get_onlineactivity_options();
 
@@ -269,7 +269,8 @@ class enrol_arlo_plugin extends enrol_plugin {
             $options = $this->get_status_options();
             $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
 
-            $typeoptions = $this->get_type_options();
+            // Type options.
+            array_unshift($typeoptions, get_string('choose') . '...');
             $mform->addElement('select', 'arlotype', get_string('type', 'enrol_arlo'), $typeoptions);
             // Event selector.
             array_unshift($eventoptions, get_string('choose') . '...');
@@ -294,6 +295,30 @@ class enrol_arlo_plugin extends enrol_plugin {
                 get_string('customwelcomemessage', 'enrol_arlo'),
                 array('cols' => '60', 'rows' => '8'));
             $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_arlo');
+
+            // Set extra Arlo instance information for existing record. Remove elements.
+            if (!is_null($instance->id)) {
+                $conditions = array('enrolid' => $instance->id);
+                $arloinstance = $DB->get_record('enrol_arlo_instance', $conditions, 'type, sourceguid', MUST_EXIST);
+                if ($arloinstance) {
+                    $data = array('arlotype' => $arloinstance->type);
+                    $mform->hardFreeze('arlotype', $arloinstance->type);
+                    if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
+                        $data['arloevent'] = $arloinstance->sourceguid;
+                        $mform->removeElement('arloonlineactivity');
+                        $mform->setConstant('arloevent', $arloinstance->sourceguid);
+                        $mform->hardFreeze('arloevent', $arloinstance->sourceguid);
+
+                    }
+                    if ($arloinstance->type == self::ARLO_TYPE_ONLINEACTIVITY) {
+                        $data['arloonlineactivity'] = $arloinstance->sourceguid;
+                        $mform->removeElement('arloevent');
+                        $mform->setConstant('arloonlineactivity', $arloinstance->sourceguid);
+                        $mform->hardFreeze('arloonlineactivity', $arloinstance->sourceguid);
+                    }
+                    $mform->setDefaults($data);
+                }
+            }
         }
 
     }
