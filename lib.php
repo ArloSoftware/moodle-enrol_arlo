@@ -28,21 +28,103 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
+use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
+use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
+
 /**
  * ARLO_CREATE_GROUP constant for automatically creating a group matched to enrolment instance.
  */
 define('ARLO_CREATE_GROUP', -1);
-/**
- * ARLO_TYPE_EVENT constant for matched event type to enrolment instance.
- */
-define('ARLO_TYPE_EVENT', 0);
-/**
- * ARLO_TYPE_ONLINEACTIVITY constant for matched online activity type to enrolment instance.
- */
-define('ARLO_TYPE_ONLINEACTIVITY', 1);
 
 
 class enrol_arlo_plugin extends enrol_plugin {
+    const ARLO_TYPE_EVENT           = 'event';
+    const ARLO_TYPE_ONLINEACTIVITY  = 'onlineactivity';
+    /**
+     * Add new instance of enrol plugin with default settings.
+     * @param stdClass $course
+     * @return int id of new instance
+     */
+    public function add_default_instance($course) {
+        $fields = $this->get_instance_defaults();
+
+        return $this->add_instance($course, $fields);
+    }
+
+    /**
+     * Add new instance of enrol plugin.
+     *
+     * @param object $course
+     * @param array $fields instance fields
+     * @return int id of new instance, null if can not be created
+     */
+    public function add_instance($course, array $fields = null) {
+        global $DB;
+
+        $instance = new stdClass();
+        $instance->platform = self::get_config('platformname');
+        if (empty($fields['arlotype'])) {
+            throw new moodle_exception('Field arlotype is empty.');
+        }
+        $instance->type = $fields['arlotype'];
+        if ($instance->type  == self::ARLO_TYPE_EVENT) {
+            if (empty($fields['arloevent'])) {
+                throw new moodle_exception('Field arloevent is empty.');
+            }
+            $sourcetable = 'enrol_arlo_event';
+            $sourceguid = $fields['arloevent'];
+        }
+        if ($instance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
+            if (empty($fields['arloonlineactivity'])) {
+                throw new moodle_exception('Field arloonlineactivity is empty.');
+            }
+            $sourcetable = 'enrol_arlo_onlineactivity';
+            $sourceguid = $fields['arloonlineactivity'];
+        }
+        $conditions = array('platform' => $instance->platform, 'sourceguid' => $sourceguid);
+        $record = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
+        $instance->sourceid = $record->sourceid;
+        $instance->sourceguid = $record->sourceguid;
+        // Set name to be passed to parent.
+        $fields['name'] = $record->code;
+        // TODO Group creation.
+        $instance->enrolid = parent::add_instance($course, $fields);
+        $DB->insert_record('enrol_arlo_instance', $instance);
+        return $instance->enrolid;
+    }
+
+    /**
+     * Delete plugin specific information.
+     *
+     * @param stdClass $instance
+     * @return void
+     */
+    public function delete_instance($instance) {
+        global $DB;
+
+        // Delete associated registrations.
+        $DB->delete_records('enrol_arlo_registration', array('enrolid' => $instance->id));
+        // Delete instance mapping information.
+        $DB->delete_records('enrol_arlo_instance', array('enrolid' => $instance->id));
+        // Time for the parent to do it's thang, yeow.
+        parent::delete_instance($instance);
+    }
+
+    /**
+     * Update instance of enrol plugin.
+     * @param stdClass $instance
+     * @param stdClass $data modified instance fields
+     * @return boolean
+     */
+    public function update_instance($instance, $data) {
+        global $DB;
+
+        //parent::update_instance($instance, $data);
+        die('Add to Arlo instance table.');
+
+        //return parent::update_instance($instance, $data);
+    }
+
     /**
      * Does this plugin allow manual changes in user_enrolments table?
      *
@@ -54,6 +136,7 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function allow_manage(stdClass $instance) {
         return true;
     }
+
     /**
      * Does this plugin allow manual unenrolment of a specific user?
      * Yes, but only if user suspended...
@@ -69,6 +152,20 @@ class enrol_arlo_plugin extends enrol_plugin {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Return true if we can add a new instance to this course.
+     *
+     * @param int $courseid
+     * @return boolean
+     */
+    public function can_add_instance($courseid) {
+        $context = context_course::instance($courseid, MUST_EXIST);
+        if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/arlo:config', $context)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -93,6 +190,148 @@ class enrol_arlo_plugin extends enrol_plugin {
         return has_capability('enrol/arlo:config', $context);
     }
 
+    public function get_event_options() {
+        global $DB;
+        $options = array();
+        $conditions = array(
+            'platform' => self::get_config('platformname', null),
+            'sourcestatus' => EventStatus::ACTIVE);
+        // TODO - Remove Events currently attached to enrol instances for list.
+        $records = $DB->get_records('enrol_arlo_event', $conditions, 'code', 'sourceguid, code');
+        foreach ($records as $record) {
+            $options[$record->sourceguid] = $record->code;
+        }
+        return $options;
+    }
+
+    public function get_onlineactivity_options() {
+        global $DB;
+        $options = array();
+        $conditions = array(
+            'platform' => self::get_config('platformname', null),
+            'sourcestatus' => OnlineActivityStatus::ACTIVE);
+        // TODO - Remove Events currently attached to enrol instances for list.
+        $records = $DB->get_records('enrol_arlo_onlineactivity', $conditions, 'code', 'sourceguid, code');
+        foreach ($records as $record) {
+            $options[$record->sourceguid] = $record->code;
+        }
+        return $options;
+    }
+
+    /**
+     * Returns defaults for new instances.
+     * @return array
+     */
+    public function get_instance_defaults() {
+        $fields = array();
+        $fields['status']               = $this->get_config('status');
+        $fields['roleid']               = $this->get_config('roleid');
+        $fields['enrolperiod']          = 0;
+        $fields['expirynotify']         = 0;
+        $fields['customint8']           = 1; //$this->get_config('sendcoursewelcomemessage');
+        $fields['arlotype']             = '';
+        $fields['arloevent']            = '';
+        $fields['arloonlineactivity']   = '';
+        return $fields;
+    }
+
+    public function get_type_options() {
+        $options = array(
+            self::ARLO_TYPE_EVENT => get_string('event', 'enrol_arlo'),
+            self::ARLO_TYPE_ONLINEACTIVITY => get_string('onlineactivity', 'enrol_arlo')
+        );
+        return $options;
+    }
+
+    /**
+     * Add elements to the edit instance form.
+     *
+     * @param stdClass $instance
+     * @param MoodleQuickForm $mform
+     * @param context $context
+     * @return bool
+     */
+    public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
+        global $CFG;
+
+        $eventoptions = $this->get_event_options();
+        $onlineactivityoptions = $this->get_onlineactivity_options();
+
+        // If there are no Active Events or Online Activities hide form elements.
+        if (!$onlineactivityoptions && !$eventoptions) {
+            $mform->addElement('static', 'noeventsoractivitiesfound', null,
+                get_string('noeventsoractivitiesfound', 'enrol_arlo'));
+            $mform->addElement('hidden', 'disable');
+            $mform->setType('disable', PARAM_INT);
+            $mform->setDefault('disable', 1);
+            $mform->disabledIf('submitbutton', 'disable', 'eq', 1);
+        } else {
+            $options = $this->get_status_options();
+            $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
+
+            $typeoptions = $this->get_type_options();
+            $mform->addElement('select', 'arlotype', get_string('type', 'enrol_arlo'), $typeoptions);
+            // Event selector.
+            array_unshift($eventoptions, get_string('choose') . '...');
+            $mform->addElement('select', 'arloevent', get_string('event', 'enrol_arlo'), $eventoptions);
+            $mform->disabledIf('arloevent', 'arlotype', 'eq', self::ARLO_TYPE_ONLINEACTIVITY);
+            // Online Activity selector.
+            array_unshift($onlineactivityoptions, get_string('choose') . '...');
+            $mform->addElement('select', 'arloonlineactivity',
+                get_string('onlineactivity', 'enrol_arlo'), $onlineactivityoptions);
+            $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', self::ARLO_TYPE_EVENT);
+
+            $options = array('optional' => true, 'defaultunit' => 86400);
+            $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_arlo'), $options);
+            $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
+
+            $options = array(0 => get_string('no'), 1 => get_string('yes'));
+            $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'enrol_arlo'), $options);
+            $mform->addHelpButton('expirynotify', 'expirynotify', 'enrol_arlo');
+            $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
+            $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
+            $mform->addElement('textarea', 'customtext1',
+                get_string('customwelcomemessage', 'enrol_arlo'),
+                array('cols' => '60', 'rows' => '8'));
+            $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_arlo');
+        }
+
+    }
+
+    /**
+     * Perform custom validation of the data used to edit the instance.
+     *
+     * @param array $data array of ("fieldname"=>value) of submitted data
+     * @param array $files array of uploaded files "element_name"=>tmp_file_path
+     * @param object $instance The instance loaded from the DB
+     * @param context $context The context of the instance we are editing
+     * @return array of "element_name"=>"error_description" if there are errors,
+     *         or an empty array if everything is OK.
+     * @return void
+     */
+    public function edit_instance_validation($data, $files, $instance, $context) {
+        $errors = array();
+        if ($data['arlotype'] == self::ARLO_TYPE_EVENT && empty($data['arloevent'])) {
+            $errors['arloevent'] = get_string('errorselectevent', 'enrol_arlo');
+        }
+        if ($data['arlotype'] == self::ARLO_TYPE_ONLINEACTIVITY && empty($data['arloonlineactivity'])) {
+            $errors['arloonlineactivity'] = get_string('errorselectonlineactivity', 'enrol_arlo');
+        }
+        return $errors;
+    }
+
+    /**
+     * Return an array of valid options for the status.
+     *
+     * @return array
+     */
+    protected function get_status_options() {
+        $options = array(
+            ENROL_INSTANCE_ENABLED  => get_string('yes'),
+            ENROL_INSTANCE_DISABLED => get_string('no')
+        );
+        return $options;
+    }
 
     /**
      * Notify user their course expiry. it is called only if notification of enrolled users (aka students) is enabled in course.
@@ -231,12 +470,6 @@ class enrol_arlo_plugin extends enrol_plugin {
         $context = context_course::instance($instance->courseid);
 
         $icons = array();
-        if (has_capability('enrol/arlo:config', $context)) {
-            $link = new moodle_url('/enrol/arlo/edit.php',
-                array('courseid' => $instance->courseid, 'id' => $instance->id));
-            $icon = new pix_icon('t/edit', get_string('edit'), 'core', array('class' => 'iconsmall'));
-            $icons[] = $OUTPUT->action_icon($link, $icon);
-        }
         if (has_capability('enrol/arlo:synchronizeinstance', $context)) {
             $link = new moodle_url('enrol/arlo/synchronizeinstance.php', array('id' => $instance->id));
             $icon = new pix_icon('synchronize', get_string('synchronize', 'enrol_arlo'),
@@ -255,7 +488,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function use_standard_editing_ui() {
-        return false;
+        return true;
     }
 
 
