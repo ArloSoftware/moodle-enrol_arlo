@@ -379,7 +379,7 @@ class manager {
             $record->id = $DB->insert_record('enrol_arlo_onlineactivity', $record);
             self::trace(sprintf('Created: %s', $record->name));
         } else {
-            $DB->update_record('enrol_arlo_template', $record);
+            $DB->update_record('enrol_arlo_onlineactivity', $record);
             self::trace(sprintf('Updated: %s', $record->name));
         }
         return $record;
