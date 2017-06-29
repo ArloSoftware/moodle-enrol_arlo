@@ -135,16 +135,16 @@ class manager {
                 $requesturi->setHost($this->platform);
                 $requesturi->setOrderBy('LastModifiedDateTime ASC'); // Important.
                 $requesturi->setResourcePath('onlineactivities/');
-                $requesturi->addExpand('EventTemplate');
+                $requesturi->addExpand('OnlineActivity/EventTemplate');
                 $createdfilter = Filter::create()
                     ->setResourceField('CreatedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified), true);
+                    ->setDateValue(date::create($latestmodified));
                 $requesturi->addFilter($createdfilter);
                 $modifiedfilter = Filter::create()
                     ->setResourceField('LastModifiedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified), true);
+                    ->setDateValue(date::create($latestmodified));
                 $requesturi->addFilter($modifiedfilter);
                 // Get HTTP client.
                 $client = new Client($this->platform, $this->apiusername, $this->apipassword);
@@ -164,7 +164,7 @@ class manager {
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $onlineactivity) {
-                        $record = self::process_template($onlineactivity);
+                        $record = self::process_onlineactivity($onlineactivity);
                         $latestmodified = $onlineactivity->LastModifiedDateTime;
                     }
                 }
@@ -352,7 +352,7 @@ class manager {
         global $DB;
         $record = new \stdClass();
         $record->platform       = $this->platform;
-        $record->sourceid       = $onlineactivity->TemplateID;
+        $record->sourceid       = $onlineactivity->OnlineActivityID;
         $record->sourceguid     = $onlineactivity->UniqueIdentifier;
         $record->name           = $onlineactivity->Name;
         $record->code           = $onlineactivity->Code;
@@ -361,6 +361,12 @@ class manager {
         $record->sourcecreated  = $onlineactivity->CreatedDateTime;
         $record->sourcemodified = $onlineactivity->LastModifiedDateTime;
         $record->modified       = time();
+
+        $template = $onlineactivity->getEventTemplate();
+        if ($template) {
+            $record->sourcetemplateid       = $template->TemplateID;
+            $record->sourcetemplateguid     = $template->UniqueIdentifier;
+        }
 
         $params = array(
             'platform'      => $this->platform,
