@@ -72,7 +72,6 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function add_default_instance($course) {
         $fields = $this->get_instance_defaults();
-
         return $this->add_instance($course, $fields);
     }
 
@@ -87,7 +86,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         global $DB;
 
         $instance = new stdClass();
-        $instance->platform = self::get_config('platformname');
+        $instance->platform = self::get_config('platform');
         if (empty($fields['arlotype'])) {
             throw new moodle_exception('Field arlotype is empty.');
         }
@@ -230,7 +229,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                                             FROM {enrol_arlo_instance})
               ORDER BY code";
         $conditions = array(
-            'platform' => self::get_config('platformname', null),
+            'platform' => self::get_config('platform', null),
             'sourcestatus' => EventStatus::ACTIVE
         );
         $records = $DB->get_records_sql($sql, $conditions);
@@ -256,7 +255,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                                             FROM {enrol_arlo_instance})
               ORDER BY code";
         $conditions = array(
-            'platform' => self::get_config('platformname', null),
+            'platform' => self::get_config('platform', null),
             'sourcestatus' => OnlineActivityStatus::ACTIVE
         );
         $records = $DB->get_records_sql($sql, $conditions);
@@ -303,22 +302,72 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context) {
         global $DB;
 
-        $typeoptions = $this->get_type_options();
-        $eventoptions = $this->get_event_options();
-        $onlineactivityoptions = $this->get_onlineactivity_options();
-
-        // If there are no Active Events or Online Activities hide form elements.
-        if (!$onlineactivityoptions && !$eventoptions) {
-            $mform->addElement('static', 'noeventsoractivitiesfound', null,
-                get_string('noeventsoractivitiesfound', 'enrol_arlo'));
-            $mform->addElement('hidden', 'disable');
-            $mform->setType('disable', PARAM_INT);
-            $mform->setDefault('disable', 1);
-            $mform->disabledIf('submitbutton', 'disable', 'eq', 1);
+        // Editing existing instance.
+        if (!is_null($instance->id)) {
+            $conditions = array('enrolid' => $instance->id, 'platform' => self::get_config('platform'));
+            $arloinstance = $DB->get_record(
+                'enrol_arlo_instance',
+                $conditions,
+                'type, sourceid, sourceguid',
+                MUST_EXIST
+            );
+            // Setup read-only Event.
+            if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
+                $typeoptions = array(
+                    self::ARLO_TYPE_EVENT => get_string('event', 'enrol_arlo')
+                );
+                $mform->addElement(
+                    'select',
+                    'arlotype',
+                    get_string('type', 'enrol_arlo'),
+                    $typeoptions
+                );
+                $mform->setConstant('arlotype', $arloinstance->type);
+                $mform->hardFreeze('arlotype', $arloinstance->type);
+                $code = $DB->get_field(
+                    'enrol_arlo_event',
+                    'code',
+                    array('platform' => self::get_config('platform'), 'sourceid' => $arloinstance->sourceid)
+                );
+                $eventoptions = array($arloinstance->sourceguid => $code);
+                $mform->addElement('select', 'arloevent', get_string('event', 'enrol_arlo'),
+                    $eventoptions);
+                $mform->setConstant('arloevent', $arloinstance->sourceguid);
+                $mform->hardFreeze('arloevent', $arloinstance->sourceguid);
+            }
+            // Setup read-only Online Activity.
+            if ($arloinstance->type == self::ARLO_TYPE_ONLINEACTIVITY) {
+                $typeoptions = array(
+                    self::ARLO_TYPE_ONLINEACTIVITY => get_string('onlineactivity', 'enrol_arlo')
+                );
+                $mform->addElement(
+                    'select',
+                    'arlotype',
+                    get_string('type', 'enrol_arlo'),
+                    $typeoptions
+                );
+                $mform->setConstant('arlotype', $arloinstance->type);
+                $mform->hardFreeze('arlotype', $arloinstance->type);
+                $code = $DB->get_field(
+                    'enrol_arlo_onlineactivity',
+                    'code',
+                    array('platform' => self::get_config('platform'), 'sourceid' => $arloinstance->sourceid)
+                );
+                $eventoptions = array($arloinstance->sourceguid => $code);
+                $mform->addElement('select', 'arloonlineactivity', get_string('onlineactivity',
+                    'enrol_arlo'), $eventoptions);
+                $mform->setConstant('arloonlineactivity', $arloinstance->sourceguid);
+                $mform->hardFreeze('arloonlineactivity', $arloinstance->sourceguid);
+            }
+        // New instance.
         } else {
-            $options = $this->get_status_options();
-            $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
-
+            $typeoptions = $this->get_type_options();
+            $eventoptions = $this->get_event_options();
+            $onlineactivityoptions = $this->get_onlineactivity_options();
+            // If there are no Active Events or Online Activities redirect.
+            if (!$onlineactivityoptions && !$eventoptions) {
+                die('redirect');
+            }
             // Type options.
             array_unshift($typeoptions, get_string('choose') . '...');
             $mform->addElement('select', 'arlotype', get_string('type', 'enrol_arlo'), $typeoptions);
@@ -333,46 +382,22 @@ class enrol_arlo_plugin extends enrol_plugin {
                 get_string('onlineactivity', 'enrol_arlo'), $onlineactivityoptions);
             $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', self::ARLO_TYPE_EVENT);
             $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', 0);
-
-            $options = array('optional' => true, 'defaultunit' => 86400);
-            $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_arlo'), $options);
-            $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
-
-            $options = array(0 => get_string('no'), 1 => get_string('yes'));
-            $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'enrol_arlo'), $options);
-            $mform->addHelpButton('expirynotify', 'expirynotify', 'enrol_arlo');
-            $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
-            $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
-            $mform->addElement('textarea', 'customtext1',
-                get_string('customwelcomemessage', 'enrol_arlo'),
-                array('cols' => '60', 'rows' => '8'));
-            $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_arlo');
-
-            // Set extra Arlo instance information for existing record. Remove elements.
-            if (!is_null($instance->id)) {
-                $conditions = array('enrolid' => $instance->id);
-                $arloinstance = $DB->get_record('enrol_arlo_instance', $conditions, 'type, sourceguid', MUST_EXIST);
-                if ($arloinstance) {
-                    $data = array('arlotype' => $arloinstance->type);
-                    $mform->hardFreeze('arlotype', $arloinstance->type);
-                    if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
-                        $data['arloevent'] = $arloinstance->sourceguid;
-                        $mform->removeElement('arloonlineactivity');
-                        $mform->setConstant('arloevent', $arloinstance->sourceguid);
-                        $mform->hardFreeze('arloevent', $arloinstance->sourceguid);
-
-                    }
-                    if ($arloinstance->type == self::ARLO_TYPE_ONLINEACTIVITY) {
-                        $data['arloonlineactivity'] = $arloinstance->sourceguid;
-                        $mform->removeElement('arloevent');
-                        $mform->setConstant('arloonlineactivity', $arloinstance->sourceguid);
-                        $mform->hardFreeze('arloonlineactivity', $arloinstance->sourceguid);
-                    }
-                    $mform->setDefaults($data);
-                }
-            }
         }
-
+        // Settings that are editable be instance new or existing.
+        $options = $this->get_status_options();
+        $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
+        $options = array('optional' => true, 'defaultunit' => 86400);
+        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_arlo'), $options);
+        $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
+        $options = array(0 => get_string('no'), 1 => get_string('yes'));
+        $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'enrol_arlo'), $options);
+        $mform->addHelpButton('expirynotify', 'expirynotify', 'enrol_arlo');
+        $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
+        $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
+        $mform->addElement('textarea', 'customtext1',
+            get_string('customwelcomemessage', 'enrol_arlo'),
+            array('cols' => '60', 'rows' => '8'));
+        $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_arlo');
     }
 
     /**
