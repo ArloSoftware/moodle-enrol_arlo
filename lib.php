@@ -243,7 +243,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 
     /**
      * Returns defaults for new instances.
-     * 
+     *
      * @return array
      */
     public function get_instance_defaults() {
@@ -301,11 +301,13 @@ class enrol_arlo_plugin extends enrol_plugin {
             array_unshift($eventoptions, get_string('choose') . '...');
             $mform->addElement('select', 'arloevent', get_string('event', 'enrol_arlo'), $eventoptions);
             $mform->disabledIf('arloevent', 'arlotype', 'eq', self::ARLO_TYPE_ONLINEACTIVITY);
+            $mform->disabledIf('arloevent', 'arlotype', 'eq', 0);
             // Online Activity selector.
             array_unshift($onlineactivityoptions, get_string('choose') . '...');
             $mform->addElement('select', 'arloonlineactivity',
                 get_string('onlineactivity', 'enrol_arlo'), $onlineactivityoptions);
             $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', self::ARLO_TYPE_EVENT);
+            $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', 0);
 
             $options = array('optional' => true, 'defaultunit' => 86400);
             $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_arlo'), $options);
