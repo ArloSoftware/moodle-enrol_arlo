@@ -189,28 +189,52 @@ class enrol_arlo_plugin extends enrol_plugin {
         return has_capability('enrol/arlo:config', $context);
     }
 
+    /**
+     * Get Event options for form select.
+     *
+     * @return array
+     */
     public function get_event_options() {
         global $DB;
         $options = array();
+        $sql = "SELECT sourceguid, code 
+                  FROM {enrol_arlo_event}
+                 WHERE platform = :platform
+                   AND sourcestatus = :sourcestatus 
+                   AND sourceguid NOT IN (SELECT sourceguid 
+                                            FROM {enrol_arlo_instance})
+              ORDER BY code";
         $conditions = array(
             'platform' => self::get_config('platformname', null),
-            'sourcestatus' => EventStatus::ACTIVE);
-        // TODO - Remove Events currently attached to enrol instances for list.
-        $records = $DB->get_records('enrol_arlo_event', $conditions, 'code', 'sourceguid, code');
+            'sourcestatus' => EventStatus::ACTIVE
+        );
+        $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
             $options[$record->sourceguid] = $record->code;
         }
         return $options;
     }
 
+    /**
+     * Get Online Activity options for form select.
+     *
+     * @return array
+     */
     public function get_onlineactivity_options() {
         global $DB;
         $options = array();
+        $sql = "SELECT sourceguid, code 
+                  FROM {enrol_arlo_onlineactivity}
+                 WHERE platform = :platform
+                   AND sourcestatus = :sourcestatus 
+                   AND sourceguid NOT IN (SELECT sourceguid 
+                                            FROM {enrol_arlo_instance})
+              ORDER BY code";
         $conditions = array(
             'platform' => self::get_config('platformname', null),
-            'sourcestatus' => OnlineActivityStatus::ACTIVE);
-        // TODO - Remove Events currently attached to enrol instances for list.
-        $records = $DB->get_records('enrol_arlo_onlineactivity', $conditions, 'code', 'sourceguid, code');
+            'sourcestatus' => OnlineActivityStatus::ACTIVE
+        );
+        $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
             $options[$record->sourceguid] = $record->code;
         }
@@ -219,6 +243,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 
     /**
      * Returns defaults for new instances.
+     * 
      * @return array
      */
     public function get_instance_defaults() {
