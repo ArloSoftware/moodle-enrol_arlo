@@ -366,7 +366,9 @@ class enrol_arlo_plugin extends enrol_plugin {
             $onlineactivityoptions = $this->get_onlineactivity_options();
             // If there are no Active Events or Online Activities redirect.
             if (!$onlineactivityoptions && !$eventoptions) {
-                die('redirect');
+                $redirect = new moodle_url('/enrol/instances.php');
+                $redirect->param('id', $instance->courseid);
+                redirect($redirect, get_string('noeventsoractivitiesfound', 'enrol_arlo'), 1);
             }
             // Type options.
             array_unshift($typeoptions, get_string('choose') . '...');

@@ -225,7 +225,7 @@ $string['error_incorrectcontenttype_full_html'] = '
 
 $string['enrolperiod'] = 'Enrolment duration';
 $string['status_help'] = '';
-$string['noeventsoractivitiesfound'] = '<h1>No Active Events or Online Activities found.</h1>';
+$string['noeventsoractivitiesfound'] = 'No "Active" Events or Online Activities found.';
 
 $string['errorselectevent'] = 'You must select an Event';
 $string['errorselectonlineactvity'] = 'You must select an Online Activity';
