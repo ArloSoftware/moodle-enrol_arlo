@@ -19,6 +19,8 @@ use GuzzleHttp\Psr7\Response;
 
 
 class manager {
+    /** @var $plugin enrolment plugin instance. */
+    private static $plugin;
     private $platform;
     private $apiusername;
     private $apipassword;
@@ -29,15 +31,38 @@ class manager {
                                 $apiusername = null,
                                 $apipassword = null,
                                 \progress_trace $trace = null) {
-
+        // Check we have all config.
+        if (empty($platform)) {
+            throw new \coding_exception('Empty platform config');
+        }
         $this->platform = $platform;
+        if (empty($apiusername)) {
+            throw new \coding_exception('Empty apiusername config');
+        }
         $this->apiusername = $apiusername;
+        if (empty($apipassword)) {
+            throw new \coding_exception('Empty apipassword config');
+        }
         $this->apipassword = $apipassword;
+        // Setup trace.
         if (is_null($trace)) {
             $this->trace = new \null_progress_trace();
         } else {
             $this->trace = $trace;
         }
+
+    }
+
+    /**
+     * Get the Arlo enrolment plugin.
+     *
+     * @return \enrol_plugin
+     */
+    private static function get_plugin() {
+        if (is_null(self::$plugin)) {
+            self::$plugin = enrol_get_plugin('arlo');
+        }
+        return self::$plugin;
     }
 
     private function get_latestmodified_field($table) {
@@ -52,7 +77,7 @@ class manager {
         if (!is_int($status)) {
             throw new \Exception('API Status must integer.');
         }
-        plugin_config::set('apistatus', $status);
+        self::get_plugin()->set_config('apistatus', $status);
     }
 
     public function fetch_events() {
