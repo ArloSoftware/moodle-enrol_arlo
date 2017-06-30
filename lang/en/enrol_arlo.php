@@ -125,8 +125,8 @@ You may access this course at the following url:
   {$a->courseurl}';
 
 $string['associatearlotemplate'] = 'Associate Arlo template';
-$string['platformname'] = 'Platform name';
-$string['platformname_desc'] = 'This is name of platform on Arlo e.g https://{platform}.arlo.co';
+$string['platform'] = 'Platform FQDN';
+$string['platform_desc'] = 'This is name of platform on Arlo e.g https://{platform}.arlo.co';
 $string['apiusername'] = 'API username';
 $string['apipassword'] = 'API password';
 $string['savechanges'] = 'Save changes';
