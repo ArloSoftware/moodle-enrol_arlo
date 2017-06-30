@@ -30,6 +30,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
+use enrol_arlo\user_match;
 
 /**
  * ARLO_CREATE_GROUP constant for automatically creating a group matched to enrolment instance.
@@ -40,6 +41,30 @@ define('ARLO_CREATE_GROUP', -1);
 class enrol_arlo_plugin extends enrol_plugin {
     const ARLO_TYPE_EVENT           = 'event';
     const ARLO_TYPE_ONLINEACTIVITY  = 'onlineactivity';
+
+    public function get_config_defaults() {
+        static $studentroleid;
+        if (is_null($studentroleid)) {
+            $student = get_archetype_roles('student');
+            $student = reset($student);
+            $studentroleid = $student->id;
+        }
+        $defaults = array(
+            'apistatus' => 0,
+            'platform' => '',
+            'apiusername' => '',
+            'apipassword' => '',
+            'authplugin' => 'manual',
+            'roleid' => $studentroleid,
+            'unenrolaction' => ENROL_EXT_REMOVED_UNENROL,
+            'expiredaction' => ENROL_EXT_REMOVED_SUSPEND,
+            'pushonlineactivityresults' => 1,
+            'pusheventresults' => 0,
+            'alertsiteadmins' => 1
+        );
+        return $defaults;
+    }
+
     /**
      * Add new instance of enrol plugin with default settings.
      * @param stdClass $course
