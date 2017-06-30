@@ -17,8 +17,8 @@ use GuzzleHttp\Exception\BadResponseException;
  * @package enrol_arlo\Arlo\AuthAPI
  */
 class Client {
-    /** @var string platformName Arlo plaform name. */
-    private $platformName;
+    /** @var string platform Arlo plaform name. */
+    private $platform;
     /** @var string apiUsername username. */
     private $apiUsername;
     /** @var string apiPassword password. */
@@ -37,20 +37,20 @@ class Client {
     /**
      * Client constructor.
      * 
-     * @param $platformName
+     * @param $platform
      * @param $apiUsername
      * @param $apiPassword
      * @throws \Exception
      */
-    public function __construct($platformName, $apiUsername, $apiPassword) {
+    public function __construct($platform, $apiUsername, $apiPassword) {
         // Check platform name.
-        if (empty($platformName)) {
-            throw new \Exception("PlatformName cannot be empty.");
+        if (empty($platform)) {
+            throw new \Exception("platform cannot be empty.");
         }
-        if (!is_string($platformName)) {
-            throw new \Exception("PlatformName must be a string.");
+        if (!is_string($platform)) {
+            throw new \Exception("platform must be a string.");
         }
-        $this->platformName = $platformName;
+        $this->platform = $platform;
         // Check apiUsername.
         if (empty($apiUsername)) {
             throw new \Exception("apiUsername name cannot be empty.");
