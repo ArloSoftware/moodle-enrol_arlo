@@ -778,7 +778,17 @@ class enrol_arlo_plugin extends enrol_plugin {
         return $processed;
     }
 
-
+    /**
+     * Handles un-enrolling a user.
+     *
+     * @param stdClass $instance
+     * @param int $userid
+     * @return void
+     */
+    public function unenrol_user(stdClass $instance, $userid) {
+        global $DB;
+        parent::unenrol_user($instance, $userid);
+    }
 
 }
 
