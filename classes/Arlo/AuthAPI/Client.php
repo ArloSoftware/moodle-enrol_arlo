@@ -99,23 +99,19 @@ class Client {
         if (!$requestUri->isValid()) {
             throw new \Exception('Invalid RequestUri.');
         }
-        try {
-            $headers = array();
-            $options = array();
-            $options['auth'] = array(
-                $this->apiUsername,
-                $this->apiPassword
-            );
-            $options['decode_content'] = 'gzip';
-            $options['connect_timeout'] = self::CONNECTION_TIMEOUT;
-            $request = new Request($method, $requestUri->output(), $headers, $body);
-            $this->lastRequest = $request;
-            $this->lastRequestTime = time();
-            $response = $this->httpClient->send($request, $options);
-            $this->lastResponse = $response;
-        } catch (BadResponseException $e) {
-            return $e->getResponse();
-        }
+        $headers = array();
+        $options = array();
+        $options['auth'] = array(
+            $this->apiUsername,
+            $this->apiPassword
+        );
+        $options['decode_content'] = 'gzip';
+        $options['connect_timeout'] = self::CONNECTION_TIMEOUT;
+        $request = new Request($method, $requestUri->output(), $headers, $body);
+        $this->lastRequest = $request;
+        $this->lastRequestTime = time();
+        $response = $this->httpClient->send($request, $options);
+        $this->lastResponse = $response;
         return $response;
     }
 
