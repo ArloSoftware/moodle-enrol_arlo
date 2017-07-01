@@ -319,7 +319,6 @@ class manager {
         $timelogged = time();
         if ($exception instanceof ClientException) {
             $status = $exception->getCode();
-            $exception->getResponse()->getReasonPhrase()
             $uri = (string) $exception->getRequest()->getUri();
             $message = $exception->getMessage();
             // Set status.
