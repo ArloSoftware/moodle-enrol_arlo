@@ -428,7 +428,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Settings that are editable be instance new or existing.
         $options = $this->get_status_options();
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
-
+        // Groups
         $groups = array(0 => get_string('none'));
         if (has_capability('moodle/course:managegroups', $context)) {
             $groups[self::ARLO_CREATE_GROUP] = get_string('creategroup', 'enrol_arlo');
@@ -441,19 +441,18 @@ class enrol_arlo_plugin extends enrol_plugin {
             $mform->setConstant('customint2', $instance->customint2);
             $mform->hardFreeze('customint2', $instance->customint2);
         }
-
-        $options = array('optional' => true, 'defaultunit' => 86400);
-        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_arlo'), $options);
-        $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
-        $options = array(0 => get_string('no'), 1 => get_string('yes'));
-        $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'enrol_arlo'), $options);
-        $mform->addHelpButton('expirynotify', 'expirynotify', 'enrol_arlo');
         $mform->addElement('advcheckbox', 'customint8', get_string('sendcoursewelcomemessage', 'enrol_arlo'));
         $mform->addHelpButton('customint8', 'sendcoursewelcomemessage', 'enrol_arlo');
         $mform->addElement('textarea', 'customtext1',
             get_string('customwelcomemessage', 'enrol_arlo'),
             array('cols' => '60', 'rows' => '8'));
         $mform->addHelpButton('customtext1', 'customwelcomemessage', 'enrol_arlo');
+        $options = array('optional' => true, 'defaultunit' => 86400);
+        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_arlo'), $options);
+        $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
+        $options = array(0 => get_string('no'), 1 => get_string('yes'));
+        $mform->addElement('select', 'expirynotify', get_string('expirynotify', 'enrol_arlo'), $options);
+        $mform->addHelpButton('expirynotify', 'expirynotify', 'enrol_arlo');
     }
 
     /**
