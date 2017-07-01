@@ -50,6 +50,28 @@ class manager {
         } else {
             $this->trace = $trace;
         }
+    }
+
+    public function process_instances() {
+        global $DB;
+        $conditions = array(
+            'enrol' => 'arlo',
+            'status' => ENROL_INSTANCE_ENABLED,
+            'platform' => $this->platform
+        );
+        $sql = "SELECT ai.* 
+                  FROM {enrol} e
+                  JOIN {enrol_arlo_instance} ai
+                    ON ai.enrolid = e.id
+                 WHERE e.enrol = :enrol 
+                   AND e.status = :status
+                   AND ai.platform = :platform
+              ORDER BY ai.nextpulltime";
+
+        $records = $DB->get_records_sql($sql, $conditions);
+        foreach ($records as $record) {
+            print_object($record);
+        }
 
     }
 
