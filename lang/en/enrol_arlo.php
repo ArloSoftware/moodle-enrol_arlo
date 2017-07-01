@@ -230,3 +230,10 @@ $string['noeventsoractivitiesfound'] = 'No "Active" Events or Online Activities 
 $string['errorselecttype'] = 'You must select an Type';
 $string['errorselectevent'] = 'You must select an Event';
 $string['errorselectonlineactvity'] = 'You must select an Online Activity';
+
+$string['error_invalidconectiondetails_subject'] = '[enrol/arlo] Invalid connection details.';
+$string['error_invalidconectiondetails_full_html'] = '
+<h3>Invalid connection details.</h3>
+<br>
+<p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
+<p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
