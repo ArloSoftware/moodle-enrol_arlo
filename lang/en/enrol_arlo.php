@@ -56,7 +56,7 @@ The following placeholders may be included in the message:
 * User username {$a->username}
 * Forgot password url {$a->forgotpasswordurl}';
 
-$string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
+$string['defaultgroupnametext'] = '{$a->name} Arlo group';
 $string['defaultperiod'] = 'Default enrolment duration';
 $string['defaultperiod_desc'] = 'Default length of time that the enrolment is valid. If set to zero, the enrolment duration will be unlimited by default.';
 $string['defaultperiod_help'] = 'Default length of time that the enrolment is valid, starting with the moment the user is enrolled. If disabled, the enrolment duration will be unlimited by default.';
@@ -67,14 +67,14 @@ $string['creategroup'] = 'Create new group';
 $string['sendcoursewelcomemessage'] = 'Send course welcome message';
 $string['sendcoursewelcomemessage_help'] = 'If enabled, users receive a welcome message via email when they are enrolled in a course.';
 
-$string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
+
 $string['event'] = 'Event';
 $string['events'] = 'Events';
 $string['onlineactivity'] = 'Online Activity';
 $string['onlineactivities'] = 'Online Activities';
 
 $string['type'] = 'Type of Event';
-$string['defaultgroupnametext'] = '{$a->name} Arlo {$a->increment}';
+
 $string['linktemplatetocourse'] = 'Link Arlo template to this course';
 $string['remove'] = 'Remove';
 $string['template'] = 'Template';
@@ -227,5 +227,6 @@ $string['enrolperiod'] = 'Enrolment duration';
 $string['status_help'] = '';
 $string['noeventsoractivitiesfound'] = 'No "Active" Events or Online Activities found.';
 
+$string['errorselecttype'] = 'You must select an Type';
 $string['errorselectevent'] = 'You must select an Event';
 $string['errorselectonlineactvity'] = 'You must select an Online Activity';

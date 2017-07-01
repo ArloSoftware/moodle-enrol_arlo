@@ -32,15 +32,13 @@ use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\user_match;
 
-/**
- * ARLO_CREATE_GROUP constant for automatically creating a group matched to enrolment instance.
- */
-define('ARLO_CREATE_GROUP', -1);
+
 
 
 class enrol_arlo_plugin extends enrol_plugin {
     const ARLO_TYPE_EVENT           = 'event';
     const ARLO_TYPE_ONLINEACTIVITY  = 'onlineactivity';
+    const ARLO_CREATE_GROUP         = -1;
 
     public function get_config_defaults() {
         static $studentroleid;
@@ -107,14 +105,48 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         $conditions = array('platform' => $instance->platform, 'sourceguid' => $sourceguid);
         $record = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
-        $instance->sourceid = $record->sourceid;
-        $instance->sourceguid = $record->sourceguid;
+        $instance->sourceid     = $record->sourceid;
+        $instance->sourceguid   = $record->sourceguid;
+        $sourcefinishdate = 0;
+        if (isset($record->finishdatetime)) {
+            $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
+        }
+        $instance->endpulltime  = $sourcefinishdate;
+        // Create a new course group if required.
+        if (!empty($fields['customint2']) && $fields['customint2'] == self::ARLO_CREATE_GROUP) {
+            $context = context_course::instance($course->id);
+            require_capability('moodle/course:managegroups', $context);
+            $groupid = static::create_course_group($course->id, $record->code);
+        }
         // Set name to be passed to parent.
-        $fields['name'] = $record->code;
-        // TODO Group creation.
+        $fields['name']         = $record->code;
+        $fields['customint2']   = $groupid;
+        // Insert enrol and enrol_arlo_instance records.
         $instance->enrolid = parent::add_instance($course, $fields);
         $DB->insert_record('enrol_arlo_instance', $instance);
         return $instance->enrolid;
+    }
+
+    /**
+     * Create course group based on Arlo Code.
+     *
+     * @param $courseid
+     * @param $code
+     * @return id
+     */
+    public static function create_course_group($courseid, $code) {
+        global $CFG;
+        require_once($CFG->dirroot . '/group/lib.php');
+        $a = new \stdClass();
+        $a->name = $code;
+        $groupname = get_string('defaultgroupnametext', 'enrol_arlo', $a);
+        // Create a new group for the for event or online activity.
+        $groupdata = new \stdClass();
+        $groupdata->courseid = $courseid;
+        $groupdata->name = $groupname;
+        $groupdata->idnumber = $code;
+        $groupid = groups_create_group($groupdata);
+        return $groupid;
     }
 
     /**
@@ -141,10 +173,17 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function update_instance($instance, $data) {
+        $context = context_course::instance($instance->courseid);
         // Unset Arlo instance data, should not be updated when updating enrol instance.
         unset($data->arlotype);
         unset($data->arloevent);
         unset($data->arloonlineactivity);
+        // Create a new course group if required.
+        if ($data->customint2 == self::ARLO_CREATE_GROUP) {
+            require_capability('moodle/course:managegroups', $context);
+            $groupid = static::create_course_group($instance->courseid, $data->name);
+            $data->customint2 = $groupid;
+        }
         return parent::update_instance($instance, $data);
     }
 
@@ -276,7 +315,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         $fields['roleid']               = $this->get_config('roleid');
         $fields['enrolperiod']          = 0;
         $fields['expirynotify']         = 0;
-        $fields['customint8']           = 1; //$this->get_config('sendcoursewelcomemessage');
+        $fields['customint2']           = self::ARLO_CREATE_GROUP;  // Group
+        $fields['customint8']           = 1; // Send course welcome.
         $fields['arlotype']             = '';
         $fields['arloevent']            = '';
         $fields['arloonlineactivity']   = '';
@@ -388,6 +428,20 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Settings that are editable be instance new or existing.
         $options = $this->get_status_options();
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
+
+        $groups = array(0 => get_string('none'));
+        if (has_capability('moodle/course:managegroups', $context)) {
+            $groups[self::ARLO_CREATE_GROUP] = get_string('creategroup', 'enrol_arlo');
+        }
+        foreach (groups_get_all_groups($context->instanceid) as $group) {
+            $groups[$group->id] = format_string($group->name, true, array('context' => $context));
+        }
+        $mform->addElement('select', 'customint2', get_string('assignedgroup', 'enrol_arlo'), $groups);
+        if ($instance->customint2 != self::ARLO_CREATE_GROUP || $instance->customint2 == '0') {
+            $mform->setConstant('customint2', $instance->customint2);
+            $mform->hardFreeze('customint2', $instance->customint2);
+        }
+
         $options = array('optional' => true, 'defaultunit' => 86400);
         $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_arlo'), $options);
         $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_self');
@@ -415,6 +469,9 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function edit_instance_validation($data, $files, $instance, $context) {
         $errors = array();
+        if(empty($data['arlotype'])) {
+            $errors['arlotype'] = get_string('errorselecttype', 'enrol_arlo');
+        }
         if ($data['arlotype'] == self::ARLO_TYPE_EVENT && empty($data['arloevent'])) {
             $errors['arloevent'] = get_string('errorselectevent', 'enrol_arlo');
         }
