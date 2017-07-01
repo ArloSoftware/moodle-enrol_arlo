@@ -78,6 +78,7 @@ class manager {
 
     }
 
+
     /**
      * Get the Arlo enrolment plugin.
      *
@@ -318,6 +319,7 @@ class manager {
         $timelogged = time();
         if ($exception instanceof ClientException) {
             $status = $exception->getCode();
+            $exception->getResponse()->getReasonPhrase()
             $uri = (string) $exception->getRequest()->getUri();
             $message = $exception->getMessage();
             // Set status.
@@ -492,18 +494,18 @@ class manager {
      * @param string $info
      * @return \stdClass
      */
-    private function log($timelogged, $uri, $status, $info = '') {
+    private function log($timelogged, $uri, $status, $extra = '') {
         global $DB;
 
         $item = new \stdClass();
-        $item->timelogged = $timelogged;
+        $item->timelogged = time();
         $item->platform = $this->platform;
         $item->uri = $uri;
         $item->status = $status;
-        if ($info != '') {
-            $item->info = (string) $info;
+        if ($extra != '') {
+            $item->extra = (string) $extra;
         }
-        $item->id = $DB->insert_record('enrol_arlo_webservicelog', $item);
+        $item->id = $DB->insert_record('enrol_arlo_requestlog', $item);
         return $item;
     }
 
