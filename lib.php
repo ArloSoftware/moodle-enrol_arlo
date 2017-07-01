@@ -117,10 +117,12 @@ class enrol_arlo_plugin extends enrol_plugin {
             $context = context_course::instance($course->id);
             require_capability('moodle/course:managegroups', $context);
             $groupid = static::create_course_group($course->id, $record->code);
+            // Map group id to customint2.
+            $fields['customint2']   = $groupid;
         }
         // Set name to be passed to parent.
         $fields['name']         = $record->code;
-        $fields['customint2']   = $groupid;
+
         // Insert enrol and enrol_arlo_instance records.
         $instance->enrolid = parent::add_instance($course, $fields);
         $DB->insert_record('enrol_arlo_instance', $instance);
