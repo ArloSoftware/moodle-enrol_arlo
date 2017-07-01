@@ -15,7 +15,10 @@ use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\exception\client_exception;
 use enrol_arlo\exception\server_exception;
 use enrol_arlo\utility\date;
+
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
 
 
 class manager {
@@ -156,7 +159,11 @@ class manager {
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            self::handle_exception($e, $logitem);
+            $handled = self::handle_request_exception($e);
+            if (!$handled) {
+                // TODO.
+                print_object($e);
+            }
             return false;
         }
         return true;
@@ -218,7 +225,11 @@ class manager {
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            self::handle_exception($e, $logitem);
+            $handled = self::handle_request_exception($e);
+            if (!$handled) {
+                // TODO.
+                print_object($e);
+            }
             return false;
         }
         $timefinish = microtime();
@@ -283,7 +294,11 @@ class manager {
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            self::handle_exception($e, $logitem);
+            $handled = self::handle_request_exception($e);
+            if (!$handled) {
+                // TODO.
+                print_object($e);
+            }
             return false;
         }
         $timefinish = microtime();
@@ -293,35 +308,73 @@ class manager {
     }
 
     /**
+     * Handle request exceptions.
+     *
      * @param \Exception $exception
-     * @param null $logitem
      * @return bool
      */
-    private function handle_exception(\Exception $exception, $logitem = null) {
-        global $DB;
-        $code = $exception->getCode();
-        $message = $exception->getMessage();
-
-        // Add log extra info.
-        if (!is_null($logitem)) {
-            $DB->set_field('enrol_arlo_webservicelog', 'info', $message, array('id' => $logitem->id));
+    private function handle_request_exception(\Exception $exception) {
+        global $CFG;
+        $timelogged = time();
+        if ($exception instanceof ClientException) {
+            $status = $exception->getCode();
+            $uri = (string) $exception->getRequest()->getUri();
+            $message = $exception->getMessage();
+            // Set status.
+            self::update_api_status($status);
+            // Log.
+            self::log($timelogged, $uri, $status, $message);
+            // Alert.
+            if ($status == 401 || $status == 403) {
+                $identifier = 'error_' . $status;
+                $params = array('url' => $CFG->wwwroot . '/admin/settings.php?section=enrolsettingsarlo');
+                self::alert($identifier, $params);
+            }
+            return false;
         }
-        if (method_exists($exception, 'get_string_dentifier')) {
-            $stringidentifier = $exception->get_string_dentifier();
-        }
-        if (method_exists($exception, 'get_parameters')) {
-            $stringparameters = $exception->get_parameters();
-        }
-        if (method_exists($exception, 'get_api_exception')) {
-            $apiexception = $exception->get_api_exception();
-        }
-        // Client exception send a message.
-        if ($exception instanceof client_exception) {
-            self::alert($stringidentifier, $stringparameters);
-        } else {
-            print_object($exception);die; // TODO - Handle
+        if ($exception instanceof RequestException) {
+            $status = $exception->getCode();
+            $uri = (string) $exception->getRequest()->getUri();
+            $message = $exception->getMessage();
+            // Set status.
+            self::update_api_status($status);
+            // Log.
+            self::log($timelogged, $uri, $status, $message);
+            return true;
         }
         return false;
+    }
+
+    /**
+     * Parse response. Check content-type.
+     *
+     * @param Response $response
+     * @return mixed
+     * @throws server_exception
+     */
+    private function parse_response(Response $response) {
+        // Returned HTTP status, used for error checking.
+        $status = (int) $response->getStatusCode();
+        $reason = $response->getReasonPhrase();
+        // Incorrect content-type.
+        $contenttype = $response->getHeaderLine('content-type');
+        if (strpos($contenttype, 'application/xml') === false) {
+            throw new server_exception(
+                $reason,
+                $status,
+                'error_incorrectcontenttype',
+                array('contenttype' => $contenttype)
+            );
+        }
+        // Deserialize response body.
+        $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
+        $stream = $response->getBody();
+        $contents = $stream->getContents();
+        if ($stream->eof()) {
+            $stream->rewind(); // Rewind stream.
+        }
+        // If everything went OK a resource class will be returned.
+        return $deserializer->deserialize($contents);
     }
 
     public function process_event(Event $event) {
@@ -430,73 +483,6 @@ class manager {
             self::trace(sprintf('Updated: %s', $record->name));
         }
         return $record;
-    }
-
-    private function parse_response(Response $response) {
-        global $CFG;
-        $resourceclass = false;
-        // Returned HTTP status, used for error checking.
-        $status = (int) $response->getStatusCode();
-        $reason = $response->getReasonPhrase();
-        // Incorrect content-type.
-        $contenttype = $response->getHeaderLine('content-type');
-        if (strpos($contenttype, 'application/xml') === false) {
-            throw new server_exception(
-                $reason,
-                $status,
-                'error_incorrectcontenttype',
-                array('contenttype' => $contenttype)
-                );
-        }
-        // Deserialize response body.
-        $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
-        $stream = $response->getBody();
-        $contents = $stream->getContents();
-        if ($stream->eof()) {
-            $stream->rewind(); // Rewind stream.
-        }
-        // Throw exception if empty response body.
-        if (empty($contents)) {
-            throw new server_exception(
-                $reason,
-                $status,
-                'error_emptyresponse');
-        }
-        $resourceclass = $deserializer->deserialize($contents);
-        // Get api exception information if available.
-        $apiexception = array();
-        if ($resourceclass instanceof ApiException) {
-            $apiexception['code'] = $resourceclass->Code;
-            $apiexception['message'] = $resourceclass->Message;
-        }
-        // Client side.
-        if ($status >= 400 && $status < 499) {
-            $identifier = 'error_4xx';
-            $params = array();
-            // Custom 401 Unauthorized, 403 Forbidden messages.
-            if ($status == 401 || $status == 403) {
-                $identifier = 'error_' . $status;
-                $params = array('url' => $CFG->wwwroot . '/admin/settings.php?section=enrolsettingsarlo');
-            }
-            throw new client_exception(
-                $reason,
-                $status,
-                $identifier,
-                $params,
-                $apiexception);
-        // Server side.
-        } else if ($status >= 500 && $status < 599) {
-            $identifier = 'error_5xx';
-            $params = array();
-            throw new server_exception(
-                $reason,
-                $status,
-                $identifier,
-                $params,
-                $apiexception);
-        }
-        // If everything went OK a resource class will be returned.
-        return $resourceclass;
     }
 
     /**
