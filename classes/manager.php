@@ -529,7 +529,7 @@ class manager {
      */
     private static function alert($identifier, $params = array()) {
         // Check admin alerts are enabled.
-        if (!plugin_config::get('alertsiteadmins')) {
+        if (!self::get_plugin()->get_config('alertsiteadmins')) {
             return;
         }
         if (empty($identifier) && !is_string($identifier)) {
