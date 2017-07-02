@@ -19,6 +19,15 @@ class Filter {
     }
 
     /**
+     * Get ResourceField.
+     *
+     * @return mixed
+     */
+    public function getResourceField() {
+        return $this->resourceField;
+    }
+
+    /**
      * Set ResourceField to compare.
      *
      * Example:
