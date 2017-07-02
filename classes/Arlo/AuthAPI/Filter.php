@@ -61,8 +61,8 @@ class Filter {
      * @param bool $exportAsOffset
      * @return $this
      */
-    public function setDateValue(\DateTime $date, $exportAsOffset = false) {
-        $this->value = $date;
+    public function setDateValue($date, $exportAsOffset = false) {
+        $this->datevalue = $date;
         $this->exportAsOffset = $exportAsOffset;
         return $this;
     }
@@ -95,16 +95,16 @@ class Filter {
         if (is_null($this->operator)) {
             throw new \Exception('Filter missing operator');
         }
-        if (is_null($this->value)) {
+        if (is_null($this->value) && is_null($this->datevalue)) {
             throw new \Exception('Filter missing value');
         }
         $export .= $this->resourceField . ' ';
         $export .= $this->operator . ' ';
-        if ($this->value instanceof \DateTime) {
+        if (isset($this->datevalue)) {
             if ($this->exportAsOffset) {
-                $export .= "datetimeoffset('". $this->value->format(DATE_ISO8601).  "')";
+                $export .= "datetimeoffset('". $this->datevalue.  "')";
             } else {
-                $export .= "datetime('". $this->value->format(DATE_ISO8601).  "')";
+                $export .= "datetime('". $this->datevalue.  "')";
             }
 
         } else {
