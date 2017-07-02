@@ -157,68 +157,42 @@ class manager {
         return true;
     }
 
-    public function fetch_onlineactivities() {
-        global $DB;
-
-        // self::check_apistatus();
-
-        // Latest modified DateTime - High water mark.
-        $latestmodified = null;
-
+    public function update_onlineactivies() {
+        $timestart = microtime();
         try {
-            $hasnext = true; // Initialise to true for first fetch.
+            $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
-                $hasnext = false;
-                if (is_null($latestmodified)) {
-                    $latestmodified = self::get_latestmodified_field('enrol_arlo_onlineactivity');
-                }
-                // Setup RequestUri for getting Templates.
+                $hasnext = false; // Avoid infinite loop by default.
+                // Get sync information.
+                $syncinfo = self::get_collection_sync_info('onlineactivities');
+                // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
-                $requesturi->setHost($this->platform);
-                $requesturi->setOrderBy('LastModifiedDateTime ASC'); // Important.
                 $requesturi->setResourcePath('onlineactivities/');
-                $requesturi->addExpand('OnlineActivity/EventTemplate');
-                $createdfilter = Filter::create()
-                    ->setResourceField('CreatedDateTime')
-                    ->setOperator('gt')
-                    ->setDateValue($latestmodified);
-                $requesturi->addFilter($createdfilter);
-                $modifiedfilter = Filter::create()
-                    ->setResourceField('LastModifiedDateTime')
-                    ->setOperator('gt')
-                    ->setDateValue($latestmodified);
-                $requesturi->addFilter($modifiedfilter);
-                // Get HTTP client.
-                $client = new Client($this->platform, $this->apiusername, $this->apipassword);
-                // Start the clock.
-                $timestart = microtime();
-                self::trace(sprintf('Fetching OnlineActivities modified after: %s',
-                    date::create($latestmodified)->format(DATE_ISO8601)));
-                // Launch HTTP client request to API and get response.
-                $response = $client->request('GET', $requesturi);
-                // Set API status.
-                self::update_api_status((int) $response->getStatusCode());
-                // Log the request uri and response status.
-                $logitem = self::log(time(), (string) $requesturi, (int) $response->getStatusCode());
-                // Parse response body.
-                $collection = self::parse_response($response);
-                if (!$collection) {
-                    self::trace("No new or updated resources found.");
+                $requesturi->addExpand('Event/EventTemplate');
+                $request = new collection_request($syncinfo, $requesturi);
+                if (!$request->executable()) {
+                    self::trace('Cannot execute request due to timing or API status');
                 } else {
-                    foreach ($collection as $onlineactivity) {
-                        $record = self::process_onlineactivity($onlineactivity);
-                        $latestmodified = $onlineactivity->LastModifiedDateTime;
+                    $response = $request->execute();
+                    $collection = self::deserialize_response_body($response);
+                    // Any returned.
+                    if (!empty($collection)) {
+                        self::update_collection_sync_info($syncinfo, $hasnext);
+                        self::trace("No new or updated resources found.");
+                    } else {
+                        foreach ($collection as $onlineactivity) {
+                            $record = self::update_onlineactivity($onlineactivity);
+                            $latestmodified = $onlineactivity->LastModifiedDateTime;
+                        }
+                        $hasnext = (bool) $collection->hasNext();
+                        $syncinfo->latestsourcemodified = $latestmodified;
+                        self::update_collection_sync_info($syncinfo, $hasnext);
                     }
                 }
-                $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            $handled = self::handle_request_exception($e);
-            if (!$handled) {
-                // TODO.
-                print_object($e);
-            }
-            return false;
+            print_object($e); // TODO handle XMLParse and Moodle exceptions.
+            die;
         }
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
@@ -444,7 +418,7 @@ class manager {
         return $record;
     }
 
-    public function process_onlineactivity(OnlineActivity $onlineactivity) {
+    public function update_onlineactivity(OnlineActivity $onlineactivity) {
         global $DB;
         $record = new \stdClass();
         $record->platform       = $this->platform;
