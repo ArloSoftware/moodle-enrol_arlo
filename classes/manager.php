@@ -79,39 +79,11 @@ class manager {
 
     }
 
-
-    /**
-     * Get the Arlo enrolment plugin.
-     *
-     * @return \enrol_plugin
-     */
-    private static function get_plugin() {
-        if (is_null(self::$plugin)) {
-            self::$plugin = enrol_get_plugin('arlo');
-        }
-        return self::$plugin;
-    }
-
-    private function get_latestmodified_field($table) {
-        global $DB;
-        $sql = "SELECT MAX(t.sourcemodified) AS latestmodified 
-                  FROM {{$table}} t
-                 WHERE t.platform = :platform";
-        $latestmodified = $DB->get_field_sql($sql, array('platform' => $this->platform));
-        if (empty($latestmodified)) {
-            $servertimezone = \core_date::get_server_timezone();
-            $tz = new \DateTimeZone($servertimezone);
-            $date = \DateTime::createFromFormat('U', 0, $tz);
-            $latestmodified = $date->format(DATE_ISO8601);
-        }
-        return $latestmodified;
-    }
-
     public static function update_api_status($status) {
         if (!is_int($status)) {
             throw new \Exception('API Status must integer.');
         }
-        self::get_plugin()->set_config('apistatus', $status);
+        self::$plugin->set_config('apistatus', $status);
     }
 
     public function update_events() {
@@ -312,17 +284,6 @@ class manager {
     }
 
     private function deserialize_response_body(Response $response) {
-        return self::parse_response($response);
-    }
-
-    /**
-     * Parse response. Check content-type.
-     *
-     * @param Response $response
-     * @return mixed
-     * @throws server_exception
-     */
-    private function parse_response(Response $response) {
         // Returned HTTP status, used for error checking.
         $status = (int) $response->getStatusCode();
         $reason = $response->getReasonPhrase();
@@ -499,7 +460,7 @@ class manager {
      */
     private static function alert($identifier, $params = array()) {
         // Check admin alerts are enabled.
-        if (!self::get_plugin()->get_config('alertsiteadmins')) {
+        if (!self::$plugin->get_config('alertsiteadmins')) {
             return;
         }
         if (empty($identifier) && !is_string($identifier)) {
