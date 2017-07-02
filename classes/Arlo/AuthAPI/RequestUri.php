@@ -55,7 +55,7 @@ class RequestUri {
      * @param \enrol_arlo\Arlo\AuthAPI\Filter $filter
      */
     public function addFilter(Filter $filter) {
-        $this->filters[] = $filter;
+        $this->filters[$filter->getResourceField()] = $filter;
     }
 
     public static function createFromUri($uri) {
@@ -157,6 +157,10 @@ class RequestUri {
      */
     public function getResourcePath() {
         return $this->resourcePath;
+    }
+
+    public function getExpands() {
+        return $this->expands;
     }
 
     /**
