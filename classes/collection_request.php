@@ -28,7 +28,8 @@ class collection_request {
         self::set_requesturi($requesturi);
     }
 
-    private function executable() {
+    public function executable() {
+        $timestart = time();
         if ($this->manualoverride) {
             return true;
         }
@@ -47,14 +48,6 @@ class collection_request {
 
     public function execute() {
         try {
-            // Can execute?
-            if (!self::executable()) {
-                return false;
-            }
-
-            // Timestamp.
-            $timestart = time();
-
             list($platform, $apiusername, $apipassword) = self::get_connection_vars();
             $requesturi = $this->requesturi;
 
@@ -83,7 +76,8 @@ class collection_request {
             $client = new Client($platform, $apiusername, $apipassword);
             $response = $client->request('GET', $requesturi);
         } catch (\Exception $e) {
-
+            print_object($e); // TODO handle request exceptions.
+            die;
         }
         return $response;
     }
