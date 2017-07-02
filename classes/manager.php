@@ -133,7 +133,7 @@ class manager {
                     $response = $request->execute();
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
-                    if (!$collection) {
+                    if (!empty($collection)) {
                         self::update_collection_sync_info($syncinfo, $hasnext);
                         self::trace("No new or updated resources found.");
                     } else {
@@ -249,7 +249,7 @@ class manager {
                     $response = $request->execute();
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
-                    if (!$collection) {
+                    if (!empty($collection)) {
                         self::update_collection_sync_info($syncinfo, $hasnext);
                         self::trace("No new or updated resources found.");
                     } else {
