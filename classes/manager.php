@@ -105,16 +105,16 @@ class manager {
                     $response = $request->execute();
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
-                    if (!empty($collection)) {
+                    if (empty($collection)) {
                         self::update_collection_sync_info($syncinfo, $hasnext);
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $event) {
                             $record = self::update_event($event);
                             $latestmodified = $event->LastModifiedDateTime;
+                            $syncinfo->latestsourcemodified = $latestmodified;
                         }
                         $hasnext = (bool) $collection->hasNext();
-                        $syncinfo->latestsourcemodified = $latestmodified;
                         self::update_collection_sync_info($syncinfo, $hasnext);
                     }
                 }
@@ -148,16 +148,16 @@ class manager {
                     $response = $request->execute();
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
-                    if (!empty($collection)) {
+                    if (empty($collection)) {
                         self::update_collection_sync_info($syncinfo, $hasnext);
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $onlineactivity) {
                             $record = self::update_onlineactivity($onlineactivity);
                             $latestmodified = $onlineactivity->LastModifiedDateTime;
+                            $syncinfo->latestsourcemodified = $latestmodified;
                         }
                         $hasnext = (bool) $collection->hasNext();
-                        $syncinfo->latestsourcemodified = $latestmodified;
                         self::update_collection_sync_info($syncinfo, $hasnext);
                     }
                 }
@@ -221,16 +221,16 @@ class manager {
                     $response = $request->execute();
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
-                    if (!empty($collection)) {
+                    if (empty($collection)) {
                         self::update_collection_sync_info($syncinfo, $hasnext);
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $template) {
                             $record = self::update_template($template);
                             $latestmodified = $template->LastModifiedDateTime;
+                            $syncinfo->latestsourcemodified = $latestmodified;
                         }
                         $hasnext = (bool) $collection->hasNext();
-                        $syncinfo->latestsourcemodified = $latestmodified;
                         self::update_collection_sync_info($syncinfo, $hasnext);
                     }
                 }
