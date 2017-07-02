@@ -53,6 +53,7 @@ class manager {
         } else {
             $this->trace = $trace;
         }
+        self::$plugin = enrol_get_plugin('arlo');
     }
 
     public function process_instances() {
@@ -246,68 +247,67 @@ class manager {
         return true;
     }
 
-    public function fetch_templates() {
+    public static function get_collection_sync_info($collection) {
+        global $DB;
+        $conditions = array('type' => $collection);
+        $record = $DB->get_record('enrol_arlo_collection', $conditions);
+        if (!$record) {
+            $record = new \stdClass();
+            $record->platform = self::$plugin->get_config('platform');
+            $record->type = $collection;
+            $record->nextpulltime = time();
+            $record->id = $DB->insert_record('enrol_arlo_collection', $record);
+        }
+        return $record;
+    }
+
+    public static function update_collection_sync_info(\stdClass $record, $hasnext= false) {
         global $DB;
 
-        // self::check_apistatus();
+        $record->lastpulltime = time();
+        if (!$hasnext) {
+            $record->nextpulltime = time();
+        }
+        $DB->update_record('enrol_arlo_collection', $record);
+        return $record;
+    }
 
-        // Latest modified DateTime - High water mark.
-        $latestmodified = null;
-
+    public function update_templates() {
+        $timestart = microtime();
         try {
-            $hasnext = true; // Initialise to true for first fetch.
+            $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
-                $hasnext = false;
-                if (is_null($latestmodified)) {
-                    $latestmodified = self::get_latestmodified_field('enrol_arlo_template');
-                }
+                $hasnext = false; // Avoid infinite loop by default.
+                // Get sync information.
+                $syncinfo = self::get_collection_sync_info('eventtemplates');
                 // Setup RequestUri for getting Templates.
                 $requesturi = new RequestUri();
-                $requesturi->setHost($this->platform);
-                $requesturi->setOrderBy('LastModifiedDateTime ASC'); // Important.
                 $requesturi->setResourcePath('eventtemplates/');
                 $requesturi->addExpand('EventTemplate');
-                $createdfilter = Filter::create()
-                    ->setResourceField('CreatedDateTime')
-                    ->setOperator('gt')
-                    ->setDateValue($latestmodified);
-                $requesturi->addFilter($createdfilter);
-                $modifiedfilter = Filter::create()
-                    ->setResourceField('LastModifiedDateTime')
-                    ->setOperator('gt')
-                    ->setDateValue($latestmodified);
-                $requesturi->addFilter($modifiedfilter);
-                // Get HTTP client.
-                $client = new Client($this->platform, $this->apiusername, $this->apipassword);
-                // Start the clock.
-                $timestart = microtime();
-                self::trace(sprintf('Fetching EventTemplates modified after: %s',
-                    date::create($latestmodified)->format(DATE_ISO8601)));
-                // Launch HTTP client request to API and get response.
-                $response = $client->request('GET', $requesturi);
-                // Set API status.
-                self::update_api_status((int) $response->getStatusCode());
-                // Log the request uri and response status.
-                $logitem = self::log(time(), (string) $requesturi, (int) $response->getStatusCode());
-                // Parse response body.
-                $collection = self::parse_response($response);
-                if (!$collection) {
-                    self::trace("No new or updated resources found.");
+                $request = new collection_request($syncinfo, $requesturi);
+                if (!$request->executable()) {
+                    self::trace('Cannot execute request due to timing or API status');
                 } else {
-                    foreach ($collection as $template) {
-                        $record = self::process_template($template);
-                        $latestmodified = $template->LastModifiedDateTime;
+                    $response = $request->execute();
+                    $collection = self::deserialize_response_body($response);
+                    // Any returned.
+                    if (!$collection) {
+                        self::update_collection_sync_info($syncinfo, $hasnext);
+                        self::trace("No new or updated resources found.");
+                    } else {
+                        foreach ($collection as $template) {
+                            $record = self::update_template($template);
+                            $latestmodified = $template->LastModifiedDateTime;
+                        }
+                        $hasnext = (bool) $collection->hasNext();
+                        $syncinfo->latestsourcemodified = $latestmodified;
+                        self::update_collection_sync_info($syncinfo, $hasnext);
                     }
                 }
-                $hasnext = (bool) $collection->hasNext();
             }
         } catch (\Exception $e) {
-            $handled = self::handle_request_exception($e);
-            if (!$handled) {
-                // TODO.
-                print_object($e);
-            }
-            return false;
+            print_object($e); // TODO handle XMLParse and Moodle exceptions.
+            die;
         }
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
@@ -351,6 +351,10 @@ class manager {
             return true;
         }
         return false;
+    }
+
+    private function deserialize_response_body(Response $response) {
+        return self::parse_response($response);
     }
 
     /**
@@ -425,7 +429,7 @@ class manager {
         return $record;
     }
 
-    public function process_template(EventTemplate $template) {
+    public function update_template(EventTemplate $template) {
         global $DB;
 
         $record = new \stdClass();
@@ -440,7 +444,7 @@ class manager {
         $record->modified       = time();
 
         $params = array(
-            'platform'      => $this->platform,
+            'platform'      => self::$plugin->get_config('platform'),
             'sourceid'      => $record->sourceid,
             'sourceguid'    => $record->sourceguid
         );
