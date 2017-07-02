@@ -107,6 +107,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         $record = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
         $instance->sourceid     = $record->sourceid;
         $instance->sourceguid   = $record->sourceguid;
+        $instance->nextpulltime = time(); // Set next pull time to current time.
         $sourcefinishdate = 0;
         if (isset($record->finishdatetime)) {
             $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
