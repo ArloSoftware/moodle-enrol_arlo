@@ -73,7 +73,7 @@ class manager {
 
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
-            print_object($record);
+            self::fetch_instance_response($record);
         }
 
     }
@@ -96,7 +96,14 @@ class manager {
         $sql = "SELECT MAX(t.sourcemodified) AS latestmodified 
                   FROM {{$table}} t
                  WHERE t.platform = :platform";
-        return $DB->get_field_sql($sql, array('platform' => $this->platform));
+        $latestmodified = $DB->get_field_sql($sql, array('platform' => $this->platform));
+        if (empty($latestmodified)) {
+            $servertimezone = \core_date::get_server_timezone();
+            $tz = new \DateTimeZone($servertimezone);
+            $date = \DateTime::createFromFormat('U', 0, $tz);
+            $latestmodified = $date->format(DATE_ISO8601);
+        }
+        return $latestmodified;
     }
 
     public static function update_api_status($status) {
@@ -128,12 +135,12 @@ class manager {
                 $createdfilter = Filter::create()
                     ->setResourceField('CreatedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
+                    ->setDateValue($latestmodified);
                 $requesturi->addFilter($createdfilter);
                 $modifiedfilter = Filter::create()
                     ->setResourceField('LastModifiedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
+                    ->setDateValue($latestmodified);
                 $requesturi->addFilter($modifiedfilter);
                 // Get HTTP client.
                 $client = new Client($this->platform, $this->apiusername, $this->apipassword);
@@ -194,12 +201,12 @@ class manager {
                 $createdfilter = Filter::create()
                     ->setResourceField('CreatedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
+                    ->setDateValue($latestmodified);
                 $requesturi->addFilter($createdfilter);
                 $modifiedfilter = Filter::create()
                     ->setResourceField('LastModifiedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
+                    ->setDateValue($latestmodified);
                 $requesturi->addFilter($modifiedfilter);
                 // Get HTTP client.
                 $client = new Client($this->platform, $this->apiusername, $this->apipassword);
@@ -263,12 +270,12 @@ class manager {
                 $createdfilter = Filter::create()
                     ->setResourceField('CreatedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
+                    ->setDateValue($latestmodified);
                 $requesturi->addFilter($createdfilter);
                 $modifiedfilter = Filter::create()
                     ->setResourceField('LastModifiedDateTime')
                     ->setOperator('gt')
-                    ->setDateValue(date::create($latestmodified));
+                    ->setDateValue($latestmodified);
                 $requesturi->addFilter($modifiedfilter);
                 // Get HTTP client.
                 $client = new Client($this->platform, $this->apiusername, $this->apipassword);
