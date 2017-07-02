@@ -9,8 +9,8 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="plaform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Moodle userid"/>
-        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
-        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="sourcecreated" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was created on Arlo"/>
         <FIELD NAME="sourcemodified" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="Epoch indicating when this resource was last modified on Arlo"/>
         <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time stamp when record modified."/>
@@ -23,8 +23,8 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="Name of resource collection."/>
-        <FIELD NAME="latestsourcemodified" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Name of resource collection."/>
+        <FIELD NAME="latestsourcemodified" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="nextpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="endpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="lastpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -38,9 +38,9 @@
     <TABLE NAME="enrol_arlo_event" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
-        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="startdatetime" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="finishdatetime" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
@@ -58,12 +58,12 @@
     <TABLE NAME="enrol_arlo_instance" COMMENT="Extra Arlo information required around a linked Event or Online Activity.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="type" TYPE="char" LENGTH="14" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="14" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="latestsourcemodified" TYPE="char" LENGTH="32" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="latestsourcemodified" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="nextpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="endpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="lastpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -77,9 +77,9 @@
     <TABLE NAME="enrol_arlo_onlineactivity" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
-        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform."/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform."/>
         <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="contenturi" TYPE="char" LENGTH="256" NOTNULL="false" SEQUENCE="false"/>
@@ -95,24 +95,24 @@
     <TABLE NAME="enrol_arlo_registration" COMMENT="Write some stuff here">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Associated enrolment instance"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle user account associated with this resource"/>
-        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
-        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Associated enrolment instance"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Moodle user account associated with this resource"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="attendance" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="A RegistrationContactAttendance value indicating whether the Contact attended the Event."/>
         <FIELD NAME="grade" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="An string representing the grade associated with this resource"/>
         <FIELD NAME="lastactivity" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Time when there was some activity"/>
         <FIELD NAME="progressstatus" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="A user-readable string representing the status of the registration"/>
-        <FIELD NAME="progresspercent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="progresspercent" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sourcestatus" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="A RegistrationStatus value representing the current state of this registration, such as pending approval, approved, cancelled, or completed."/>
         <FIELD NAME="sourcecreated" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was created on Arlo"/>
         <FIELD NAME="sourcemodified" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was last modified on Arlo"/>
-        <FIELD NAME="sourcecontactid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Related contact resource mapped contact.sourceid"/>
-        <FIELD NAME="sourcecontactguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="sourceeventid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourcecontactid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" COMMENT="Related contact resource mapped contact.sourceid"/>
+        <FIELD NAME="sourcecontactguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceeventid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sourceeventguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="sourceonlineactivityid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceonlineactivityid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sourceonlineactivtyguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time stamp when record modified."/>
       </FIELDS>
@@ -131,9 +131,9 @@
     <TABLE NAME="enrol_arlo_template" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
-        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
+        <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="name" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="A string representing the short code used when referring to this template"/>
         <FIELD NAME="sourcestatus" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
@@ -148,8 +148,8 @@
     <TABLE NAME="enrol_arlo_templatelink" COMMENT="Arlo Template linked to Moodle course.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Standard Moodle primary key."/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle course id."/>
-        <FIELD NAME="templateguid" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="Arlo template GUID."/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Moodle course id."/>
+        <FIELD NAME="templateguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="Arlo template GUID."/>
         <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
