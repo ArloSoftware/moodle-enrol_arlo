@@ -125,7 +125,7 @@ class collection_request {
      *
      * @return array
      */
-    private function get_connection_vars() {
+    protected function get_connection_vars() {
         $platform       = self::$plugin->get_config('platform');
         $apiusername    = self::$plugin->get_config('apiusername');
         $apipassword    = self::$plugin->get_config('apipassword');
@@ -151,7 +151,7 @@ class collection_request {
      * @param array $requiredfields
      * @throws \moodle_exception
      */
-    private function load_record(stdClass $record, array $requiredfields) {
+    protected function load_record(stdClass $record, array $requiredfields) {
         $recordfields = array_keys(get_object_vars($record));
         foreach ($requiredfields as $requiredfield) {
             if (!in_array($requiredfield, $recordfields)) {
@@ -170,7 +170,7 @@ class collection_request {
      * @param string $extra
      * @return stdClass
      */
-    private function log($platform, $uri, $status, $extra = '') {
+    protected function log($platform, $uri, $status, $extra = '') {
         global $DB;
 
         $record             = new \stdClass();
