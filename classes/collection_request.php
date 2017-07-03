@@ -3,31 +3,39 @@
 namespace enrol_arlo;
 
 use stdClass;
+use enrol_arlo\alert;
 use enrol_arlo\Arlo\AuthAPI\Client;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Filter;
 use GuzzleHttp\Psr7\Response;
+use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 
 class collection_request {
-    const REQUEST_INTERVAL      = 900;       // 15 Minutes (In seconds).
-    const REQUEST_EXTENSION     = 259200;    // 72 Hours (In seconds).
-    const MAXIMUM_ERROR_COUNT   = 20;
+    const REQUEST_INTERVAL_SECONDS      = 900;       // 15 Minutes (In seconds).
+    const REQUEST_EXTENSION_SECONDS     = 259200;    // 72 Hours (In seconds).
+    const MAXIMUM_ERROR_COUNT           = 20;
 
     private static $plugin;
-    private $table = 'enrol_arlo_collection';
+    private $table                      = 'enrol_arlo_collection';
     private $record;
     private $requesturi;
-    private $manualoverride = false;
-    private $retryallowed = true;
+    private $manualoverride             = false; // Used for manual syncs.
+    private $retryallowed               = false; // TODO not yet implemented.
 
-    public function __construct(stdClass $record, RequestUri $requesturi) {
-        self::$plugin = enrol_get_plugin('arlo');
+    public function __construct(stdClass $record, RequestUri $requesturi, $manualoverride = false) {
         self::load_record($record, self::get_requiredfields());
         self::set_requesturi($requesturi);
+        self::$plugin = enrol_get_plugin('arlo');
+        $this->manualoverride = $manualoverride;
     }
 
+    /**
+     * Checks synchronization and returns if request can be executed.
+     *
+     * @return bool
+     */
     public function executable() {
         $timestart = time();
         if ($this->manualoverride) {
@@ -35,18 +43,24 @@ class collection_request {
         }
         $nextpulltime = $this->record->nextpulltime;
         // Return if next pull time hasn't passed current time.
-        if ($timestart < ($nextpulltime + self::REQUEST_INTERVAL)) {
+        if ($timestart < ($nextpulltime + self::REQUEST_INTERVAL_SECONDS)) {
             return false;
         }
         $endpulltime = $this->record->endpulltime;
         // Return if end pull time has past.
-        if (!empty($endpulltime) && $timestart > ($endpulltime + self::REQUEST_EXTENSION)) {
+        if (!empty($endpulltime) && $timestart > ($endpulltime + self::REQUEST_EXTENSION_SECONDS)) {
             return false;
         }
         return true;
     }
 
+    /**
+     * Execute the request.
+     *
+     * @return bool|\Psr\Http\Message\ResponseInterface
+     */
     public function execute() {
+        global $CFG;
         try {
             list($platform, $apiusername, $apipassword) = self::get_connection_vars();
             $requesturi = $this->requesturi;
@@ -75,13 +89,42 @@ class collection_request {
             // Initialize client and send request.
             $client = new Client($platform, $apiusername, $apipassword);
             $response = $client->request('GET', $requesturi);
-        } catch (\Exception $e) {
-            print_object($e); // TODO handle request exceptions.
-            die;
+
+        } catch (ClientException $exception) {
+            $status = $exception->getCode();
+            $uri = (string) $exception->getRequest()->getUri();
+            $extra = $exception->getMessage();
+            // Update API status vars.
+            set_config('enrol_arlo','apistatus', $status);
+            set_config('enrol_arlo','apilastrequested', time());
+            // Log the request.
+            self::log($platform, $uri, $status, $extra);
+            // Alert.
+            if ($status == 401 || $status == 403) {
+                $params = array('url' => $CFG->wwwroot . '/admin/settings.php?section=enrolsettingsarlo');
+                alert::create('error_invalidcredentials', $params)->send();
+            }
+            return false;
+        } catch (RequestException $exception) {
+            $status = $exception->getCode();
+            $uri = (string) $exception->getRequest()->getUri();
+            $extra = $exception->getMessage();
+            $extra = $exception->getMessage();
+            // Update API status vars.
+            set_config('enrol_arlo','apistatus', $status);
+            set_config('enrol_arlo','apilastrequested', time());
+            // Log the request.
+            self::log($platform, $uri, $status, $extra);
+            return false;
         }
         return $response;
     }
 
+    /**
+     * Helper method. Return connection vars for client.
+     *
+     * @return array
+     */
     private function get_connection_vars() {
         $platform       = self::$plugin->get_config('platform');
         $apiusername    = self::$plugin->get_config('apiusername');
@@ -89,6 +132,11 @@ class collection_request {
         return array($platform, $apiusername, $apipassword);
     }
 
+    /**
+     * Require synchronization control fields.
+     *
+     * @return array
+     */
     public function get_requiredfields() {
         $requiredfields = array(
             'id', 'type', 'latestsourcemodified', 'nextpulltime', 'endpulltime', 'lastpulltime', 'lasterror', 'errorcount'
@@ -96,6 +144,13 @@ class collection_request {
         return $requiredfields;
     }
 
+    /**
+     * Load in synchronization control data.
+     *
+     * @param stdClass $record
+     * @param array $requiredfields
+     * @throws \moodle_exception
+     */
     private function load_record(stdClass $record, array $requiredfields) {
         $recordfields = array_keys(get_object_vars($record));
         foreach ($requiredfields as $requiredfield) {
@@ -106,10 +161,38 @@ class collection_request {
         $this->record = $record;
     }
 
+    /**
+     * Log the web service request.
+     *
+     * @param $platform
+     * @param $uri
+     * @param $status
+     * @param string $extra
+     * @return stdClass
+     */
+    private function log($platform, $uri, $status, $extra = '') {
+        global $DB;
+
+        $record             = new \stdClass();
+        $record->timelogged = time();
+        $record->platform   = $platform;
+        $record->uri        = $uri;
+        $record->status     = $status;
+        if ($extra != '') {
+            $record->extra  = (string) $extra;
+        }
+        $record->id = $DB->insert_record('enrol_arlo_requestlog', $record);
+        return $record;
+    }
+
     public function retry_allowed() {}
 
-    public function set_manualoverride() {}
-
+    /**
+     *
+     *
+     * @param RequestUri $requesturi
+     * @throws \moodle_exception
+     */
     public function set_requesturi(RequestUri $requesturi) {
         if (empty($requesturi->getResourcePath())) {
             throw new \moodle_exception('URI Resourse Path cannot be empty.');
