@@ -172,56 +172,17 @@ $string['siteadmins'] = 'Site administrators';
 $string['changessaved'] = 'Changes saved';
 $string['synchronize'] = 'Synchronize';
 
-$string['error_401_subject'] = '[enrol/arlo] 401 Unauthorized';
-$string['error_401_small'] = '[enrol/arlo] 401 Unauthorized';
-$string['error_401_full'] = '
-There is something wrong with your connection settings. Please check that the api username and api password are correct.
-
-Moodle Arlo connection settings: {$a->url}';
-$string['error_401_full_html'] = '
-<p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
-<p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
-$string['error_403_subject'] = '[enrol/arlo] 403 Unauthorized';
-$string['error_403_small'] = '[enrol/arlo] 403 Unauthorized';
-$string['error_403_full'] = '
-There is something wrong with your connection settings. Please check that the api username and api password are correct.
-
-Moodle Arlo connection settings: {$a->url}';
-$string['error_403_full_html'] = '
-<p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
-<p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
-
-$string['error_4xx_subject'] = '[enrol/arlo] {$a->status} {$a->reason}';
-$string['error_4xx_small'] = '[enrol/arlo] {$a->status} {$a->reason}';
-$string['error_4xx_full'] = '{$a->exceptioncode} {$a->exceptionmessage}';
-$string['error_4xx_full_html'] = '
-<p><strong>Code:</strong>{$a->exceptioncode}</p>
-<br>
-<p><strong>Message:</strong></p>
-<br>
-<p>{$a->exceptionmessage}</p>';
-
-$string['error_5xx_subject'] = '[enrol/arlo] {$a->status} {$a->reason}';
-$string['error_5xx_small'] = '[enrol/arlo] {$a->status} {$a->reason}';
-$string['error_5xx_full'] = '{$a->exceptioncode} {$a->exceptionmessage}';
-$string['error_5xx_full_html'] = '
-<p><strong>Code:</strong>{$a->exceptioncode}</p>
-<br>
-<p><strong>Message:</strong></p>
-<br>
-<p>{$a->exceptionmessage}</p>';
-
-
 $string['error_incorrectcontenttype_subject'] = '[enrol/arlo] Incorrect Content-Type';
-$string['error_incorrectcontenttype_small'] = '[enrol/arlo] Incorrect Content-Type';
+$string['error_incorrectcontenttype_smallmessage'] = '[enrol/arlo] Incorrect Content-Type';
 $string['error_incorrectcontenttype_full'] = '
 Plugin detected Incorrect Content-Type in Response from Arlo API.
 
 Response Content-type: {$a->contenttype}';
-$string['error_incorrectcontenttype_full_html'] = '
+$string['error_incorrectcontenttype_fullhtml'] = '
 <p>Plugin detected Incorrect Content-Type in Response from Arlo API.<p>
 <br>
 <p>Response Content-type: {$a->contenttype}</p>';
+
 
 $string['enrolperiod'] = 'Enrolment duration';
 $string['status_help'] = '';
@@ -231,9 +192,19 @@ $string['errorselecttype'] = 'You must select an Type';
 $string['errorselectevent'] = 'You must select an Event';
 $string['errorselectonlineactvity'] = 'You must select an Online Activity';
 
-$string['error_invalidconectiondetails_subject'] = '[enrol/arlo] Invalid connection details.';
-$string['error_invalidconectiondetails_full_html'] = '
-<h3>Invalid connection details.</h3>
+$string['messageprovider:alerts'] = 'Alert integration problems';
+
+$string['error_invalidcredentials_subject'] = 'Moodle cannot connect to Arlo API';
+$string['error_invalidcredentials_smallmessage'] = 'Moodle cannot connect to Arlo API. Please check connection settings: {$a->url}';
+$string['error_invalidcredentials_full'] = '
+Moodle cannot connect to Arlo API
+
+There is something wrong with your connection settings. Please check that the api username and api password are correct.
+Moodle Arlo connection settings: {$a->url}
+';
+$string['error_invalidcredentials_fullhtml'] = '
+<h3>Moodle cannot connect to Arlo API</h3>
 <br>
 <p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
 <p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
+
