@@ -29,24 +29,7 @@ class manager {
     private $apipassword;
     private $trace;
 
-
-    public function __construct($platform = null,
-                                $apiusername = null,
-                                $apipassword = null,
-                                \progress_trace $trace = null) {
-        // Check we have all config.
-        if (empty($platform)) {
-            throw new \coding_exception('Empty platform config');
-        }
-        $this->platform = $platform;
-        if (empty($apiusername)) {
-            throw new \coding_exception('Empty apiusername config');
-        }
-        $this->apiusername = $apiusername;
-        if (empty($apipassword)) {
-            throw new \coding_exception('Empty apipassword config');
-        }
-        $this->apipassword = $apipassword;
+    public function __construct(\progress_trace $trace = null) {
         // Setup trace.
         if (is_null($trace)) {
             $this->trace = new \null_progress_trace();
@@ -86,8 +69,45 @@ class manager {
         self::$plugin->set_config('apistatus', $status);
     }
 
-    public function update_events() {
+    public static function get_collection_sync_info($collection) {
+        global $DB;
+        $conditions = array('type' => $collection);
+        $record = $DB->get_record('enrol_arlo_collection', $conditions);
+        if (!$record) {
+            $record                         = new \stdClass();
+            $record->platform               = self::$plugin->get_config('platform');
+            $record->type                   = $collection;
+            $record->latestsourcemodified   = '';
+            $record->nextpulltime           = 0;
+            $record->endpulltime            = 0;
+            $record->lastpulltime           = 0;
+            $record->lasterror              = '';
+            $record->errorcount             = 0;
+            $record->id = $DB->insert_record('enrol_arlo_collection', $record);
+        }
+        return $record;
+    }
+
+    /**
+     * @param \stdClass $record
+     * @param bool $hasnext
+     * @return \stdClass
+     */
+    public static function update_collection_sync_info(\stdClass $record, $hasnext= false) {
+        global $DB;
+
+        $record->lastpulltime = time();
+        // Only update nextpulltime if no more records to process.
+        if (!$hasnext) {
+            $record->nextpulltime = time();
+        }
+        $DB->update_record('enrol_arlo_collection', $record);
+        return $record;
+    }
+
+    public function update_events($manualoverride = false) {
         $timestart = microtime();
+        self::trace("Updating Events");
         try {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
@@ -98,7 +118,7 @@ class manager {
                 $requesturi = new RequestUri();
                 $requesturi->setResourcePath('events/');
                 $requesturi->addExpand('Event/EventTemplate');
-                $request = new collection_request($syncinfo, $requesturi);
+                $request = new collection_request($syncinfo, $requesturi, $manualoverride);
                 if (!$request->executable()) {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
@@ -129,8 +149,9 @@ class manager {
         return true;
     }
 
-    public function update_onlineactivies() {
+    public function update_onlineactivities($manualoverride = false) {
         $timestart = microtime();
+        self::trace("Updating Online Activities");
         try {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
@@ -141,7 +162,7 @@ class manager {
                 $requesturi = new RequestUri();
                 $requesturi->setResourcePath('onlineactivities/');
                 $requesturi->addExpand('Event/EventTemplate');
-                $request = new collection_request($syncinfo, $requesturi);
+                $request = new collection_request($syncinfo, $requesturi, $manualoverride);
                 if (!$request->executable()) {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
@@ -172,38 +193,9 @@ class manager {
         return true;
     }
 
-    public static function get_collection_sync_info($collection) {
-        global $DB;
-        $conditions = array('type' => $collection);
-        $record = $DB->get_record('enrol_arlo_collection', $conditions);
-        if (!$record) {
-            $record = new \stdClass();
-            $record->platform = self::$plugin->get_config('platform');
-            $record->type = $collection;
-            $record->latestsourcemodified = '';
-            $record->nextpulltime = 0;
-            $record->endpulltime = 0;
-            $record->lastpulltime = 0;
-            $record->lasterror = '';
-            $record->errorcount = 0;
-            $record->id = $DB->insert_record('enrol_arlo_collection', $record);
-        }
-        return $record;
-    }
-
-    public static function update_collection_sync_info(\stdClass $record, $hasnext= false) {
-        global $DB;
-
-        $record->lastpulltime = time();
-        if (!$hasnext) {
-            $record->nextpulltime = time();
-        }
-        $DB->update_record('enrol_arlo_collection', $record);
-        return $record;
-    }
-
-    public function update_templates() {
+    public function update_templates($manualoverride = false) {
         $timestart = microtime();
+        self::trace("Updating Templates");
         try {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
@@ -214,7 +206,7 @@ class manager {
                 $requesturi = new RequestUri();
                 $requesturi->setResourcePath('eventtemplates/');
                 $requesturi->addExpand('EventTemplate');
-                $request = new collection_request($syncinfo, $requesturi);
+                $request = new collection_request($syncinfo, $requesturi, $manualoverride);
                 if (!$request->executable()) {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
@@ -243,44 +235,6 @@ class manager {
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
         return true;
-    }
-
-    /**
-     * Handle request exceptions.
-     *
-     * @param \Exception $exception
-     * @return bool
-     */
-    private function handle_request_exception(\Exception $exception) {
-        global $CFG;
-        $timelogged = time();
-        if ($exception instanceof ClientException) {
-            $status = $exception->getCode();
-            $uri = (string) $exception->getRequest()->getUri();
-            $message = $exception->getMessage();
-            // Set status.
-            self::update_api_status($status);
-            // Log.
-            self::log($timelogged, $uri, $status, $message);
-            // Alert.
-            if ($status == 401 || $status == 403) {
-                $identifier = 'error_' . $status;
-                $params = array('url' => $CFG->wwwroot . '/admin/settings.php?section=enrolsettingsarlo');
-                self::alert($identifier, $params);
-            }
-            return false;
-        }
-        if ($exception instanceof RequestException) {
-            $status = $exception->getCode();
-            $uri = (string) $exception->getRequest()->getUri();
-            $message = $exception->getMessage();
-            // Set status.
-            self::update_api_status($status);
-            // Log.
-            self::log($timelogged, $uri, $status, $message);
-            return true;
-        }
-        return false;
     }
 
     private function deserialize_response_body(Response $response) {
@@ -414,75 +368,6 @@ class manager {
             self::trace(sprintf('Updated: %s', $record->name));
         }
         return $record;
-    }
-
-    /**
-     * @param $timelogged
-     * @param $uri
-     * @param $status
-     * @param string $info
-     * @return \stdClass
-     */
-    private function log($timelogged, $uri, $status, $extra = '') {
-        global $DB;
-
-        $item = new \stdClass();
-        $item->timelogged = time();
-        $item->platform = $this->platform;
-        $item->uri = $uri;
-        $item->status = $status;
-        if ($extra != '') {
-            $item->extra = (string) $extra;
-        }
-        $item->id = $DB->insert_record('enrol_arlo_requestlog', $item);
-        return $item;
-    }
-
-    /**
-     * Send admin alert on integration status.
-     *
-     * Each alert must define following locale lang strings based on passed in identifier:
-     *
-     *  - $identifier_subject
-     *  - $identifier_small
-     *  - $identifier_full
-     *  - $identifier_full_html
-     *
-     * An associative array of can be passed to provide more context specific information
-     * to the lang string.
-     *
-     * Example:
-     *          $params['configurl' => 'someurl', 'level' => 'warning'];
-     *
-     * @param $identifier
-     * @param array $params
-     * @throws \Exception
-     */
-    private static function alert($identifier, $params = array()) {
-        // Check admin alerts are enabled.
-        if (!self::$plugin->get_config('alertsiteadmins')) {
-            return;
-        }
-        if (empty($identifier) && !is_string($identifier)) {
-            throw new \Exception('Alert identifier is empty or not a string.');
-        }
-        // Setup message.
-        $message = new \core\message\message();
-        $message->component = 'enrol_arlo';
-        $message->name = 'alerts';
-        $message->notification = 1;
-        $message->userfrom = \core_user::get_noreply_user();
-        $message->subject = get_string($identifier . '_subject', 'enrol_arlo', $params);
-        $message->fullmessage = get_string($identifier . '_full', 'enrol_arlo', $params);
-        $message->fullmessageformat = FORMAT_HTML;
-        $message->fullmessagehtml = get_string($identifier . '_full_html', 'enrol_arlo', $params);
-        $message->smallmessage = get_string($identifier . '_small', 'enrol_arlo', $params);
-        // Message each recipient.
-        foreach (get_admins() as $admin) {
-            $messagecopy = clone($message);
-            $messagecopy->userto = $admin;
-            message_send($messagecopy);
-        }
     }
 
     /**
