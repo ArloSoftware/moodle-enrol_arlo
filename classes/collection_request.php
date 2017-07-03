@@ -89,6 +89,12 @@ class collection_request {
             // Initialize client and send request.
             $client = new Client($platform, $apiusername, $apipassword);
             $response = $client->request('GET', $requesturi);
+            $status = $response->getStatusCode();
+            self::log($platform, $requesturi->output(), $status);
+            // Update API status vars.
+            set_config('enrol_arlo','apistatus', $status);
+            set_config('enrol_arlo','apilastrequested', time());
+            return $response;
 
         } catch (ClientException $exception) {
             $status = $exception->getCode();
@@ -117,7 +123,6 @@ class collection_request {
             self::log($platform, $uri, $status, $extra);
             return false;
         }
-        return $response;
     }
 
     /**
