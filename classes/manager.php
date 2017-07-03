@@ -30,6 +30,8 @@ class manager {
     private $trace;
 
     public function __construct(\progress_trace $trace = null) {
+        //global $CFG;
+        //require_once($CFG->dirroot . '/enrol.arlo/lib.php');
         // Setup trace.
         if (is_null($trace)) {
             $this->trace = new \null_progress_trace();
@@ -44,7 +46,7 @@ class manager {
         $conditions = array(
             'enrol' => 'arlo',
             'status' => ENROL_INSTANCE_ENABLED,
-            'platform' => $this->platform
+            'platform' => self::$plugin->get_config('platform')
         );
         $sql = "SELECT ai.* 
                   FROM {enrol} e
@@ -57,7 +59,7 @@ class manager {
 
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
-            self::fetch_instance_response($record);
+            self::update_instance_registrations($record);
         }
 
     }
@@ -88,6 +90,11 @@ class manager {
         return $record;
     }
 
+    public static function get_instance_registrations_sync_info(array $conditions) {
+        global $DB;
+        return $DB->get_record('enrol_arlo_instance', $conditions, '*', MUST_EXIST);
+    }
+
     /**
      * @param \stdClass $record
      * @param bool $hasnext
@@ -103,6 +110,63 @@ class manager {
         }
         $DB->update_record('enrol_arlo_collection', $record);
         return $record;
+    }
+
+    public static function update_instance_registrations_sync_info(\stdClass $record, $hasnext= false) {
+
+    }
+
+    public function update_instance_registrations($instance, $manualoverride = false) {
+        $timestart = microtime();
+        try {
+
+            $hasnext = true; // Initialise to for multiple pages.
+            while ($hasnext) {
+                $hasnext = false; // Avoid infinite loop by default.
+                // Get sync information.
+                $syncinfo = self::get_instance_registrations_sync_info(array('enrolid' => $instance->enrolid));
+                $type     = $syncinfo->type;
+                $sourceid = $syncinfo->sourceid;
+                if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+                    $resourcepath = 'events/' . $sourceid . '/registrations/';
+
+                }
+                if ($type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+                    $resourcepath = 'onlineactivities/' . $sourceid . '/registrations/';
+                }
+                // Setup RequestUri for getting Events.
+                $requesturi = new RequestUri();
+                $requesturi->setResourcePath($resourcepath);
+                $requesturi->addExpand('Registration/Contact');
+                $request = new instance_request($syncinfo, $requesturi, $manualoverride);
+                if (!$request->executable()) {
+                    self::trace('Cannot execute request due to timing or API status');
+                } else {
+                    $response = $request->execute();
+                    $collection = self::deserialize_response_body($response);
+                    // Any returned.
+                    if (empty($collection)) {
+                        //self::update_instance_registrations_sync_info($syncinfo, $hasnext);
+                        self::trace("No new or updated resources found.");
+                    } else {
+                        foreach ($collection as $registration) {
+
+                            $latestmodified = $event->LastModifiedDateTime;
+                            $syncinfo->latestsourcemodified = $latestmodified;
+                        }
+                        $hasnext = (bool) $collection->hasNext();
+                        //self::update_instance_registrations_sync_info($syncinfo, $hasnext);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            print_object($e); // TODO handle XMLParse and Moodle exceptions.
+            die;
+        }
+        $timefinish = microtime();
+        $difftime = microtime_diff($timestart, $timefinish);
+        self::trace("Execution took {$difftime} seconds");
+        return true;
     }
 
     public function update_events($manualoverride = false) {
