@@ -118,8 +118,8 @@ class manager {
 
     public function update_instance_registrations($instance, $manualoverride = false) {
         $timestart = microtime();
+        self::trace("Updating Registrations for instance");
         try {
-
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
                 $hasnext = false; // Avoid infinite loop by default.
@@ -143,6 +143,10 @@ class manager {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
                     $response = $request->execute();
+                    if (200 != $response->getStatusCode()) {
+                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                        return false;
+                    }
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
                     if (empty($collection)) {
@@ -187,6 +191,10 @@ class manager {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
                     $response = $request->execute();
+                    if (200 != $response->getStatusCode()) {
+                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                        return false;
+                    }
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
                     if (empty($collection)) {
@@ -231,6 +239,10 @@ class manager {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
                     $response = $request->execute();
+                    if (200 != $response->getStatusCode()) {
+                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                        return false;
+                    }
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
                     if (empty($collection)) {
@@ -275,6 +287,10 @@ class manager {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
                     $response = $request->execute();
+                    if (200 != $response->getStatusCode()) {
+                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                        return false;
+                    }
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
                     if (empty($collection)) {
