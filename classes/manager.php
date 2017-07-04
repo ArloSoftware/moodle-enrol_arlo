@@ -29,9 +29,9 @@ class manager {
     private $apipassword;
     private $trace;
 
+    const DELAY_REQUEST_SECONDS = 900; // 15 Minutes.
+
     public function __construct(\progress_trace $trace = null) {
-        //global $CFG;
-        //require_once($CFG->dirroot . '/enrol.arlo/lib.php');
         // Setup trace.
         if (is_null($trace)) {
             $this->trace = new \null_progress_trace();
@@ -39,6 +39,37 @@ class manager {
             $this->trace = $trace;
         }
         self::$plugin = enrol_get_plugin('arlo');
+    }
+
+    /**
+     * @return bool
+     */
+    public function api_callable() {
+        $apilaststatus      = (int) self::$plugin->get_config('apistatus');
+        $apilastrequested   = self::$plugin->get_config('apilastrequested');
+        $apierrorcount      = self::$plugin->get_config('apierrorcount');
+        // Maximum error count reached.
+        if ($apierrorcount >= collection_request::MAXIMUM_ERROR_COUNT) {
+            self::trace('API error count has exceeded maximum permissible errors.');
+            return false;
+        }
+        // Client errors.
+        if ($apilaststatus == 401 && $apilaststatus == 403) {
+            if ($apilastrequested + self::DELAY_REQUEST_SECONDS > time()) {
+                self::trace(sprintf("API delay request until: %s", userdate($apilastrequested)));
+                return false;
+            }
+            return true;
+        }
+        // Server errors.
+        if ($apilaststatus > 500 && $apilaststatus < 599) {
+            if ($apilastrequested + self::DELAY_REQUEST_SECONDS > time()) {
+                self::trace(sprintf("API delay request until: %s", userdate($apilastrequested)));
+                return false;
+            }
+            return true;
+        }
+        return true;
     }
 
     public function process_instances() {
@@ -62,13 +93,6 @@ class manager {
             self::update_instance_registrations($record);
         }
 
-    }
-
-    public static function update_api_status($status) {
-        if (!is_int($status)) {
-            throw new \Exception('API Status must integer.');
-        }
-        self::$plugin->set_config('apistatus', $status);
     }
 
     public static function get_collection_sync_info($collection) {
@@ -271,6 +295,10 @@ class manager {
 
     public function update_templates($manualoverride = false) {
         $timestart = microtime();
+        if (!self::api_callable()) {
+            return false;
+        }
+
         self::trace("Updating Templates");
         try {
             $hasnext = true; // Initialise to for multiple pages.
