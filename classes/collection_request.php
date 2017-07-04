@@ -89,7 +89,6 @@ class collection_request {
             // Initialize client and send request.
             $client = new Client($platform, $apiusername, $apipassword);
             $response = $client->request('GET', $requesturi);
-            print_object($response);
             $status = $response->getStatusCode();
             self::log($platform, $requesturi->output(), $status);
             // Update API status vars.
