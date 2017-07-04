@@ -212,7 +212,7 @@ class manager {
                 $requesturi->addExpand('Event/EventTemplate');
                 $request = new collection_request($syncinfo, $requesturi, $manualoverride);
                 if (!$request->executable()) {
-                    self::trace('Cannot execute request due to timing or API status');
+                    self::trace('Cannot execute request due to throttling');
                 } else {
                     $response = $request->execute();
                     if (200 != $response->getStatusCode()) {
@@ -260,7 +260,7 @@ class manager {
                 $requesturi->addExpand('Event/EventTemplate');
                 $request = new collection_request($syncinfo, $requesturi, $manualoverride);
                 if (!$request->executable()) {
-                    self::trace('Cannot execute request due to timing or API status');
+                    self::trace('Cannot execute request due to throttling');
                 } else {
                     $response = $request->execute();
                     if (200 != $response->getStatusCode()) {
@@ -312,7 +312,7 @@ class manager {
                 $requesturi->addExpand('EventTemplate');
                 $request = new collection_request($syncinfo, $requesturi, $manualoverride);
                 if (!$request->executable()) {
-                    self::trace('Cannot execute request due to timing or API status');
+                    self::trace('Cannot execute request due to throttling');
                 } else {
                     $response = $request->execute();
                     if (200 != $response->getStatusCode()) {
