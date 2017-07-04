@@ -89,20 +89,23 @@ class collection_request {
             // Initialize client and send request.
             $client = new Client($platform, $apiusername, $apipassword);
             $response = $client->request('GET', $requesturi);
+            print_object($response);
             $status = $response->getStatusCode();
             self::log($platform, $requesturi->output(), $status);
             // Update API status vars.
-            set_config('enrol_arlo','apistatus', $status);
-            set_config('enrol_arlo','apilastrequested', time());
+            set_config('apistatus', $status, 'enrol_arlo');
+            set_config('apilastrequested', time(), 'enrol_arlo');
+            set_config('apierrorcount', 0, 'enrol_arlo');
             return $response;
-
-        } catch (ClientException $exception) {
+        } catch (RequestException $exception) {
+            $apierrorcount = (int) get_config('enrol_arlo', 'apierrorcount');
             $status = $exception->getCode();
             $uri = (string) $exception->getRequest()->getUri();
             $extra = $exception->getMessage();
             // Update API status vars.
-            set_config('enrol_arlo','apistatus', $status);
-            set_config('enrol_arlo','apilastrequested', time());
+            set_config('apistatus', $status, 'enrol_arlo');
+            set_config('apilastrequested', time(), 'enrol_arlo');
+            set_config('apierrorcount', $apierrorcount++, 'enrol_arlo');
             // Log the request.
             self::log($platform, $uri, $status, $extra);
             // Alert.
@@ -110,18 +113,9 @@ class collection_request {
                 $params = array('url' => $CFG->wwwroot . '/admin/settings.php?section=enrolsettingsarlo');
                 alert::create('error_invalidcredentials', $params)->send();
             }
-            return false;
-        } catch (RequestException $exception) {
-            $status = $exception->getCode();
-            $uri = (string) $exception->getRequest()->getUri();
-            $extra = $exception->getMessage();
-            $extra = $exception->getMessage();
-            // Update API status vars.
-            set_config('enrol_arlo','apistatus', $status);
-            set_config('enrol_arlo','apilastrequested', time());
-            // Log the request.
-            self::log($platform, $uri, $status, $extra);
-            return false;
+            // Be nice return a empty response with http status set.
+            $response = new Response();
+            return $response->withStatus($status);
         }
     }
 
