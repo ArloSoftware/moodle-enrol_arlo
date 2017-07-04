@@ -105,7 +105,7 @@ class collection_request {
             // Update API status vars.
             set_config('apistatus', $status, 'enrol_arlo');
             set_config('apilastrequested', time(), 'enrol_arlo');
-            set_config('apierrorcount', $apierrorcount++, 'enrol_arlo');
+            set_config('apierrorcount', ++$apierrorcount, 'enrol_arlo');
             // Log the request.
             self::log($platform, $uri, $status, $extra);
             // Alert.
