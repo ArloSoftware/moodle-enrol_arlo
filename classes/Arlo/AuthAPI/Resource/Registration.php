@@ -33,6 +33,27 @@ class Registration extends AbstractResource {
     protected $OnlineActivity;
 
     /**
+     * @return mixed
+     */
+    public function getContact() {
+        return $this->Contact;
+    }
+
+    /**
+     * @return Event
+     */
+    public function getEvent() {
+        return $this->Event;
+    }
+
+    /**
+     * @return OnlineActivity
+     */
+    public function getOnlineActivity() {
+        return $this->OnlineActivity;
+    }
+
+    /**
      * @param Contact $contact
      */
     public function setContact(Contact $contact) {
