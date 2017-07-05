@@ -44,7 +44,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2017 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class fdqn_updated extends \core\event\base {
+class fqdn_updated extends \core\event\base {
 
     /**
      * Init method.
@@ -54,7 +54,7 @@ class fdqn_updated extends \core\event\base {
     protected function init() {
         $this->data['objecttable'] = 'data_fields';
         $this->data['crud'] = 'u';
-        $this->data['edulevel'] = self::LEVEL_TEACHING;
+        $this->data['edulevel'] = self::LEVEL_OTHER;
     }
 
     /**

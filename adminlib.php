@@ -55,7 +55,7 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
      */
     protected function add_to_config_log($name, $oldvalue, $value) {
         // Trigger an event for updating this field.
-        $event = \enrol_arlo\event\fdqn_updated::create(array(
+        $event = \enrol_arlo\event\fqdn_updated::create(array(
             'objectid' => 1,
             'context' => context_system::instance(),
             'other' => array(

@@ -37,7 +37,7 @@ class event_observer {
     public static function user_graded($event) {
         return;
     }
-    public static function fdqn_updated($event) {
+    public static function fqdn_updated($event) {
         return $event;
     }
 }
