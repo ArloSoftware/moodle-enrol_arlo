@@ -12,9 +12,11 @@ use enrol_arlo\Arlo\AuthAPI\Resource\ApiException;
 use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
+use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
+
 use enrol_arlo\exception\client_exception;
 use enrol_arlo\exception\server_exception;
-use enrol_arlo\utility\date;
+
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Exception\ClientException;
@@ -79,7 +81,7 @@ class manager {
             'status' => ENROL_INSTANCE_ENABLED,
             'platform' => self::$plugin->get_config('platform')
         );
-        $sql = "SELECT ai.* 
+        $sql = "SELECT e.* 
                   FROM {enrol} e
                   JOIN {enrol_arlo_instance} ai
                     ON ai.enrolid = e.id
@@ -114,7 +116,7 @@ class manager {
         return $record;
     }
 
-    public static function get_instance_registrations_sync_info(array $conditions) {
+    public static function get_associated_arlo_instance(array $conditions) {
         global $DB;
         return $DB->get_record('enrol_arlo_instance', $conditions, '*', MUST_EXIST);
     }
@@ -136,7 +138,7 @@ class manager {
         return $record;
     }
 
-    public static function update_instance_registrations_sync_info(\stdClass $record, $hasnext= false) {
+    public static function update_associated_arlo_instance(\stdClass $record, $hasnext= false) {
 
     }
 
@@ -148,9 +150,9 @@ class manager {
             while ($hasnext) {
                 $hasnext = false; // Avoid infinite loop by default.
                 // Get sync information.
-                $syncinfo = self::get_instance_registrations_sync_info(array('enrolid' => $instance->enrolid));
-                $type     = $syncinfo->type;
-                $sourceid = $syncinfo->sourceid;
+                $arloinstance = self::get_associated_arlo_instance(array('enrolid' => $instance->id));
+                $type     = $arloinstance->type;
+                $sourceid = $arloinstance->sourceid;
                 if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
                     $resourcepath = 'events/' . $sourceid . '/registrations/';
 
@@ -160,9 +162,10 @@ class manager {
                 }
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
+                $requesturi->setPagingTop(2);
                 $requesturi->setResourcePath($resourcepath);
                 $requesturi->addExpand('Registration/Contact');
-                $request = new instance_request($syncinfo, $requesturi, $manualoverride);
+                $request = new instance_request($arloinstance, $requesturi, $manualoverride);
                 if (!$request->executable()) {
                     self::trace('Cannot execute request due to timing or API status');
                 } else {
@@ -174,16 +177,16 @@ class manager {
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
                     if (empty($collection)) {
-                        //self::update_instance_registrations_sync_info($syncinfo, $hasnext);
+                        //self::update_associated_arlo_instance($arloinstance, $hasnext);
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $registration) {
-
+                            self::update_enrolment_registration($instance, $arloinstance, $registration);
                             $latestmodified = $event->LastModifiedDateTime;
-                            $syncinfo->latestsourcemodified = $latestmodified;
+                            $arloinstance->latestsourcemodified = $latestmodified;
                         }
                         $hasnext = (bool) $collection->hasNext();
-                        //self::update_instance_registrations_sync_info($syncinfo, $hasnext);
+                        //self::update_associated_arlo_instance($arloinstance, $hasnext);
                     }
                 }
             }
@@ -195,6 +198,36 @@ class manager {
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
         return true;
+    }
+
+    public function update_enrolment_registration($instance, $arloinstance, $registration) {
+        $contactresource = $registration->getContact();
+        if (is_null($contactresource)) {
+            throw new \moodle_exception('Contact is not set on Registration');
+        }
+
+
+
+        // Load contact.
+        $user = user::get_by_guid($contactresource->UniqueIdentifier);
+        if ($user->isempty()) {
+            $user->load_resource($contactresource);
+            //$user->create();
+        }
+
+print_object($user);
+
+        //mtrace($contact->UniqueIdentifier);
+
+        //\core_user::get_user();
+
+        //RegistrationStatus::APPROVED
+        //print_object($instance);
+        //print_object($arloinstance);
+        //print_object($registration);
+        //print_object($registration->getEvent());
+        //print_object($registration->getOnlineActivity());
+        die;
     }
 
     public function update_events($manualoverride = false) {
