@@ -208,3 +208,4 @@ $string['error_invalidcredentials_fullhtml'] = '
 <p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
 <p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
 
+$string['unlock'] = 'Unlock';

@@ -33,5 +33,9 @@ $observers = array(
     array(
         'eventname' => '\core\event\user_graded',
         'callback' => '\enrol_arlo\event_observer\user_graded'
+    ),
+    array(
+        'eventname'   => '\enrol_arlo\event\fdqn_updated',
+        'callback'    => '\enrol_arlo\event_observer::fdqn_updated',
     )
 );

@@ -31,15 +31,16 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once (dirname(__FILE__).'/adminlib.php');
 
 if ($hassiteconfig) {
-    
+
     $name = get_string('arloconnection', 'enrol_arlo');
     $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
 
     $name = get_string('platform', 'enrol_arlo');
     $description = get_string('platform_desc', 'enrol_arlo');
-    $settings->add(new admin_setting_configtext('enrol_arlo/platform', $name, $description, 'arlo.co', PARAM_HOST));
+    $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, 'arlo.co', PARAM_HOST));
 
     $name = get_string('apiusername', 'enrol_arlo');
     $settings->add(new admin_setting_configtext('enrol_arlo/apiusername', $name, '', ''));

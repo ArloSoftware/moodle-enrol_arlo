@@ -24,7 +24,8 @@
 
 namespace enrol_arlo;
 
-require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+//require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+
 
 class event_observer {
     public static function course_completion_updated($event) {
@@ -35,5 +36,8 @@ class event_observer {
     }
     public static function user_graded($event) {
         return;
+    }
+    public static function fdqn_updated($event) {
+        return $event;
     }
 }
