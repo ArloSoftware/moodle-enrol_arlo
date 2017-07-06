@@ -126,7 +126,7 @@ You may access this course at the following url:
 
 $string['associatearlotemplate'] = 'Associate Arlo template';
 $string['platform'] = 'Platform FQDN';
-$string['platform_desc'] = 'This is name of platform on Arlo e.g https://{platform}.arlo.co';
+$string['platform_desc'] = 'This is name of platform on Arlo e.g {platform}.arlo.co';
 $string['apiusername'] = 'API username';
 $string['apipassword'] = 'API password';
 $string['savechanges'] = 'Save changes';
@@ -135,7 +135,7 @@ $string['usercreation'] = 'User creation';
 $string['chooseauthmethod'] = 'Default authentication method';
 $string['matchbyarlocodeprimary'] = 'Arlo Contact CodePrimary';
 $string['matchbyarlouserdetails'] = 'Arlo Contact FirstName, LastName and Email';
-$string['matchbyauto'] = 'Arlo Contact CodePrimary then Arlo Contact FirstName, LastName and Email';
+$string['matchbyauto'] = 'Arlo Contact FirstName, LastName and Email then Arlo Contact CodePrimary';
 $string['matchuseraccountsby'] = 'Match user accounts by';
 $string['matchuseraccountsby_help'] = '
 <p>
