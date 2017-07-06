@@ -293,7 +293,7 @@ print_object($registration);
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
                 $requesturi->setResourcePath('onlineactivities/');
-                $requesturi->addExpand('Event/EventTemplate');
+                $requesturi->addExpand('OnlineActivity/EventTemplate');
                 $request = new collection_request($syncinfo, $requesturi, $manualoverride);
                 if (!$request->executable()) {
                     self::trace('Cannot execute request due to throttling');
