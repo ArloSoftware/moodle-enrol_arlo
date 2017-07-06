@@ -49,9 +49,12 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         $defaults = array(
             'apistatus' => 0,
+            'apilastrequested' => 0,
+            'apierrorcount' => 0,
             'platform' => '',
             'apiusername' => '',
             'apipassword' => '',
+            'matchuseraccountsby' => user_match::BY_DEFAULT,
             'authplugin' => 'manual',
             'roleid' => $studentroleid,
             'unenrolaction' => ENROL_EXT_REMOVED_UNENROL,
