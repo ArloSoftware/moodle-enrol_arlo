@@ -51,6 +51,10 @@ class manager {
         $apilaststatus      = (int) self::$plugin->get_config('apistatus');
         $apilastrequested   = self::$plugin->get_config('apilastrequested');
         $apierrorcount      = self::$plugin->get_config('apierrorcount');
+        if (!enrol_is_enabled('arlo')) {
+            self::trace(get_string('pluginnotenabled', 'enrol_arlo'));
+            return false;
+        }
         // Maximum error count reached.
         if ($apierrorcount >= collection_request::MAXIMUM_ERROR_COUNT) {
             self::trace('API error count has exceeded maximum permissible errors.');
@@ -147,6 +151,9 @@ class manager {
 
     public function update_instance_registrations($instance, $manualoverride = false) {
         $timestart = microtime();
+        if (!self::api_callable()) {
+            return false;
+        }
         self::trace("Updating Registrations for instance");
         try {
             $hasnext = true; // Initialise to for multiple pages.
@@ -237,6 +244,9 @@ print_object($registration);
 
     public function update_events($manualoverride = false) {
         $timestart = microtime();
+        if (!self::api_callable()) {
+            return false;
+        }
         self::trace("Updating Events");
         try {
             $hasnext = true; // Initialise to for multiple pages.
@@ -285,6 +295,9 @@ print_object($registration);
 
     public function update_onlineactivities($manualoverride = false) {
         $timestart = microtime();
+        if (!self::api_callable()) {
+            return false;
+        }
         self::trace("Updating Online Activities");
         try {
             $hasnext = true; // Initialise to for multiple pages.

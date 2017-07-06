@@ -209,3 +209,4 @@ $string['error_invalidcredentials_fullhtml'] = '
 <p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
 
 $string['unlock'] = 'Unlock';
+$string['pluginnotenabled'] = 'Plugin not enabled!';
