@@ -5,6 +5,7 @@ namespace enrol_arlo;
 use enrol_arlo\Arlo\AuthAPI\Client;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Filter;
+use enrol_arlo\Arlo\AuthAPI\Resource\Registration;
 use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
@@ -200,33 +201,35 @@ class manager {
         return true;
     }
 
-    public function update_enrolment_registration($instance, $arloinstance, $registration) {
+    protected function helper_make_record_from_resource() {
+
+    }
+
+    public function update_enrolment_registration($instance, $arloinstance, Registration $registration) {
+        global $DB;
         $contactresource = $registration->getContact();
         if (is_null($contactresource)) {
             throw new \moodle_exception('Contact is not set on Registration');
         }
+        $plugin = self::$plugin;
 
-
-
-        // Load contact.
+        // Load Contact.
         $user = user::get_by_guid($contactresource->UniqueIdentifier);
-        if ($user->isempty()) {
-            $user->load_resource($contactresource);
-            //$user->create();
+        if (!$user->exists()) {
+            $user = $user->create($contactresource);
         }
 
+        $conditions = array('userid' => $user->id, 'enrolid' => $instance->id);
+        $registrationrecord = $DB->get_record('enrol_arlo_registration', $conditions);
+
+        if ($registration->Status == RegistrationStatus::APPROVED || $registration->Status == RegistrationStatus::COMPLETED) {
+
+        }
+
+print_object($instance);
 print_object($user);
+print_object($registration);
 
-        //mtrace($contact->UniqueIdentifier);
-
-        //\core_user::get_user();
-
-        //RegistrationStatus::APPROVED
-        //print_object($instance);
-        //print_object($arloinstance);
-        //print_object($registration);
-        //print_object($registration->getEvent());
-        //print_object($registration->getOnlineActivity());
         die;
     }
 
