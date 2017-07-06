@@ -27,7 +27,7 @@ use GuzzleHttp\Exception\RequestException;
 class manager {
     /** @var $plugin enrolment plugin instance. */
     private static $plugin;
-    private $platform;
+
     private $apiusername;
     private $apipassword;
     private $trace;
@@ -77,10 +77,11 @@ class manager {
 
     public function process_instances() {
         global $DB;
+        $platform = self::$plugin->get_config('platform');
         $conditions = array(
             'enrol' => 'arlo',
             'status' => ENROL_INSTANCE_ENABLED,
-            'platform' => self::$plugin->get_config('platform')
+            'platform' => $platform
         );
         $sql = "SELECT e.* 
                   FROM {enrol} e
@@ -100,11 +101,12 @@ class manager {
 
     public static function get_collection_sync_info($collection) {
         global $DB;
+        $platform = self::$plugin->get_config('platform');
         $conditions = array('type' => $collection);
         $record = $DB->get_record('enrol_arlo_collection', $conditions);
         if (!$record) {
             $record                         = new \stdClass();
-            $record->platform               = self::$plugin->get_config('platform');
+            $record->platform               = $platform;
             $record->type                   = $collection;
             $record->latestsourcemodified   = '';
             $record->nextpulltime           = 0;
@@ -409,8 +411,9 @@ print_object($registration);
     public function update_event(Event $event) {
         global $DB;
 
+        $platform               = self::$plugin->get_config('platform');
         $record                 = new \stdClass();
-        $record->platform       = $this->platform;
+        $record->platform       = $platform;
         $record->sourceid       = $event->EventID;
         $record->sourceguid     = $event->UniqueIdentifier;
 
@@ -430,7 +433,7 @@ print_object($registration);
         }
 
         $params = array(
-            'platform'      => self::$plugin->get_config('platform'),
+            'platform'      => $platform,
             'sourceid'      => $record->sourceid,
             'sourceguid'    => $record->sourceguid
         );
@@ -449,8 +452,9 @@ print_object($registration);
     public function update_template(EventTemplate $template) {
         global $DB;
 
-        $record = new \stdClass();
-        $record->platform       = $this->platform;
+        $platform               = self::$plugin->get_config('platform');
+        $record                 = new \stdClass();
+        $record->platform       = $platform;
         $record->sourceid       = $template->TemplateID;
         $record->sourceguid     = $template->UniqueIdentifier;
         $record->name           = $template->Name;
@@ -461,7 +465,7 @@ print_object($registration);
         $record->modified       = time();
 
         $params = array(
-            'platform'      => self::$plugin->get_config('platform'),
+            'platform'      => $platform,
             'sourceid'      => $record->sourceid,
             'sourceguid'    => $record->sourceguid
         );
@@ -479,8 +483,10 @@ print_object($registration);
 
     public function update_onlineactivity(OnlineActivity $onlineactivity) {
         global $DB;
-        $record = new \stdClass();
-        $record->platform       = $this->platform;
+
+        $platform               = self::$plugin->get_config('platform');
+        $record                 = new \stdClass();
+        $record->platform       = $platform;
         $record->sourceid       = $onlineactivity->OnlineActivityID;
         $record->sourceguid     = $onlineactivity->UniqueIdentifier;
         $record->name           = $onlineactivity->Name;
@@ -498,7 +504,7 @@ print_object($registration);
         }
 
         $params = array(
-            'platform'      => $this->platform,
+            'platform'      => $platform,
             'sourceid'      => $record->sourceid,
             'sourceguid'    => $record->sourceguid
         );
