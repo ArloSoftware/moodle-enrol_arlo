@@ -164,6 +164,13 @@ class user extends \core_user {
         return $userfields;
     }
 
+    public function get_id() {
+        if (isset($this->userrecord->id)) {
+            return $this->userrecord->id;
+        }
+        return 0;
+    }
+
     public static function get_by_guid($guid) {
         global $DB;
         if (empty($guid) || !is_string($guid)) {
@@ -187,7 +194,7 @@ class user extends \core_user {
             $userrecord = (object) $unaliasedrecord['user'];
             $contactrecord = (object) $unaliasedrecord['contact'];
             $user->load_user_record($userrecord);
-            $user->load_contact_record($contactrecor);
+            $user->load_contact_record($contactrecord);
         }
         return $user;
     }
