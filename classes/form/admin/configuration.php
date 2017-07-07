@@ -36,13 +36,13 @@ class configuration extends \moodleform {
 
         // User account matching.
         $options = array();
-        $options[\enrol_arlo\user_match::BY_USER_DETAILS] = get_string('matchbyarlouserdetails', 'enrol_arlo');
-        $options[\enrol_arlo\user_match::BY_CODE_PRIMARY] = get_string('matchbyarlocodeprimary', 'enrol_arlo');
-        $options[\enrol_arlo\user_match::AUTO] = get_string('matchbyauto', 'enrol_arlo');
+        $options[\enrol_arlo\user::MATCH_BY_USER_DETAILS] = get_string('matchbyarlouserdetails', 'enrol_arlo');
+        $options[\enrol_arlo\user::MATCH_BY_CODE_PRIMARY] = get_string('matchbyarlocodeprimary', 'enrol_arlo');
+        $options[\enrol_arlo\user::MATCH_BY_AUTO] = get_string('matchbyauto', 'enrol_arlo');
 
 
         $form->addElement('select', 'matchuseraccountsby', get_string('matchuseraccountsby', 'enrol_arlo'), $options);
-        $default = \enrol_arlo\user_match::BY_DEFAULT;
+        $default = \enrol_arlo\user::MATCH_BY_DEFAULT;
         $form->setDefault('matchuseraccountsby', $default);
         $form->addHelpButton('matchuseraccountsby', 'matchuseraccountsby', 'enrol_arlo');
 
