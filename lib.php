@@ -30,7 +30,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
-use enrol_arlo\user_match;
+use enrol_arlo\user;
 
 
 
@@ -54,7 +54,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             'platform' => '',
             'apiusername' => '',
             'apipassword' => '',
-            'matchuseraccountsby' => user_match::BY_DEFAULT,
+            'matchuseraccountsby' => user::MATCH_BY_DEFAULT,
             'authplugin' => 'manual',
             'roleid' => $studentroleid,
             'unenrolaction' => ENROL_EXT_REMOVED_UNENROL,
