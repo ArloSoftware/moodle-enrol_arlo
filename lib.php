@@ -907,8 +907,9 @@ class enrol_arlo_plugin extends enrol_plugin {
 
     public function suspend_and_remove_roles(stdClass $instance, $userid) {
         global $DB;
+
         if ($DB->record_exists('user_enrolments', array('enrolid' => $instance->id, 'userid' => $userid))) {
-            $plugin->update_user_enrol($instance, $userid, ENROL_USER_SUSPENDED);
+            parent::update_user_enrol($instance, $userid, ENROL_USER_SUSPENDED);
             // Remove all users groups linked to this enrolment instance.
             $conditions = array('userid' => $userid, 'component' => 'enrol_arlo', 'itemid' => $instance->id);
             if ($gms = $DB->get_records('groups_members', $conditions)) {
