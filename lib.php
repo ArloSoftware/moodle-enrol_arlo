@@ -27,11 +27,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/vendor/autoload.php');
+require_once($CFG->dirroot . '/group/lib.php');
 
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\user;
-
 
 
 
@@ -141,8 +141,6 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return id
      */
     public static function create_course_group($courseid, $code) {
-        global $CFG;
-        require_once($CFG->dirroot . '/group/lib.php');
         $a = new \stdClass();
         $a->name = $code;
         $groupname = get_string('defaultgroupnametext', 'enrol_arlo', $a);
@@ -168,6 +166,10 @@ class enrol_arlo_plugin extends enrol_plugin {
         $DB->delete_records('enrol_arlo_registration', array('enrolid' => $instance->id));
         // Delete instance mapping information.
         $DB->delete_records('enrol_arlo_instance', array('enrolid' => $instance->id));
+        // Clear our any welcome flags.
+        if ($instance->customint8) {
+            $DB->delete_records('user_preferences', array('name' => 'enrol_arlo_course_welcome', 'value' => $instance->id));
+        }
         // Time for the parent to do it's thang, yeow.
         parent::delete_instance($instance);
     }
@@ -867,6 +869,23 @@ class enrol_arlo_plugin extends enrol_plugin {
         return $processed;
     }
 
+    public function enrol_user(stdClass $instance, $userid, $roleid = null, $timestart = 0, $timeend = 0, $status = null, $recovergrades = null) {
+        // Enrolment period handling.
+        $timestart = time();
+        if ($instance->enrolperiod) {
+            $timeend = $timestart + $instance->enrolperiod;
+        } else {
+            $timeend = 0;
+        }
+        parent::enrol_user($instance, $userid, $instance->roleid, $timestart, $timeend, ENROL_USER_ACTIVE);
+        if (!empty($instance->customint2) && $instance->customint2 != self::ARLO_CREATE_GROUP) {
+            groups_add_member($instance->customint2, $userid, 'enrol_arlo');
+        }
+        if ($instance->customint8) {
+            set_user_preference('enrol_arlo_course_welcome', $instance->id, $userid);
+        }
+    }
+
     /**
      * Handles un-enrolling a user.
      *
@@ -876,7 +895,30 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function unenrol_user(stdClass $instance, $userid) {
         global $DB;
-        parent::unenrol_user($instance, $userid);
+        if ($DB->record_exists('user_enrolments', array('enrolid' => $instance->id, 'userid' => $userid))) {
+            parent::unenrol_user($instance, $userid);
+        }
+    }
+
+    public function suspend_and_remove_roles(stdClass $instance, $userid) {
+        global $DB;
+        if ($DB->record_exists('user_enrolments', array('enrolid' => $instance->id, 'userid' => $userid))) {
+            $plugin->update_user_enrol($instance, $userid, ENROL_USER_SUSPENDED);
+            // Remove all users groups linked to this enrolment instance.
+            $conditions = array('userid' => $userid, 'component' => 'enrol_arlo', 'itemid' => $instance->id);
+            if ($gms = $DB->get_records('groups_members', $conditions)) {
+                foreach ($gms as $gm) {
+                    groups_remove_member($gm->groupid, $gm->userid);
+                }
+            }
+            $context = context_course::instance($instance->courseid);
+            $unenrolparams = array();
+            $unenrolparams['userid'] = $userid;
+            $unenrolparams['contextid'] = $context->id;
+            $unenrolparams['component'] = 'enrol_arlo';
+            $unenrolparams['itemid'] = $instance->id;
+            role_unassign_all($unenrolparams);
+        }
     }
 
 }
