@@ -7,7 +7,7 @@
     <TABLE NAME="enrol_arlo_contact" COMMENT="Arlo contact mapped to a Moodle user.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Moodle userid"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
         <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
@@ -22,7 +22,7 @@
     <TABLE NAME="enrol_arlo_collection" COMMENT="Information for syncing collections of resources.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="Name of resource collection."/>
         <FIELD NAME="latestsourcemodified" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="nextpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -59,7 +59,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="char" LENGTH="14" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
@@ -77,7 +77,7 @@
     <TABLE NAME="enrol_arlo_onlineactivity" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource."/>
         <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform."/>
         <FIELD NAME="code" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
@@ -97,7 +97,7 @@
     <TABLE NAME="enrol_arlo_registration" COMMENT="Write some stuff here">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Associated enrolment instance"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Moodle user account associated with this resource"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
@@ -133,7 +133,7 @@
     <TABLE NAME="enrol_arlo_template" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="sourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="An integer value that uniquely identifies this resource within the platform"/>
         <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="name" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
