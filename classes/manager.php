@@ -79,7 +79,7 @@ class manager {
         return true;
     }
 
-    public function process_instances() {
+    public function process_instances($manualoverride = false) {
         global $DB;
         $platform = self::$plugin->get_config('platform');
         $conditions = array(
@@ -98,7 +98,7 @@ class manager {
 
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
-            self::update_instance_registrations($record);
+            self::update_instance_registrations($record, $manualoverride);
         }
 
     }
@@ -152,6 +152,7 @@ class manager {
     public function update_instance_registrations($instance, $manualoverride = false) {
         $timestart = microtime();
         if (!self::api_callable()) {
+            self::trace('API not callable');
             return false;
         }
         self::trace("Updating Registrations for instance");
@@ -165,16 +166,19 @@ class manager {
                 $sourceid = $arloinstance->sourceid;
                 if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
                     $resourcepath = 'events/' . $sourceid . '/registrations/';
+                    $expand = 'Registration/Event';
 
                 }
                 if ($type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
                     $resourcepath = 'onlineactivities/' . $sourceid . '/registrations/';
+                    $expand = 'Registration/OnlineActivity';
                 }
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
                 $requesturi->setPagingTop(2);
                 $requesturi->setResourcePath($resourcepath);
                 $requesturi->addExpand('Registration/Contact');
+                $requesturi->addExpand($expand);
                 $request = new instance_request($arloinstance, $requesturi, $manualoverride);
                 if (!$request->executable()) {
                     self::trace('Cannot execute request due to timing or API status');
@@ -192,10 +196,11 @@ class manager {
                     } else {
                         foreach ($collection as $registration) {
                             self::update_enrolment_registration($instance, $arloinstance, $registration);
-                            $latestmodified = $event->LastModifiedDateTime;
+                            $latestmodified = $registration->LastModifiedDateTime;
                             $arloinstance->latestsourcemodified = $latestmodified;
                         }
-                        $hasnext = (bool) $collection->hasNext();
+
+                        //$hasnext = (bool) $collection->hasNext();
                         //self::update_associated_arlo_instance($arloinstance, $hasnext);
                     }
                 }
@@ -210,36 +215,50 @@ class manager {
         return true;
     }
 
-    protected function helper_make_record_from_resource() {
-
-    }
-
     public function update_enrolment_registration($instance, $arloinstance, Registration $registration) {
         global $DB;
+
+        $plugin = self::$plugin;
+        $unenrolaction = $plugin->get_config('unenrolaction', ENROL_EXT_REMOVED_UNENROL);
+
         $contactresource = $registration->getContact();
         if (is_null($contactresource)) {
             throw new \moodle_exception('Contact is not set on Registration');
         }
-        $plugin = self::$plugin;
 
         // Load Contact.
         $user = user::get_by_guid($contactresource->UniqueIdentifier);
         if (!$user->exists()) {
             $user = $user->create($contactresource);
         }
-
-        $conditions = array('userid' => $user->id, 'enrolid' => $instance->id);
+        $userid = $user->get_id();
+        $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
         $registrationrecord = $DB->get_record('enrol_arlo_registration', $conditions);
-
-        if ($registration->Status == RegistrationStatus::APPROVED || $registration->Status == RegistrationStatus::COMPLETED) {
-
+        $parameters = $conditions;
+        // Add id if available.
+        if ($registrationrecord) {
+            $parameters['id'] = $registrationrecord->id;
         }
-
-print_object($instance);
-print_object($user);
-print_object($registration);
-
-        die;
+        // Build record for Moodle.
+        $record = helper::resource_to_record($registration, $parameters);
+        if ($registration->Status == RegistrationStatus::APPROVED || $registration->Status == RegistrationStatus::COMPLETED) {
+            $record->modified = time();
+            if (empty($record->id)) {
+                unset($record->id);
+                $record->id = $DB->insert_record('enrol_arlo_registration', $record);
+                self::trace(sprintf('Created reg: %s', $record->userid));
+            } else {
+                $DB->update_record('enrol_arlo_registration', $record);
+                self::trace(sprintf('Updated reg: %s', $record->userid));
+            }
+            $plugin->enrol_user($instance, $userid);
+        }
+        if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_UNENROL)) {
+            $plugin->unenrol_user($instance, $userid);
+        }
+        if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES)) {
+            $plugin->suspend_and_remove_roles($instance, $userid);
+        }
     }
 
     public function update_events($manualoverride = false) {
