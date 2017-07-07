@@ -141,9 +141,14 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return id
      */
     public static function create_course_group($courseid, $code) {
-        $a = new \stdClass();
-        $a->name = $code;
-        $groupname = get_string('defaultgroupnametext', 'enrol_arlo', $a);
+        global $DB;
+        // Format group name.
+        $groupname = get_string('defaultgroupnametext', 'enrol_arlo', array('name' => $code));
+        // Check if group exists and return group id.
+        $group = $DB->get_record('groups', array('name' => $groupname, 'courseid' => $courseid));
+        if ($group) {
+            return $group->id;
+        }
         // Create a new group for the for event or online activity.
         $groupdata = new \stdClass();
         $groupdata->courseid = $courseid;
