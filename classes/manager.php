@@ -25,14 +25,12 @@ use GuzzleHttp\Exception\RequestException;
 
 
 class manager {
+    /** @var DELAY_REQUEST_SECONDS time in seconds to delay next request. */
+    const DELAY_REQUEST_SECONDS = 900; // 15 Minutes.
     /** @var $plugin enrolment plugin instance. */
     private static $plugin;
-
-    private $apiusername;
-    private $apipassword;
+    /** @var \progress_trace  */
     private $trace;
-
-    const DELAY_REQUEST_SECONDS = 900; // 15 Minutes.
 
     public function __construct(\progress_trace $trace = null) {
         // Setup trace.
