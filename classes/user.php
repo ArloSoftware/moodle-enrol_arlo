@@ -103,10 +103,19 @@ class user extends \core_user {
         global $DB;
         $firstname = clean_param($firstname, PARAM_USERNAME);
         $lastname  = clean_param($lastname, PARAM_USERNAME);
+        $tries = 0;
+        $max = 99;
         $exists = true;
         while ($exists) {
+            ++$tries;
+            if ($tries > 5) {
+                $max = 99999999;
+            }
+            if ($tries > 100) {
+                throw new \moodle_exception('Generate username reached maximum tries.');
+            }
             $username = \core_text::strtolower(\core_text::substr($firstname, 0 , 3) .
-                \core_text::substr($lastname, 0 , 3) . rand(0, 99));
+                \core_text::substr($lastname, 0 , 3) . rand(0, $max));
             $exists = $DB->get_record('user', array('username' => $username));
         }
         return $username;
