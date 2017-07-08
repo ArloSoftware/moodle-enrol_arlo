@@ -146,7 +146,14 @@ class manager {
     }
 
     public static function update_associated_arlo_instance(\stdClass $record, $hasnext= false) {
-
+        global $DB;
+        $record->lastpulltime = time();
+        // Only update nextpulltime if no more records to process.
+        if (!$hasnext) {
+            $record->nextpulltime = time();
+        }
+        $DB->update_record('enrol_arlo_instance', $record);
+        return $record;
     }
 
     public function update_instance_registrations($instance, $manualoverride = false) {
@@ -175,7 +182,6 @@ class manager {
                 }
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
-                $requesturi->setPagingTop(2);
                 $requesturi->setResourcePath($resourcepath);
                 $requesturi->addExpand('Registration/Contact');
                 $requesturi->addExpand($expand);
@@ -191,7 +197,7 @@ class manager {
                     $collection = self::deserialize_response_body($response);
                     // Any returned.
                     if (empty($collection)) {
-                        //self::update_associated_arlo_instance($arloinstance, $hasnext);
+                        self::update_associated_arlo_instance($arloinstance, false);
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $registration) {
@@ -199,9 +205,8 @@ class manager {
                             $latestmodified = $registration->LastModifiedDateTime;
                             $arloinstance->latestsourcemodified = $latestmodified;
                         }
-
-                        //$hasnext = (bool) $collection->hasNext();
-                        //self::update_associated_arlo_instance($arloinstance, $hasnext);
+                        $hasnext = (bool) $collection->hasNext();
+                        self::update_associated_arlo_instance($arloinstance, $hasnext);
                     }
                 }
             }
