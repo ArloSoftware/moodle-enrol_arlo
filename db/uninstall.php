@@ -37,5 +37,8 @@ function xmldb_enrol_arlo_uninstall() {
 
     role_unassign_all(array('component' => 'enrol_arlo'));
 
+    // Clear any create password flags.
+    $DB->delete_records('user_preferences', array('name' => 'enrol_arlo_createpassword'));
+
     return true;
 }
