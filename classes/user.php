@@ -85,12 +85,12 @@ class user extends \core_user {
             $user               = static::get_dummy_user_record();
             $user->auth         = $plugin->get_config('authplugin');
             $user->username     = self::generate_username($contactresource->FirstName, $contactresource->LastName);
-            $user->firstname    = $contactresource->FirstName;
-            $user->lastname     = $contactresource->LastName;
-            $user->email        = $contactresource->Email;
-            $user->phone1       = $contactresource->PhoneHome;
-            $user->phone2       = $contactresource->PhoneMobile;
-            $user->idnumber     = $contactresource->CodePrimary;
+            $user->firstname    = (string) $contactresource->FirstName;
+            $user->lastname     = (string) $contactresource->LastName;
+            $user->email        = (string) $contactresource->Email;
+            $user->phone1       = (string) $contactresource->PhoneHome;
+            $user->phone2       = (string) $contactresource->PhoneMobile;
+            $user->idnumber     = (string) $contactresource->CodePrimary;
             $user->id           = user_create_user($user, true, false);
             // Set create password flag.
             set_user_preference('enrol_arlo_createpassword', 1, $user->id);
@@ -99,10 +99,10 @@ class user extends \core_user {
         $contact                  = new stdClass();
         $contact->platform        = $plugin->get_config('platform');
         $contact->userid          = $user->id;
-        $contact->sourceid        = $contactresource->ContactID;
-        $contact->sourceguid      = $contactresource->UniqueIdentifier;
-        $contact->sourcecreated   = $contactresource->CreatedDateTime;
-        $contact->sourcemodified  = $contactresource->LastModifiedDateTime;
+        $contact->sourceid        = (int)    $contactresource->ContactID;
+        $contact->sourceguid      = (string) $contactresource->UniqueIdentifier;
+        $contact->sourcecreated   = (string) $contactresource->CreatedDateTime;
+        $contact->sourcemodified  = (string) $contactresource->LastModifiedDateTime;
         $contact->modified        = time();
         $contact->id              = $DB->insert_record('enrol_arlo_contact', $contact);
 
