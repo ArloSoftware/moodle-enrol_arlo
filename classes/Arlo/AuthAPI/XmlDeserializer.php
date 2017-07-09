@@ -66,7 +66,7 @@ class XmlDeserializer {
      */
     public function deserialize($data) {
         if ('' === trim($data)) {
-            throw new XMLDeserializerException('Invalid XML data, it can not be empty.'); // @todo custom exception class
+            throw new XMLDeserializerException('Invalid XML data, it can not be empty.');
         }
 
         $internalErrors = libxml_use_internal_errors(true);
