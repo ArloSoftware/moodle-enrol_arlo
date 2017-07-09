@@ -173,7 +173,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         $DB->delete_records('enrol_arlo_instance', array('enrolid' => $instance->id));
         // Clear our any welcome flags.
         if ($instance->customint8) {
-            $DB->delete_records('user_preferences', array('name' => 'enrol_arlo_course_welcome', 'value' => $instance->id));
+            $DB->delete_records('user_preferences',
+                array('name' => 'enrol_arlo_coursewelcome_'.$instance->id, 'value' => $instance->id));
         }
         // Time for the parent to do it's thang, yeow.
         parent::delete_instance($instance);
@@ -506,6 +507,50 @@ class enrol_arlo_plugin extends enrol_plugin {
         return $options;
     }
 
+    public function email_newpassword(\stdClass $user) {
+        global $CFG, $DB;
+
+        // We try to send the mail in language the user understands,
+        // unfortunately the filter_string() does not support alternative langs yet
+        // so multilang will not work properly for site->fullname.
+        $lang = empty($user->lang) ? $CFG->lang : $user->lang;
+        $emailtype = 'enrol_arlo_createpassword';
+        if (!get_user_preferences($emailtype, false, $user->id)) {
+            return;
+        }
+
+        $site  = get_site();
+        $noreplyuser = core_user::get_noreply_user();
+        $newpassword = generate_password();
+
+        update_internal_user_password($user, $newpassword);
+
+        $a = new \stdClass();
+        $a->firstname   = fullname($user, true);
+        $a->sitename    = format_string($site->fullname);
+        $a->username    = $user->username;
+        $a->newpassword = $newpassword;
+        $a->link        = $CFG->wwwroot .'/login/';
+        $a->signoff     = generate_email_signoff();
+
+        $message = (string)new lang_string('newusernewpasswordtext', '', $a, $lang);
+
+        $subject = format_string($site->fullname) .': '. (string)new lang_string('newusernewpasswordsubj', '', $a, $lang);
+
+        $status = email_to_user($user, $noreplyuser, $subject, $message);
+        unset_user_preference($emailtype, $user);
+
+        // Log delivery.
+        $log = new \stdClass();
+        $log->timelogged    = time();
+        $log->type          = $emailtype;
+        $log->userid        = $user->id;
+        $log->delivered     = $status;
+        $DB->insert_record('enrol_arlo_emaillog', $log);
+
+        return $status;
+    }
+
     /**
      * Notify user their course expiry. it is called only if notification of enrolled users (aka students) is enabled in course.
      *
@@ -543,6 +588,11 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function email_welcome_message($instance, $user) {
         global $CFG, $DB;
+
+        $emailtype = 'enrol_arlo_coursewelcome_'.$instance->id;
+        if (!get_user_preferences($emailtype, false, $user->id)) {
+            return;
+        }
 
         $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
         $context = context_course::instance($course->id);
@@ -593,7 +643,18 @@ class enrol_arlo_plugin extends enrol_plugin {
         $contact = self::get_contact_user($instance);
 
         // Directly emailing welcome message rather than using messaging.
-        email_to_user($user, $contact, $subject, $messagetext, $messagehtml);
+        $status = email_to_user($user, $contact, $subject, $messagetext, $messagehtml);
+        unset_user_preference($emailtype, $user);
+
+        // Log delivery.
+        $log = new \stdClass();
+        $log->timelogged    = time();
+        $log->type          = $emailtype;
+        $log->userid        = $user->id;
+        $log->delivered     = $status;
+        $DB->insert_record('enrol_arlo_emaillog', $log);
+
+        return $status;
     }
 
     /**
@@ -887,7 +948,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             groups_add_member($instance->customint2, $userid, 'enrol_arlo');
         }
         if ($instance->customint8) {
-            set_user_preference('enrol_arlo_course_welcome', $instance->id, $userid);
+            set_user_preference('enrol_arlo_coursewelcome_'.$instance->id, $instance->id, $userid);
         }
     }
 
