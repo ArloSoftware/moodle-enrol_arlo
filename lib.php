@@ -126,7 +126,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         // Set name to be passed to parent.
         $fields['name']         = $record->code;
-
+        $fields['roleid']       = self::get_config('roleid');
         // Insert enrol and enrol_arlo_instance records.
         $instance->enrolid = parent::add_instance($course, $fields);
         $DB->insert_record('enrol_arlo_instance', $instance);
