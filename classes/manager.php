@@ -74,6 +74,13 @@ class manager {
         return true;
     }
 
+    public function process_all($manualoverride = false) {
+        // Order of processing.
+        self::process_templates($manualoverride);
+        self::process_events($manualoverride);
+        self::process_onlineactivities($manualoverride);
+    }
+
     /**
      * Function for get enrolment instance to process. Hidden instances or instances in a hidden
      * course are not included.
