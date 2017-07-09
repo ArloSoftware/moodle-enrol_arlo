@@ -20,7 +20,7 @@ namespace enrol_arlo\reports;
  *  for defining some custom column names and proccessing
  * Username and Password feilds using custom and other column methods.
  */
-class reportbuilder extends \table_sql {
+class report_builder extends \table_sql {
 
     /**
      * Constructor

@@ -36,7 +36,7 @@ admin_externalpage_setup('enrolsettingsarloapilog');
 
 $download = optional_param('download', '', PARAM_ALPHA);
 
-$table = new \enrol_arlo\reports\reportbuilder('uniqueid',  array('timelogged', 'platform', 'uri', 'status', 'extra'));
+$table = new \enrol_arlo\reports\report_builder('uniqueid',  array('timelogged', 'platform', 'uri', 'status', 'extra'));
 $table->is_downloading($download, 'apilog');
 
 // Work out the sql for the table.
