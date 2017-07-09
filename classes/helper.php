@@ -51,11 +51,11 @@ class helper {
         $record->platform = get_config('enrol_arlo', 'platform');
         // Create ID field based on class short name.
         $idfieldname = $reflect->getShortName() . 'ID';
-        $record->sourceid = $resource->{$idfieldname};
-        $record->sourceguid = $resource->UniqueIdentifier;
-        $record->sourcestatus = $resource->Status;
-        $record->sourcecreated = $resource->CreatedDateTime;
-        $record->sourcemodified = $resource->LastModifiedDateTime;
+        $record->sourceid = (int) $resource->{$idfieldname};
+        $record->sourceguid = (string) $resource->UniqueIdentifier;
+        $record->sourcestatus = (string) $resource->Status;
+        $record->sourcecreated = (string) $resource->CreatedDateTime;
+        $record->sourcemodified = (string) $resource->LastModifiedDateTime;
         return $record;
     }
 
@@ -96,14 +96,14 @@ class helper {
      */
     protected static function event_to_record(Event $resource, $parameters = array()) {
         $record = static::init_record($resource);
-        $record->code = $resource->Code;
-        $record->startdatetime = $resource->StartDateTime;
-        $record->finishdatetime = $resource->FinishDateTime;
+        $record->code = (string) $resource->Code;
+        $record->startdatetime = (string) $resource->StartDateTime;
+        $record->finishdatetime = (string) $resource->FinishDateTime;
         $template = $resource->getEventTemplate();
         // Add EventTemplate if passed.
         if ($template) {
-            $record->sourcetemplateid = $template->TemplateID;
-            $record->sourcetemplateguid = $template->UniqueIdentifier;
+            $record->sourcetemplateid = (string) $template->TemplateID;
+            $record->sourcetemplateguid = (string) $template->UniqueIdentifier;
         }
         return static::apply_parameters($record, $parameters);
     }
@@ -117,14 +117,14 @@ class helper {
      */
     protected static function onlineactivity_to_record(OnlineActivity $resource, $parameters = array()) {
         $record = static::init_record($resource);
-        $record->name = $resource->Name;
-        $record->code = $resource->Code;
-        $record->contenturi = $resource->ContentUri;
+        $record->name = (string) $resource->Name;
+        $record->code = (string) $resource->Code;
+        $record->contenturi = (string) $resource->ContentUri;
         $template = $resource->getEventTemplate();
         // Add EventTemplate if passed.
         if ($template) {
-            $record->sourcetemplateid = $template->TemplateID;
-            $record->sourcetemplateguid = $template->UniqueIdentifier;
+            $record->sourcetemplateid = (string) $template->TemplateID;
+            $record->sourcetemplateguid = (string) $template->UniqueIdentifier;
         }
         return static::apply_parameters($record, $parameters);
     }
@@ -138,28 +138,28 @@ class helper {
      */
     protected static function registration_to_record(Registration $resource, $parameters = array()) {
         $record = static::init_record($resource);
-        $record->attendance = $resource->Attendance;
-        $record->grade = $resource->Grade;
-        $record->lastactivity = $resource->LastActivityDateTime;
-        $record->progressstatus = $resource->ProgressStatus;
-        $record->progresspercent = $resource->ProgressPercent;
+        $record->attendance = (string) $resource->Attendance;
+        $record->grade = (string) $resource->Grade;
+        $record->lastactivity = (string) $resource->LastActivityDateTime;
+        $record->progressstatus = (string) $resource->ProgressStatus;
+        $record->progresspercent = (string) $resource->ProgressPercent;
         // Add Contact if passed.
         $contact = $resource->getContact();
         if (isset($contact )) {
-            $record->sourcecontactid = $contact->ContactID;
-            $record->sourcecontactguid = $contact->UniqueIdentifier;
+            $record->sourcecontactid = (string) $contact->ContactID;
+            $record->sourcecontactguid = (string) $contact->UniqueIdentifier;
         }
         // Add Event if passed.
         $event = $resource->getEvent();
         if (isset($event)) {
-           $record->sourceeventid = $event->EventID;
-           $record->sourceeventguid = $event->UniqueIdentifier;
+           $record->sourceeventid = (string) $event->EventID;
+           $record->sourceeventguid = (string) $event->UniqueIdentifier;
         }
         // Add OnlineActivity if passed.
         $onlineactivity = $resource->getOnlineActivity();
         if (isset($onlineactivity)) {
-            $record->sourceonlineactivityid = $onlineactivity->OnlineActivityID;
-            $record->sourceonlineactivityguid = $onlineactivity->UniqueIdentifier;
+            $record->sourceonlineactivityid = (string) $onlineactivity->OnlineActivityID;
+            $record->sourceonlineactivityguid = (string) $onlineactivity->UniqueIdentifier;
         }
         return static::apply_parameters($record, $parameters);
     }
@@ -173,8 +173,8 @@ class helper {
      */
     protected static function template_to_record(EventTemplate $resource, $parameters = array()) {
         $record = static::init_record($resource);
-        $record->name = $resource->Name;
-        $record->code = $resource->Code;
+        $record->name = (string) $resource->Name;
+        $record->code = (string) $resource->Code;
         return static::apply_parameters($record, $parameters);
     }
 }
