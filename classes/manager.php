@@ -3,6 +3,7 @@
 namespace enrol_arlo;
 
 use enrol_arlo\Arlo\AuthAPI\Client;
+use enrol_arlo\Arlo\AuthAPI\Exception\XMLDeserializerException;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Filter;
 use enrol_arlo\Arlo\AuthAPI\Resource\Registration;
@@ -15,13 +16,9 @@ use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 
-use enrol_arlo\exception\client_exception;
-use enrol_arlo\exception\server_exception;
-
-
+use enrol_arlo\exception\invalidcontent_exception;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\RequestException;
+
 
 
 class manager {
@@ -305,9 +302,11 @@ class manager {
                     }
                 }
             }
-        } catch (\Exception $e) {
-            print_object($e); // TODO handle XMLParse and Moodle exceptions.
-            die;
+        } catch (\Exception $exception) {
+            if ($exception instanceof invalidcontent_exception) {}
+            if ($exception instanceof XMLDeserializerException) {}
+            print_object($exception); // TODO handle XMLParse and Moodle exceptions.
+            return false;
         }
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
@@ -419,16 +418,10 @@ class manager {
     }
 
     private function deserialize_response_body(Response $response) {
-        // Returned HTTP status, used for error checking.
-        $status = (int) $response->getStatusCode();
-        $reason = $response->getReasonPhrase();
         // Incorrect content-type.
         $contenttype = $response->getHeaderLine('content-type');
         if (strpos($contenttype, 'application/xml') === false) {
-            throw new server_exception(
-                $reason,
-                $status,
-                'error_incorrectcontenttype',
+            throw new invalidcontent_exception(
                 array('contenttype' => $contenttype)
             );
         }
