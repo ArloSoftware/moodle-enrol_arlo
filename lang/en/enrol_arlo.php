@@ -210,3 +210,30 @@ $string['error_invalidcredentials_fullhtml'] = '
 
 $string['unlock'] = 'Unlock';
 $string['pluginnotenabled'] = 'Plugin not enabled!';
+
+$string['error_duplicateusers_subject'] = 'Duplicate users found in Moodle when matching Arlo Contact';
+$string['error_duplicateusers_smallmessage'] = 'Duplicate users found in Moodle when matching Arlo Contact';
+$string['error_duplicateusers_full'] = '
+Duplicate users were found in Moodle when attempting to match against an Arlo Contact.
+
+Found {$a->count} Moodle accounts with following details:
+First name: {$a->firstname}
+Last name:  {$a->lastname}
+Email:      {$a->email}
+IDNumber:   {$a->idnumber}
+
+A new account has been created for this user.
+';
+$string['error_duplicateusers_fullhtml'] = '
+<p>Duplicate users were found in Moodle when attempting to match against an Arlo Contact.</p>
+<br>
+<p>Found {$a->count} Moodle accounts with following details:</p>
+<br>
+<pre>
+First name: {$a->firstname}
+Last name:  {$a->lastname}
+Email:      {$a->email}
+IDNumber:   {$a->idnumber}
+</pre>
+<br>
+<p>A new account has been created for this user.</p>';

@@ -26,11 +26,19 @@ class user extends \core_user {
      * @var int MATCH_BY_DEFAULT default user match method to use.
      */
     const MATCH_BY_DEFAULT = 2;
+
+    /** @var $plugin enrolment plugin instance. */
+    private static $plugin;
+
     private $userrecord;
     private $contactrecord;
     private $contactresource;
 
     protected $contactfields = array('id', 'plaform', 'userid', 'sourceid', 'sourceguid', 'sourcecreated', 'sourcemodified');
+
+    public function __construct() {
+        self::$plugin = enrol_get_plugin('arlo');
+    }
 
     public function create(Contact $contactresource = null) {
         global $DB;
@@ -42,7 +50,7 @@ class user extends \core_user {
             self::load_contact_resource($contactresource);
         }
         $contactresource = $this->contactresource;
-        $plugin = enrol_get_plugin('arlo');
+        $plugin = self::$plugin;
 
         $match = false;
         $matches = self::get_matches();
@@ -50,7 +58,14 @@ class user extends \core_user {
             $match = reset($matches);
         } else if (count($matches) > 1) {
             // Send message.
-            mtrace('send message');
+            $params = array(
+                'firstname' => $contactresource->FirstName,
+                'lastname' => $contactresource->LastName,
+                'email' => $contactresource->Email,
+                'idnumber' => $contactresource->CodePrimary,
+                'count' => count($matches)
+            );
+            alert::create('error_duplicateusers', $params, true)->send();
         }
 
         // Don't touch anything on Match just clone. Else create user.
