@@ -207,6 +207,7 @@ class manager {
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
                 $requesturi->setResourcePath($resourcepath);
+                //$requesturi->setPagingTop(2);
                 $requesturi->addExpand('Registration/Contact');
                 $requesturi->addExpand($expand);
                 $request = new instance_request($arloinstance, $requesturi, $manualoverride);
@@ -230,6 +231,8 @@ class manager {
                             $arloinstance->latestsourcemodified = $latestmodified;
                         }
                         $hasnext = (bool) $collection->hasNext();
+                        self::email_new_user_passwords();
+                        self::email_welcome_message_per_instance($instance);
                         self::update_associated_arlo_instance($arloinstance, $hasnext);
                     }
                 }
@@ -242,6 +245,42 @@ class manager {
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
         return true;
+    }
+
+    /**
+     * Get users with enrol_arlo_createpassword preference set and email new
+     * password.
+     *
+     */
+    public function email_new_user_passwords() {
+        global $DB;
+
+        $sql = "SELECT u.*
+                  FROM mdl_user u
+                  JOIN mdl_user_preferences up ON up.userid = u.id
+                 WHERE name = ?";
+        $records = $DB->get_records_sql($sql, array('enrol_arlo_createpassword'));
+        foreach($records as $user) {
+            self::$plugin->email_newpassword($user);
+        }
+    }
+
+    /**
+     * Email course welcome to users in an enrolment instance.
+     *
+     * @param $instance
+     */
+    public function email_welcome_message_per_instance($instance) {
+        global $DB;
+        $sql = "SELECT u.*
+                  FROM mdl_user u
+                  JOIN mdl_user_preferences up ON up.userid = u.id
+                 WHERE name = :name AND value = :value";
+        $conditions = array('name' => 'enrol_arlo_coursewelcome_'.$instance->id, 'value' => $instance->id);
+        $records = $DB->get_records_sql($sql, $conditions);
+        foreach($records as $user) {
+            self::$plugin->email_welcome_message($instance, $user);
+        }
     }
 
     /**
@@ -267,6 +306,7 @@ class manager {
         $user = user::get_by_guid($contactresource->UniqueIdentifier);
         if (!$user->exists()) {
             $user = $user->create($contactresource);
+            self::trace(sprintf("Created a new user account: %s", $user->get_id()));
         }
         $userid = $user->get_id();
         $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
