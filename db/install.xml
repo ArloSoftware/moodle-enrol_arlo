@@ -13,11 +13,17 @@
         <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="sourcecreated" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was created on Arlo"/>
         <FIELD NAME="sourcemodified" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false" COMMENT="Epoch indicating when this resource was last modified on Arlo"/>
+        <FIELD NAME="lastpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="lasterror" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="errorcount" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time stamp when record modified."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="contactsourceguid" UNIQUE="true" FIELDS="sourceguid"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="enrol_arlo_collection" COMMENT="Information for syncing collections of resources.">
       <FIELDS>
@@ -54,6 +60,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="eventsourceguid" UNIQUE="true" FIELDS="sourceguid"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="enrol_arlo_instance" COMMENT="Extra Arlo information required around a linked Event or Online Activity.">
       <FIELDS>
@@ -93,6 +102,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="onlineactivitysourceguid" UNIQUE="true" FIELDS="sourceguid"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="enrol_arlo_registration" COMMENT="Write some stuff here">
       <FIELDS>
@@ -116,21 +128,19 @@
         <FIELD NAME="sourceeventguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="sourceonlineactivityid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="sourceonlineactivtyguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="updatesource" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="lastpulltime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="lastpushtime" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="lasterror" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="errorcount" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="modified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Time stamp when record modified."/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
-    </TABLE>
-    <TABLE NAME="enrol_arlo_result" COMMENT="Default comment for the table, please edit me">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="enrolid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-      </KEYS>
+      <INDEXES>
+        <INDEX NAME="registrationsourceguid" UNIQUE="true" FIELDS="sourceguid"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="enrol_arlo_template" COMMENT="Default comment for the table, please edit me">
       <FIELDS>
@@ -148,6 +158,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="templatesourceguid" UNIQUE="true" FIELDS="sourceguid"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="enrol_arlo_templatelink" COMMENT="Arlo Template linked to Moodle course.">
       <FIELDS>
@@ -186,11 +199,11 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="enrol_arlo_applicationlog" COMMENT="Log notice and errors that don't fall into context of request.">
+    <TABLE NAME="enrol_arlo_applicationlog" COMMENT="Log application notices, errors that don't fall into the context of a request.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="timelogged" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timelogged" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Timestamp"/>
+        <FIELD NAME="platform" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="extra" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
