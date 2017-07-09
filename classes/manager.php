@@ -74,28 +74,41 @@ class manager {
         return true;
     }
 
+    /**
+     * Function for get enrolment instance to process. Hidden instances or instances in a hidden
+     * course are not included.
+     *
+     * @param bool $manualoverride
+     * @return bool
+     */
     public function process_instances($manualoverride = false) {
         global $DB;
         $platform = self::$plugin->get_config('platform');
+
+        $sql = "SELECT e.* 
+                  FROM {enrol} e
+                  JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
+                  JOIN {course} c ON c.id = e.courseid
+                 WHERE e.enrol = :enrol 
+                   AND e.status = :status
+                   AND ai.platform = :platform
+                   AND c.visible = 1
+              ORDER BY ai.nextpulltime";
+
         $conditions = array(
             'enrol' => 'arlo',
             'status' => ENROL_INSTANCE_ENABLED,
             'platform' => $platform
         );
-        $sql = "SELECT e.* 
-                  FROM {enrol} e
-                  JOIN {enrol_arlo_instance} ai
-                    ON ai.enrolid = e.id
-                 WHERE e.enrol = :enrol 
-                   AND e.status = :status
-                   AND ai.platform = :platform
-              ORDER BY ai.nextpulltime";
-
         $records = $DB->get_records_sql($sql, $conditions);
-        foreach ($records as $record) {
-            self::update_instance_registrations($record, $manualoverride);
+        if (empty($records)) {
+            self::trace('No enrolment instances to process.');
+        } else {
+            foreach ($records as $record) {
+                self::process_instance_registrations($record, $manualoverride);
+            }
         }
-
+        return true;
     }
 
     public static function get_collection_sync_info($collection) {
@@ -151,7 +164,14 @@ class manager {
         return $record;
     }
 
-    public function update_instance_registrations($instance, $manualoverride = false) {
+    /**
+     * Process any registrations for an enrolment instance.
+     *
+     * @param $instance
+     * @param bool $manualoverride
+     * @return bool
+     */
+    public function process_instance_registrations($instance, $manualoverride = false) {
         $timestart = microtime();
         if (!self::api_callable()) {
             self::trace('API not callable');
@@ -166,11 +186,13 @@ class manager {
                 $arloinstance = self::get_associated_arlo_instance(array('enrolid' => $instance->id));
                 $type     = $arloinstance->type;
                 $sourceid = $arloinstance->sourceid;
+                // Event, set resource path and expand accordingly.
                 if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
                     $resourcepath = 'events/' . $sourceid . '/registrations/';
                     $expand = 'Registration/Event';
 
                 }
+                // Online Activity, set resource path and expand accordingly.
                 if ($type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
                     $resourcepath = 'onlineactivities/' . $sourceid . '/registrations/';
                     $expand = 'Registration/OnlineActivity';
@@ -182,7 +204,7 @@ class manager {
                 $requesturi->addExpand($expand);
                 $request = new instance_request($arloinstance, $requesturi, $manualoverride);
                 if (!$request->executable()) {
-                    self::trace('Cannot execute request due to timing or API status');
+                    self::trace('Cannot execute request due to throttling');
                 } else {
                     $response = $request->execute();
                     if (200 != $response->getStatusCode()) {
@@ -196,7 +218,7 @@ class manager {
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $registration) {
-                            self::update_enrolment_registration($instance, $arloinstance, $registration);
+                            self::process_enrolment_registration($instance, $arloinstance, $registration);
                             $latestmodified = $registration->LastModifiedDateTime;
                             $arloinstance->latestsourcemodified = $latestmodified;
                         }
@@ -205,9 +227,9 @@ class manager {
                     }
                 }
             }
-        } catch (\Exception $e) {
-            print_object($e); // TODO handle XMLParse and Moodle exceptions.
-            die;
+        } catch (\Exception $exception) {
+            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            return false;
         }
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
@@ -215,7 +237,15 @@ class manager {
         return true;
     }
 
-    public function update_enrolment_registration($instance, $arloinstance, Registration $registration) {
+    /**
+     * Process enrolment registration. Enrol, unenrol or suspend based on configuration.
+     *
+     * @param $instance
+     * @param $arloinstance
+     * @param Registration $registration
+     * @throws \moodle_exception
+     */
+    public function process_enrolment_registration($instance, $arloinstance, Registration $registration) {
         global $DB;
 
         $plugin = self::$plugin;
@@ -246,18 +276,21 @@ class manager {
             if (empty($record->id)) {
                 unset($record->id);
                 $record->id = $DB->insert_record('enrol_arlo_registration', $record);
-                self::trace(sprintf('Created reg: %s', $record->userid));
+                self::trace(sprintf('Created registration record: %s', $record->userid));
             } else {
                 $DB->update_record('enrol_arlo_registration', $record);
-                self::trace(sprintf('Updated reg: %s', $record->userid));
+                self::trace(sprintf('Updated registration record: %s', $record->userid));
             }
             $plugin->enrol_user($instance, $userid);
+            self::trace(sprintf(sprintf('User %s enrolled', $record->userid)));
         }
         if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_UNENROL)) {
             $plugin->unenrol_user($instance, $userid);
+            self::trace(sprintf(sprintf('User %s unenrolled', $record->userid)));
         }
         if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES)) {
             $plugin->suspend_and_remove_roles($instance, $userid);
+            self::trace(sprintf(sprintf('User %s suspended', $record->userid)));
         }
     }
 
