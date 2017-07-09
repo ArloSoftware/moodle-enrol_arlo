@@ -29,6 +29,8 @@ class user extends \core_user {
 
     /** @var $plugin enrolment plugin instance. */
     private static $plugin;
+    /** @var \progress_trace  */
+    private $trace;
 
     private $userrecord;
     private $contactrecord;
@@ -36,7 +38,13 @@ class user extends \core_user {
 
     protected $contactfields = array('id', 'plaform', 'userid', 'sourceid', 'sourceguid', 'sourcecreated', 'sourcemodified');
 
-    public function __construct() {
+    public function __construct(\progress_trace $trace = null) {
+        // Setup trace.
+        if (is_null($trace)) {
+            $this->trace = new \null_progress_trace();
+        } else {
+            $this->trace = $trace;
+        }
         self::$plugin = enrol_get_plugin('arlo');
     }
 
@@ -207,7 +215,8 @@ class user extends \core_user {
         $sql = "SELECT $fields
                   FROM {enrol_arlo_contact} ac 
                   JOIN {user} u ON  u.id = ac.userid
-                 WHERE ac.platform = :platform 
+                 WHERE u.deleted = 0
+                   AND ac.platform = :platform
                    AND ac.sourceguid = :sourceguid";
         $platform = get_config('enrol_arlo', 'platform');
         $conditions = array('platform' => $platform, 'sourceguid' => $guid);
