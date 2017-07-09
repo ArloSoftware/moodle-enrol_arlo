@@ -294,7 +294,7 @@ class manager {
         }
     }
 
-    public function update_events($manualoverride = false) {
+    public function process_events($manualoverride = false) {
         $timestart = microtime();
         if (!self::api_callable()) {
             return false;
@@ -326,7 +326,7 @@ class manager {
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $event) {
-                            $record = self::update_event($event);
+                            $record = self::process_event($event);
                             $latestmodified = $event->LastModifiedDateTime;
                             $syncinfo->latestsourcemodified = $latestmodified;
                         }
@@ -347,7 +347,7 @@ class manager {
         return true;
     }
 
-    public function update_onlineactivities($manualoverride = false) {
+    public function process_onlineactivities($manualoverride = false) {
         $timestart = microtime();
         if (!self::api_callable()) {
             return false;
@@ -379,7 +379,7 @@ class manager {
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $onlineactivity) {
-                            $record = self::update_onlineactivity($onlineactivity);
+                            $record = self::process_onlineactivity($onlineactivity);
                             $latestmodified = $onlineactivity->LastModifiedDateTime;
                             $syncinfo->latestsourcemodified = $latestmodified;
                         }
@@ -398,7 +398,7 @@ class manager {
         return true;
     }
 
-    public function update_templates($manualoverride = false) {
+    public function process_templates($manualoverride = false) {
         $timestart = microtime();
         if (!self::api_callable()) {
             return false;
@@ -431,7 +431,7 @@ class manager {
                         self::trace("No new or updated resources found.");
                     } else {
                         foreach ($collection as $template) {
-                            $record = self::update_template($template);
+                            $record = self::process_template($template);
                             $latestmodified = $template->LastModifiedDateTime;
                             $syncinfo->latestsourcemodified = $latestmodified;
                         }
@@ -469,7 +469,7 @@ class manager {
         return $deserializer->deserialize($contents);
     }
 
-    public function update_event(Event $event) {
+    public function process_event(Event $event) {
         global $DB;
 
         $platform               = self::$plugin->get_config('platform');
@@ -510,7 +510,7 @@ class manager {
         return $record;
     }
 
-    public function update_template(EventTemplate $template) {
+    public function process_template(EventTemplate $template) {
         global $DB;
 
         $platform               = self::$plugin->get_config('platform');
@@ -542,7 +542,7 @@ class manager {
         return $record;
     }
 
-    public function update_onlineactivity(OnlineActivity $onlineactivity) {
+    public function process_onlineactivity(OnlineActivity $onlineactivity) {
         global $DB;
 
         $platform               = self::$plugin->get_config('platform');
