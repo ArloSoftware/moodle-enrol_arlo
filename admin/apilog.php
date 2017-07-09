@@ -1,36 +1,57 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * Simple file test_custom.php to drop into root of Moodle installation.
- * This is an example of using a sql_table class to format data.
+ *
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @author    Mathew May
+ * @copyright 2017 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require "../../../config.php";
+
+
+use enrol_arlo\plugin_config;
+
+require_once(__DIR__ . '/../../../config.php');
+
 global $CFG,$PAGE,$OUTPUT;
-require "$CFG->libdir/tablelib.php";
-$context = context_system::instance();
-$PAGE->set_context($context);
-$PAGE->set_url('/enrol/arlo/admin/test.php');
+
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->libdir . '/tablelib.php');
+
+admin_externalpage_setup('enrolsettingsarloapilog');
 
 $download = optional_param('download', '', PARAM_ALPHA);
 
-$table = new \enrol_arlo\reports\test_table('uniqueid',  array('timelogged', 'platform', 'uri', 'status', 'extra'));
-$table->is_downloading($download, 'test', 'testing123');
-
-if (!$table->is_downloading()) {
-    // Only print headers if not asked to download data.
-    // Print the page header.
-    $PAGE->set_title('Testing');
-    $PAGE->set_heading('Testing table class');
-    $PAGE->navbar->add('Testing table class', new moodle_url('/enrol/arlo/admin/test.php'));
-    echo $OUTPUT->header();
-}
+$table = new \enrol_arlo\reports\reportbuilder('uniqueid',  array('timelogged', 'platform', 'uri', 'status', 'extra'));
+$table->is_downloading($download, 'apilog');
 
 // Work out the sql for the table.
 $table->set_sql('*', "{enrol_arlo_requestlog}", '1');
+$table->sort_default_order = SORT_DESC;
 
-$table->define_baseurl("$CFG->wwwroot/enrol/arlo/admin/test.php");
+$table->define_baseurl("$CFG->wwwroot/enrol/arlo/admin/apilog.php");
+
+if (!$table->is_downloading()) {
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading(get_string('apilog', 'enrol_arlo'));
+}
 
 $table->out(10, true);
 
 if (!$table->is_downloading()) {
-    $OUTPUT->footer();
+    echo $OUTPUT->footer();
 }
