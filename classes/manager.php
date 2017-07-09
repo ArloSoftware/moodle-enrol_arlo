@@ -342,11 +342,12 @@ class manager {
     }
 
     public function process_events($manualoverride = false) {
+        global $DB;
         $timestart = microtime();
         if (!self::api_callable()) {
             return false;
         }
-        self::trace("Updating Events");
+        self::trace("Processing Events");
         try {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
@@ -383,9 +384,11 @@ class manager {
                 }
             }
         } catch (\Exception $exception) {
-            if ($exception instanceof invalidcontent_exception) {}
-            if ($exception instanceof XMLDeserializerException) {}
-            print_object($exception); // TODO handle XMLParse and Moodle exceptions.
+            $record                 = new \stdClass();
+            $record->timelogged     = time();
+            $record->message        = $exception->getMessage();
+            $DB->insert_record('enrol_arlo_applicationlog', $record);
+            self::trace('Error processing Events');
             return false;
         }
         $timefinish = microtime();
@@ -395,11 +398,12 @@ class manager {
     }
 
     public function process_onlineactivities($manualoverride = false) {
+        global $DB;
         $timestart = microtime();
         if (!self::api_callable()) {
             return false;
         }
-        self::trace("Updating Online Activities");
+        self::trace("Processing Online Activities");
         try {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
@@ -435,9 +439,13 @@ class manager {
                     }
                 }
             }
-        } catch (\Exception $e) {
-            print_object($e); // TODO handle XMLParse and Moodle exceptions.
-            die;
+        } catch (\Exception $exception) {
+            $record                 = new \stdClass();
+            $record->timelogged     = time();
+            $record->message        = $exception->getMessage();
+            $DB->insert_record('enrol_arlo_applicationlog', $record);
+            self::trace('Error processing Online Activities');
+            return false;
         }
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
@@ -446,12 +454,12 @@ class manager {
     }
 
     public function process_templates($manualoverride = false) {
+        global $DB;
         $timestart = microtime();
         if (!self::api_callable()) {
             return false;
         }
-
-        self::trace("Updating Templates");
+        self::trace("Processing Event Templates");
         try {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
@@ -487,9 +495,13 @@ class manager {
                     }
                 }
             }
-        } catch (\Exception $e) {
-            print_object($e); // TODO handle XMLParse and Moodle exceptions.
-            die;
+        } catch (\Exception $exception) {
+            $record                 = new \stdClass();
+            $record->timelogged     = time();
+            $record->message        = $exception->getMessage();
+            $DB->insert_record('enrol_arlo_applicationlog', $record);
+            self::trace('Error processing Event Templates');
+            return false;
         }
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
