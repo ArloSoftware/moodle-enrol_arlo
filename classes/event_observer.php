@@ -34,6 +34,10 @@ class event_observer {
     public static function course_module_completion_updated($event) {
         return;
     }
+    public static function user_deleted($event) {
+        global $DB;
+        $DB->delete_records('enrol_arlo_contact', array('userid' => $event->relateduserid));
+    }
     public static function user_graded($event) {
         return;
     }

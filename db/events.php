@@ -24,15 +24,19 @@
 $observers = array(
     array(
         'eventname' => '\core\event\course_completion_updated',
-        'callback' => '\enrol_arlo\event_observer\course_completion_updated'
+        'callback' => '\enrol_arlo\event_observer::course_completion_updated'
     ),
     array(
         'eventname' => '\core\event\course_module_completion_updated',
-        'callback' => '\enrol_arlo\event_observer\course_module_completion_updated'
+        'callback' => '\enrol_arlo\event_observer::course_module_completion_updated'
+    ),
+    array(
+        'eventname' => '\core\event\user_deleted',
+        'callback' => '\enrol_arlo\event_observer::user_deleted'
     ),
     array(
         'eventname' => '\core\event\user_graded',
-        'callback' => '\enrol_arlo\event_observer\user_graded'
+        'callback' => '\enrol_arlo\event_observer::user_graded'
     ),
     array(
         'eventname'   => '\enrol_arlo\event\fqdn_updated',
