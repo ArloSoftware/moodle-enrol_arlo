@@ -49,7 +49,7 @@ class user extends \core_user {
     }
 
     public function create(Contact $contactresource = null) {
-        global $DB;
+        global $DB, $CFG;
 
         if (self::exists()) {
             throw new \moodle_exception('Already exists');
@@ -91,6 +91,7 @@ class user extends \core_user {
             $user->phone1       = (string) $contactresource->PhoneHome;
             $user->phone2       = (string) $contactresource->PhoneMobile;
             $user->idnumber     = (string) $contactresource->CodePrimary;
+            $user->mnethostid   = $CFG->mnet_localhost_id;
             $user->id           = user_create_user($user, true, false);
             // Set create password flag.
             set_user_preference('enrol_arlo_createpassword', 1, $user->id);
