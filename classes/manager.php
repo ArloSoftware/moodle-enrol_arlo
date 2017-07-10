@@ -207,7 +207,6 @@ class manager {
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
                 $requesturi->setResourcePath($resourcepath);
-                //$requesturi->setPagingTop(2);
                 $requesturi->addExpand('Registration/Contact');
                 $requesturi->addExpand($expand);
                 $request = new instance_request($arloinstance, $requesturi, $manualoverride);
@@ -231,9 +230,18 @@ class manager {
                             $arloinstance->latestsourcemodified = $latestmodified;
                         }
                         $hasnext = (bool) $collection->hasNext();
+                        $apionepageperrequest = self::$plugin->get_config('apionepageperrequest', false);
+                        if ($apionepageperrequest) {
+                            $hasnext = false;
+                        }
+                        self::update_associated_arlo_instance($arloinstance, $hasnext);
+                        $delayemail = self::$plugin->get_config('delayemail', false);
+                        if ($delayemail) {
+                            break;
+                        }
                         self::email_new_user_passwords();
                         self::email_welcome_message_per_instance($instance);
-                        self::update_associated_arlo_instance($arloinstance, $hasnext);
+
                     }
                 }
             }
