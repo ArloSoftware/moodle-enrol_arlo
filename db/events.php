@@ -27,6 +27,10 @@ $observers = array(
         'callback' => '\enrol_arlo\event_observer::course_module_completion_updated'
     ),
     array(
+        'eventname' => '\core\event\course_viewed',
+        'callback' => '\enrol_arlo\event_observer::course_viewed'
+    ),
+    array(
         'eventname' => '\core\event\user_deleted',
         'callback' => '\enrol_arlo\event_observer::user_deleted'
     ),

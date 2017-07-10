@@ -65,6 +65,15 @@ class event_observer {
     }
 
     /**
+     * Course viewed event handler. Update last activity in registration.
+     *
+     * @param $event
+     */
+    public static function course_viewed($event) {
+        static::set_update_source($event->courseid, $event->relateduserid);
+    }
+
+    /**
      * User deleted event handler. Clean up, remove user from enrol_arlo_contact table.
      *
      * @param $event
