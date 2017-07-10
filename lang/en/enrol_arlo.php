@@ -239,3 +239,6 @@ IDNumber:   {$a->idnumber}
 <p>A new account has been created for this user.</p>';
 
 $string['longtime'] = 'This process can take a long time';
+$string['completed'] = 'Completed';
+$string['inprogress'] = 'In progress';
+$string['notstarted'] = 'Not started';
