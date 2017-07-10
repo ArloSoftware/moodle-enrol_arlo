@@ -28,6 +28,7 @@ global $DB, $OUTPUT, $PAGE;
 
 $id         = required_param('id', PARAM_INT); // course id
 $instanceid = optional_param('instance', 0, PARAM_INT);
+$confirm    = optional_param('confirm', 0, PARAM_INT);
 
 $course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
 $context = context_course::instance($course->id, MUST_EXIST);
@@ -48,10 +49,13 @@ $plugins   = enrol_get_plugins(false);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('enrol/arlo:synchronizeinstance', 'enrol_arlo'));
 
-if ($canconfig and confirm_sesskey()) {
+if ($canconfig and confirm_sesskey() and $confirm == true) {
     $trace = new html_list_progress_trace();
     $manager = new enrol_arlo\manager($trace);
     $manager->process_instance_registrations($instance, true);
+} else if ($canconfig and confirm_sesskey()) {
+    $url = new moodle_url('/enrol/arlo/synchronizeinstance.php', array('confirm' => true, 'sesskey' => sesskey(), 'id' => $id,'instance' => $instanceid));
+    echo $OUTPUT->confirm(get_string('longtime', 'enrol_arlo'), $url, '/index.php');
 } else {
     echo print_error('nopermissions', 'error', '', 'please ensure you are signed in and have permission');
 }
