@@ -22,12 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-use enrol_arlo\plugin_config;
-
 require_once(__DIR__ . '/../../../config.php');
-
-global $CFG,$PAGE,$OUTPUT;
 
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/tablelib.php');
@@ -36,13 +31,12 @@ admin_externalpage_setup('enrolsettingsarloemaillog');
 
 $download = optional_param('download', '', PARAM_ALPHA);
 
-$table = new \enrol_arlo\reports\report_builder('uniqueid',  array('timelogged', 'type', 'userid', 'delivered', 'extra'));
+$table = new \enrol_arlo\reports\builder('uniqueid',  array('timelogged', 'type', 'userid', 'delivered', 'extra'));
 $table->is_downloading($download, 'emaillog');
 
 // Work out the sql for the table.
-$table->set_sql('*', "{enrol_arlo_emaillog}", '1');
+$table->set_sql('ael.*, u.firstname, u.lastname', "{enrol_arlo_emaillog} ael JOIN {user} u ON ael.userid = u.id", true);
 $table->sort_default_order = SORT_DESC;
-
 $table->define_baseurl("$CFG->wwwroot/enrol/arlo/admin/emaillog.php");
 
 

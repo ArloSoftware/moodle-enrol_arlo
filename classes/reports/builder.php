@@ -15,14 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace enrol_arlo\reports;
-use enrol_arlo\user;
 
 /**
  * Test table class to be put in test_table.php of root of Moodle installation.
  *  for defining some custom column names and proccessing
  * Username and Password feilds using custom and other column methods.
  */
-class report_builder extends \table_sql {
+class builder extends \table_sql {
 
     /**
      * Constructor
@@ -56,19 +55,26 @@ class report_builder extends \table_sql {
         if ($this->is_downloading()) {
             return $values->timelogged;
         } else {
-            $dt = new \DateTime("@$values->timelogged");
-            return $dt->format('Y-m-d H:i:s');
+            return userdate($values->timelogged);
+        }
+    }
+
+    function col_delivered($values) {
+        // If the data is being downloaded than we don't want to show HTML.
+        if ($this->is_downloading()) {
+            return $values->delivered;
+        } else {
+            return $values->delivered ? get_string('messagesent', 'enrol_arlo') : get_string('messagenotsent', 'enrol_arlo');
         }
     }
 
     function col_userid($values) {
-        global $DB;
+        global $CFG;
         // If the data is being downloaded than we don't want to show HTML.
         if ($this->is_downloading()) {
             return $values->userid;
         } else {
-            $user = $DB->get_record('user', array('id' => $values->userid), 'firstname, lastname');
-            return '<a href="/user/profile.php?id='.$values->userid.'">'. $user->firstname . ' '. $user->lastname .'</a>';
+            return '<a href="' . $CFG->wwwroot . '/user/profile.php?id='.$values->userid.'">'. $values->firstname . ' '. $values->lastname .'</a>';
         }
     }
 }

@@ -24,7 +24,6 @@
  */
 
 require('../../config.php');
-global $DB, $OUTPUT, $PAGE;
 
 $id         = required_param('id', PARAM_INT); // course id
 $instanceid = optional_param('instance', 0, PARAM_INT);
@@ -34,7 +33,6 @@ $course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
 $context = context_course::instance($course->id, MUST_EXIST);
 
 require_login($course);
-require_capability('moodle/course:enrolreview', $context);
 
 $canconfig = has_capability('enrol/arlo:synchronizeinstance', $context);
 
