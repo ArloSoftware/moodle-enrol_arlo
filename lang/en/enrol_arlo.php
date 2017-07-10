@@ -237,3 +237,5 @@ IDNumber:   {$a->idnumber}
 </pre>
 <br>
 <p>A new account has been created for this user.</p>';
+
+$string['longtime'] = 'This process can take a long time';
