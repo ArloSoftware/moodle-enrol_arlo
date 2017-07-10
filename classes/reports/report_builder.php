@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace enrol_arlo\reports;
+use enrol_arlo\user;
+
 /**
  * Test table class to be put in test_table.php of root of Moodle installation.
  *  for defining some custom column names and proccessing
@@ -46,6 +48,27 @@ class report_builder extends \table_sql {
         // For security reasons we don't want to show the password hash.
         if ($colname == 'password') {
             return "****";
+        }
+    }
+
+    function col_timelogged($values) {
+        // If the data is being downloaded than we don't want to show HTML.
+        if ($this->is_downloading()) {
+            return $values->timelogged;
+        } else {
+            $dt = new \DateTime("@$values->timelogged");
+            return $dt->format('Y-m-d H:i:s');
+        }
+    }
+
+    function col_userid($values) {
+        global $DB;
+        // If the data is being downloaded than we don't want to show HTML.
+        if ($this->is_downloading()) {
+            return $values->userid;
+        } else {
+            $user = $DB->get_record('user', array('id' => $values->userid), 'firstname, lastname');
+            return '<a href="/user/profile.php?id='.$values->userid.'">'. $user->firstname . ' '. $user->lastname .'</a>';
         }
     }
 }
