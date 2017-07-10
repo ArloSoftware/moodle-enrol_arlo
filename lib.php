@@ -701,11 +701,12 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function get_action_icons(stdClass $instance) {
         global $OUTPUT;
 
-        $context = context_course::instance($instance->courseid);
+        $courseid = $instance->courseid;
+        $context = context_course::instance($courseid);
 
         $icons = array();
         if (has_capability('enrol/arlo:synchronizeinstance', $context)) {
-            $link = new moodle_url('enrol/arlo/synchronizeinstance.php', array('id' => $instance->id));
+            $link = new moodle_url('arlo/synchronizeinstance.php', array('sesskey' => sesskey(), 'id' => $courseid,'instance' => $instance->id));
             $icon = new pix_icon('synchronize', get_string('synchronize', 'enrol_arlo'),
                 'enrol_arlo', array('class' => 'iconsmall'));
             $icons[] = $OUTPUT->action_icon($link, $icon);
