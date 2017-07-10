@@ -23,6 +23,7 @@ class result {
         $this->courseid = $courseid;
         $this->userid   = $userid;
         self::set_completion_progress_information();
+        self::set_course_last_access();
     }
 
     protected function get_course($courseid) {
@@ -59,6 +60,16 @@ class result {
                     $this->progresspercent = round(($criteriacomplete / $totalcriteria) * 100, 0);
                 }
             }
+        }
+    }
+
+    protected function set_course_last_access() {
+        global $DB;
+        $course = self::get_course($this->courseid);
+        $conditions = array('courseid' => $course->id, 'userid' => $this->userid);
+        $lastcourseaccess = $DB->get_field('user_lastaccess', 'timeaccess', $conditions);
+        if ($lastcourseaccess) {
+            $this->lastactivity = $lastcourseaccess;
         }
     }
 
