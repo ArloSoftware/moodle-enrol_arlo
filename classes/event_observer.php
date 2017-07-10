@@ -24,23 +24,73 @@
 
 namespace enrol_arlo;
 
-//require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
-
 
 class event_observer {
-    public static function course_completion_updated($event) {
-        return;
+
+    /**
+     * Set updatesource field in enrol_arlo_registration table. Fired on cours module update and
+     * user graded events. This will inform manager to update result information via registration patch.
+     *
+     * @param $courseid
+     * @param $relateduserid
+     */
+    private static function set_update_source($courseid, $relateduserid) {
+        global $DB;
+        $sql = "SELECT ear.* 
+                  FROM {enrol} e
+                  JOIN {enrol_arlo_registration} ear ON ear.enrolid = e.id
+                  JOIN {course} c ON c.id = e.courseid
+                 WHERE e.enrol = :enrol AND e.status = :status
+                   AND c.id = :courseid AND ear.userid = :relateduserid";
+        $conditions = array(
+            'enrol' => 'arlo',
+            'status' => ENROL_INSTANCE_ENABLED,
+            'courseid' => $courseid,
+            'relateduserid' => $relateduserid
+        );
+        $record = $DB->get_record_sql($sql, $conditions);
+        if ($record) {
+            $DB->set_field('enrol_arlo_registration',
+                'updatesource', 1, array('id' => $record->id));
+        }
     }
+
+    /**
+     * Course module completion event handler. Used for updating results.
+     *
+     * @param $event
+     */
     public static function course_module_completion_updated($event) {
-        return;
+        static::set_update_source($event->courseid, $event->relateduserid);
     }
+
+    /**
+     * User deleted event handler. Clean up, remove user from enrol_arlo_contact table.
+     *
+     * @param $event
+     */
     public static function user_deleted($event) {
         global $DB;
         $DB->delete_records('enrol_arlo_contact', array('userid' => $event->relateduserid));
     }
+
+    /**
+     * User graded event handler. Used for updating results.
+     *
+     * @param $event
+     */
     public static function user_graded($event) {
-        return;
+        static::set_update_source($event->courseid, $event->relateduserid);
     }
+
+    /**
+     * Platform name change handler. Used for cleanup.
+     *
+     * NOT YET IMPLEMENTED.
+     *
+     * @param $event
+     * @return mixed
+     */
     public static function fqdn_updated($event) {
         return $event;
     }
