@@ -15,6 +15,7 @@ use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
+use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationOutcome;
 
 use enrol_arlo\exception\invalidcontent_exception;
 use GuzzleHttp\Psr7\Response;
@@ -116,6 +117,50 @@ class manager {
             }
         }
         return true;
+    }
+
+    public function get_enrol_instances($orderby = '') {
+        global $DB;
+        $platform = self::$plugin->get_config('platform');
+        $sql = "SELECT e.*
+                  FROM {enrol} e
+                  JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
+                  JOIN {course} c ON c.id = e.courseid
+                 WHERE e.enrol = :enrol
+                   AND e.status = :status
+                   AND ai.platform = :platform
+                   AND c.visible = 1";
+        if (!empty($orderby)) {
+            $sql .= " ORDER BY {$orderby}";
+        }
+        $conditions = array(
+            'enrol' => 'arlo',
+            'status' => ENROL_INSTANCE_ENABLED,
+            'platform' => $platform
+        );
+        return $DB->get_records_sql($sql, $conditions);
+    }
+
+    public function process_results($manualoverride = false) {
+        $records = self::get_enrol_instances();
+        foreach ($records as $instance) {
+            self::process_instance_results($instance, $manualoverride);
+        }
+    }
+
+    public function process_instance_results($instance, $manualoverride) {
+        global $DB;
+        $conditions = array(
+            'enrolid' => $instance->id,
+            'updatesource' => 1
+        );
+        $records = $DB->get_records('enrol_arlo_registration', $conditions);
+        foreach ($records as $record) {
+            print_object($record);
+            print_object($instance);
+
+        }
+
     }
 
     public static function get_collection_sync_info($collection) {
