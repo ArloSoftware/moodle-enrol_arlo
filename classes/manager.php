@@ -153,9 +153,14 @@ class manager {
             $resourcepath = 'registrations/' . $sourceid . '/';
             $requesturi->setResourcePath($resourcepath);
             try{
-                $client = new Client($platform, $apiusername, $apipassword);
+                $options = array();
+                $options['auth'] = array(
+                    $apiusername,
+                    $apipassword
+                );
+                $client = new Client();
                 $headers = array('Content-type' => 'application/xml; charset=utf-8');
-                $response = $client->request('patch', $requesturi, $headers, $body);
+                $response = $client->request('patch', $requesturi, $headers, $body, $options);
             } catch (BadResponseException $e) {
                 $c = $e->getResponse()->getBody()->getContents();
                 print_object($e->getMessage());
@@ -196,35 +201,22 @@ class manager {
         return $arloinstance;
     }
 
-    /**
-     * @param \stdClass $record
-     * @param bool $hasnext
-     * @return \stdClass
-     */
-    public static function update_collection_sync_info(\stdClass $record, $hasnext= false) {
+    public static function update_scheduling_information(\stdClass $record, $updatepulltime = false, $updatepushtime = false) {
         global $DB;
-
-        $record->lastpulltime = time();
-        // Only update nextpulltime if no more records to process.
-        if (!$hasnext) {
+        if (!isset($record->tablename)) {
+            throw new \coding_exception('Table name must be set on scheduling record');
+        }
+        $tablename = $record->tablename; // Does not exist in table, can be safely passed to update.
+        if (!$updatepulltime) {
             $record->nextpulltime = time();
         }
-        $DB->update_record('enrol_arlo_collection', $record);
-        $record->tablename = 'enrol_arlo_collection';
-        return $record;
+        if (!$updatepushtime) {
+            $record->updatepushtime = time();
+        }
+        $DB->update_record($tablename, $record);
     }
 
-    public static function update_associated_arlo_instance(\stdClass $record, $hasnext= false) {
-        global $DB;
-        $record->lastpulltime = time();
-        // Only update nextpulltime if no more records to process.
-        if (!$hasnext) {
-            $record->nextpulltime = time();
-        }
-        $DB->update_record('enrol_arlo_instance', $record);
-        $record->tablename = 'enrol_arlo_instance';
-        return $record;
-    }
+
 
     protected static function can_pull($record, $manualoverride = false) {
         $timestart = time();
@@ -275,10 +267,14 @@ class manager {
                 $hasnext = false; // Avoid infinite loop by default.
                 // Get sync information.
                 $arloinstance = self::get_associated_arlo_instance(array('enrolid' => $instance->id));
+                // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
                 if (!$arloinstance) {
                     self::trace('No matching Arlo enrolment instance.');
                     break;
                 }
+                // Reset.
+                $arloinstance->lasterror = '';
+                $arloinstance->errorcount = 0;
                 if (!self::can_pull($arloinstance, $manualoverride)) {
                     break;
                 }
@@ -315,7 +311,7 @@ class manager {
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
                 if (empty($collection)) {
-                    self::update_associated_arlo_instance($arloinstance, false);
+                    self::update_scheduling_information($arloinstance, false);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $registration) {
@@ -328,7 +324,7 @@ class manager {
                     if ($apionepageperrequest) {
                         $hasnext = false;
                     }
-                    self::update_associated_arlo_instance($arloinstance, $hasnext);
+                    self::update_scheduling_information($arloinstance, $hasnext);
                     $delayemail = self::$plugin->get_config('delayemail', false);
                     if ($delayemail) {
                         break;
@@ -338,6 +334,10 @@ class manager {
                 }
             }
         } catch (\Exception $exception) {
+            $errorcount = (int) $arloinstance->errorcount;
+            $arloinstance->errorcount = ++$errorcount;
+            $arloinstance->lasterror = $exception->getMessage();
+            self::update_scheduling_information($arloinstance, false);
             debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
             return false;
         }
@@ -481,7 +481,7 @@ class manager {
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
                 if (empty($collection)) {
-                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::update_scheduling_information($syncinfo, $hasnext);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $event) {
@@ -490,7 +490,7 @@ class manager {
                         $syncinfo->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::update_scheduling_information($syncinfo, $hasnext);
                 }
             }
         } catch (\Exception $exception) {
@@ -547,7 +547,7 @@ class manager {
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
                 if (empty($collection)) {
-                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::update_scheduling_information($syncinfo, $hasnext);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $onlineactivity) {
@@ -556,7 +556,7 @@ class manager {
                         $syncinfo->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::update_scheduling_information($syncinfo, $hasnext);
                 }
             }
         } catch (\Exception $exception) {
@@ -613,7 +613,7 @@ class manager {
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
                 if (empty($collection)) {
-                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::update_scheduling_information($syncinfo, $hasnext);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $template) {
@@ -622,7 +622,7 @@ class manager {
                         $syncinfo->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::update_scheduling_information($syncinfo, $hasnext);
                 }
             }
         } catch (\Exception $exception) {

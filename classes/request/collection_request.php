@@ -2,6 +2,7 @@
 
 namespace enrol_arlo\request;
 
+use enrol_arlo\manager;
 use stdClass;
 use enrol_arlo\alert;
 use enrol_arlo\Arlo\AuthAPI\Client;
@@ -48,6 +49,10 @@ class collection_request extends abstract_request {
             set_config('apierrorcount', 0, 'enrol_arlo');
             return $response;
         } catch (RequestException $exception) {
+            $errorcount = (int) $this->record->errorcount;
+            $this->record->errorcount = ++$errorcount;
+            $this->record->lasterror = $exception->getMessage();
+            manager::update_scheduling_information($this->record, false);
             $apierrorcount = (int) get_config('enrol_arlo', 'apierrorcount');
             $status = $exception->getCode();
             $uri = (string) $exception->getRequest()->getUri();
