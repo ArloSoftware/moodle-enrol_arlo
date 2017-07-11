@@ -1006,7 +1006,6 @@ function change_platform($oldinstance, $newinstance) {
     if ($oldinstance  === $newinstance) {
         return;
     }
-    die();
     $rs = $DB->get_recordset('enrol', array('enrol' => 'arlo'));
     foreach ($rs as $instance) {
         $this->delete_instance($instance);
@@ -1016,10 +1015,18 @@ function change_platform($oldinstance, $newinstance) {
     // Clear any create password flags.
     $DB->delete_records('user_preferences', array('name' => 'enrol_arlo_createpassword'));
     // Clear out tables.
+
+    $DB->delete_records('enrol_arlo_applicationlog');
     $DB->delete_records('enrol_arlo_collection', array('platform' =>$oldinstance));
     $DB->delete_records('enrol_arlo_contact', array('platform' =>$oldinstance));
-    $DB->delete_records('enrol_arlo_contact', array('event' =>$oldinstance));
-    // ETC.
+    $DB->delete_records('enrol_arlo_emaillog');
+    $DB->delete_records('enrol_arlo_event', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_instance', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_onlineactivity', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_registration', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_requestlog', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_template', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_templatelink');
     // Finally purge all caches.
     purge_all_caches();
 }
