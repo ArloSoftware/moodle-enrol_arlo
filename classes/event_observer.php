@@ -24,7 +24,6 @@
 
 namespace enrol_arlo;
 
-
 class event_observer {
 
     /**
@@ -92,6 +91,8 @@ class event_observer {
      * @return mixed
      */
     public static function fqdn_updated($event) {
-        return $event;
+        global $CFG;
+        require_once($CFG->dirroot.'/enrol/arlo/lib.php');
+        change_platform($event->other['oldvalue'], $event->other['newvalue']);
     }
 }

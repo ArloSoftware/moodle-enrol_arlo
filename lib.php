@@ -994,9 +994,35 @@ class enrol_arlo_plugin extends enrol_plugin {
             role_unassign_all($unenrolparams);
         }
     }
-
 }
+function change_platform($oldinstance, $newinstance) {
+    global $DB;
+    print_object('in the lib.');
+    print_object($oldinstance);
+    print_object($newinstance);
+    print_object('leaving lib');
 
+    // Nothing changed.
+    if ($oldinstance  === $newinstance) {
+        return;
+    }
+    die();
+    $rs = $DB->get_recordset('enrol', array('enrol' => 'arlo'));
+    foreach ($rs as $instance) {
+        $this->delete_instance($instance);
+    }
+    $rs->close();
+    role_unassign_all(array('component' => 'enrol_arlo'));
+    // Clear any create password flags.
+    $DB->delete_records('user_preferences', array('name' => 'enrol_arlo_createpassword'));
+    // Clear out tables.
+    $DB->delete_records('enrol_arlo_collection', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_contact', array('platform' =>$oldinstance));
+    $DB->delete_records('enrol_arlo_contact', array('event' =>$oldinstance));
+    // ETC.
+    // Finally purge all caches.
+    purge_all_caches();
+}
 /**
  * Display the associate Arlo template link in the course administration menu.
  *
