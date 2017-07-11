@@ -17,12 +17,6 @@ use GuzzleHttp\Exception\BadResponseException;
  * @package enrol_arlo\Arlo\AuthAPI
  */
 class Client {
-    /** @var string platform Arlo plaform name. */
-    private $platform;
-    /** @var string apiUsername username. */
-    private $apiUsername;
-    /** @var string apiPassword password. */
-    private $apiPassword;
     /** @var \GuzzleHttp\Client httpClient client to used to make requests. */
     private $httpClient;
     /** @var \GuzzleHttp\Psr7\Request lastRequest returns last request. */
@@ -42,31 +36,7 @@ class Client {
      * @param $apiPassword
      * @throws \Exception
      */
-    public function __construct($platform, $apiUsername, $apiPassword) {
-        // Check platform name.
-        if (empty($platform)) {
-            throw new \Exception("platform cannot be empty.");
-        }
-        if (!is_string($platform)) {
-            throw new \Exception("platform must be a string.");
-        }
-        $this->platform = $platform;
-        // Check apiUsername.
-        if (empty($apiUsername)) {
-            throw new \Exception("apiUsername name cannot be empty.");
-        }
-        if (!is_string($apiUsername)) {
-            throw new \Exception("apiUsername name must be a string.");
-        }
-        $this->apiUsername = $apiUsername;
-        // Check apiPassword and set.
-        if (empty($apiPassword)) {
-            throw new \Exception("apiPassword name cannot be empty.");
-        }
-        if (!is_string($apiPassword)) {
-            throw new \Exception("apiPassword name must be a string.");
-        }
-        $this->apiPassword = $apiPassword;
+    public function __construct() {
         // Initialize Guzzle.
         $this->httpClient = new \GuzzleHttp\Client();
     }
@@ -101,16 +71,12 @@ class Client {
         if (!$requestUri->isValid()) {
             throw new \Exception('Invalid RequestUri.');
         }
-        $options['auth'] = array(
-            $this->apiUsername,
-            $this->apiPassword
-        );
         $options['decode_content'] = 'gzip';
         $options['connect_timeout'] = self::CONNECTION_TIMEOUT;
         $request = new Request($method, $requestUri->output(), $headers, $body);
+        $response = $this->httpClient->send($request, $options);
         $this->lastRequest = $request;
         $this->lastRequestTime = time();
-        $response = $this->httpClient->send($request, $options);
         $this->lastResponse = $response;
         return $response;
     }
