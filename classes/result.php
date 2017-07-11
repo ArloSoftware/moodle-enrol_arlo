@@ -139,7 +139,7 @@ class result {
             return '';
         }
         $registrationrecord = $this->registrationrecord;
-        $dom = new DOMDocument();
+        $dom = new DOMDocument('1.0', 'utf-8');
         $root = $dom->appendChild(new DOMElement('diff'));
         if ($registrationrecord->grade != $this->grade) {
             $element = $dom->createElement('replace', $this->grade);
@@ -168,6 +168,8 @@ class result {
             $element = $dom->createElement('replace', $this->progresspercent);
             $element->setAttribute("sel", "Registration/ProgressPercent/text()[1]");
             $root->appendChild($element);
+
+
         }
         return $dom->saveXML();
     }
