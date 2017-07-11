@@ -457,6 +457,7 @@ class manager {
         if (!self::api_callable()) {
             return false;
         }
+        list($platform, $apiusername, $apipassword) = self::get_connection_vars();
         self::trace("Processing Events");
         try {
             $hasnext = true; // Initialise to for multiple pages.
@@ -464,33 +465,42 @@ class manager {
                 $hasnext = false; // Avoid infinite loop by default.
                 // Get sync information.
                 $syncinfo = self::get_collection_sync_info('events');
+                if (!$syncinfo) {
+                    self::trace('No matching sync instance');
+                    break;
+                }
+                if (!self::can_pull($syncinfo, $manualoverride)) {
+                    break;
+                }
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
+                $requesturi->setHost($platform);
                 $requesturi->setResourcePath('events/');
                 $requesturi->addExpand('Event/EventTemplate');
-                $request = new collection_request($syncinfo, $requesturi, $manualoverride);
-                if (!$request->executable()) {
-                    self::trace('Cannot execute request due to throttling');
+                $options = array();
+                $options['auth'] = array(
+                    $apiusername,
+                    $apipassword
+                );
+                $request = new \enrol_arlo\request\collection_request($syncinfo, $requesturi, array(), null, $options);
+                $response = $request->execute();
+                if (200 != $response->getStatusCode()) {
+                    self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                    return false;
+                }
+                $collection = self::deserialize_response_body($response);
+                // Any returned.
+                if (empty($collection)) {
+                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::trace("No new or updated resources found.");
                 } else {
-                    $response = $request->execute();
-                    if (200 != $response->getStatusCode()) {
-                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
-                        return false;
+                    foreach ($collection as $event) {
+                        $record = self::process_event($event);
+                        $latestmodified = $event->LastModifiedDateTime;
+                        $syncinfo->latestsourcemodified = $latestmodified;
                     }
-                    $collection = self::deserialize_response_body($response);
-                    // Any returned.
-                    if (empty($collection)) {
-                        self::update_collection_sync_info($syncinfo, $hasnext);
-                        self::trace("No new or updated resources found.");
-                    } else {
-                        foreach ($collection as $event) {
-                            $record = self::process_event($event);
-                            $latestmodified = $event->LastModifiedDateTime;
-                            $syncinfo->latestsourcemodified = $latestmodified;
-                        }
-                        $hasnext = (bool) $collection->hasNext();
-                        self::update_collection_sync_info($syncinfo, $hasnext);
-                    }
+                    $hasnext = (bool) $collection->hasNext();
+                    self::update_collection_sync_info($syncinfo, $hasnext);
                 }
             }
         } catch (\Exception $exception) {
