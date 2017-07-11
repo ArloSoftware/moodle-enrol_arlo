@@ -18,18 +18,22 @@ use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationOutcome;
 
 use enrol_arlo\exception\invalidcontent_exception;
+use enrol_arlo\request\collection;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
 
 
 
 class manager {
+    const REQUEST_INTERVAL_SECONDS      = 900; // 15 Minutes.
+    const REQUEST_EXTENSION_SECONDS     = 259200; // 72 Hours.
+    const MAXIMUM_ERROR_COUNT           = 20;
     /** @var DELAY_REQUEST_SECONDS time in seconds to delay next request. */
-    const DELAY_REQUEST_SECONDS = 900; // 15 Minutes.
+    const DELAY_REQUEST_SECONDS         = 900; // 15 Minutes.
     /** @var $plugin enrolment plugin instance. */
     private static $plugin;
     /** @var \progress_trace  */
-    private $trace;
+    private static $trace;
 
     public function __construct(\progress_trace $trace = null) {
         // Raise limits, so this script can be interrupted without problems.
@@ -37,9 +41,9 @@ class manager {
         raise_memory_limit(MEMORY_HUGE);
         // Setup trace.
         if (is_null($trace)) {
-            $this->trace = new \null_progress_trace();
+            self::$trace = new \null_progress_trace();
         } else {
-            $this->trace = $trace;
+            self::$trace = $trace;
         }
         self::$plugin = enrol_get_plugin('arlo');
     }
@@ -196,12 +200,13 @@ class manager {
             $record->errorcount             = 0;
             $record->id = $DB->insert_record('enrol_arlo_collection', $record);
         }
+        $record->tablename = 'enrol_arlo_collection';
         return $record;
     }
 
     public static function get_associated_arlo_instance(array $conditions) {
         global $DB;
-        return $DB->get_record('enrol_arlo_instance', $conditions, '*', MUST_EXIST);
+        return $DB->get_record('enrol_arlo_instance', $conditions);
     }
 
     /**
@@ -218,6 +223,7 @@ class manager {
             $record->nextpulltime = time();
         }
         $DB->update_record('enrol_arlo_collection', $record);
+        $record->tablename = 'enrol_arlo_collection';
         return $record;
     }
 
@@ -232,6 +238,34 @@ class manager {
         return $record;
     }
 
+    protected static function can_pull($record, $manualoverride = false) {
+        $timestart = time();
+        if ($manualoverride) {
+            return true;
+        }
+        // Pull disabled for this record.
+        if ($record->nextpulltime == -1) {
+            self::trace('Disabled due to errors');
+            return false;
+        }
+        $nextpulltime = $record->nextpulltime;
+        // Return if next pull time hasn't passed current time.
+        if ($timestart < ($nextpulltime + self::REQUEST_INTERVAL_SECONDS)) {
+            self::trace('Next pull time not yet reached');
+            return false;
+        }
+        $endpulltime = $record->endpulltime;
+        // Return if end pull time has past.
+        if (!empty($endpulltime) && $timestart > ($endpulltime + self::REQUEST_EXTENSION_SECONDS)) {
+            self::trace('End pull time has passed');
+            return false;
+        }
+        return true;
+    }
+
+    protected static function can_push() {}
+
+
     /**
      * Process any registrations for an enrolment instance.
      *
@@ -242,7 +276,7 @@ class manager {
     public function process_instance_registrations($instance, $manualoverride = false) {
         $timestart = microtime();
         if (!self::api_callable()) {
-            self::trace('API not callable');
+            self::trace('API not callable due to status');
             return false;
         }
         self::trace("Updating Registrations for instance");
@@ -252,6 +286,13 @@ class manager {
                 $hasnext = false; // Avoid infinite loop by default.
                 // Get sync information.
                 $arloinstance = self::get_associated_arlo_instance(array('enrolid' => $instance->id));
+                if (!$arloinstance) {
+                    self::trace('No matching Arlo enrolment instance.');
+                    break;
+                }
+                if (!self::can_pull($arloinstance, $manualoverride)) {
+                    break;
+                }
                 $type     = $arloinstance->type;
                 $sourceid = $arloinstance->sourceid;
                 // Event, set resource path and expand accordingly.
@@ -372,7 +413,7 @@ class manager {
         }
 
         // Load Contact.
-        $user = new user($this->trace);
+        $user = new user(self::$trace);
         $user->load_by_guid($contactresource->UniqueIdentifier);
         if (!$user->exists()) {
             $user = $user->create($contactresource);
@@ -528,6 +569,7 @@ class manager {
         if (!self::api_callable()) {
             return false;
         }
+        list($platform, $apiusername, $apipassword) = self::get_connection_vars();
         self::trace("Processing Event Templates");
         try {
             $hasnext = true; // Initialise to for multiple pages.
@@ -535,33 +577,42 @@ class manager {
                 $hasnext = false; // Avoid infinite loop by default.
                 // Get sync information.
                 $syncinfo = self::get_collection_sync_info('eventtemplates');
+                if (!$syncinfo) {
+                    self::trace('No matching sync instance');
+                    break;
+                }
+                if (!self::can_pull($syncinfo, $manualoverride)) {
+                    break;
+                }
                 // Setup RequestUri for getting Templates.
                 $requesturi = new RequestUri();
+                $requesturi->setHost($platform);
                 $requesturi->setResourcePath('eventtemplates/');
                 $requesturi->addExpand('EventTemplate');
-                $request = new collection_request($syncinfo, $requesturi, $manualoverride);
-                if (!$request->executable()) {
-                    self::trace('Cannot execute request due to throttling');
+                $options = array();
+                $options['auth'] = array(
+                    $apiusername,
+                    $apipassword
+                );
+                $request = new \enrol_arlo\request\collection_request($syncinfo, $requesturi, array(), null, $options);
+                $response = $request->execute();
+                if (200 != $response->getStatusCode()) {
+                    self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                    return false;
+                }
+                $collection = self::deserialize_response_body($response);
+                // Any returned.
+                if (empty($collection)) {
+                    self::update_collection_sync_info($syncinfo, $hasnext);
+                    self::trace("No new or updated resources found.");
                 } else {
-                    $response = $request->execute();
-                    if (200 != $response->getStatusCode()) {
-                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
-                        return false;
+                    foreach ($collection as $template) {
+                        $record = self::process_template($template);
+                        $latestmodified = $template->LastModifiedDateTime;
+                        $syncinfo->latestsourcemodified = $latestmodified;
                     }
-                    $collection = self::deserialize_response_body($response);
-                    // Any returned.
-                    if (empty($collection)) {
-                        self::update_collection_sync_info($syncinfo, $hasnext);
-                        self::trace("No new or updated resources found.");
-                    } else {
-                        foreach ($collection as $template) {
-                            $record = self::process_template($template);
-                            $latestmodified = $template->LastModifiedDateTime;
-                            $syncinfo->latestsourcemodified = $latestmodified;
-                        }
-                        $hasnext = (bool) $collection->hasNext();
-                        self::update_collection_sync_info($syncinfo, $hasnext);
-                    }
+                    $hasnext = (bool) $collection->hasNext();
+                    self::update_collection_sync_info($syncinfo, $hasnext);
                 }
             }
         } catch (\Exception $exception) {
@@ -710,12 +761,24 @@ class manager {
     }
 
     /**
+     * Helper method. Return connection vars for client.
+     *
+     * @return array
+     */
+    protected function get_connection_vars() {
+        $platform       = self::$plugin->get_config('platform');
+        $apiusername    = self::$plugin->get_config('apiusername');
+        $apipassword    = self::$plugin->get_config('apipassword');
+        return array($platform, $apiusername, $apipassword);
+    }
+
+    /**
      * Output a progress message.
      *
      * @param $message the message to output.
      * @param int $depth indent depth for this message.
      */
     private function trace($message, $depth = 0) {
-        $this->trace->output($message, $depth);
+        self::$trace->output($message, $depth);
     }
 }
