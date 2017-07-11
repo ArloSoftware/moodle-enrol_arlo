@@ -91,16 +91,16 @@ class Client {
      *
      * @param $method
      * @param \enrol_arlo\Arlo\AuthAPI\RequestUri $requestUri
+     * @param array $headers
+     * @param null $body
      * @param array $options
-     * @return mixed|null|\Psr\Http\Message\ResponseInterface
+     * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \Exception
      */
-    public function request($method, RequestUri $requestUri, array $options = [], $body = null) {
+    public function request($method, RequestUri $requestUri, array $headers = [], $body = null, array $options = []) {
         if (!$requestUri->isValid()) {
             throw new \Exception('Invalid RequestUri.');
         }
-        $headers = array();
-        $options = array();
         $options['auth'] = array(
             $this->apiUsername,
             $this->apiPassword
