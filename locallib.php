@@ -384,3 +384,43 @@ function enrol_arlo_sync(progress_trace $trace, $courseid = null) {
 function enrol_arlo_allow_group_member_remove($itemid, $groupid, $userid) {
     return false;
 }
+
+/**
+ * Deletes all occurences of the old instance
+ * troughout the arlo tables if FQDN setting is changed.
+ *
+ * @param String $oldinstance
+ * @param String $newinstance
+ */
+function enrol_arlo_change_platform($oldinstance, $newinstance) {
+    global $DB, $CFG;
+
+    require_once($CFG->dirroot.'/enrol/arlo/lib.php');
+    // Nothing changed.
+    if ($oldinstance  === $newinstance) {
+        return;
+    }
+    $rs = $DB->get_recordset('enrol', array('enrol' => 'arlo'));
+    $x = new enrol_arlo_plugin();
+    foreach ($rs as $instance) {
+        $x->delete_instance($instance);
+    }
+    $rs->close();
+    role_unassign_all(array('component' => 'enrol_arlo'));
+    // Clear any create password flags.
+    $DB->delete_records('user_preferences', array('name' => 'enrol_arlo_createpassword'));
+    // Clear out tables.
+    $DB->delete_records('enrol_arlo_applicationlog');
+    $DB->delete_records('enrol_arlo_collection', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_contact', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_emaillog');
+    $DB->delete_records('enrol_arlo_event', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_instance', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_onlineactivity', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_registration', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_requestlog', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_template', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_templatelink');
+    // Finally purge all caches.
+    purge_all_caches();
+}
