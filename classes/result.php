@@ -3,6 +3,9 @@
 namespace enrol_arlo;
 
 use stdClass;
+use DOMDocument;
+
+use DOMElement;
 use completion_info;
 use completion_completion;
 use grade_item;
@@ -43,7 +46,7 @@ class result {
         return static::$coursecache[$courseid];
     }
 
-    public function set_course_grade_information() {
+    protected function set_course_grade_information() {
         global $CFG;
 
         $course = self::get_course($this->courseid);
@@ -71,12 +74,14 @@ class result {
                     true,
                     $displaytype,
                     $decimalpoints);
-                // Set grade.
-                $this->grade = $gradetodisplay;
-                if ($realgrade >= $graderequiredtopass) {
-                    $this->outcome = get_string('pass', 'enrol_arlo');
-                } else {
-                    $this->outcome = get_string('fail', 'enrol_arlo');
+                // Check if any grade. - denotes no grade yet.
+                if ($gradetodisplay != '-') {
+                    $this->grade = $gradetodisplay;
+                    if ($realgrade >= $graderequiredtopass) {
+                        $this->outcome = get_string('pass', 'enrol_arlo');
+                    } else {
+                        $this->outcome = get_string('fail', 'enrol_arlo');
+                    }
                 }
             }
         }
@@ -127,5 +132,43 @@ class result {
             }
         }
         return false;
+    }
+
+    public function export_to_xml() {
+        if (!self::has_changed()) {
+            return '';
+        }
+        $registrationrecord = $this->registrationrecord;
+        $dom = new DOMDocument();
+        $root = $dom->appendChild(new DOMElement('diff'));
+        if ($registrationrecord->grade != $this->grade) {
+            $element = $dom->createElement('replace', $this->grade);
+            $element->setAttribute("sel", "Registration/Grade/text()[1]");
+            $root->appendChild($element);
+        }
+        if ($registrationrecord->outcome != $this->outcome) {
+            $element = $dom->createElement('replace', $this->outcome);
+            $element->setAttribute("sel", "Registration/Outcome/text()[1]");
+            $root->appendChild($element);
+        }
+        if ($registrationrecord->lastactivity != $this->lastactivity) {
+            $servertimezone = \core_date::get_server_timezone();
+            $tz = new \DateTimeZone($servertimezone);
+            $date = \DateTime::createFromFormat('U', $this->lastactivity, $tz);
+            $element = $dom->createElement('replace', $date->format(DATE_ISO8601));
+            $element->setAttribute("sel", "Registration/LastActivityDateTime/text()[1]");
+            $root->appendChild($element);
+        }
+        if ($registrationrecord->progressstatus != $this->progressstatus) {
+            $element = $dom->createElement('replace', $this->progressstatus);
+            $element->setAttribute("sel", "Registration/ProgressStatus/text()[1]");
+            $root->appendChild($element);
+        }
+        if ($registrationrecord->progresspercent != $this->progresspercent) {
+            $element = $dom->createElement('replace', $this->progresspercent);
+            $element->setAttribute("sel", "Registration/ProgressPercent/text()[1]");
+            $root->appendChild($element);
+        }
+        return $dom->saveXML();
     }
 }
