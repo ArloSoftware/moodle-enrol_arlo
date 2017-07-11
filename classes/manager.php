@@ -49,6 +49,8 @@ class manager {
     }
 
     /**
+     * Can api be called. Delay call based client/server HTTP error status.
+     *
      * @return bool
      */
     public function api_callable() {
@@ -78,6 +80,12 @@ class manager {
         return true;
     }
 
+    /**
+     * Get all active and visible Arlo enrolment instances.
+     *
+     * @param string $orderby
+     * @return array
+     */
     public function get_enrol_instances($orderby = '') {
         global $DB;
         $platform = self::$plugin->get_config('platform');
@@ -201,6 +209,14 @@ class manager {
         return $arloinstance;
     }
 
+    /**
+     * Updates schedulng, error information on a passed in record. Record must include tablename field.
+     *
+     * @param \stdClass $record
+     * @param bool $updatepulltime
+     * @param bool $updatepushtime
+     * @throws \coding_exception
+     */
     public static function update_scheduling_information(\stdClass $record, $updatepulltime = false, $updatepushtime = false) {
         global $DB;
         if (!isset($record->tablename)) {
@@ -216,9 +232,14 @@ class manager {
         $DB->update_record($tablename, $record);
     }
 
-
-
-    protected static function can_pull($record, $manualoverride = false) {
+    /**
+     * Check if item can be pulled based on scheduling information.
+     *
+     * @param $record
+     * @param bool $manualoverride
+     * @return bool
+     */
+    protected static function can_pull(\stdClass $record, $manualoverride = false) {
         $timestart = time();
         if ($manualoverride) {
             return true;
