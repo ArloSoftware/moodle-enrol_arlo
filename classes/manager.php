@@ -32,6 +32,9 @@ class manager {
     private $trace;
 
     public function __construct(\progress_trace $trace = null) {
+        // Raise limits, so this script can be interrupted without problems.
+        \core_php_time_limit::raise();
+        raise_memory_limit(MEMORY_HUGE);
         // Setup trace.
         if (is_null($trace)) {
             $this->trace = new \null_progress_trace();
