@@ -116,6 +116,7 @@
         <FIELD NAME="sourceguid" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="A GUID value that uniquely identifies this resource across any platform"/>
         <FIELD NAME="attendance" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="A RegistrationContactAttendance value indicating whether the Contact attended the Event."/>
         <FIELD NAME="grade" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="An string representing the grade associated with this resource"/>
+        <FIELD NAME="outcome" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="lastactivity" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="Time when there was some activity"/>
         <FIELD NAME="progressstatus" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="A user-readable string representing the status of the registration"/>
         <FIELD NAME="progresspercent" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
