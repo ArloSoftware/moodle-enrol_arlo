@@ -239,5 +239,11 @@ IDNumber:   {$a->idnumber}
 <p>A new account has been created for this user.</p>';
 
 $string['longtime'] = 'This process can take a long time';
+
 $string['messagesent'] = 'Message sent';
 $string['messagenotsent'] = 'Message not sent';
+$string['completed'] = 'Completed';
+$string['inprogress'] = 'In progress';
+$string['notstarted'] = 'Not started';
+$string['pass'] = 'Pass';
+$string['fail'] = 'fail';
