@@ -206,7 +206,11 @@ class manager {
 
     public static function get_associated_arlo_instance(array $conditions) {
         global $DB;
-        return $DB->get_record('enrol_arlo_instance', $conditions);
+        $arloinstance = $DB->get_record('enrol_arlo_instance', $conditions);
+        if ($arloinstance) {
+            $arloinstance->tablename = 'enrol_arlo_instance';
+        }
+        return $arloinstance;
     }
 
     /**
@@ -235,6 +239,7 @@ class manager {
             $record->nextpulltime = time();
         }
         $DB->update_record('enrol_arlo_instance', $record);
+        $record->tablename = 'enrol_arlo_instance';
         return $record;
     }
 
@@ -279,6 +284,7 @@ class manager {
             self::trace('API not callable due to status');
             return false;
         }
+        list($platform, $apiusername, $apipassword) = self::get_connection_vars();
         self::trace("Updating Registrations for instance");
         try {
             $hasnext = true; // Initialise to for multiple pages.
@@ -308,43 +314,45 @@ class manager {
                 }
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
+                $requesturi->setHost($platform);
                 $requesturi->setResourcePath($resourcepath);
                 $requesturi->addExpand('Registration/Contact');
                 $requesturi->addExpand($expand);
+                $options = array();
+                $options['auth'] = array(
+                    $apiusername,
+                    $apipassword
+                );
+                $request = new \enrol_arlo\request\collection_request($arloinstance, $requesturi, array(), null, $options);
+                $response = $request->execute();
                 $request = new instance_request($arloinstance, $requesturi, $manualoverride);
-                if (!$request->executable()) {
-                    self::trace('Cannot execute request due to throttling');
+                if (200 != $response->getStatusCode()) {
+                    self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                    return false;
+                }
+                $collection = self::deserialize_response_body($response);
+                // Any returned.
+                if (empty($collection)) {
+                    self::update_associated_arlo_instance($arloinstance, false);
+                    self::trace("No new or updated resources found.");
                 } else {
-                    $response = $request->execute();
-                    if (200 != $response->getStatusCode()) {
-                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
-                        return false;
+                    foreach ($collection as $registration) {
+                        self::process_enrolment_registration($instance, $arloinstance, $registration);
+                        $latestmodified = $registration->LastModifiedDateTime;
+                        $arloinstance->latestsourcemodified = $latestmodified;
                     }
-                    $collection = self::deserialize_response_body($response);
-                    // Any returned.
-                    if (empty($collection)) {
-                        self::update_associated_arlo_instance($arloinstance, false);
-                        self::trace("No new or updated resources found.");
-                    } else {
-                        foreach ($collection as $registration) {
-                            self::process_enrolment_registration($instance, $arloinstance, $registration);
-                            $latestmodified = $registration->LastModifiedDateTime;
-                            $arloinstance->latestsourcemodified = $latestmodified;
-                        }
-                        $hasnext = (bool) $collection->hasNext();
-                        $apionepageperrequest = self::$plugin->get_config('apionepageperrequest', false);
-                        if ($apionepageperrequest) {
-                            $hasnext = false;
-                        }
-                        self::update_associated_arlo_instance($arloinstance, $hasnext);
-                        $delayemail = self::$plugin->get_config('delayemail', false);
-                        if ($delayemail) {
-                            break;
-                        }
-                        self::email_new_user_passwords();
-                        self::email_welcome_message_per_instance($instance);
-
+                    $hasnext = (bool) $collection->hasNext();
+                    $apionepageperrequest = self::$plugin->get_config('apionepageperrequest', false);
+                    if ($apionepageperrequest) {
+                        $hasnext = false;
                     }
+                    self::update_associated_arlo_instance($arloinstance, $hasnext);
+                    $delayemail = self::$plugin->get_config('delayemail', false);
+                    if ($delayemail) {
+                        break;
+                    }
+                    self::email_new_user_passwords();
+                    self::email_welcome_message_per_instance($instance);
                 }
             }
         } catch (\Exception $exception) {
@@ -549,7 +557,6 @@ class manager {
                     $apipassword
                 );
                 $request = new \enrol_arlo\request\collection_request($syncinfo, $requesturi, array(), null, $options);
-                $response = $request->execute();
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
