@@ -246,4 +246,4 @@ $string['completed'] = 'Completed';
 $string['inprogress'] = 'In progress';
 $string['notstarted'] = 'Not started';
 $string['pass'] = 'Pass';
-$string['fail'] = 'fail';
+$string['fail'] = 'Fail';
