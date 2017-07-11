@@ -78,50 +78,6 @@ class manager {
         return true;
     }
 
-    public function process_all($manualoverride = false) {
-        // Order of processing.
-        self::process_templates($manualoverride);
-        self::process_events($manualoverride);
-        self::process_onlineactivities($manualoverride);
-    }
-
-    /**
-     * Function for get enrolment instance to process. Hidden instances or instances in a hidden
-     * course are not included.
-     *
-     * @param bool $manualoverride
-     * @return bool
-     */
-    public function process_instances($manualoverride = false) {
-        global $DB;
-        $platform = self::$plugin->get_config('platform');
-
-        $sql = "SELECT e.* 
-                  FROM {enrol} e
-                  JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
-                  JOIN {course} c ON c.id = e.courseid
-                 WHERE e.enrol = :enrol 
-                   AND e.status = :status
-                   AND ai.platform = :platform
-                   AND c.visible = 1
-              ORDER BY ai.nextpulltime";
-
-        $conditions = array(
-            'enrol' => 'arlo',
-            'status' => ENROL_INSTANCE_ENABLED,
-            'platform' => $platform
-        );
-        $records = $DB->get_records_sql($sql, $conditions);
-        if (empty($records)) {
-            self::trace('No enrolment instances to process.');
-        } else {
-            foreach ($records as $record) {
-                self::process_instance_registrations($record, $manualoverride);
-            }
-        }
-        return true;
-    }
-
     public function get_enrol_instances($orderby = '') {
         global $DB;
         $platform = self::$plugin->get_config('platform');
@@ -144,6 +100,33 @@ class manager {
         return $DB->get_records_sql($sql, $conditions);
     }
 
+    public function process_all($manualoverride = false) {
+        // Order of processing.
+        self::process_templates($manualoverride);
+        self::process_events($manualoverride);
+        self::process_onlineactivities($manualoverride);
+        self::process_instances($manualoverride);
+    }
+    /**
+     * Function for get enrolment instance to process. Hidden instances or instances in a hidden
+     * course are not included.
+     *
+     * @param bool $manualoverride
+     * @return bool
+     */
+    public function process_instances($manualoverride = false) {
+        global $DB;
+        $instances = self::get_enrol_instances('ai.nextpulltime');
+        if (empty($instances)) {
+            self::trace('No enrolment instances to process.');
+        } else {
+            foreach ($instances as $instance) {
+                self::process_instance_registrations($instance, $manualoverride);
+            }
+        }
+        return true;
+    }
+
     public function process_results($manualoverride = false) {
         $records = self::get_enrol_instances();
         foreach ($records as $instance) {
@@ -153,9 +136,9 @@ class manager {
 
     public function process_instance_results($instance, $manualoverride) {
         global $DB;
-        $platform       = self::$plugin->get_config('platform');
-        $apiusername    = self::$plugin->get_config('apiusername');
-        $apipassword    = self::$plugin->get_config('apipassword');
+
+        list($platform, $apiusername, $apipassword) = self::get_connection_vars();
+
         $conditions = array(
             'enrolid' => $instance->id,
             'updatesource' => 1
@@ -325,7 +308,6 @@ class manager {
                 );
                 $request = new \enrol_arlo\request\collection_request($arloinstance, $requesturi, array(), null, $options);
                 $response = $request->execute();
-                $request = new instance_request($arloinstance, $requesturi, $manualoverride);
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
                     return false;
