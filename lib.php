@@ -166,7 +166,6 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function delete_instance($instance) {
         global $DB;
-
         // Delete associated registrations.
         $DB->delete_records('enrol_arlo_registration', array('enrolid' => $instance->id));
         // Delete instance mapping information.
@@ -994,7 +993,6 @@ class enrol_arlo_plugin extends enrol_plugin {
             role_unassign_all($unenrolparams);
         }
     }
-
 }
 
 /**

@@ -24,7 +24,6 @@
 
 namespace enrol_arlo;
 
-
 class event_observer {
 
     /**
@@ -95,12 +94,12 @@ class event_observer {
     /**
      * Platform name change handler. Used for cleanup.
      *
-     * NOT YET IMPLEMENTED.
-     *
      * @param $event
      * @return mixed
      */
     public static function fqdn_updated($event) {
-        return $event;
+        global $CFG;
+        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
+        enrol_arlo_change_platform($event->other['oldvalue'], $event->other['newvalue']);
     }
 }
