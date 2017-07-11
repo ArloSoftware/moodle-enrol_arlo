@@ -242,3 +242,5 @@ $string['longtime'] = 'This process can take a long time';
 $string['completed'] = 'Completed';
 $string['inprogress'] = 'In progress';
 $string['notstarted'] = 'Not started';
+$string['pass'] = 'Pass';
+$string['fail'] = 'fail';
