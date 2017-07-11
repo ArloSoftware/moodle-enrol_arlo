@@ -18,6 +18,7 @@ use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationOutcome;
 
 use enrol_arlo\exception\invalidcontent_exception;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
 
 
@@ -150,14 +151,31 @@ class manager {
 
     public function process_instance_results($instance, $manualoverride) {
         global $DB;
+        $platform       = self::$plugin->get_config('platform');
+        $apiusername    = self::$plugin->get_config('apiusername');
+        $apipassword    = self::$plugin->get_config('apipassword');
         $conditions = array(
             'enrolid' => $instance->id,
             'updatesource' => 1
         );
         $records = $DB->get_records('enrol_arlo_registration', $conditions);
-        foreach ($records as $record) {
-            print_object($record);
-            print_object($instance);
+        foreach ($records as $registrationrecord) {
+            $result = new result($instance->courseid, $registrationrecord);
+            $body = $result->export_to_xml();
+            $sourceid = $registrationrecord->sourceid;
+            $requesturi = new RequestUri();
+            $requesturi->setHost($platform);
+            $resourcepath = 'registrations/' . $sourceid . '/';
+            $requesturi->setResourcePath($resourcepath);
+            try{
+                $client = new Client($platform, $apiusername, $apipassword);
+                $headers = array('Content-type' => 'application/xml; charset=utf-8');
+                $response = $client->request('patch', $requesturi, $headers, $body);
+            } catch (BadResponseException $e) {
+                $c = $e->getResponse()->getBody()->getContents();
+                print_object($e->getMessage());
+                print_object($c);
+            }
 
         }
 
@@ -356,10 +374,10 @@ class manager {
         }
 
         // Load Contact.
-        $user = user::get_by_guid($contactresource->UniqueIdentifier);
+        $user = new user($this->trace);
+        $user->load_by_guid($contactresource->UniqueIdentifier);
         if (!$user->exists()) {
             $user = $user->create($contactresource);
-            self::trace(sprintf("Created a new user account: %s", $user->get_id()));
         }
         $userid = $user->get_id();
         $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
