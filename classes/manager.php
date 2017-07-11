@@ -55,11 +55,6 @@ class manager {
             self::trace(get_string('pluginnotenabled', 'enrol_arlo'));
             return false;
         }
-        // Maximum error count reached.
-        if ($apierrorcount >= collection_request::MAXIMUM_ERROR_COUNT) {
-            self::trace('API error count has exceeded maximum permissible errors.');
-            return false;
-        }
         // Client errors.
         if ($apilaststatus == 401 && $apilaststatus == 403) {
             if ($apilastrequested + self::DELAY_REQUEST_SECONDS > time()) {
