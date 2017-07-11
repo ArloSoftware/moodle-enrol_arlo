@@ -64,6 +64,7 @@ class user extends \core_user {
         $matches = self::get_matches();
         if (1 == count($matches)) {
             $match = reset($matches);
+            self::trace('Perfect match.');
         } else if (count($matches) > 1) {
             // Send message.
             $params = array(
@@ -204,7 +205,7 @@ class user extends \core_user {
         return 0;
     }
 
-    public static function get_by_guid($guid) {
+    public function load_by_guid($guid) {
         global $DB;
         if (empty($guid) || !is_string($guid)) {
             throw new \moodle_exception('GUID must be non empty string');
@@ -222,15 +223,14 @@ class user extends \core_user {
         $platform = get_config('enrol_arlo', 'platform');
         $conditions = array('platform' => $platform, 'sourceguid' => $guid);
         $record = $DB->get_record_sql($sql, $conditions);
-        $user = new user();
         if ($record) {
             $unaliasedrecord = dml::unalias($record);
             $userrecord = (object) $unaliasedrecord['user'];
             $contactrecord = (object) $unaliasedrecord['contact'];
-            $user->load_user_record($userrecord);
-            $user->load_contact_record($contactrecord);
+            self::load_user_record($userrecord);
+            self::load_contact_record($contactrecord);
         }
-        return $user;
+        return $this;
     }
 
     protected function check_record_fields($record, $fields) {}
@@ -265,5 +265,15 @@ class user extends \core_user {
         $conditions = array('firstname' => $firstname, 'lastname' => $lastname, 'email' => $email);
         $records = $DB->get_records('user', $conditions);
         return $records;
+    }
+
+    /**
+     * Output a progress message.
+     *
+     * @param $message the message to output.
+     * @param int $depth indent depth for this message.
+     */
+    private function trace($message, $depth = 0) {
+        $this->trace->output($message, $depth);
     }
 }
