@@ -139,32 +139,69 @@ class result {
             return '';
         }
         $registrationrecord = $this->registrationrecord;
+        // Setup root element.
         $dom = new DOMDocument('1.0', 'utf-8');
         $root = $dom->appendChild(new DOMElement('diff'));
-        if ($registrationrecord->grade != $this->grade) {
+        // Add or replace Grade element.
+        if (empty($registrationrecord->grade) && !empty($this->grade)) {
+            $add = $dom->createElement("add");
+            $add->setAttribute("sel", "Registration");
+            $element = $dom->createElement('Grade', $this->grade);
+            $add->appendChild($element);
+            $root->appendChild($add);
+        } else if ($registrationrecord->grade != $this->grade) {
             $element = $dom->createElement('replace', $this->grade);
             $element->setAttribute("sel", "Registration/Grade/text()[1]");
             $root->appendChild($element);
         }
-        if ($registrationrecord->outcome != $this->outcome) {
+        // Add or replace Outcome element.
+        if (empty($registrationrecord->outcome) && !empty($this->outcome)) {
+            $add = $dom->createElement("add");
+            $add->setAttribute("sel", "Registration");
+            $element = $dom->createElement('Outcome', $this->outcome);
+            $add->appendChild($element);
+            $root->appendChild($add);
+        } else if ($registrationrecord->outcome != $this->outcome) {
             $element = $dom->createElement('replace', $this->outcome);
             $element->setAttribute("sel", "Registration/Outcome/text()[1]");
             $root->appendChild($element);
         }
-        if ($registrationrecord->lastactivity != $this->lastactivity) {
-            $servertimezone = \core_date::get_server_timezone();
-            $tz = new \DateTimeZone($servertimezone);
-            $date = \DateTime::createFromFormat('U', $this->lastactivity, $tz);
-            $element = $dom->createElement('replace', $date->format(DATE_ISO8601));
-            $element->setAttribute("sel", "Registration/LastActivityDateTime/text()[1]");
-            $root->appendChild($element);
+        // Add or replace LastActivityDateTime element.
+        // Must use format: Y-m-d\TH:i:s.000+00:00
+        // https://developer.arlo.co/doc/api/2012-02-01/auth/datetimeformats#datetimeoffset
+        if (empty($registrationrecord->lastactivity) && !empty($this->lastactivity)) {
+            $lastactivitydate = date('Y-m-d\TH:i:s.000+00:00', $this->lastactivity);
+            $add = $dom->createElement("add");
+            $add->setAttribute("sel", "Registration");
+            $element = $dom->createElement('LastActivityDateTime', $lastactivitydate);
+            $add->appendChild($element);
+            $root->appendChild($add);
+        } else if ($registrationrecord->lastactivity != $this->lastactivity) {
+            $lastactivitydate = date('Y-m-d\TH:i:s.000+00:00', $this->lastactivity);
+            $replace = $dom->createElement('replace', $lastactivitydate);
+            $replace->setAttribute("sel", "Registration/LastActivityDateTime/text()[1]");
+            $root->appendChild($replace);
         }
-        if ($registrationrecord->progressstatus != $this->progressstatus) {
+        // Add or replace ProgressStatus element.
+        if (empty($registrationrecord->progressstatus) && !empty($this->progressstatus)) {
+            $add = $dom->createElement("add");
+            $add->setAttribute("sel", "Registration");
+            $element = $dom->createElement('ProgressStatus', $this->progressstatus);
+            $add->appendChild($element);
+            $root->appendChild($add);
+        } else if ($registrationrecord->progressstatus != $this->progressstatus) {
             $element = $dom->createElement('replace', $this->progressstatus);
             $element->setAttribute("sel", "Registration/ProgressStatus/text()[1]");
             $root->appendChild($element);
         }
-        if ($registrationrecord->progresspercent != $this->progresspercent) {
+        // Add or replace ProgressPercent element.
+        if (empty($registrationrecord->progresspercent) && !empty($this->progresspercent)) {
+            $add = $dom->createElement("add");
+            $add->setAttribute("sel", "Registration");
+            $element = $dom->createElement('ProgressPercent', $this->progresspercent);
+            $add->appendChild($element);
+            $root->appendChild($add);
+        } else if ($registrationrecord->progresspercent != $this->progresspercent) {
             $element = $dom->createElement('replace', $this->progresspercent);
             $element->setAttribute("sel", "Registration/ProgressPercent/text()[1]");
             $root->appendChild($element);
