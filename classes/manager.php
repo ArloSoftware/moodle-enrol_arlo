@@ -210,7 +210,7 @@ class manager {
     }
 
     /**
-     * Updates schedulng, error information on a passed in record. Record must include tablename field.
+     * Updates scheduling, error information on a passed in record. Record must include tablename field.
      *
      * @param \stdClass $record
      * @param bool $updatepulltime
@@ -265,6 +265,21 @@ class manager {
     }
 
     protected static function can_push() {}
+
+
+    protected static function get_request_interval(\stdClass $record) {
+        if (!isset($record->tablename)) {
+            throw new \coding_exception('Table name must be set on scheduling record');
+        }
+        $tablename = $record->tablename;
+    }
+    protected static function get_request_extension(\stdClass $record) {
+        if (!isset($record->tablename)) {
+            throw new \coding_exception('Table name must be set on scheduling record');
+        }
+        $tablename = $record->tablename;
+
+    }
 
 
     /**
