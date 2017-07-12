@@ -13,7 +13,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 
 
-class abstract_request {
+abstract class abstract_request {
     protected $tablename;
     protected $record;
     protected $requesturi;
@@ -28,7 +28,9 @@ class abstract_request {
         $this->body         = $body;
         $this->options      = $options;
     }
-    //abstract public function execute();
+
+    abstract public function execute();
+
     /**
      * Require synchronization control fields.
      *
