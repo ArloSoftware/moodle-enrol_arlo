@@ -26,6 +26,8 @@
 namespace enrol_arlo\task;
 
 
+use enrol_arlo\manager;
+
 class synchronize extends \core\task\scheduled_task {
 
     /**
@@ -43,9 +45,14 @@ class synchronize extends \core\task\scheduled_task {
     public function execute() {
         global $CFG;
 
-        if (enrol_is_enabled('arlo')) {
-
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        if (!enrol_is_enabled('arlo')) {
+            return;
         }
+
+        $manager = new manager();
+        $result = $manager->process_all();
+        return $result;
     }
 
 }
