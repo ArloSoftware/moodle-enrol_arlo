@@ -18,8 +18,9 @@ class collection_request extends abstract_request {
         global $CFG;
         try {
             $requesturi = $this->requesturi;
+            $schedule = $this->schedule;
             // Set latest modified date if not set. First pull.
-            $latestmodified = $this->record->latestsourcemodified;
+            $latestmodified = $schedule->latestsourcemodified;
             if (empty($latestmodified)) {
                 $servertimezone = \core_date::get_server_timezone();
                 $tz = new \DateTimeZone($servertimezone);
@@ -51,10 +52,10 @@ class collection_request extends abstract_request {
             set_config('apierrorcount', 0, 'enrol_arlo');
             return $response;
         } catch (RequestException $exception) {
-            $errorcount = (int) $this->record->errorcount;
-            $this->record->errorcount = ++$errorcount;
-            $this->record->lasterror = $exception->getMessage();
-            manager::update_scheduling_information($this->record, false);
+            $errorcount = (int) $schedule->errorcount;
+            $schedule->errorcount = ++$errorcount;
+            $schedule->lasterror = $exception->getMessage();
+            manager::update_scheduling_information($schedule);
             $apierrorcount = (int) get_config('enrol_arlo', 'apierrorcount');
             $status = $exception->getCode();
             $uri = (string) $exception->getRequest()->getUri();
