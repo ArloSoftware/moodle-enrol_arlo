@@ -27,7 +27,9 @@ class collection_request extends abstract_request {
                 $latestmodified = $date->format(DATE_ISO8601);
             }
             // Set OrderBy and Filters.
-            $requesturi->setOrderBy('LastModifiedDateTime ASC');
+            if (!empty($requesturi->getOrderBy())) {
+                $requesturi->setOrderBy('LastModifiedDateTime ASC');
+            }
             $createdfilter = Filter::create()
                 ->setResourceField('CreatedDateTime')
                 ->setOperator('gt')
