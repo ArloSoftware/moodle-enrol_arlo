@@ -15,14 +15,14 @@ use GuzzleHttp\Exception\RequestException;
 
 abstract class abstract_request {
     protected $tablename;
-    protected $record;
+    protected $schedule ;
     protected $requesturi;
     protected $headers;
     protected $body;
     protected $options;
 
-    public function __construct(stdClass $record, RequestUri $requesturi, array $headers = [], $body = null, array $options = []) {
-        self::load_record($record, self::get_requiredfields());
+    public function __construct(stdClass $schedule, RequestUri $requesturi, array $headers = [], $body = null, array $options = []) {
+        self::load_schedule($schedule, self::get_requiredfields());
         $this->requesturi   = $requesturi;
         $this->headers      = $headers;
         $this->body         = $body;
@@ -38,7 +38,7 @@ abstract class abstract_request {
      */
     public function get_requiredfields() {
         $requiredfields = array(
-            'tablename', 'id', 'lasterror', 'errorcount'
+             'id', 'enrolid', 'platform', 'lasterror', 'errorcount'
         );
         return $requiredfields;
     }
@@ -49,14 +49,14 @@ abstract class abstract_request {
      * @param array $requiredfields
      * @throws \moodle_exception
      */
-    protected function load_record(stdClass $record, array $requiredfields) {
-        $recordfields = array_keys(get_object_vars($record));
+    protected function load_schedule(stdClass $schedule, array $requiredfields) {
+        $recordfields = array_keys(get_object_vars($schedule));
         foreach ($requiredfields as $requiredfield) {
             if (!in_array($requiredfield, $recordfields)) {
                 throw new \moodle_exception("Required {$requiredfield} not found.");
             }
         }
-        $this->record = $record;
+        $this->schedule = $schedule;
     }
     /**
      * Log the web service request.
