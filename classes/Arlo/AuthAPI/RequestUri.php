@@ -159,8 +159,22 @@ class RequestUri {
         return $this->resourcePath;
     }
 
+    /**
+     * Return array of expands.
+     *
+     * @return array
+     */
     public function getExpands() {
         return $this->expands;
+    }
+
+    /**
+     * Return order by string.
+     *
+     * @return string
+     */
+    public function getOrderBy() {
+        return $this->orderBy;
     }
 
     /**
