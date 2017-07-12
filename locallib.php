@@ -401,9 +401,9 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
         return;
     }
     $rs = $DB->get_recordset('enrol', array('enrol' => 'arlo'));
-    $x = new enrol_arlo_plugin();
+    $plugin = new enrol_arlo_plugin();
     foreach ($rs as $instance) {
-        $x->delete_instance($instance);
+        $plugin->delete_instance($instance);
     }
     $rs->close();
     role_unassign_all(array('component' => 'enrol_arlo'));
