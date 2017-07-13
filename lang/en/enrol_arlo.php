@@ -248,3 +248,4 @@ $string['notstarted'] = 'Not started';
 $string['pass'] = 'Pass';
 $string['fail'] = 'Fail';
 $string['synctask'] = 'Synchronization of Arlo data';
+$string['backtoenrolmentmethods'] = 'Back to enrolment methods';

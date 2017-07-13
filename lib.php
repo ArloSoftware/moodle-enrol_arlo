@@ -705,7 +705,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 
         $icons = array();
         if (has_capability('enrol/arlo:synchronizeinstance', $context)) {
-            $link = new moodle_url('arlo/synchronizeinstance.php', array('sesskey' => sesskey(), 'id' => $courseid,'instance' => $instance->id));
+            $link = new moodle_url('arlo/synchronizeinstance.php', array('sesskey' => sesskey(), 'id' => $instance->id));
             $icon = new pix_icon('synchronize', get_string('synchronize', 'enrol_arlo'),
                 'enrol_arlo', array('class' => 'iconsmall'));
             $icons[] = $OUTPUT->action_icon($link, $icon);
