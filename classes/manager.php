@@ -86,7 +86,7 @@ class manager {
      * @param string $orderby
      * @return array
      */
-    public function get_enrol_instances($orderby = '') {
+    public function get_enrol_instances() {
         global $DB;
         $platform = self::$plugin->get_config('platform');
         $sql = "SELECT e.*
@@ -97,9 +97,6 @@ class manager {
                    AND e.status = :status
                    AND ai.platform = :platform
                    AND c.visible = 1";
-        if (!empty($orderby)) {
-            $sql .= " ORDER BY {$orderby}";
-        }
         $conditions = array(
             'enrol' => 'arlo',
             'status' => ENROL_INSTANCE_ENABLED,
@@ -124,7 +121,7 @@ class manager {
      */
     public function process_instances($manualoverride = false) {
         global $DB;
-        $instances = self::get_enrol_instances('ai.nextpulltime');
+        $instances = self::get_enrol_instances();
         if (empty($instances)) {
             self::trace('No enrolment instances to process.');
         } else {
@@ -179,34 +176,51 @@ class manager {
 
     }
 
-    public static function get_collection_sync_info($collection) {
+    public static function create_schedule($resourcetype, $enrolid = 0, $endpulltime = 0, $endpushtime = 0) {
         global $DB;
-        $platform = self::$plugin->get_config('platform');
-        $conditions = array('type' => $collection);
-        $record = $DB->get_record('enrol_arlo_collection', $conditions);
-        if (!$record) {
-            $record                         = new \stdClass();
-            $record->platform               = $platform;
-            $record->type                   = $collection;
-            $record->latestsourcemodified   = '';
-            $record->nextpulltime           = 0;
-            $record->endpulltime            = 0;
-            $record->lastpulltime           = 0;
-            $record->lasterror              = '';
-            $record->errorcount             = 0;
-            $record->id = $DB->insert_record('enrol_arlo_collection', $record);
+        if (!is_string($resourcetype)) {
+            throw new \coding_exception('resourcetype must be string');
         }
-        $record->tablename = 'enrol_arlo_collection';
-        return $record;
+        $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid);
+        $schedule = $DB->get_record('enrol_arlo_schedule', $conditions);
+        if (!$schedule) {
+            $plugin                             = new \enrol_arlo_plugin();
+            $schedule                           = new \stdClass();
+            $schedule->enrolid                  = $enrolid;
+            $schedule->platform                 = $plugin->get_config('platform');
+            $schedule->resourcetype             = $resourcetype;
+            $schedule->latestsourcemodified     = '';
+            $schedule->nextpulltime             = 0;
+            $schedule->lastpulltime             = 0;
+            $schedule->endpulltime              = $endpulltime;
+            $schedule->nextpushtime             = 0;
+            $schedule->lastpushtime             = 0;
+            $schedule->endpushtime              = $endpushtime;
+            $schedule->lasterror                = '';
+            $schedule->errorcount               = 0;
+            $schedule->modified                 = time();
+            $schedule->id = $DB->insert_record('enrol_arlo_schedule', $schedule);
+        } else {
+            $schedule->endpulltime              = $endpulltime;
+            $schedule->endpushtime              = $endpushtime;
+            $DB->update_record('enrol_arlo_schedule', $schedule);
+        }
+        return $schedule;
     }
 
-    public static function get_associated_arlo_instance(array $conditions) {
+    public static function get_schedule($resourcetype, $enrolid = 0, $reseterror = false) {
         global $DB;
-        $arloinstance = $DB->get_record('enrol_arlo_instance', $conditions);
-        if ($arloinstance) {
-            $arloinstance->tablename = 'enrol_arlo_instance';
+        if (!is_string($resourcetype)) {
+            throw new \coding_exception('resourcetype must be string');
         }
-        return $arloinstance;
+        $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid);
+        $schedule = $DB->get_record('enrol_arlo_schedule', $conditions);
+        if (!$schedule) {
+            $schedule = self::create_schedule($resourcetype, $enrolid);
+        }
+        $schedule->lasterror = ($reseterror) ? '' : $schedule->lasterror;
+        $schedule->errorcount = ($reseterror) ? 0 : $schedule->lasterror;
+        return $schedule;
     }
 
     /**
@@ -217,19 +231,16 @@ class manager {
      * @param bool $updatepushtime
      * @throws \coding_exception
      */
-    public static function update_scheduling_information(\stdClass $record, $updatepulltime = false, $updatepushtime = false) {
+    public static function update_scheduling_information(\stdClass $schedule, $updatepulltime = false, $updatepushtime = false) {
         global $DB;
-        if (!isset($record->tablename)) {
-            throw new \coding_exception('Table name must be set on scheduling record');
-        }
-        $tablename = $record->tablename; // Does not exist in table, can be safely passed to update.
         if (!$updatepulltime) {
-            $record->nextpulltime = time();
+            $schedule->nextpulltime = time();
         }
         if (!$updatepushtime) {
-            $record->updatepushtime = time();
+            $schedule->updatepushtime = time();
         }
-        $DB->update_record($tablename, $record);
+        $schedule->modified = time();
+        $DB->update_record('enrol_arlo_schedule', $schedule);
     }
 
     /**
@@ -266,13 +277,13 @@ class manager {
 
     protected static function can_push() {}
 
-
     protected static function get_request_interval(\stdClass $record) {
         if (!isset($record->tablename)) {
             throw new \coding_exception('Table name must be set on scheduling record');
         }
         $tablename = $record->tablename;
     }
+
     protected static function get_request_extension(\stdClass $record) {
         if (!isset($record->tablename)) {
             throw new \coding_exception('Table name must be set on scheduling record');
@@ -281,6 +292,14 @@ class manager {
 
     }
 
+    public static function get_associated_arlo_instance($enrolid) {
+        global $DB;
+        $arloinstance = $DB->get_record('enrol_arlo_instance', array('enrolid' => $enrolid));
+        if ($arloinstance) {
+            $arloinstance->tablename = 'enrol_arlo_instance';
+        }
+        return $arloinstance;
+    }
 
     /**
      * Process any registrations for an enrolment instance.
@@ -302,15 +321,22 @@ class manager {
             while ($hasnext) {
                 $hasnext = false; // Avoid infinite loop by default.
                 // Get sync information.
-                $arloinstance = self::get_associated_arlo_instance(array('enrolid' => $instance->id));
+                $arloinstance = self::get_associated_arlo_instance($instance->id);
                 // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
                 if (!$arloinstance) {
                     self::trace('No matching Arlo enrolment instance.');
                     break;
                 }
-                // Reset.
-                $arloinstance->lasterror = '';
-                $arloinstance->errorcount = 0;
+                // Get schedule information.
+                $schedule = self::get_schedule('registrations', $instance->id, true);
+                if (!$schedule) {
+                    self::trace('No matching schedule information');
+                    break;
+                }
+                if (!self::can_pull($schedule , $manualoverride)) {
+                    break;
+                }
+
                 if (!self::can_pull($arloinstance, $manualoverride)) {
                     break;
                 }
@@ -338,7 +364,7 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
-                $request = new \enrol_arlo\request\collection_request($arloinstance, $requesturi, array(), null, $options);
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -346,8 +372,8 @@ class manager {
                 }
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
-                if (empty($collection)) {
-                    self::update_scheduling_information($arloinstance, false);
+                if (iterator_count($collection) == 0) {
+                    self::update_scheduling_information($schedule);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $registration) {
@@ -360,7 +386,7 @@ class manager {
                     if ($apionepageperrequest) {
                         $hasnext = false;
                     }
-                    self::update_scheduling_information($arloinstance, $hasnext);
+                    self::update_scheduling_information($schedule, $hasnext);
                     $delayemail = self::$plugin->get_config('delayemail', false);
                     if ($delayemail) {
                         break;
@@ -370,10 +396,12 @@ class manager {
                 }
             }
         } catch (\Exception $exception) {
-            $errorcount = (int) $arloinstance->errorcount;
-            $arloinstance->errorcount = ++$errorcount;
-            $arloinstance->lasterror = $exception->getMessage();
-            self::update_scheduling_information($arloinstance, false);
+            if (isset($schedule)) {
+                $errorcount = (int) $schedule->errorcount;
+                $schedule->errorcount = ++$errorcount;
+                $schedule->lasterror = $exception->getMessage();
+                self::update_scheduling_information($schedule);
+            }
             debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
             return false;
         }
@@ -489,13 +517,13 @@ class manager {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
                 $hasnext = false; // Avoid infinite loop by default.
-                // Get sync information.
-                $syncinfo = self::get_collection_sync_info('events');
-                if (!$syncinfo) {
-                    self::trace('No matching sync instance');
+                // Get schedule information.
+                $schedule = self::get_schedule('events', 0);
+                if (!$schedule) {
+                    self::trace('No matching schedule information');
                     break;
                 }
-                if (!self::can_pull($syncinfo, $manualoverride)) {
+                if (!self::can_pull($schedule , $manualoverride)) {
                     break;
                 }
                 // Setup RequestUri for getting Events.
@@ -508,7 +536,7 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
-                $request = new \enrol_arlo\request\collection_request($syncinfo, $requesturi, array(), null, $options);
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -516,25 +544,27 @@ class manager {
                 }
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
-                if (empty($collection)) {
-                    self::update_scheduling_information($syncinfo, $hasnext);
+                if (iterator_count($collection) == 0) {
+                    self::update_scheduling_information($schedule);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $event) {
                         $record = self::process_event($event);
                         $latestmodified = $event->LastModifiedDateTime;
-                        $syncinfo->latestsourcemodified = $latestmodified;
+                        $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_scheduling_information($syncinfo, $hasnext);
+                    self::update_scheduling_information($schedule, $hasnext);
                 }
             }
         } catch (\Exception $exception) {
-            $record                 = new \stdClass();
-            $record->timelogged     = time();
-            $record->message        = $exception->getMessage();
-            $DB->insert_record('enrol_arlo_applicationlog', $record);
-            self::trace('Error processing Events');
+            if (isset($schedule)) {
+                $errorcount = (int) $schedule->errorcount;
+                $schedule->errorcount = ++$errorcount;
+                $schedule->lasterror = $exception->getMessage();
+                self::update_scheduling_information($schedule);
+            }
+            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
             return false;
         }
         $timefinish = microtime();
@@ -555,13 +585,13 @@ class manager {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
                 $hasnext = false; // Avoid infinite loop by default.
-                // Get sync information.
-                $syncinfo = self::get_collection_sync_info('onlineactivities');
-                if (!$syncinfo) {
-                    self::trace('No matching sync instance');
+                // Get schedule information.
+                $schedule = self::get_schedule('onlineactivities', 0);
+                if (!$schedule) {
+                    self::trace('No matching schedule information');
                     break;
                 }
-                if (!self::can_pull($syncinfo, $manualoverride)) {
+                if (!self::can_pull($schedule , $manualoverride)) {
                     break;
                 }
                 // Setup RequestUri for getting Events.
@@ -574,7 +604,7 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
-                $request = new \enrol_arlo\request\collection_request($syncinfo, $requesturi, array(), null, $options);
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -582,25 +612,27 @@ class manager {
                 }
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
-                if (empty($collection)) {
-                    self::update_scheduling_information($syncinfo, $hasnext);
+                if (iterator_count($collection) == 0) {
+                    self::update_scheduling_information($schedule);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $onlineactivity) {
                         $record = self::process_onlineactivity($onlineactivity);
                         $latestmodified = $onlineactivity->LastModifiedDateTime;
-                        $syncinfo->latestsourcemodified = $latestmodified;
+                        $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_scheduling_information($syncinfo, $hasnext);
+                    self::update_scheduling_information($schedule, $hasnext);
                 }
             }
         } catch (\Exception $exception) {
-            $record                 = new \stdClass();
-            $record->timelogged     = time();
-            $record->message        = $exception->getMessage();
-            $DB->insert_record('enrol_arlo_applicationlog', $record);
-            self::trace('Error processing Online Activities');
+            if (isset($schedule)) {
+                $errorcount = (int) $schedule->errorcount;
+                $schedule->errorcount = ++$errorcount;
+                $schedule->lasterror = $exception->getMessage();
+                self::update_scheduling_information($schedule);
+            }
+            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
             return false;
         }
         $timefinish = microtime();
@@ -621,13 +653,13 @@ class manager {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
                 $hasnext = false; // Avoid infinite loop by default.
-                // Get sync information.
-                $syncinfo = self::get_collection_sync_info('eventtemplates');
-                if (!$syncinfo) {
-                    self::trace('No matching sync instance');
+                // Get schedule information.
+                $schedule = self::get_schedule('eventtemplates', 0);
+                if (!$schedule) {
+                    self::trace('No matching schedule information');
                     break;
                 }
-                if (!self::can_pull($syncinfo, $manualoverride)) {
+                if (!self::can_pull($schedule , $manualoverride)) {
                     break;
                 }
                 // Setup RequestUri for getting Templates.
@@ -640,7 +672,7 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
-                $request = new \enrol_arlo\request\collection_request($syncinfo, $requesturi, array(), null, $options);
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -648,25 +680,27 @@ class manager {
                 }
                 $collection = self::deserialize_response_body($response);
                 // Any returned.
-                if (empty($collection)) {
-                    self::update_scheduling_information($syncinfo, $hasnext);
+                if (iterator_count($collection) == 0) {
+                    self::update_scheduling_information($schedule);
                     self::trace("No new or updated resources found.");
                 } else {
                     foreach ($collection as $template) {
                         $record = self::process_template($template);
                         $latestmodified = $template->LastModifiedDateTime;
-                        $syncinfo->latestsourcemodified = $latestmodified;
+                        $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_scheduling_information($syncinfo, $hasnext);
+                    self::update_scheduling_information($schedule, $hasnext);
                 }
             }
         } catch (\Exception $exception) {
-            $record                 = new \stdClass();
-            $record->timelogged     = time();
-            $record->message        = $exception->getMessage();
-            $DB->insert_record('enrol_arlo_applicationlog', $record);
-            self::trace('Error processing Event Templates');
+            if (isset($schedule)) {
+                $errorcount = (int) $schedule->errorcount;
+                $schedule->errorcount = ++$errorcount;
+                $schedule->lasterror = $exception->getMessage();
+                self::update_scheduling_information($schedule);
+            }
+            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
             return false;
         }
         $timefinish = microtime();
