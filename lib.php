@@ -171,6 +171,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         $DB->delete_records('enrol_arlo_registration', array('enrolid' => $instance->id));
         // Delete instance mapping information.
         $DB->delete_records('enrol_arlo_instance', array('enrolid' => $instance->id));
+        // Delete scheduling information.
+        $DB->delete_records('enrol_arlo_schedule', array('enrolid' => $instance->id));
         // Clear our any welcome flags.
         if ($instance->customint8) {
             $DB->delete_records('user_preferences',
