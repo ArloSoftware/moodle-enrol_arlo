@@ -249,3 +249,4 @@ $string['pass'] = 'Pass';
 $string['fail'] = 'Fail';
 $string['synctask'] = 'Synchronization of Arlo data';
 $string['backtoenrolmentmethods'] = 'Back to enrolment methods';
+$string['arlo:synchronizeinstance'] = 'Allow user to manually synchronize instance';
