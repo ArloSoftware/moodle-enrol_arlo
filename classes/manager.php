@@ -336,10 +336,6 @@ class manager {
                 if (!self::can_pull($schedule , $manualoverride)) {
                     break;
                 }
-
-                if (!self::can_pull($arloinstance, $manualoverride)) {
-                    break;
-                }
                 $type     = $arloinstance->type;
                 $sourceid = $arloinstance->sourceid;
                 // Event, set resource path and expand accordingly.
