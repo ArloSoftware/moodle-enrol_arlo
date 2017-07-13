@@ -243,6 +243,75 @@ class manager {
         $DB->update_record('enrol_arlo_schedule', $schedule);
     }
 
+    public function update_instance_contacts($instance, $manualoverride) {
+        $timestart = microtime();
+        if (!self::api_callable()) {
+            self::trace('API not callable due to status');
+            return false;
+        }
+        list($platform, $apiusername, $apipassword) = self::get_connection_vars();
+        self::trace(sprintf("Updating Contact information for %s", $instance->name));
+        try {
+            $hasnext = true; // Initialise to for multiple pages.
+            while ($hasnext) {
+                $hasnext = false; // Avoid infinite loop by default.
+                // Get sync information.
+                $arloinstance = self::get_associated_arlo_instance($instance->id);
+                // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
+                if (!$arloinstance) {
+                    self::trace('No matching Arlo enrolment instance.');
+                    break;
+                }
+                // Get schedule information.
+                $schedule = self::get_schedule('contacts', $instance->id, true);
+                if (!$schedule) {
+                    self::trace('No matching schedule information');
+                    break;
+                }
+                if (!self::can_pull($schedule , $manualoverride)) {
+                    break;
+                }
+                $type     = $arloinstance->type;
+                $sourceid = $arloinstance->sourceid;
+                // Event, set resource path.
+                if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+                    $resourcepath = 'events/' . $sourceid . '/registrations/';
+                }
+                // Online Activity, set resource path.
+                if ($type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+                    $resourcepath = 'onlineactivities/' . $sourceid . '/registrations/';
+                }
+                // Setup RequestUri for getting Events.
+                $requesturi = new RequestUri();
+                $requesturi->setHost($platform);
+                $requesturi->setResourcePath($resourcepath);
+                $requesturi->addExpand('Registration/Contact');
+                $requesturi->setOrderBy('Contact/LastModifiedDateTime ASC');
+                $options = array();
+                $options['auth'] = array(
+                    $apiusername,
+                    $apipassword
+                );
+
+            }
+        } catch (\Exception $exception) {
+            if (isset($schedule)) {
+                $errorcount = (int) $schedule->errorcount;
+                $schedule->errorcount = ++$errorcount;
+                $schedule->lasterror = $exception->getMessage();
+                self::update_scheduling_information($schedule);
+            }
+            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            return false;
+        }
+        $timefinish = microtime();
+        $difftime = microtime_diff($timestart, $timefinish);
+        self::trace("Execution took {$difftime} seconds");
+        return true;
+
+    }
+
+
     /**
      * Check if item can be pulled based on scheduling information.
      *
