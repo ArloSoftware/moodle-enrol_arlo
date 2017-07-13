@@ -758,10 +758,33 @@ class manager {
             unset($record->id);
             $record->id = $DB->insert_record('enrol_arlo_event', $record);
             self::trace(sprintf('Created: %s', $record->code));
+            $systemevent = \enrol_arlo\event\event_created::create(array(
+                'objectid' => 1,
+                'context' => \context_system::instance(),
+                'other' => array(
+                        'eventid' => $event->EventID,
+                        'uid' => $event->UniqueIdentifier,
+                        'sourcetemplateguid' => $record->sourcetemplateguid,
+                        'status' => $event->Status,
+                        'type' => \enrol_arlo_plugin::ARLO_TYPE_EVENT
+                    )
+            ));
         } else {
             $DB->update_record('enrol_arlo_event', $record);
             self::trace(sprintf('Updated: %s', $record->code));
+            $systemevent = \enrol_arlo\event\event_updated::create(array(
+                'objectid' => 1,
+                'context' => \context_system::instance(),
+                'other' => array(
+                        'eventid' => $event->EventID,
+                        'uid' => $event->UniqueIdentifier,
+                        'sourcetemplateguid' => $record->sourcetemplateguid,
+                        'status' => $event->Status,
+                        'type' => \enrol_arlo_plugin::ARLO_TYPE_EVENT
+                    )
+            ));
         }
+        $systemevent->trigger();
         return $record;
     }
 
@@ -829,10 +852,33 @@ class manager {
             unset($record->id);
             $record->id = $DB->insert_record('enrol_arlo_onlineactivity', $record);
             self::trace(sprintf('Created: %s', $record->name));
+            $systemevent = \enrol_arlo\event\onlineactivity_created::create(array(
+                'objectid' => 1,
+                'context' => \context_system::instance(),
+                'other' => array(
+                    'activityid' => $onlineactivity->OnlineActivityID,
+                    'uid' => $onlineactivity->UniqueIdentifier,
+                    'sourcetemplateguid' => $record->sourcetemplateguid,
+                    'status' => $onlineactivity->Status,
+                    'type' => \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY
+                )
+            ));
         } else {
             $DB->update_record('enrol_arlo_onlineactivity', $record);
             self::trace(sprintf('Updated: %s', $record->name));
+            $systemevent = \enrol_arlo\event\onlineactivity_updated::create(array(
+                'objectid' => 1,
+                'context' => \context_system::instance(),
+                'other' => array(
+                        'activityid' => $onlineactivity->OnlineActivityID,
+                        'uid' => $onlineactivity->UniqueIdentifier,
+                        'sourcetemplateguid' => $record->sourcetemplateguid,
+                        'status' => $onlineactivity->Status,
+                        'type' => \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY
+                    )
+            ));
         }
+        $systemevent->trigger();
         return $record;
     }
 

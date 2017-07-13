@@ -31,6 +31,7 @@ require_once($CFG->dirroot . '/group/lib.php');
 
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
+use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
 use enrol_arlo\user;
 
 
@@ -275,6 +276,38 @@ class enrol_arlo_plugin extends enrol_plugin {
      *
      * @return array
      */
+
+    /**
+    +     * Get Template options for form select.
+    +     *
+    +     * @return array
+    +     */
+    public static function get_template_options() {
+    global $DB;
+    $options = array();
+    /* TODO Matt
+     * platform = :platform
+      AND*/
+        $sql = "SELECT DISTINCT sourceguid, name, code
+                  FROM {enrol_arlo_template}
+                 WHERE sourcestatus = :sourcestatus
+                   AND sourceguid NOT IN (SELECT sourceguid
+                                            FROM {enrol_arlo_instance})
+              ORDER BY code";
+        $conditions = array(
+                'platform' => get_config('enrol_arlo', 'platform'),
+                'sourcestatus' => EventTemplateStatus::ACTIVE
+                );
+        $records = $DB->get_records_sql($sql, $conditions);
+        foreach ($records as $record) {
+            $options[$record->sourceguid] = new \stdClass();
+            $options[$record->sourceguid]->templateguid = $record->sourceguid;
+            $options[$record->sourceguid]->code = $record->code;
+            $options[$record->sourceguid]->name = $record->name;
+        }
+        return $options;
+    }
+
     public function get_event_options() {
         global $DB;
         $options = array();

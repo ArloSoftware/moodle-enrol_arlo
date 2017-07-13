@@ -430,8 +430,12 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
 function enrol_arlo_process_template_change($sourcetemplateguid) {
     global $CFG, $DB;
 
-
     $templatelink = $DB->get_record('enrol_arlo_templatelink', array('templateguid' => $sourcetemplateguid));
+
+    if (empty($templatelink)) {
+        return;
+    }
+
     $course = $DB->get_record('course', array('id' => $templatelink->courseid));
 
     // use template guid to get the course associated
@@ -440,7 +444,6 @@ function enrol_arlo_process_template_change($sourcetemplateguid) {
 
     // If a enrolment method does not exist make it.    Could check from both events and onlince activities
     require_once($CFG->dirroot . '/group/lib.php');
-
 
     if (!$course) {
         return false;
@@ -484,7 +487,6 @@ function enrol_arlo_process_template_change($sourcetemplateguid) {
 
     // Array merge to get count.
     $x = array_merge($events, $onlineactivities);
-
     if (count($x) === count($enrolinstances)) {
         foreach ($x as $key => $arloitem) {
             $sql = 'SELECT enrolid FROM {enrol_arlo_instance} WHERE sourceid = :sourceid AND type = :type';
