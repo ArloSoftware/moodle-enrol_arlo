@@ -129,7 +129,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Insert enrol and enrol_arlo_instance records.
         $instance->enrolid = parent::add_instance($course, $fields);
         $DB->insert_record('enrol_arlo_instance', $instance);
-        \enrol_arlo\manager::create_schedule('registrations', $instance->enrolid, $sourcefinishdate);
+        \enrol_arlo\manager::schedule('registrations', $instance->enrolid, $sourcefinishdate);
+        \enrol_arlo\manager::schedule('contacts', $instance->enrolid, $sourcefinishdate);
         return $instance->enrolid;
     }
 

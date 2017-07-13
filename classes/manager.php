@@ -176,7 +176,7 @@ class manager {
 
     }
 
-    public static function create_schedule($resourcetype, $enrolid = 0, $endpulltime = 0, $endpushtime = 0) {
+    public static function schedule($resourcetype, $enrolid = 0, $endpulltime = 0, $endpushtime = 0) {
         global $DB;
         if (!is_string($resourcetype)) {
             throw new \coding_exception('resourcetype must be string');
@@ -216,10 +216,10 @@ class manager {
         $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid);
         $schedule = $DB->get_record('enrol_arlo_schedule', $conditions);
         if (!$schedule) {
-            $schedule = self::create_schedule($resourcetype, $enrolid);
+            $schedule = self::schedule($resourcetype, $enrolid);
         }
         $schedule->lasterror = ($reseterror) ? '' : $schedule->lasterror;
-        $schedule->errorcount = ($reseterror) ? 0 : $schedule->lasterror;
+        $schedule->errorcount = ($reseterror) ? 0 : $schedule->errorcount;
         return $schedule;
     }
 
