@@ -22,18 +22,14 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use enrol_arlo\plugin_config;
-require_once(__DIR__ . '/../../../config.php');
-require_once($CFG->libdir . '/adminlib.php');
+require_once(__DIR__ . '/../../config.php');
 global $CFG, $DB, $PAGE, $OUTPUT;
-//require_once($CFG->dirroot . '/enrol/arlo/linktemplate_form.php');
 require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
-//require_once($CFG->libdir . '/formslib.php');
-admin_externalpage_setup('enroltemplatemanage');
 
 $courseid = required_param('courseid', PARAM_INT);
 $linkid = optional_param('id', 0, PARAM_INT);
-
+$PAGE->set_context(context_system::instance()); // hack - set context to something, by default to system context
+$PAGE->set_pagelayout('admin');
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 $context = \context_course::instance($course->id, MUST_EXIST);
 
@@ -42,6 +38,8 @@ require_capability('enrol/arlo:config', $context);
 
 $returnurl = new \moodle_url('/enrol/instances.php', array('id' => $course->id));
 $PAGE->set_url('/enrol/arlo/linktemplate.php', array('courseid' => $course->id));
+$PAGE->set_title(get_string('linktemplatetocourse', 'enrol_arlo'));
+$PAGE->set_heading($course->fullname);
 
 $link = $DB->get_record('enrol_arlo_templatelink', array('courseid' => $course->id));
 if (!$link) {
@@ -82,11 +80,7 @@ if ($mform->is_cancelled()) {
     $trace->finished();
     redirect($returnurl);
 }
-$PAGE->set_title(get_string('linktemplatetocourse', 'enrol_arlo'));
-$PAGE->set_heading($course->fullname);
 
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('linktemplatetocourse', 'enrol_arlo'));
 if ($link->id) {
     $a = '';
     $rs = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $course->id), '', 'id, name');
@@ -100,5 +94,7 @@ if ($link->id) {
 } else {
     echo $OUTPUT->box(get_string('linktemplatenotice', 'enrol_arlo'), 'generalbox');
 }
+echo $OUTPUT->header();
+echo $OUTPUT->heading(get_string('linktemplatetocourse', 'enrol_arlo'));
 $mform->display();
 echo $OUTPUT->footer();

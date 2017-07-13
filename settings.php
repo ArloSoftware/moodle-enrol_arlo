@@ -69,10 +69,6 @@ if ($hassiteconfig) {
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloemaillog',
             $name = get_string('emaillog', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/emaillog.php')));
-
-        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enroltemplatemanage',
-            $name = get_string('template', 'enrol_arlo'),
-            new moodle_url('/enrol/arlo/admin/linktemplate.php', array('courseid' => optional_param('courseid', 1, PARAM_INT)))));
     }
 
 }
