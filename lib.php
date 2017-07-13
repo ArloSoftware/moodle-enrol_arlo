@@ -115,7 +115,6 @@ class enrol_arlo_plugin extends enrol_plugin {
         if (isset($record->finishdatetime)) {
             $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
         }
-        $instance->endpulltime  = $sourcefinishdate;
         // Create a new course group if required.
         if (!empty($fields['customint2']) && $fields['customint2'] == self::ARLO_CREATE_GROUP) {
             $context = context_course::instance($course->id);
@@ -130,6 +129,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Insert enrol and enrol_arlo_instance records.
         $instance->enrolid = parent::add_instance($course, $fields);
         $DB->insert_record('enrol_arlo_instance', $instance);
+        \enrol_arlo\manager::create_schedule('registrations', $instance->enrolid, $sourcefinishdate);
         return $instance->enrolid;
     }
 
