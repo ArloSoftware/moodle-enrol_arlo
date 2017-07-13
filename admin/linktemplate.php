@@ -22,35 +22,41 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require('../../config.php');
-require_once($CFG->dirroot . '/enrol/arlo/linktemplate_form.php');
+use enrol_arlo\plugin_config;
+require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
+global $CFG, $DB, $PAGE, $OUTPUT;
+//require_once($CFG->dirroot . '/enrol/arlo/linktemplate_form.php');
 require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+//require_once($CFG->libdir . '/formslib.php');
+admin_externalpage_setup('enroltemplatemanage');
 
-$courseid   = required_param('courseid', PARAM_INT);
-$linkid     = optional_param('id', 0, PARAM_INT);
+$courseid = required_param('courseid', PARAM_INT);
+$linkid = optional_param('id', 0, PARAM_INT);
 
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-$context = context_course::instance($course->id, MUST_EXIST);
+$context = \context_course::instance($course->id, MUST_EXIST);
 
-require_login($course);
+//require_login($course);
 require_capability('enrol/arlo:config', $context);
 
-$returnurl = new moodle_url('/enrol/instances.php', array('id' => $course->id));
+$returnurl = new \moodle_url('/enrol/instances.php', array('id' => $course->id));
 $PAGE->set_url('/enrol/arlo/linktemplate.php', array('courseid' => $course->id));
 
 $link = $DB->get_record('enrol_arlo_templatelink', array('courseid' => $course->id));
-if (! $link) {
-    $link = new stdClass();
-    $link->id         = 0;
-    $link->courseid   = $course->id;
+if (!$link) {
+    $link = new \stdClass();
+    $link->id = 0;
+    $link->courseid = $course->id;
 }
 
-$mform = new enrol_arlo_linktemplate_form(null, array($link, $course));
+$mform = new \enrol_arlo\form\admin\linktemplate_form(null, array($link, $course));
 if ($mform->is_cancelled()) {
     redirect($returnurl);
 } else if ($data = $mform->get_data()) {
     $plugin = enrol_get_plugin('arlo');
     $trace = new \null_progress_trace();
+
     if ($data->id) {
         if (isset($data->submitbuttonremove)) {
             // Remove associated instances and mapping.
@@ -62,6 +68,10 @@ if ($mform->is_cancelled()) {
         $link->templateguid = $data->template;
         $link->modified = time();
         $link->id = $DB->insert_record('enrol_arlo_templatelink', $link);
+        //enrol_arlo_create_instances_from_template($trace, $data->courseid);
+        $instance = new \enrol_arlo_plugin();
+        //$instance->add_instance($data->courseid, array());
+        //bricked here
         enrol_arlo_create_instances_from_template($trace, $data->courseid);
     }
     // Can we sync now?
@@ -92,4 +102,3 @@ if ($link->id) {
 }
 $mform->display();
 echo $OUTPUT->footer();
-

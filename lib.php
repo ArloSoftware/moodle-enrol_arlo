@@ -83,7 +83,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @param array $fields instance fields
      * @return int id of new instance, null if can not be created
      */
-    public function add_instance($course, array $fields = null) {
+    public function add_instance($course, array $fields = null, $cli = false) {
         global $DB;
 
         $instance = new stdClass();
@@ -101,7 +101,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         if ($instance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
             if (empty($fields['arloonlineactivity'])) {
-                throw new moodle_exception('Field arloonlineactivity is empty.');
+                throw new moodle_exception('Field sourceguid is empty.');
             }
             $sourcetable = 'enrol_arlo_onlineactivity';
             $sourceguid = $fields['arloonlineactivity'];
@@ -117,8 +117,10 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         // Create a new course group if required.
         if (!empty($fields['customint2']) && $fields['customint2'] == self::ARLO_CREATE_GROUP) {
-            $context = context_course::instance($course->id);
-            require_capability('moodle/course:managegroups', $context);
+            if (!$cli) {
+                $context = \context_course::instance($course->id);
+                require_capability('moodle/course:managegroups', $context);
+            }
             $groupid = static::create_course_group($course->id, $record->code);
             // Map group id to customint2.
             $fields['customint2']   = $groupid;
@@ -1011,7 +1013,7 @@ function enrol_arlo_extend_navigation_course($navigation, $course, $context) {
         // Check that they can add an instance.
         $plugin = enrol_get_plugin('arlo');
         if ($plugin->can_add_instance($course->id)) {
-            $url = new moodle_url('/enrol/arlo/linktemplate.php', array('courseid' => $context->instanceid));
+            $url = new moodle_url('/enrol/arlo/admin/linktemplate.php', array('courseid' => $context->instanceid));
             $label = get_string('associatearlotemplate', 'enrol_arlo');
             $settingsnode = navigation_node::create($label, $url, navigation_node::TYPE_SETTING,
                 null, null, new pix_icon('i/twoway', ''));
