@@ -465,6 +465,35 @@ function enrol_arlo_process_template_change($sourcetemplateguid) {
         return;
     }
 
+    // Get current Arlo enrolment instances. Will use to check against later on.
+    $enrolinstances = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $course->id, 'status' => 0));
+    foreach ($enrolinstances as $enrolinstance) {
+        $currentinstances[$enrolinstance->customchar3] = $enrolinstance;
+    }
+
+    // Here we handle any events that have been cancelled.
+    $canevents = $DB->get_records('enrol_arlo_event', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Cancelled'));
+    $canonlineactivities = $DB->get_records('enrol_arlo_onlineactivity', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Cancelled'));
+    $canitems = array_merge($canevents, $canonlineactivities);
+    $instances = $DB->get_records('enrol_arlo_instance');
+    $canguids = array();
+    foreach ($canitems as $key => $item) {
+        $canguids[] = $item->sourceguid;
+    }
+    $changes = new \stdClass();
+    $plugin = new \enrol_arlo_plugin();
+    foreach ($instances as $key => $instance) {
+        $query = $DB->get_record('enrol', array('id' => $instance->enrolid));
+        if (in_array($instance->sourceguid, $canguids) == true) {
+            $changes->status = ENROL_INSTANCE_DISABLED;
+            $plugin->cancel_instance($query, $changes);
+        } else {
+            $changes->status = ENROL_INSTANCE_ENABLED;
+            $plugin->update_instance($query, $changes);
+        }
+    }
+
+    // Move onto updates and additions
     // Get all event associated with the template.
     $events = $DB->get_records('enrol_arlo_event', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Active'));
     foreach ($events as $event) {
@@ -479,31 +508,26 @@ function enrol_arlo_process_template_change($sourcetemplateguid) {
         $templateassociations[$onlineactivity->sourceguid] = $onlineactivity;
     }
 
-    // Get current Arlo enrolment instances. Will use to check against later on.
-    $enrolinstances = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $course->id));
-    foreach ($enrolinstances as $enrolinstance) {
-        $currentinstances[$enrolinstance->customchar3] = $enrolinstance;
-    }
-    // Array merge to get count.
+
+    // Array merge to get count of active items.
     $x = array_merge($events, $onlineactivities);
     if (count($x) === count($enrolinstances)) {
+        // We only have to update items if these are equal.
         foreach ($x as $key => $arloitem) {
             $sql = 'SELECT enrolid FROM {enrol_arlo_instance} WHERE sourceid = :sourceid AND type = :type';
             $query = $DB->get_record_sql($sql, array('sourceid' => $arloitem->sourceid, 'type' => $arloitem->type));
             $changes = new \stdClass();
             $changes->name = $arloitem->code;
-            $changes->status = $arloitem->sourcestatus == 'Active' ? ENROL_INSTANCE_ENABLED : ENROL_INSTANCE_DISABLED;
             $plugin = new \enrol_arlo_plugin();
             $plugin->update_instance($enrolinstances[$query->enrolid], $changes);
         }
-
     } else {
+        // We need to figure out what enrolment instances are missing.
         foreach ($x as $key => $arloitem) {
             $sql = 'SELECT enrolid FROM {enrol_arlo_instance} WHERE sourceid = :sourceid AND type = :type';
             $query = $DB->get_record_sql($sql, array('sourceid' => $arloitem->sourceid, 'type' => $arloitem->type));
             if (empty($query) && $arloitem->sourcestatus != 'Cancelled') {
                 $plugin = new \enrol_arlo_plugin();
-
                 $newinstance = $plugin->get_instance_defaults();
                 $newinstance['status'] = ENROL_INSTANCE_ENABLED;
                 if ($arloitem->type === 'event') {
@@ -516,17 +540,5 @@ function enrol_arlo_process_template_change($sourcetemplateguid) {
                 $plugin->add_instance($course, $newinstance, true);
             }
         }
-    }
-    // Here we handle any events that have been cancelled.
-
-    $canevents = $DB->get_records('enrol_arlo_event', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Cancelled'));
-    $canonlineactivities = $DB->get_records('enrol_arlo_onlineactivity', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Cancelled'));
-    $canitems = array_merge($canevents, $canonlineactivities);
-
-    foreach ($canitems as $key => $canned) {
-        $sql = 'SELECT enrolid FROM {enrol_arlo_instance} WHERE sourceid = :sourceid AND type = :type';
-        $query = $DB->get_record_sql($sql, array('sourceid' => $arloitem->sourceid, 'type' => $arloitem->type));
-        $plugin = new \enrol_arlo_plugin();
-        $plugin->cancel_instance($enrolinstances[$query->enrolid], $canned);
     }
 }

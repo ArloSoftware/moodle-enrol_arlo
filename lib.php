@@ -192,8 +192,6 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function update_instance($instance, $data) {
-        print_object('update');
-        print_object($data);
         return parent::update_instance($instance, $data);
     }
 
@@ -204,10 +202,8 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function cancel_instance($instance, $data) {
-
         $instance->status = ENROL_INSTANCE_DISABLED;
         \enrol_arlo\manager::schedule('event', $instance->id,-1,-1);
-
         return parent::update_instance($instance, $data);
     }
 
