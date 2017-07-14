@@ -189,14 +189,14 @@ class manager {
             $schedule->enrolid                  = $enrolid;
             $schedule->platform                 = $plugin->get_config('platform');
             $schedule->resourcetype             = $resourcetype;
-            $schedule->latestsourcemodified     = '';
+            $schedule->latestsourcemodified     = 0;
             $schedule->nextpulltime             = 0;
             $schedule->lastpulltime             = 0;
             $schedule->endpulltime              = $endpulltime;
             $schedule->nextpushtime             = 0;
             $schedule->lastpushtime             = 0;
             $schedule->endpushtime              = $endpushtime;
-            $schedule->lasterror                = '';
+            $schedule->lasterror                = 0;
             $schedule->errorcount               = 0;
             $schedule->modified                 = time();
             $schedule->id = $DB->insert_record('enrol_arlo_schedule', $schedule);

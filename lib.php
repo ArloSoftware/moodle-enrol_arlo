@@ -192,17 +192,22 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function update_instance($instance, $data) {
-        $context = context_course::instance($instance->courseid);
-        // Unset Arlo instance data, should not be updated when updating enrol instance.
-        unset($data->arlotype);
-        unset($data->arloevent);
-        unset($data->arloonlineactivity);
-        // Create a new course group if required.
-        if ($data->customint2 == self::ARLO_CREATE_GROUP) {
-            require_capability('moodle/course:managegroups', $context);
-            $groupid = static::create_course_group($instance->courseid, $data->name);
-            $data->customint2 = $groupid;
-        }
+        print_object('update');
+        print_object($data);
+        return parent::update_instance($instance, $data);
+    }
+
+    /**
+     * Cancelled instance of enrol plugin.
+     * @param stdClass $instance
+     * @param stdClass $data modified instance fields
+     * @return boolean
+     */
+    public function cancel_instance($instance, $data) {
+
+        $instance->status = ENROL_INSTANCE_DISABLED;
+        \enrol_arlo\manager::schedule('event', $instance->id,-1,-1);
+
         return parent::update_instance($instance, $data);
     }
 

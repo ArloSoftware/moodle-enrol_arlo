@@ -66,10 +66,6 @@ if ($mform->is_cancelled()) {
         $link->templateguid = $data->template;
         $link->modified = time();
         $link->id = $DB->insert_record('enrol_arlo_templatelink', $link);
-        //enrol_arlo_create_instances_from_template($trace, $data->courseid);
-        $instance = new \enrol_arlo_plugin();
-        //$instance->add_instance($data->courseid, array());
-        //bricked here
         enrol_arlo_create_instances_from_template($trace, $data->courseid);
     }
     // Can we sync now?
