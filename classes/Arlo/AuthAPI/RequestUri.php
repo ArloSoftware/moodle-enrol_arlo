@@ -169,6 +169,15 @@ class RequestUri {
     }
 
     /**
+     * Return array of filters.
+     *
+     * @return array
+     */
+    public function getFilters() {
+        return $this->filters;
+    }
+
+    /**
      * Return order by string.
      *
      * @return string

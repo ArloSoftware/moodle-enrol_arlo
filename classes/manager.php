@@ -139,6 +139,13 @@ class manager {
         }
     }
 
+    public function process_contacts($manualoverride = false) {
+        $records = self::get_enrol_instances();
+        foreach ($records as $instance) {
+            self::update_instance_contacts($instance, $manualoverride);
+        }
+    }
+
     public function process_instance_results($instance, $manualoverride) {
         global $DB;
 
@@ -189,7 +196,10 @@ class manager {
             $schedule->enrolid                  = $enrolid;
             $schedule->platform                 = $plugin->get_config('platform');
             $schedule->resourcetype             = $resourcetype;
-            $schedule->latestsourcemodified     = 0;
+            $servertimezone                     = \core_date::get_server_timezone();
+            $tz                                 = new \DateTimeZone($servertimezone);
+            $date                               = \DateTime::createFromFormat('U', 0, $tz);
+            $schedule->latestsourcemodified     = $date->format(DATE_ISO8601); // Default 0 to 1970-01-01T00:00:00+0000.
             $schedule->nextpulltime             = 0;
             $schedule->lastpulltime             = 0;
             $schedule->endpulltime              = $endpulltime;
@@ -242,6 +252,106 @@ class manager {
         $schedule->modified = time();
         $DB->update_record('enrol_arlo_schedule', $schedule);
     }
+
+    public function update_instance_contacts($instance, $manualoverride) {
+        $timestart = microtime();
+        if (!self::api_callable()) {
+            self::trace('API not callable due to status');
+            return false;
+        }
+        list($platform, $apiusername, $apipassword) = self::get_connection_vars();
+        self::trace(sprintf("Updating Contact information for %s", $instance->name));
+        try {
+            $hasnext = true; // Initialise to for multiple pages.
+            while ($hasnext) {
+                $hasnext = false; // Avoid infinite loop by default.
+                // Get sync information.
+                $arloinstance = self::get_associated_arlo_instance($instance->id);
+                // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
+                if (!$arloinstance) {
+                    self::trace('No matching Arlo enrolment instance.');
+                    break;
+                }
+                // Get schedule information.
+                $schedule = self::get_schedule('contacts', $instance->id, true);
+                if (!$schedule) {
+                    self::trace('No matching schedule information');
+                    break;
+                }
+                if (!self::can_pull($schedule , $manualoverride)) {
+                    break;
+                }
+                $type     = $arloinstance->type;
+                $sourceid = $arloinstance->sourceid;
+                // Event, set resource path.
+                if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+                    $resourcepath = 'events/' . $sourceid . '/registrations/';
+                }
+                // Online Activity, set resource path.
+                if ($type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+                    $resourcepath = 'onlineactivities/' . $sourceid . '/registrations/';
+                }
+                // Setup RequestUri for getting Events.
+                $requesturi = new RequestUri();
+                $requesturi->setHost($platform);
+                $requesturi->setResourcePath($resourcepath);
+                $requesturi->addExpand('Registration/Contact');
+                $requesturi->setOrderBy('Contact/LastModifiedDateTime ASC');
+                $latestmodified = $schedule->latestsourcemodified;
+                $modifiedfilter = Filter::create()
+                    ->setResourceField('Contact/LastModifiedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue($latestmodified);
+                $requesturi->addFilter($modifiedfilter);
+
+                $options = array();
+                $options['auth'] = array(
+                    $apiusername,
+                    $apipassword
+                );
+
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $response = $request->execute();
+                if (200 != $response->getStatusCode()) {
+                    self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                    return false;
+                }
+                $collection = self::deserialize_response_body($response);
+                // Any returned.
+                if (iterator_count($collection) == 0) {
+                    self::update_scheduling_information($schedule);
+                    self::trace("No new or updated Contact resources found.");
+                } else {
+                    foreach ($collection as $registration) {
+                        $contactresource = $registration->getContact();
+                        $user = new user(self::$trace);
+                        $user->load_by_resource($contactresource);
+                        $user->update();
+                        self::trace(sprintf("Updated %s", $user->get_user_fullname()));
+                        $latestmodified = $contactresource->LastModifiedDateTime;
+                        $schedule->latestsourcemodified = $latestmodified;
+                    }
+                    $hasnext = (bool) $collection->hasNext();
+                    self::update_scheduling_information($schedule, $hasnext);
+                }
+            }
+        } catch (\Exception $exception) {
+            if (isset($schedule)) {
+                $errorcount = (int) $schedule->errorcount;
+                $schedule->errorcount = ++$errorcount;
+                $schedule->lasterror = $exception->getMessage();
+                self::update_scheduling_information($schedule);
+            }
+            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            return false;
+        }
+        $timefinish = microtime();
+        $difftime = microtime_diff($timestart, $timefinish);
+        self::trace("Execution took {$difftime} seconds");
+        return true;
+
+    }
+
 
     /**
      * Check if item can be pulled based on scheduling information.
@@ -375,7 +485,7 @@ class manager {
                     foreach ($collection as $registration) {
                         self::process_enrolment_registration($instance, $arloinstance, $registration);
                         $latestmodified = $registration->LastModifiedDateTime;
-                        $arloinstance->latestsourcemodified = $latestmodified;
+                        $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
                     $apionepageperrequest = self::$plugin->get_config('apionepageperrequest', false);
@@ -464,11 +574,11 @@ class manager {
 
         // Load Contact.
         $user = new user(self::$trace);
-        $user->load_by_guid($contactresource->UniqueIdentifier);
+        $user->load_by_resource($contactresource);
         if (!$user->exists()) {
-            $user = $user->create($contactresource);
+            $user = $user->create();
         }
-        $userid = $user->get_id();
+        $userid = $user->get_user_id();
         $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
         $registrationrecord = $DB->get_record('enrol_arlo_registration', $conditions);
         $parameters = $conditions;
