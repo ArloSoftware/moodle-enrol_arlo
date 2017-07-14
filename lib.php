@@ -31,6 +31,7 @@ require_once($CFG->dirroot . '/group/lib.php');
 
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
+use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
 use enrol_arlo\user;
 
 
@@ -83,7 +84,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @param array $fields instance fields
      * @return int id of new instance, null if can not be created
      */
-    public function add_instance($course, array $fields = null) {
+    public function add_instance($course, array $fields = null, $cli = false) {
         global $DB;
 
         $instance = new stdClass();
@@ -101,7 +102,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         if ($instance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
             if (empty($fields['arloonlineactivity'])) {
-                throw new moodle_exception('Field arloonlineactivity is empty.');
+                throw new moodle_exception('Field sourceguid is empty.');
             }
             $sourcetable = 'enrol_arlo_onlineactivity';
             $sourceguid = $fields['arloonlineactivity'];
@@ -117,8 +118,10 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         // Create a new course group if required.
         if (!empty($fields['customint2']) && $fields['customint2'] == self::ARLO_CREATE_GROUP) {
-            $context = context_course::instance($course->id);
-            require_capability('moodle/course:managegroups', $context);
+            if (!$cli) {
+                $context = \context_course::instance($course->id);
+                require_capability('moodle/course:managegroups', $context);
+            }
             $groupid = static::create_course_group($course->id, $record->code);
             // Map group id to customint2.
             $fields['customint2']   = $groupid;
@@ -189,17 +192,18 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function update_instance($instance, $data) {
-        $context = context_course::instance($instance->courseid);
-        // Unset Arlo instance data, should not be updated when updating enrol instance.
-        unset($data->arlotype);
-        unset($data->arloevent);
-        unset($data->arloonlineactivity);
-        // Create a new course group if required.
-        if ($data->customint2 == self::ARLO_CREATE_GROUP) {
-            require_capability('moodle/course:managegroups', $context);
-            $groupid = static::create_course_group($instance->courseid, $data->name);
-            $data->customint2 = $groupid;
-        }
+        return parent::update_instance($instance, $data);
+    }
+
+    /**
+     * Cancelled instance of enrol plugin.
+     * @param stdClass $instance
+     * @param stdClass $data modified instance fields
+     * @return boolean
+     */
+    public function cancel_instance($instance, $data) {
+        $instance->status = ENROL_INSTANCE_DISABLED;
+        \enrol_arlo\manager::schedule('event', $instance->id,-1,-1);
         return parent::update_instance($instance, $data);
     }
 
@@ -273,6 +277,38 @@ class enrol_arlo_plugin extends enrol_plugin {
      *
      * @return array
      */
+
+    /**
+    +     * Get Template options for form select.
+    +     *
+    +     * @return array
+    +     */
+    public static function get_template_options() {
+    global $DB;
+    $options = array();
+    /* TODO Matt
+     * platform = :platform
+      AND*/
+        $sql = "SELECT DISTINCT sourceguid, name, code
+                  FROM {enrol_arlo_template}
+                 WHERE sourcestatus = :sourcestatus
+                   AND sourceguid NOT IN (SELECT sourceguid
+                                            FROM {enrol_arlo_instance})
+              ORDER BY code";
+        $conditions = array(
+                'platform' => get_config('enrol_arlo', 'platform'),
+                'sourcestatus' => EventTemplateStatus::ACTIVE
+                );
+        $records = $DB->get_records_sql($sql, $conditions);
+        foreach ($records as $record) {
+            $options[$record->sourceguid] = new \stdClass();
+            $options[$record->sourceguid]->templateguid = $record->sourceguid;
+            $options[$record->sourceguid]->code = $record->code;
+            $options[$record->sourceguid]->name = $record->name;
+        }
+        return $options;
+    }
+
     public function get_event_options() {
         global $DB;
         $options = array();

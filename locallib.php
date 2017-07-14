@@ -93,7 +93,7 @@ function enrol_arlo_create_instances_from_template(progress_trace $trace, $cours
     $currentinstances = array();
     $templateassociations = array();
 
-    $arloinstance = \local_arlo\arlo::get_platform_name();
+    $arloinstance = get_config('enrol_arlo', 'platform');
     $plugin = enrol_get_plugin('arlo');
 
     $student = get_archetype_roles('student');
@@ -106,21 +106,21 @@ function enrol_arlo_create_instances_from_template(progress_trace $trace, $cours
         return false;
     }
     // Get full template information.
-    $template = $DB->get_record('local_arlo_templates', array('templateguid' => $templateguid), '*', MUST_EXIST);
-    if ($template->status == 'Cancelled') {
+    $template = $DB->get_record('enrol_arlo_template', array('sourceguid' => $templateguid), '*', MUST_EXIST);
+    if ($template->sourcestatus == 'Cancelled') {
         $trace->output("Template cancelled, don't add anything.", 1);
     }
     // Get all event associated with the template.
-    $events = $DB->get_records('local_arlo_events', array('templateguid' => $templateguid));
+    $events = $DB->get_records('enrol_arlo_event', array('sourcetemplateguid' => $templateguid));
     foreach ($events as $event) {
-        $event->type = ARLO_TYPE_EVENT;
-        $templateassociations[$event->eventguid] = $event;
+        $event->type = \enrol_arlo_plugin::ARLO_TYPE_EVENT;
+        $templateassociations[$event->sourceguid] = $event;
     }
     // Get all online activities associated with the template.
-    $onlineactivities = $DB->get_records('local_arlo_onlineactivities', array('templateguid' => $templateguid));
+    $onlineactivities = $DB->get_records('enrol_arlo_onlineactivity', array('sourcetemplateguid' => $templateguid));
     foreach ($onlineactivities as $onlineactivity) {
-        $onlineactivity->type = ARLO_TYPE_ONLINEACTIVITY;
-        $templateassociations[$onlineactivity->onlineactivityguid] = $onlineactivity;
+        $onlineactivity->type = \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY;
+        $templateassociations[$onlineactivity->sourceguid] = $onlineactivity;
     }
     // Get current Arlo enrolment instances. Will use to check against later on.
     $enrolinstances = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $course->id));
@@ -131,52 +131,44 @@ function enrol_arlo_create_instances_from_template(progress_trace $trace, $cours
     foreach ($templateassociations as $templateassociation) {
         $name = $templateassociation->code . ' ' . $template->name;
         // Arlo event.
-        if ($templateassociation->type == ARLO_TYPE_EVENT) {
-            $customint3 = ARLO_TYPE_EVENT;
-            $customchar1 = $templateassociation->templateguid;
-            $customchar3 = $templateassociation->eventguid;
-            $table = 'local_arlo_events';
-            $field = 'eventguid';
+        if ($templateassociation->type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+            if (!empty($currentinstances) == true) {
+                // Enrolment instance already exists, do nothing.
+                continue;
+            } else {
+                if ($templateassociation->sourcestatus == 'Cancelled') {
+                    $trace->output("cancelled, don't add event {$name}", 1);
+                    continue;
+                }
+                $plugin = new \enrol_arlo_plugin();
+
+                $newinstance = $plugin->get_instance_defaults();
+                $newinstance['status'] = ENROL_INSTANCE_ENABLED;
+                $newinstance['arlotype'] = \enrol_arlo_plugin::ARLO_TYPE_EVENT;
+                $newinstance['arloevent'] = $templateassociation->sourceguid;
+                $plugin->add_instance($course, $newinstance);
+            }
         }
         // Arlo online activity.
-        if ($templateassociation->type == ARLO_TYPE_ONLINEACTIVITY) {
-            $customint3 = ARLO_TYPE_ONLINEACTIVITY;
-            $customchar1 = $templateassociation->templateguid;
-            $customchar3 = $templateassociation->onlineactivityguid;
-            $table = 'local_arlo_onlineactivities';
-            $field = 'onlineactivityguid';
-        }
-        // Can we create.
-        if (isset($currentinstances[$customchar3])) {
-            // Enrolment instance already exists, do nothing.
-            continue;
-        } else {
-            // Is already 'Cancelled' don't bother adding.
-            if ($templateassociation->status == 'Cancelled') {
-                $trace->output("cancelled, don't add event {$name}", 1);
+        if ($templateassociation->type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+            if (!empty($currentinstances) == true) {
+                // Enrolment instance already exists, do nothing.
                 continue;
-            }
-            $newinstance = array();
-            $newinstance['name'] = $name;
-            $newinstance['status'] = ENROL_INSTANCE_ENABLED;
-            $newinstance['roleid'] = $defaultroleid;
-            $newinstance['customint2'] = -1; // Group selected or none.
-            $newinstance['customint3'] = $customint3; // Resource type.
-            $newinstance['customchar1'] = $customchar1; // Template unique identifier.
-            $newinstance['customchar2'] = $arloinstance; // Platform name.
-            $newinstance['customchar3'] = $customchar3; // Resource unique identifier.
-            $newinstance['customint8'] = 1;
-            // Create a new group for the arlo if requested.
-            if ($newinstance['customint2'] == ARLO_CREATE_GROUP) {
-                $groupid = enrol_arlo_create_new_group($course->id,
-                    $table, $field, $customchar3);
-                $newinstance['customint2'] = $groupid;
             } else {
-                $newinstance['customint2'] = 0;
+                if ($templateassociation->sourcestatus == 'Cancelled') {
+                    $trace->output("cancelled, don't add event {$name}", 1);
+                    continue;
+                }
+                $plugin = new \enrol_arlo_plugin();
+
+                $newinstance = $plugin->get_instance_defaults();
+                $newinstance['status'] = ENROL_INSTANCE_ENABLED;
+                $newinstance['arlotype'] = \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY;
+                $newinstance['arloonlineactivity'] = $templateassociation->sourceguid;
+                $plugin->add_instance($course, $newinstance);
             }
-            $plugin->add_instance($course, $newinstance);
-            $trace->output("adding enrol instance for online activity {$name}", 1);
         }
+
     }
 }
 
@@ -423,4 +415,130 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
     $DB->delete_records('enrol_arlo_templatelink');
     // Finally purge all caches.
     purge_all_caches();
+}
+
+/**
+ * Create Arlo enrolment instances in a course that is linked to a Arlo template.
+ *
+ * @param progress_trace $trace
+ * @param $courseid
+ * @return bool
+ * @throws Exception
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function enrol_arlo_process_template_change($sourcetemplateguid) {
+    global $CFG, $DB;
+
+    $templatelink = $DB->get_record('enrol_arlo_templatelink', array('templateguid' => $sourcetemplateguid));
+
+    if (empty($templatelink)) {
+        return;
+    }
+
+    $course = $DB->get_record('course', array('id' => $templatelink->courseid));
+
+    // use template guid to get the course associated
+
+    // Use course ID to check what enrolment methods currently exist
+
+    // If a enrolment method does not exist make it.    Could check from both events and onlince activities
+    require_once($CFG->dirroot . '/group/lib.php');
+
+    if (!$course) {
+        return false;
+    }
+
+    $currentinstances = array();
+    $templateassociations = array();
+
+    $arloinstance = get_config('enrol_arlo', 'platform');
+    $plugin = enrol_get_plugin('arlo');
+
+    $student = get_archetype_roles('student');
+    $student = reset($student);
+    $defaultroleid = $plugin->get_config('roleid', $student->id);
+
+    // Get full template information.
+    $template = $DB->get_record('enrol_arlo_template', array('sourceguid' => $templatelink->templateguid), '*', IGNORE_MULTIPLE);
+    if ($template->sourcestatus == 'Cancelled') {
+        return;
+    }
+
+    // Get current Arlo enrolment instances. Will use to check against later on.
+    $enrolinstances = $DB->get_records('enrol', array('enrol' => 'arlo', 'courseid' => $course->id, 'status' => 0));
+    foreach ($enrolinstances as $enrolinstance) {
+        $currentinstances[$enrolinstance->customchar3] = $enrolinstance;
+    }
+
+    // Here we handle any events that have been cancelled.
+    $canevents = $DB->get_records('enrol_arlo_event', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Cancelled'));
+    $canonlineactivities = $DB->get_records('enrol_arlo_onlineactivity', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Cancelled'));
+    $canitems = array_merge($canevents, $canonlineactivities);
+    $instances = $DB->get_records('enrol_arlo_instance');
+    $canguids = array();
+    foreach ($canitems as $key => $item) {
+        $canguids[] = $item->sourceguid;
+    }
+    $changes = new \stdClass();
+    $plugin = new \enrol_arlo_plugin();
+    foreach ($instances as $key => $instance) {
+        $query = $DB->get_record('enrol', array('id' => $instance->enrolid));
+        if (in_array($instance->sourceguid, $canguids) == true) {
+            $changes->status = ENROL_INSTANCE_DISABLED;
+            $plugin->cancel_instance($query, $changes);
+        } else {
+            $changes->status = ENROL_INSTANCE_ENABLED;
+            $plugin->update_instance($query, $changes);
+        }
+    }
+
+    // Move onto updates and additions
+    // Get all event associated with the template.
+    $events = $DB->get_records('enrol_arlo_event', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Active'));
+    foreach ($events as $event) {
+        $event->type = \enrol_arlo_plugin::ARLO_TYPE_EVENT;
+        $templateassociations[$event->sourceguid] = $event;
+    }
+    // Get all online activities associated with the template.
+    //template guid to match
+    $onlineactivities = $DB->get_records('enrol_arlo_onlineactivity', array('sourcetemplateguid' => $templatelink->templateguid, 'sourcestatus' => 'Active'));
+    foreach ($onlineactivities as $onlineactivity) {
+        $onlineactivity->type = \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY;
+        $templateassociations[$onlineactivity->sourceguid] = $onlineactivity;
+    }
+
+
+    // Array merge to get count of active items.
+    $x = array_merge($events, $onlineactivities);
+    if (count($x) === count($enrolinstances)) {
+        // We only have to update items if these are equal.
+        foreach ($x as $key => $arloitem) {
+            $sql = 'SELECT enrolid FROM {enrol_arlo_instance} WHERE sourceid = :sourceid AND type = :type';
+            $query = $DB->get_record_sql($sql, array('sourceid' => $arloitem->sourceid, 'type' => $arloitem->type));
+            $changes = new \stdClass();
+            $changes->name = $arloitem->code;
+            $plugin = new \enrol_arlo_plugin();
+            $plugin->update_instance($enrolinstances[$query->enrolid], $changes);
+        }
+    } else {
+        // We need to figure out what enrolment instances are missing.
+        foreach ($x as $key => $arloitem) {
+            $sql = 'SELECT enrolid FROM {enrol_arlo_instance} WHERE sourceid = :sourceid AND type = :type';
+            $query = $DB->get_record_sql($sql, array('sourceid' => $arloitem->sourceid, 'type' => $arloitem->type));
+            if (empty($query) && $arloitem->sourcestatus != 'Cancelled') {
+                $plugin = new \enrol_arlo_plugin();
+                $newinstance = $plugin->get_instance_defaults();
+                $newinstance['status'] = ENROL_INSTANCE_ENABLED;
+                if ($arloitem->type === 'event') {
+                    $newinstance['arlotype'] = \enrol_arlo_plugin::ARLO_TYPE_EVENT;
+                    $newinstance['arloevent'] = $arloitem->sourceguid;
+                } else {
+                    $newinstance['arlotype'] = \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY;
+                    $newinstance['arloonlineactivity'] = $arloitem->sourceguid;
+                }
+                $plugin->add_instance($course, $newinstance, true);
+            }
+        }
+    }
 }

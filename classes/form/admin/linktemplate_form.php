@@ -22,12 +22,13 @@
  */
 
 
-defined('MOODLE_INTERNAL') || die();
+namespace enrol_arlo\form\admin;
 
-require_once($CFG->libdir  . '/formslib.php');
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+
+require_once($CFG->libdir . '/formslib.php');
 require_once($CFG->dirroot . '/enrol/arlo/lib.php');
-
-class enrol_arlo_linktemplate_form extends moodleform{
+class linktemplate_form extends \moodleform{
     public function definition() {
         global $DB;
         $mform = $this->_form;
@@ -37,7 +38,8 @@ class enrol_arlo_linktemplate_form extends moodleform{
         $templates = array();
         $templates[''] = get_string("select") . '...';
         // Build templates options group.
-        foreach (\local_arlo\arlo::get_active_templates() as $key => $template) {
+        //get_template_options
+        foreach (\enrol_arlo_plugin::get_template_options() as $key => $template) {
             $templates[$template->templateguid] = $template->code . ' ' . $template->name;
         }
         if ($link->id) {

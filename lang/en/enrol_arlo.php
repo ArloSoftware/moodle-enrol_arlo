@@ -250,3 +250,8 @@ $string['fail'] = 'Fail';
 $string['synctask'] = 'Synchronization of Arlo data';
 $string['backtoenrolmentmethods'] = 'Back to enrolment methods';
 $string['arlo:synchronizeinstance'] = 'Allow user to manually synchronize instance';
+
+$string['eventcreated'] = 'Event created';
+$string['eventupdated'] = 'Event updated';
+$string['onlineactivitycreated'] = 'Online activity created';
+$string['onlineactivityupdated'] = 'Online activity updated';

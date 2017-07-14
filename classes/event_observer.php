@@ -91,15 +91,34 @@ class event_observer {
         static::set_update_source($event->courseid, $event->relateduserid);
     }
 
-    /**
-     * Platform name change handler. Used for cleanup.
-     *
-     * @param $event
-     * @return mixed
-     */
     public static function fqdn_updated($event) {
         global $CFG;
         require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
         enrol_arlo_change_platform($event->other['oldvalue'], $event->other['newvalue']);
+    }
+
+    public static function event_created($event) {
+        global $CFG;
+        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
+        enrol_arlo_process_template_change($event->other['sourcetemplateguid']);
+        return $event;
+    }
+    public static function event_updated($event) {
+        global $CFG;
+        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
+        enrol_arlo_process_template_change($event->other['sourcetemplateguid']);
+        return $event;
+    }
+    public static function onlineactivity_created($event) {
+        global $CFG;
+        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
+        enrol_arlo_process_template_change($event->other['sourcetemplateguid']);
+        return $event;
+    }
+    public static function onlineactivity_updated($event) {
+        global $CFG;
+        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
+        enrol_arlo_process_template_change($event->other['sourcetemplateguid']);
+        return $event;
     }
 }

@@ -41,5 +41,21 @@ $observers = array(
     array(
         'eventname'   => '\enrol_arlo\event\fqdn_updated',
         'callback'    => '\enrol_arlo\event_observer::fqdn_updated',
-    )
+    ),
+    array(
+        'eventname'   => '\enrol_arlo\event\event_created',
+        'callback'    => '\enrol_arlo\event_observer::event_created',
+    ),
+    array(
+        'eventname'   => '\enrol_arlo\event\event_updated',
+        'callback'    => '\enrol_arlo\event_observer::event_updated',
+    ),
+    array(
+        'eventname'   => '\enrol_arlo\event\onlineactivity_created',
+        'callback'    => '\enrol_arlo\event_observer::onlineactivity_created',
+    ),
+    array(
+        'eventname'   => '\enrol_arlo\event\onlineactivity_updated',
+        'callback'    => '\enrol_arlo\event_observer::onlineactivity_updated',
+    ),
 );
