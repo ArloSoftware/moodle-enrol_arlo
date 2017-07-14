@@ -19,28 +19,31 @@ class collection_request extends abstract_request {
         try {
             $requesturi = $this->requesturi;
             $schedule = $this->schedule;
-            // Set latest modified date if not set. First pull.
-            $latestmodified = $schedule->latestsourcemodified;
-            if (empty($latestmodified)) {
-                $servertimezone = \core_date::get_server_timezone();
-                $tz = new \DateTimeZone($servertimezone);
-                $date = \DateTime::createFromFormat('U', 0, $tz);
-                $latestmodified = $date->format(DATE_ISO8601);
-            }
-            // Set OrderBy and Filters.
-            if (!empty($requesturi->getOrderBy())) {
+            /// Set default order by if empty.
+            if (empty($requesturi->getOrderBy())) {
                 $requesturi->setOrderBy('LastModifiedDateTime ASC');
             }
-            $createdfilter = Filter::create()
-                ->setResourceField('CreatedDateTime')
-                ->setOperator('gt')
-                ->setDateValue($latestmodified);
-            $requesturi->addFilter($createdfilter);
-            $modifiedfilter = Filter::create()
-                ->setResourceField('LastModifiedDateTime')
-                ->setOperator('gt')
-                ->setDateValue($latestmodified);
-            $requesturi->addFilter($modifiedfilter);
+            // Set default filter if empty.
+            if (empty($requesturi->getFilters())) {
+                // Set latest modified date if not set. First pull.
+                $latestmodified = $schedule->latestsourcemodified;
+                if (empty($latestmodified)) {
+                    $servertimezone = \core_date::get_server_timezone();
+                    $tz = new \DateTimeZone($servertimezone);
+                    $date = \DateTime::createFromFormat('U', 0, $tz);
+                    $latestmodified = $date->format(DATE_ISO8601);
+                }
+                $createdfilter = Filter::create()
+                    ->setResourceField('CreatedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue($latestmodified);
+                $requesturi->addFilter($createdfilter);
+                $modifiedfilter = Filter::create()
+                    ->setResourceField('LastModifiedDateTime')
+                    ->setOperator('gt')
+                    ->setDateValue($latestmodified);
+                $requesturi->addFilter($modifiedfilter);
+            }
 
             $client = new Client();
             $response = $client->request('GET', $requesturi, $this->headers, $this->body, $this->options);
