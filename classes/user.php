@@ -10,44 +10,92 @@ use enrol_arlo\Arlo\AuthAPI\Enum\ContactStatus;
 require_once($CFG->dirroot . '/user/lib.php');
 
 class user extends \core_user {
-    /**
-     * @var MATCH_BY_CODE_PRIMARY match by idnumber
-     */
+    /** @var MATCH_BY_CODE_PRIMARY match by idnumber */
     const MATCH_BY_CODE_PRIMARY = 1;
-    /**
-     * @var MATCH_BY_USER_DETAILS match by firstname, lastname and email
-     */
+
+    /** @var MATCH_BY_USER_DETAILS match by firstname, lastname and email */
     const MATCH_BY_USER_DETAILS = 2;
-    /**
-     * @var int MATCH_BY_AUTO match using MATCH_BY_USER_DETAILS then MATCH_BY_CODE_PRIMARY
-     * */
+
+    /** @var int MATCH_BY_AUTO match using MATCH_BY_USER_DETAILS then MATCH_BY_CODE_PRIMARY */
     const MATCH_BY_AUTO = 3;
-    /**
-     * @var int MATCH_BY_DEFAULT default user match method to use.
-     */
+
+    /** @var int MATCH_BY_DEFAULT default user match method to use. */
     const MATCH_BY_DEFAULT = 2;
 
     /** @var $plugin enrolment plugin instance. */
     private static $plugin;
-    /** @var \progress_trace  */
-    private $trace;
 
+    /** @var \progress_trace  */
+    private static $trace;
+
+    /** @var $userrecord stdClass */
     private $userrecord;
+
+    /** @var $contactrecord stdClass */
     private $contactrecord;
+    
+    /** @var $contactresource Contact */
     private $contactresource;
 
-    protected $contactfields = array('id', 'plaform', 'userid', 'sourceid', 'sourceguid', 'sourcecreated', 'sourcemodified');
-
     public function __construct(\progress_trace $trace = null) {
-        // Setup trace.
-        if (is_null($trace)) {
-            $this->trace = new \null_progress_trace();
+        if (is_null(static::$trace)) {
+            static::$trace = new \null_progress_trace();
         } else {
-            $this->trace = $trace;
+            static::$trace = $trace;
         }
-        self::$plugin = enrol_get_plugin('arlo');
+        self::$plugin = new \enrol_arlo_plugin();
     }
 
+    /**
+     * @return Contact
+     */
+    public function get_contact_resource() {
+        return $this->contactresource;
+    }
+
+    /**
+     * @param Contact $contactresource
+     * @return bool
+     */
+    public function load_by_resource(Contact $contactresource) {
+        global $DB;
+
+        self::load_contact_resource($contactresource);
+        // Alias up fields.
+        $aliaseduserfields      = dml::alias(static::get_user_fields(), 'u', 'user_');
+        $aliasedcontactfields   = dml::alias(static::get_contact_fields(), 'ac', 'contact_');
+        // Add user and contact fields together to be used in SQL.
+        $fields = "$aliaseduserfields, $aliasedcontactfields ";
+        $sql = "SELECT $fields
+                  FROM {enrol_arlo_contact} ac 
+                  JOIN {user} u ON  u.id = ac.userid
+                 WHERE u.deleted = 0
+                   AND ac.platform = :platform
+                   AND ac.sourceguid = :sourceguid";
+        // Conditions required: platform and sourceguid.
+        $platform   = self::$plugin->get_config('platform');
+        $guid       = $this->contactresource->UniqueIdentifier;
+        $conditions = array('platform' => $platform, 'sourceguid' => $guid);
+        $record     = $DB->get_record_sql($sql, $conditions);
+        if ($record) {
+            $unaliasedrecord    = dml::unalias($record);
+            $userrecord         = (object) $unaliasedrecord['user'];
+            $contactrecord      = (object) $unaliasedrecord['contact'];
+            self::load_user_record($userrecord);
+            self::load_contact_record($contactrecord);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Create/Match a user. Attempts to match Arlo contact against a Moodle users.
+     * It will join Arlo contact to a Moodle account either existing or newly created.
+     *
+     * @param Contact|null $contactresource
+     * @return $this
+     * @throws \moodle_exception
+     */
     public function create(Contact $contactresource = null) {
         global $DB, $CFG;
 
@@ -57,9 +105,7 @@ class user extends \core_user {
         if (!is_null($contactresource)) {
             self::load_contact_resource($contactresource);
         }
-        $contactresource = $this->contactresource;
-        $plugin = self::$plugin;
-
+        // See if can match Arlo contact against a Moodle user.
         $match = false;
         $matches = self::get_matches();
         if (1 == count($matches)) {
@@ -68,60 +114,67 @@ class user extends \core_user {
         } else if (count($matches) > 1) {
             // Send message.
             $params = array(
-                'firstname' => $contactresource->FirstName,
-                'lastname' => $contactresource->LastName,
-                'email' => $contactresource->Email,
-                'idnumber' => $contactresource->CodePrimary,
-                'count' => count($matches)
+                'firstname' => self::get_contact_resource()->FirstName,
+                'lastname'  => self::get_contact_resource()->LastName,
+                'email'     => self::get_contact_resource()->Email,
+                'idnumber'  => self::get_contact_resource()->CodePrimary,
+                'count'     => count($matches)
             );
             alert::create('error_duplicateusers', $params, true)->send();
         }
-
         // Don't touch anything on Match just clone. Else create user.
         if ($match) {
             $trigger            = false;
             $user               = clone($match);
         } else {
             $trigger            = true;
-            $user               = static::get_dummy_user_record();
-            $user->auth         = $plugin->get_config('authplugin');
-            $user->username     = self::generate_username($contactresource->FirstName, $contactresource->LastName);
-            $user->firstname    = (string) $contactresource->FirstName;
-            $user->lastname     = (string) $contactresource->LastName;
-            $user->email        = (string) $contactresource->Email;
-            $user->phone1       = (string) $contactresource->PhoneHome;
-            $user->phone2       = (string) $contactresource->PhoneMobile;
-            $user->idnumber     = (string) $contactresource->CodePrimary;
+            $user               = self::get_dummy_user_record();
+            $user->auth         = self::$plugin->get_config('authplugin');
+            $user->username     = self::generate_username(self::get_contact_resource()->FirstName, self::get_contact_resource()->LastName);
+            $user->firstname    = (string) self::get_contact_resource()->FirstName;
+            $user->lastname     = (string) self::get_contact_resource()->LastName;
+            $user->email        = (string) self::get_contact_resource()->Email;
+            $user->phone1       = (string) self::get_contact_resource()->PhoneHome;
+            $user->phone2       = (string) self::get_contact_resource()->PhoneMobile;
+            $user->idnumber     = (string) self::get_contact_resource()->CodePrimary;
             $user->mnethostid   = $CFG->mnet_localhost_id;
             $user->id           = user_create_user($user, true, false);
+            // Load new record.
+            self::load_user_record($user);
             // Set create password flag.
             set_user_preference('enrol_arlo_createpassword', 1, $user->id);
         }
         // Create Contact association.
         $contact                  = new stdClass();
-        $contact->platform        = $plugin->get_config('platform');
+        $contact->platform        = self::$plugin->get_config('platform');
         $contact->userid          = $user->id;
-        $contact->sourceid        = (int)    $contactresource->ContactID;
-        $contact->sourceguid      = (string) $contactresource->UniqueIdentifier;
-        $contact->sourcecreated   = (string) $contactresource->CreatedDateTime;
-        $contact->sourcemodified  = (string) $contactresource->LastModifiedDateTime;
+        $contact->sourceid        = (int)    self::get_contact_resource()->ContactID;
+        $contact->sourceguid      = (string) self::get_contact_resource()->UniqueIdentifier;
+        $contact->sourcecreated   = (string) self::get_contact_resource()->CreatedDateTime;
+        $contact->sourcemodified  = (string) self::get_contact_resource()->LastModifiedDateTime;
         $contact->modified        = time();
         $contact->id              = $DB->insert_record('enrol_arlo_contact', $contact);
-
-        self::load_user_record($user);
+        // Load contact record.
         self::load_contact_record($contact);
-
+        // Trigger event for newly created users.
         if ($trigger) {
             \core\event\user_created::create_from_userid($user->id)->trigger();
         }
         return $this;
     }
 
+    /**
+     * Exists if have a user and associated contact record.
+     *
+     * @return bool
+     */
     public function exists() {
-        if (empty($this->userrecord) || empty($this->contactrecord)) {
-            return false;
+        if (!empty($this->userrecord) && !empty($this->contactrecord)) {
+            if ($this->userrecord->id == $this->contactrecord->userid) {
+                return true;
+            }
         }
-        return true;
+        return false;
     }
 
     public static function generate_username($firstname, $lastname) {
@@ -146,6 +199,9 @@ class user extends \core_user {
         return $username;
     }
 
+    /**
+     * @return array
+     */
     public static function get_contact_fields() {
         $contactfields = array(
             'id', 'platform', 'userid', 'sourceid', 'sourceguid', 'sourcecreated', 'sourcemodified'
@@ -153,6 +209,69 @@ class user extends \core_user {
         return $contactfields;
     }
 
+    /**
+     * Return formatted fullname.
+     *
+     * @return string
+     */
+    public function get_user_fullname(){
+        if (self::exists()){
+            return fullname($this->userrecord);
+        }
+        return '';
+    }
+
+    /**
+     * @return array
+     */
+    public static function get_user_fields() {
+        $userfields = array();
+        foreach (get_object_vars(static::get_dummy_user_record()) as $key => $value) {
+            $userfields[] = $key;
+        }
+        return $userfields;
+    }
+
+    /**
+     * Get user record id.
+     *
+     * @return int
+     */
+    public function get_user_id() {
+        if (isset($this->userrecord->id)) {
+            return $this->userrecord->id;
+        }
+        return 0;
+    }
+
+    /**
+     * @param $user
+     */
+    private function load_user_record($user) {
+        $this->userrecord = (object) $user;
+    }
+
+    /**
+     * @param $contact
+     */
+    private function load_contact_record($contact) {
+        $this->contactrecord = (object) $contact;
+    }
+
+    /**
+     * @param Contact $contact
+     * @return Contact
+     */
+    private function load_contact_resource(Contact $contact) {
+        return $this->contactresource = $contact;
+    }
+
+    /**
+     * Apply matching schemes based on configuration.
+     *
+     * @return array
+     * @throws \moodle_exception
+     */
     protected function get_matches() {
         // Match preference.
         $matchuseraccountsby = get_config('enrol_arlo', 'matchuseraccountsby');
@@ -190,64 +309,13 @@ class user extends \core_user {
         return $matches;
     }
 
-    public static function get_user_fields() {
-        $userfields = array();
-        foreach (get_object_vars(static::get_dummy_user_record()) as $key => $value) {
-            $userfields[] = $key;
-        }
-        return $userfields;
-    }
-
-    public function get_id() {
-        if (isset($this->userrecord->id)) {
-            return $this->userrecord->id;
-        }
-        return 0;
-    }
-
-    public function load_by_guid($guid) {
-        global $DB;
-        if (empty($guid) || !is_string($guid)) {
-            throw new \moodle_exception('GUID must be non empty string');
-        }
-        // Alias up fields.
-        $aliaseduserfields = dml::alias(static::get_user_fields(), 'u', 'user_');
-        $aliasedcontactfields = dml::alias(static::get_contact_fields(), 'ac', 'contact_');
-        $fields = "$aliaseduserfields, $aliasedcontactfields ";
-        $sql = "SELECT $fields
-                  FROM {enrol_arlo_contact} ac 
-                  JOIN {user} u ON  u.id = ac.userid
-                 WHERE u.deleted = 0
-                   AND ac.platform = :platform
-                   AND ac.sourceguid = :sourceguid";
-        $platform = get_config('enrol_arlo', 'platform');
-        $conditions = array('platform' => $platform, 'sourceguid' => $guid);
-        $record = $DB->get_record_sql($sql, $conditions);
-        if ($record) {
-            $unaliasedrecord = dml::unalias($record);
-            $userrecord = (object) $unaliasedrecord['user'];
-            $contactrecord = (object) $unaliasedrecord['contact'];
-            self::load_user_record($userrecord);
-            self::load_contact_record($contactrecord);
-        }
-        return $this;
-    }
-
-    protected function check_record_fields($record, $fields) {}
-
-    private function load_user_record($user) {
-        $this->userrecord = (object) $user;
-    }
-
-    private function load_contact_record($contact) {
-        $this->contactrecord = (object) $contact;
-    }
-
-    public function load_contact_resource(Contact $contact) {
-        return $this->contactresource = $contact;
-    }
-
-    public function match_against_arlo_code_primary($codeprimary) {
+    /**
+     * Returns any matches agains idnumber.
+     *
+     * @param $codeprimary
+     * @return array
+     */
+    protected function match_against_arlo_code_primary($codeprimary) {
         global $DB;
 
         $conditions = array('idnumber' => $codeprimary);
@@ -255,7 +323,15 @@ class user extends \core_user {
         return $records;
     }
 
-    public function match_against_arlo_user_details($firstname, $lastname, $email) {
+    /**
+     * Returns any matches in Moodle against firstname, lastname and email.
+     *
+     * @param $firstname
+     * @param $lastname
+     * @param $email
+     * @return array
+     */
+    protected function match_against_arlo_user_details($firstname, $lastname, $email) {
         global $DB;
 
         $firstname  = trim($firstname);
@@ -268,12 +344,45 @@ class user extends \core_user {
     }
 
     /**
+     * Update Moodle user and contact records based on change in Arlo contact record.
+     *
+     *  - Updates user record firstname, lastname and email.
+     *  - Update contact record sourcecreated and sourcemodified.
+     *
+     * @param Contact|null $contactresource
+     * @return bool
+     * @throws \coding_exception
+     */
+    public function update(Contact $contactresource = null) {
+        global $DB;
+        if (!self::exists()) {
+            throw new \coding_exception('Records do not exist');
+        }
+        if (!is_null($contactresource)) {
+            self::load_contact_resource($contactresource);
+        }
+        $contactrecord = $this->contactrecord;
+        $contactrecord->sourcecreated = self::get_contact_resource()->CreatedDateTime;
+        $contactrecord->sourcemodified = self::get_contact_resource()->LastModifiedDateTime;
+        // Update timing information on enrol contact record.
+        $DB->update_record('enrol_arlo_contact', $contactrecord);
+        $userrecord = $this->userrecord;
+        $userrecord->firstname = self::get_contact_resource()->FirstName;
+        $userrecord->lastname = self::get_contact_resource()->LastName;
+        $userrecord->email = self::get_contact_resource()->Email;
+        // Update name details for user record.
+        $DB->update_record('user', $userrecord);
+        \core\event\user_updated::create_from_userid($userrecord->id)->trigger();
+        return true;
+    }
+
+    /**
      * Output a progress message.
      *
      * @param $message the message to output.
      * @param int $depth indent depth for this message.
      */
     private function trace($message, $depth = 0) {
-        $this->trace->output($message, $depth);
+        self::$trace->output($message, $depth);
     }
 }
