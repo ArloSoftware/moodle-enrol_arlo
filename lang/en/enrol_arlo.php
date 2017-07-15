@@ -255,3 +255,5 @@ $string['eventcreated'] = 'Event created';
 $string['eventupdated'] = 'Event updated';
 $string['onlineactivitycreated'] = 'Online activity created';
 $string['onlineactivityupdated'] = 'Online activity updated';
+$string['associatetemplatewithcourse'] = 'Associate Arlo Template with Moodle course';
+$string['errorselecttemplate'] = 'Please select a Event Template';
