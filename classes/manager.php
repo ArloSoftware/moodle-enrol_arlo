@@ -872,12 +872,13 @@ class manager {
                 'objectid' => 1,
                 'context' => \context_system::instance(),
                 'other' => array(
-                        'eventid' => $event->EventID,
-                        'uid' => $event->UniqueIdentifier,
-                        'sourcetemplateguid' => $record->sourcetemplateguid,
-                        'status' => $event->Status,
-                        'type' => \enrol_arlo_plugin::ARLO_TYPE_EVENT
-                    )
+                    'id' => $record->id,
+                    'sourceid' => $record->sourceid,
+                    'sourceguid' => $record->sourceguid,
+                    'sourcestatus' => $record->sourcestatus,
+                    'sourcetemplateid' => $record->sourcetemplateid,
+                    'sourcetemplateguid' => $record->sourcetemplateguid
+                )
             ));
         } else {
             $DB->update_record('enrol_arlo_event', $record);
@@ -886,12 +887,13 @@ class manager {
                 'objectid' => 1,
                 'context' => \context_system::instance(),
                 'other' => array(
-                        'eventid' => $event->EventID,
-                        'uid' => $event->UniqueIdentifier,
-                        'sourcetemplateguid' => $record->sourcetemplateguid,
-                        'status' => $event->Status,
-                        'type' => \enrol_arlo_plugin::ARLO_TYPE_EVENT
-                    )
+                    'id' => $record->id,
+                    'sourceid' => $record->sourceid,
+                    'sourceguid' => $record->sourceguid,
+                    'sourcestatus' => $record->sourcestatus,
+                    'sourcetemplateid' => $record->sourcetemplateid,
+                    'sourcetemplateguid' => $record->sourcetemplateguid
+                )
             ));
         }
         $systemevent->trigger();
@@ -966,11 +968,12 @@ class manager {
                 'objectid' => 1,
                 'context' => \context_system::instance(),
                 'other' => array(
-                    'activityid' => $onlineactivity->OnlineActivityID,
-                    'uid' => $onlineactivity->UniqueIdentifier,
-                    'sourcetemplateguid' => $record->sourcetemplateguid,
-                    'status' => $onlineactivity->Status,
-                    'type' => \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY
+                    'id' => $record->id,
+                    'sourceid' => $record->sourceid,
+                    'sourceguid' => $record->sourceguid,
+                    'sourcestatus' => $record->sourcestatus,
+                    'sourcetemplateid' => $record->sourcetemplateid,
+                    'sourcetemplateguid' => $record->sourcetemplateguid
                 )
             ));
         } else {
@@ -980,12 +983,13 @@ class manager {
                 'objectid' => 1,
                 'context' => \context_system::instance(),
                 'other' => array(
-                        'activityid' => $onlineactivity->OnlineActivityID,
-                        'uid' => $onlineactivity->UniqueIdentifier,
-                        'sourcetemplateguid' => $record->sourcetemplateguid,
-                        'status' => $onlineactivity->Status,
-                        'type' => \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY
-                    )
+                    'id' => $record->id,
+                    'sourceid' => $record->sourceid,
+                    'sourceguid' => $record->sourceguid,
+                    'sourcestatus' => $record->sourcestatus,
+                    'sourcetemplateid' => $record->sourcetemplateid,
+                    'sourcetemplateguid' => $record->sourcetemplateguid
+                )
             ));
         }
         $systemevent->trigger();
