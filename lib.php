@@ -1032,7 +1032,7 @@ function enrol_arlo_extend_navigation_course($navigation, $course, $context) {
         // Check that they can add an instance.
         $plugin = enrol_get_plugin('arlo');
         if ($plugin->can_add_instance($course->id)) {
-            $url = new moodle_url('/enrol/arlo/linktemplate.php', array('courseid' => $context->instanceid));
+            $url = new moodle_url('/enrol/arlo/associatetemplate.php', array('id' => $context->instanceid));
             $label = get_string('associatearlotemplate', 'enrol_arlo');
             $settingsnode = navigation_node::create($label, $url, navigation_node::TYPE_SETTING,
                 null, null, new pix_icon('i/twoway', ''));
