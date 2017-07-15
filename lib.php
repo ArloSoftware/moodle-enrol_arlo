@@ -107,6 +107,10 @@ class enrol_arlo_plugin extends enrol_plugin {
             $sourcetable = 'enrol_arlo_onlineactivity';
             $sourceguid = $fields['arloonlineactivity'];
         }
+        // Check Event or Online Activity not already in play.
+        if ($DB->record_exists('enrol_arlo_instance', array('sourceguid' => $sourceguid))) {
+            return false;
+        }
         $conditions = array('platform' => $instance->platform, 'sourceguid' => $sourceguid);
         $record = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
         $instance->sourceid     = $record->sourceid;
@@ -273,42 +277,37 @@ class enrol_arlo_plugin extends enrol_plugin {
     }
 
     /**
-     * Get Event options for form select.
+     * Get Event Templates options for form select.
      *
      * @return array
      */
-
-    /**
-    +     * Get Template options for form select.
-    +     *
-    +     * @return array
-    +     */
-    public static function get_template_options() {
-    global $DB;
-    $options = array();
-    /* TODO Matt
-     * platform = :platform
-      AND*/
-        $sql = "SELECT DISTINCT sourceguid, name, code
+    public function get_template_options($courseid) {
+        global $DB;
+        $sql = "SELECT sourceid, sourceguid, name, code
                   FROM {enrol_arlo_template}
                  WHERE sourcestatus = :sourcestatus
-                   AND sourceguid NOT IN (SELECT sourceguid
-                                            FROM {enrol_arlo_instance})
+                   AND sourceguid NOT IN (SELECT sourcetemplateguid
+                                            FROM {enrol_arlo_templateassociate}
+                                           WHERE courseid <> :courseid)
               ORDER BY code";
         $conditions = array(
-                'platform' => get_config('enrol_arlo', 'platform'),
-                'sourcestatus' => EventTemplateStatus::ACTIVE
-                );
+            'platform' => self::get_config('platform', null),
+            'sourcestatus' => EventTemplateStatus::ACTIVE,
+            'courseid' => $courseid
+        );
+        $options = array();
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
-            $options[$record->sourceguid] = new \stdClass();
-            $options[$record->sourceguid]->templateguid = $record->sourceguid;
-            $options[$record->sourceguid]->code = $record->code;
-            $options[$record->sourceguid]->name = $record->name;
+            $options[$record->sourceguid] = $record->code . ' ' . $record->name;
         }
         return $options;
     }
 
+    /**
+     * Get Event options for form select.
+     *
+     * @return array
+     */
     public function get_event_options() {
         global $DB;
         $options = array();
@@ -363,7 +362,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function get_instance_defaults() {
         $fields = array();
-        $fields['status']               = $this->get_config('status');
+        $fields['status']               = ENROL_INSTANCE_ENABLED;
         $fields['roleid']               = $this->get_config('roleid');
         $fields['enrolperiod']          = 0;
         $fields['expirynotify']         = 0;
