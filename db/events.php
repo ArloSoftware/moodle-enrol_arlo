@@ -24,38 +24,38 @@
 $observers = array(
     array(
         'eventname' => '\core\event\course_module_completion_updated',
-        'callback' => '\enrol_arlo\event_observer::course_module_completion_updated'
+        'callback' => '\enrol_arlo\event\observer::course_module_completion_updated'
     ),
     array(
         'eventname' => '\core\event\course_viewed',
-        'callback' => '\enrol_arlo\event_observer::course_viewed'
+        'callback' => '\enrol_arlo\event\observer::course_viewed'
     ),
     array(
         'eventname' => '\core\event\user_deleted',
-        'callback' => '\enrol_arlo\event_observer::user_deleted'
+        'callback' => '\enrol_arlo\event\observer::user_deleted'
     ),
     array(
         'eventname' => '\core\event\user_graded',
-        'callback' => '\enrol_arlo\event_observer::user_graded'
+        'callback' => '\enrol_arlo\event\observer::user_graded'
     ),
     array(
         'eventname'   => '\enrol_arlo\event\fqdn_updated',
-        'callback'    => '\enrol_arlo\event_observer::fqdn_updated',
+        'callback'    => '\enrol_arlo\event\observer::fqdn_updated',
     ),
     array(
         'eventname'   => '\enrol_arlo\event\event_created',
-        'callback'    => '\enrol_arlo\event_observer::event_created',
+        'callback'    => '\enrol_arlo\event\observer::event_created',
     ),
     array(
         'eventname'   => '\enrol_arlo\event\event_updated',
-        'callback'    => '\enrol_arlo\event_observer::event_updated',
+        'callback'    => '\enrol_arlo\event\observer::event_updated',
     ),
     array(
         'eventname'   => '\enrol_arlo\event\onlineactivity_created',
-        'callback'    => '\enrol_arlo\event_observer::onlineactivity_created',
+        'callback'    => '\enrol_arlo\event\observer::onlineactivity_created',
     ),
     array(
         'eventname'   => '\enrol_arlo\event\onlineactivity_updated',
-        'callback'    => '\enrol_arlo\event_observer::onlineactivity_updated',
+        'callback'    => '\enrol_arlo\event\observer::onlineactivity_updated',
     ),
 );

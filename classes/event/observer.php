@@ -22,9 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace enrol_arlo;
+namespace enrol_arlo\event;
 
-class event_observer {
+class observer {
 
     /**
      * Set updatesource field in enrol_arlo_registration table. Fired on cours module update and
