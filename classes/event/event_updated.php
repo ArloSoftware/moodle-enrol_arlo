@@ -71,7 +71,7 @@ class event_updated extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "Updated ARLO event with GUID '" . $this->other['uid'] . "'.";
+        return "Updated Arlo Event record '" . $this->other['id'] . "'.";
     }
 
     /**
@@ -91,17 +91,23 @@ class event_updated extends \core\event\base {
      */
     protected function validate_data() {
         parent::validate_data();
-        if (!isset($this->other['eventid'])) {
-            throw new \coding_exception('The \'eventid\' value must be set in other.');
+        if (!isset($this->other['id'])) {
+            throw new \coding_exception("The id value must be set in other.");
         }
-        if (!isset($this->other['uid'])) {
-            throw new \coding_exception('The \'uid\' value must be set in other.');
+        if (!isset($this->other['sourceid'])) {
+            throw new \coding_exception("The sourceid value must be set in other.");
         }
-        if (!isset($this->other['status'])) {
-            throw new \coding_exception('The \'status\' value must be set in other.');
+        if (!isset($this->other['sourceguid'])) {
+            throw new \coding_exception("The sourceguid value must be set in other.");
         }
-        if (!isset($this->other['type'])) {
-            throw new \coding_exception('The \'type\' value must be set in other.');
+        if (!isset($this->other['sourcestatus'])) {
+            throw new \coding_exception("The sourcestatus value must be set in other.");
+        }
+        if (!isset($this->other['sourcetemplateid'])) {
+            throw new \coding_exception("The sourcetemplateid value must be set in other.");
+        }
+        if (!isset($this->other['sourcetemplateguid'])) {
+            throw new \coding_exception("The sourcetemplateguid value must be set in other.");
         }
     }
 
