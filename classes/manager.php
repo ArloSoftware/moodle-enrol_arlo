@@ -464,7 +464,7 @@ class manager {
         }
 
         $nextpushtime = $record->nextpushtime;
-        $endpushtime = $record->endpulltime;
+        $endpushtime = $record->endpushtime;
         // Defaults.
         $interval = self::REQUEST_INTERVAL_SECONDS;
         $extension = self::REQUEST_EXTENSION_SECONDS;
@@ -475,7 +475,7 @@ class manager {
             return false;
         }
         // Return if next push time hasn't passed current time.
-        if ($timestart < ($nextpulltime + $interval)) {
+        if ($timestart < ($nextpushtime + $interval)) {
             self::trace('Next push time not yet reached');
             return false;
         }
