@@ -188,6 +188,15 @@ class manager {
         return $schedule;
     }
 
+    /**
+     * Get or create schedule record. Can filter on enrolment instance. Can reset error.
+     *
+     * @param $resourcetype
+     * @param int $enrolid
+     * @param bool $reseterror
+     * @return mixed|\stdClass
+     * @throws \coding_exception
+     */
     public static function get_schedule($resourcetype, $enrolid = 0, $reseterror = false) {
         global $DB;
         if (!is_string($resourcetype)) {
@@ -204,12 +213,9 @@ class manager {
     }
 
     /**
-     * Updates scheduling, error information on a passed in record. Record must include tablename field.
+     * Updates scheduling, error information on a passed in record.
      *
-     * @param \stdClass $record
-     * @param bool $updatepulltime
-     * @param bool $updatepushtime
-     * @throws \coding_exception
+     * @param \stdClass $schedule
      */
     public static function update_scheduling_information(\stdClass $schedule) {
         global $DB;
@@ -223,6 +229,13 @@ class manager {
         $DB->update_record('enrol_arlo_schedule', $schedule);
     }
 
+    /**
+     * Process result information for registrations with an enrolment instance.
+     *
+     * @param $instance
+     * @param $manualoverride
+     * @return bool
+     */
     public function process_instance_results($instance, $manualoverride) {
         global $DB;
         $timestart = microtime();
@@ -291,7 +304,6 @@ class manager {
                 $schedule->updatenextpushtime = true;
                 self::update_scheduling_information($schedule);
             }
-            return true;
         } catch (\Exception $exception) {
             if (isset($schedule)) {
                 $errorcount = (int) $schedule->errorcount;
@@ -302,6 +314,10 @@ class manager {
             debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
             return false;
         }
+        $timefinish = microtime();
+        $difftime = microtime_diff($timestart, $timefinish);
+        self::trace("Execution took {$difftime} seconds");
+        return true;
     }
 
     public function update_instance_contacts($instance, $manualoverride) {
