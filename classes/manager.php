@@ -2,24 +2,16 @@
 
 namespace enrol_arlo;
 
-use enrol_arlo\Arlo\AuthAPI\Client;
-use enrol_arlo\Arlo\AuthAPI\Exception\XMLDeserializerException;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Filter;
 use enrol_arlo\Arlo\AuthAPI\Resource\Registration;
 use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
-use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
-use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
-use enrol_arlo\Arlo\AuthAPI\Resource\ApiException;
 use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
-use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationOutcome;
-
 use enrol_arlo\exception\invalidcontent_exception;
 use enrol_arlo\request\collection;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Response;
 
 
