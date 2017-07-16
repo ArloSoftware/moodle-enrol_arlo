@@ -32,6 +32,7 @@ class patch_request extends abstract_request {
             $errorcount = (int) $schedule->errorcount;
             $schedule->errorcount = ++$errorcount;
             $schedule->lasterror = $exception->getMessage();
+            $schedule->lastpushtime = time();
             manager::update_scheduling_information($schedule);
             $apierrorcount = (int) get_config('enrol_arlo', 'apierrorcount');
             $status = $exception->getCode();
