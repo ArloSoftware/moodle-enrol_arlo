@@ -2,9 +2,10 @@
 
 namespace enrol_arlo\request;
 
-use enrol_arlo\manager;
+
 use stdClass;
 use enrol_arlo\alert;
+use enrol_arlo\manager;
 use enrol_arlo\Arlo\AuthAPI\Client;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Filter;
