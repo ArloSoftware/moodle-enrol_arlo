@@ -42,7 +42,7 @@ class manager {
         } else {
             self::$trace = $trace;
         }
-        self::$plugin = enrol_get_plugin('arlo');
+        self::$plugin = new \enrol_arlo_plugin();
     }
 
     /**
