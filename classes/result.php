@@ -124,6 +124,17 @@ class result {
         }
     }
 
+    public function get_changed() {
+        $record = new stdClass();
+        $fields = array('grade', 'outcome', 'lastactivity', 'progressstatus', 'progresspercent');
+        foreach ($fields as $field) {
+            if ($this->{$field} != $this->registrationrecord->{$field}) {
+                $record->{$field} = $this->{$field};
+            }
+        }
+        return $record;
+    }
+
     public function has_changed() {
         $fields = array('grade', 'outcome', 'lastactivity', 'progressstatus', 'progresspercent');
         foreach ($fields as $field) {
@@ -149,7 +160,7 @@ class result {
             $element = $dom->createElement('Grade', $this->grade);
             $add->appendChild($element);
             $root->appendChild($add);
-        } else if ($registrationrecord->grade != $this->grade) {
+        } else if ($registrationrecord->grade != $this->grade && !empty($this->grade)) {
             $element = $dom->createElement('replace', $this->grade);
             $element->setAttribute("sel", "Registration/Grade/text()[1]");
             $root->appendChild($element);
@@ -161,7 +172,7 @@ class result {
             $element = $dom->createElement('Outcome', $this->outcome);
             $add->appendChild($element);
             $root->appendChild($add);
-        } else if ($registrationrecord->outcome != $this->outcome) {
+        } else if ($registrationrecord->outcome != $this->outcome && !empty($this->outcome)) {
             $element = $dom->createElement('replace', $this->outcome);
             $element->setAttribute("sel", "Registration/Outcome/text()[1]");
             $root->appendChild($element);
@@ -176,7 +187,7 @@ class result {
             $element = $dom->createElement('LastActivityDateTime', $lastactivitydate);
             $add->appendChild($element);
             $root->appendChild($add);
-        } else if ($registrationrecord->lastactivity != $this->lastactivity) {
+        } else if ($registrationrecord->lastactivity != $this->lastactivity && !empty($this->lastactivity)) {
             $lastactivitydate = date('Y-m-d\TH:i:s.000+00:00', $this->lastactivity);
             $replace = $dom->createElement('replace', $lastactivitydate);
             $replace->setAttribute("sel", "Registration/LastActivityDateTime/text()[1]");
@@ -189,10 +200,10 @@ class result {
             $element = $dom->createElement('ProgressStatus', $this->progressstatus);
             $add->appendChild($element);
             $root->appendChild($add);
-        } else if ($registrationrecord->progressstatus != $this->progressstatus) {
-            $element = $dom->createElement('replace', $this->progressstatus);
-            $element->setAttribute("sel", "Registration/ProgressStatus/text()[1]");
-            $root->appendChild($element);
+        } else if ($registrationrecord->progressstatus != $this->progressstatus && !empty($this->progressstatus)) {
+            $replace = $dom->createElement('replace', $this->progressstatus);
+            $replace->setAttribute("sel", "Registration/ProgressStatus/text()[1]");
+            $root->appendChild($replace);
         }
         // Add or replace ProgressPercent element.
         if (empty($registrationrecord->progresspercent) && !empty($this->progresspercent)) {
@@ -201,10 +212,10 @@ class result {
             $element = $dom->createElement('ProgressPercent', $this->progresspercent);
             $add->appendChild($element);
             $root->appendChild($add);
-        } else if ($registrationrecord->progresspercent != $this->progresspercent) {
-            $element = $dom->createElement('replace', $this->progresspercent);
-            $element->setAttribute("sel", "Registration/ProgressPercent/text()[1]");
-            $root->appendChild($element);
+        } else if ($registrationrecord->progresspercent != $this->progresspercent && ($this->progresspercent != 0)) {
+            $replace = $dom->createElement('replace', $this->progresspercent);
+            $replace->setAttribute("sel", "Registration/ProgressPercent/text()[1]");
+            $root->appendChild($replace);
 
 
         }
