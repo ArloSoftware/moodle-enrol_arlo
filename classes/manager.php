@@ -211,12 +211,12 @@ class manager {
      * @param bool $updatepushtime
      * @throws \coding_exception
      */
-    public static function update_scheduling_information(\stdClass $schedule, $updatepulltime = false, $updatepushtime = false) {
+    public static function update_scheduling_information(\stdClass $schedule) {
         global $DB;
-        if (!$updatepulltime) {
+        if (isset($schedule->updatenextpulltime) && $schedule->nextpulltime != '-1') {
             $schedule->nextpulltime = time();
         }
-        if (!$updatepushtime) {
+        if (isset($schedule->updatenextpushtime) && $schedule->nextpushtime != '-1') {
             $schedule->updatepushtime = time();
         }
         $schedule->modified = time();
@@ -275,6 +275,7 @@ class manager {
                     );
                     $headers = array('Content-type' => 'application/xml; charset=utf-8');
                     $request = new \enrol_arlo\request\patch_request($schedule, $requesturi, $headers, $xmlbody, $options);
+                    $schedule->lastpushtime = time();
                     $response = $request->execute();
                     if (! (200 == $response->getStatusCode() || 201 == $response->getStatusCode())) {
                         self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -287,14 +288,12 @@ class manager {
                     $DB->update_record('enrol_arlo_registration', $changed);
                     self::trace('Result updated');
                 }
-                $schedule->lastpushtime = time();
                 $schedule->updatenextpushtime = true;
                 self::update_scheduling_information($schedule);
             }
             return true;
         } catch (\Exception $exception) {
             if (isset($schedule)) {
-                $schedule->lastpushtime = time();
                 $errorcount = (int) $schedule->errorcount;
                 $schedule->errorcount = ++$errorcount;
                 $schedule->lasterror = $exception->getMessage();
@@ -363,7 +362,9 @@ class manager {
                 );
 
                 $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $schedule->lastpulltime = time();
                 $response = $request->execute();
+                $schedule->lastpulltime = time();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
                     return false;
@@ -384,7 +385,8 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_scheduling_information($schedule, $hasnext);
+                    $schedule->updatenextpulltime = !$hasnext;
+                    self::update_scheduling_information($schedule);
                 }
             }
         } catch (\Exception $exception) {
@@ -556,6 +558,7 @@ class manager {
                     $apipassword
                 );
                 $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $schedule->lastpulltime = time();
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -575,9 +578,10 @@ class manager {
                     $hasnext = (bool) $collection->hasNext();
                     $apionepageperrequest = self::$plugin->get_config('apionepageperrequest', false);
                     if ($apionepageperrequest) {
-                        $hasnext = false;
+                        return;
                     }
-                    self::update_scheduling_information($schedule, $hasnext);
+                    $schedule->updatenextpulltime = !$hasnext;
+                    self::update_scheduling_information($schedule);
                     $delayemail = self::$plugin->get_config('delayemail', false);
                     if ($delayemail) {
                         break;
@@ -728,7 +732,9 @@ class manager {
                     $apipassword
                 );
                 $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $schedule->lastpulltime = time();
                 $response = $request->execute();
+                $schedule->lastpulltime = time();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
                     return false;
@@ -745,8 +751,8 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    $schedule->lastpulltime = time();
-                    self::update_scheduling_information($schedule, $hasnext);
+                    $schedule->updatenextpulltime = !$hasnext;
+                    self::update_scheduling_information($schedule);
                 }
             }
         } catch (\Exception $exception) {
@@ -754,7 +760,6 @@ class manager {
                 $errorcount = (int) $schedule->errorcount;
                 $schedule->errorcount = ++$errorcount;
                 $schedule->lasterror = $exception->getMessage();
-                $schedule->lastpulltime = time();
                 self::update_scheduling_information($schedule);
             }
             debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
@@ -797,7 +802,9 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
+                $schedule->lastpulltime = time();
                 $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $schedule->lastpulltime = time();
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -815,7 +822,8 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_scheduling_information($schedule, $hasnext);
+                    $schedule->lastpulltime = time();
+                    self::update_scheduling_information($schedule);
                 }
             }
         } catch (\Exception $exception) {
@@ -851,6 +859,8 @@ class manager {
                 if (!$schedule) {
                     self::trace('No matching schedule information');
                     break;
+                } else {
+                    $schedule->lastpulltime = time();
                 }
                 if (!self::can_pull($schedule , $manualoverride)) {
                     break;
@@ -866,6 +876,7 @@ class manager {
                     $apipassword
                 );
                 $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $schedule->lastpulltime = time();
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
                     self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
@@ -883,7 +894,8 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    self::update_scheduling_information($schedule, $hasnext);
+                    $schedule->updatenextpulltime = !$hasnext;
+                    self::update_scheduling_information($schedule);
                 }
             }
         } catch (\Exception $exception) {
