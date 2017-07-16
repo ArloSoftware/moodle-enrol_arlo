@@ -217,7 +217,7 @@ class manager {
             $schedule->nextpulltime = time();
         }
         if (isset($schedule->updatenextpushtime) && $schedule->nextpushtime != '-1') {
-            $schedule->updatepushtime = time();
+            $schedule->nextpushtime = time();
         }
         $schedule->modified = time();
         $DB->update_record('enrol_arlo_schedule', $schedule);
