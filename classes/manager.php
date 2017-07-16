@@ -25,11 +25,16 @@ use GuzzleHttp\Psr7\Response;
 
 
 class manager {
+    /** @var REQUEST_INTERVAL_SECONDS default for normal pull and push operations. */
     const REQUEST_INTERVAL_SECONDS      = 900; // 15 Minutes.
+    /** @var REQUEST_EXTENSION_SECONDS default for normal pull and push operations. */
     const REQUEST_EXTENSION_SECONDS     = 259200; // 72 Hours.
+    /** @var MAXIMUM_ERROR_COUNT */
     const MAXIMUM_ERROR_COUNT           = 20;
     /** @var DELAY_REQUEST_SECONDS time in seconds to delay next request. */
     const DELAY_REQUEST_SECONDS         = 900; // 15 Minutes.
+    /** @var CONTACT_REQUEST_INTERVAL_SECONDS */
+    const CONTACT_REQUEST_INTERVAL_SECONDS  = 86400; // 24 hours.
     /** @var $plugin enrolment plugin instance. */
     private static $plugin;
     /** @var \progress_trace  */
@@ -410,42 +415,75 @@ class manager {
         if ($manualoverride) {
             return true;
         }
+
+        $nextpulltime = $record->nextpulltime;
+        $endpulltime = $record->endpulltime;
+        // Defaults.
+        $interval = self::REQUEST_INTERVAL_SECONDS;
+        $extension = self::REQUEST_EXTENSION_SECONDS;
+
+        if ($record->resourcetype == 'contacts') {
+            $interval = self::CONTACT_REQUEST_INTERVAL_SECONDS;
+        }
+
         // Pull disabled for this record.
-        if ($record->nextpulltime == -1) {
-            self::trace('Disabled due to errors');
+        if ($nextpulltime == -1) {
+            self::trace('Disabled');
             return false;
         }
-        $nextpulltime = $record->nextpulltime;
+
         // Return if next pull time hasn't passed current time.
-        if ($timestart < ($nextpulltime + self::REQUEST_INTERVAL_SECONDS)) {
+        if ($timestart < ($nextpulltime + $interval)) {
             self::trace('Next pull time not yet reached');
             return false;
         }
-        $endpulltime = $record->endpulltime;
+
         // Return if end pull time has past.
-        if (!empty($endpulltime) && $timestart > ($endpulltime + self::REQUEST_EXTENSION_SECONDS)) {
+        if (!empty($endpulltime) && $timestart > ($endpulltime + $extension)) {
             self::trace('End pull time has passed');
             return false;
         }
         return true;
     }
 
-    protected static function can_push() {}
-
-    protected static function get_request_interval(\stdClass $record) {
-        if (!isset($record->tablename)) {
-            throw new \coding_exception('Table name must be set on scheduling record');
+    /**
+     * Check if item can be pushed based on scheduling information.
+     *
+     * @param \stdClass $record
+     * @param bool $manualoverride
+     * @return bool
+     */
+    protected static function can_push(\stdClass $record, $manualoverride = false) {
+        $timestart = time();
+        if ($manualoverride) {
+            return true;
         }
-        $tablename = $record->tablename;
+
+        $nextpushtime = $record->nextpushtime;
+        $endpushtime = $record->endpulltime;
+        // Defaults.
+        $interval = self::REQUEST_INTERVAL_SECONDS;
+        $extension = self::REQUEST_EXTENSION_SECONDS;
+
+        // Push disabled for this record.
+        if ($nextpushtime == -1) {
+            self::trace('Disabled');
+            return false;
+        }
+        // Return if next push time hasn't passed current time.
+        if ($timestart < ($nextpulltime + $interval)) {
+            self::trace('Next push time not yet reached');
+            return false;
+        }
+
+        // Return if end push time has past.
+        if (!empty($endpushtime) && $timestart > ($endpushtime + $extension)) {
+            self::trace('End push time has passed');
+            return false;
+        }
+        return true;
     }
 
-    protected static function get_request_extension(\stdClass $record) {
-        if (!isset($record->tablename)) {
-            throw new \coding_exception('Table name must be set on scheduling record');
-        }
-        $tablename = $record->tablename;
-
-    }
 
     public static function get_associated_arlo_instance($enrolid) {
         global $DB;
