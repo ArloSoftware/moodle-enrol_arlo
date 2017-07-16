@@ -49,6 +49,7 @@ if (confirm_sesskey() and $confirm == true) {
     $trace = new html_list_progress_trace();
     $manager = new enrol_arlo\manager($trace);
     $manager->process_instance_registrations($instance, true);
+    $manager->process_instance_results($instance, true);
     echo $OUTPUT->single_button($returnurl, get_string('backtoenrolmentmethods', 'enrol_arlo'));
 } else if (confirm_sesskey()) {
     $confirmurl = new moodle_url('/enrol/arlo/synchronizeinstance.php', array('confirm' => true, 'sesskey' => sesskey(), 'id' => $instance->id));
