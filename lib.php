@@ -194,6 +194,16 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function update_instance($instance, $data) {
+        global $DB;
+        $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
+        // Create a new course group if required.
+        if (!empty($data->customint2) && $data->customint2 == self::ARLO_CREATE_GROUP) {
+            $context = \context_course::instance($course->id);
+            require_capability('moodle/course:managegroups', $context);
+            $groupid = static::create_course_group($course->id, $instance->name);
+            // Map group id to customint2.
+            $data->customint2   = $groupid;
+        }
         return parent::update_instance($instance, $data);
     }
 
