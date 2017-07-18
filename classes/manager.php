@@ -110,6 +110,7 @@ class manager {
         self::process_instances($manualoverride);
         self::process_results($manualoverride);
         self::process_contacts($manualoverride);
+        self::process_expirations();
     }
     /**
      * Function for get enrolment instance to process. Hidden instances or instances in a hidden
