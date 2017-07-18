@@ -83,7 +83,7 @@ class configuration extends \moodleform {
 
 
         $form->addElement('select', 'unenrolaction', get_string('extremovedaction', 'enrol'), $options);
-        $form->setDefault('unenrolaction', ENROL_EXT_REMOVED_UNENROL);
+        $form->setDefault('unenrolaction', ENROL_EXT_REMOVED_SUSPEND);
         $form->addHelpButton('unenrolaction', 'extremovedaction', 'enrol');
 
         // Note: let's reuse the ext sync constants and strings here, internally it is very similar,

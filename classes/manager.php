@@ -789,7 +789,39 @@ class manager {
         self::trace("Execution took {$difftime} seconds");
         return true;
     }
-    
+
+    /**
+     * Process enrolment expirations.
+     *
+     * TODO - Do we really need this? External source a.k.a Arlo should be
+     * in control of enrolment expiration.
+     */
+    public function process_expirations() {
+        global $DB;
+        $instances = array(); // Cache.
+        $sql = "SELECT ue.*, e.courseid, c.id AS contextid
+                  FROM {user_enrolments} ue
+                  JOIN {enrol} e ON (e.id = ue.enrolid AND e.enrol = :enrol)
+                  JOIN {context} c ON (c.instanceid = e.courseid AND c.contextlevel = :courselevel)
+                 WHERE ue.timeend > 0 AND ue.timeend < :now
+                   AND ue.status = :useractive";
+        $conditions = array(
+            'now' => time(),
+            'courselevel' => CONTEXT_COURSE,
+            'useractive' => ENROL_USER_ACTIVE,
+            'enrol' => 'arlo'
+        );
+        $rs = $DB->get_recordset_sql($sql, $conditions);
+        foreach ($rs as $ue) {
+            if (empty($instances[$ue->enrolid])) {
+                $instances[$ue->enrolid] = $DB->get_record('enrol', array('id' => $ue->enrolid));
+                $instance = $instances[$ue->enrolid];
+                self::$plugin->process_expiration($instance, $ue);
+            }
+        }
+        $rs->close();
+    }
+
     public function process_onlineactivities($manualoverride = false) {
         global $DB;
         $timestart = microtime();
