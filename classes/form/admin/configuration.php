@@ -62,12 +62,6 @@ class configuration extends \moodleform {
         $form->addElement('select', 'authplugin', get_string('chooseauthmethod', 'enrol_arlo'), $options);
         $form->setDefault('authplugin', 'manual');
 
-
-        $form->addElement('editor', 'newuserdefaultemail',
-            get_string('newuserdefaultemail', 'enrol_arlo'),
-            null, self::editor_options());
-        $form->setType('newuserdefaultemail', PARAM_RAW);
-
         $form->addElement('header', 'enrolment', get_string('enrolment', 'enrol_arlo'));
 
         $student = get_archetype_roles('student');
