@@ -678,7 +678,7 @@ class manager {
 
         $contactresource = $registration->getContact();
         if (is_null($contactresource)) {
-            throw new \moodle_exception('Contact is not set on Registration');
+            throw new \coding_exception('Contact is not set on Registration');
         }
 
         // Load Contact.
@@ -688,6 +688,9 @@ class manager {
             $user = $user->create();
         }
         $userid = $user->get_user_id();
+        if (!$userid) {
+            throw new \coding_exception('Empty userid');
+        }
         $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
         $registrationrecord = $DB->get_record('enrol_arlo_registration', $conditions);
         $parameters = $conditions;
@@ -708,16 +711,17 @@ class manager {
                 self::trace(sprintf('Updated registration record: %s', $record->userid));
             }
             $plugin->enrol_user($instance, $userid);
-            self::trace(sprintf(sprintf('User %s enrolled', $record->userid)));
+            self::trace(sprintf('User %s enrolled', $record->userid));
         }
         if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_UNENROL)) {
             $plugin->unenrol_user($instance, $userid);
-            self::trace(sprintf(sprintf('User %s unenrolled', $record->userid)));
+            self::trace(sprintf('User %s unenrolled', $record->userid));
         }
         if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES)) {
             $plugin->suspend_and_remove_roles($instance, $userid);
-            self::trace(sprintf(sprintf('User %s suspended', $record->userid)));
+            self::trace(sprintf('User %s suspended', $record->userid));
         }
+        return true;
     }
 
     public function process_events($manualoverride = false) {
