@@ -897,11 +897,11 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function enrol_user(stdClass $instance, $userid, $roleid = null, $timestart = 0, $timeend = 0, $status = null, $recovergrades = null) {
         global $DB;
         // Enrolment period handling.
-        $timestart = time();
+        $timestart = 0;
+        $timeend = 0;
         if ($instance->enrolperiod) {
+            $timestart = time();
             $timeend = $timestart + $instance->enrolperiod;
-        } else {
-            $timeend = 0;
         }
         // Send course welcome email.
         $conditions = array('enrolid' => $instance->id, 'userid' => $userid, 'status' => ENROL_USER_ACTIVE);
@@ -911,7 +911,9 @@ class enrol_arlo_plugin extends enrol_plugin {
                 set_user_preference('enrol_arlo_coursewelcome_'.$instance->id, $instance->id, $userid);
             }
         }
+        // Parent checks timestart or timeend or status are different.
         parent::enrol_user($instance, $userid, $instance->roleid, $timestart, $timeend, ENROL_USER_ACTIVE);
+        // Always add group.
         if (!empty($instance->customint2) && $instance->customint2 != self::ARLO_CREATE_GROUP) {
             groups_add_member($instance->customint2, $userid, 'enrol_arlo');
         }
