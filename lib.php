@@ -583,6 +583,7 @@ class enrol_arlo_plugin extends enrol_plugin {
     private function email_expiry_message($instance, $user) {
         global $CFG, $DB;
 
+        $emailtype = 'enrol_arlo_enrolment_expiry';
         $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
         $context = context_course::instance($course->id);
         // Get contact user.
@@ -599,7 +600,16 @@ class enrol_arlo_plugin extends enrol_plugin {
         $messagehtml = text_to_html($messagetext, null, false, true);
 
         // Directly emailing welcome message rather than using messaging.
-        email_to_user($user, $contact, $subject, $messagetext, $messagehtml);
+        $status = email_to_user($user, $contact, $subject, $messagetext, $messagehtml);
+        // Log delivery.
+        $log = new \stdClass();
+        $log->timelogged    = time();
+        $log->type          = $emailtype;
+        $log->userid        = $user->id;
+        $log->delivered     = $status;
+        $DB->insert_record('enrol_arlo_emaillog', $log);
+
+        return $status;
     }
 
     /**
