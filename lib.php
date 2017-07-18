@@ -33,6 +33,7 @@ use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
 use enrol_arlo\user;
+use enrol_arlo\manager;
 
 
 
@@ -108,17 +109,9 @@ class enrol_arlo_plugin extends enrol_plugin {
             $sourceguid = $fields['arloonlineactivity'];
         }
         // Check Event or Online Activity not already in play.
-        if ($DB->record_exists('enrol_arlo_instance', array('sourceguid' => $sourceguid))) {
-            return false;
-        }
         $conditions = array('platform' => $instance->platform, 'sourceguid' => $sourceguid);
-        $record = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
-        $instance->sourceid     = $record->sourceid;
-        $instance->sourceguid   = $record->sourceguid;
-        $instance->nextpulltime = time(); // Set next pull time to current time.
-        $sourcefinishdate = 0;
-        if (isset($record->finishdatetime)) {
-            $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
+        if ($DB->record_exists('enrol_arlo_instance', $conditions)) {
+            return false;
         }
         // Create a new course group if required.
         if (!empty($fields['customint2']) && $fields['customint2'] == self::ARLO_CREATE_GROUP) {
@@ -133,9 +126,23 @@ class enrol_arlo_plugin extends enrol_plugin {
         $fields['roleid']       = self::get_config('roleid');
         // Insert enrol and enrol_arlo_instance records.
         $instance->enrolid = parent::add_instance($course, $fields);
+        // Get either Event or Online Activity record.
+        $record = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
+        $instance->sourceid     = $record->sourceid;
+        $instance->sourceguid   = $record->sourceguid;
+        $instance->modified = time();
         $DB->insert_record('enrol_arlo_instance', $instance);
-        \enrol_arlo\manager::schedule('registrations', $instance->enrolid, $sourcefinishdate);
-        \enrol_arlo\manager::schedule('contacts', $instance->enrolid, $sourcefinishdate);
+        // Add extra schedule type information.
+        $instance->endpulldate  = 0;
+        $instance->endpushdate  = 0;
+        $conditions = array('platform' => $instance->platform, 'sourceguid' => $sourceguid);
+        if (isset($record->finishdatetime)) {
+            $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
+            $instance->endpulldate  = $sourcefinishdate;
+            $instance->endpushdate  = $sourcefinishdate;
+        }
+        \enrol_arlo\manager::schedule('registrations', $instance->enrolid, $instance->endpulldate, $instance->endpushdate);
+        \enrol_arlo\manager::schedule('contacts', $instance->enrolid, $instance->endpulldate, $instance->endpushdate);
         return $instance->enrolid;
     }
 
@@ -195,6 +202,28 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function update_instance($instance, $data) {
         global $DB;
+        $arloinstance = manager::get_associated_arlo_instance($instance->id);
+        $schedule = manager::get_schedule('registrations', $instance->id);
+        if ($arloinstance->type  == self::ARLO_TYPE_EVENT) {
+            $record = $DB->get_record('enrol_arlo_event', array('sourceguid' => $arloinstance->sourceguid));
+            if ($record->sourcestatus == EventStatus::CANCELLED) {
+                $schedule->nextpulltime = -1;
+                $schedule->nextpushtime = -1;
+            }
+        }
+        if ($arloinstance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
+            $record = $DB->get_record('enrol_arlo_onlineactivity', array('sourceguid' => $arloinstance->sourceguid));
+//            if ($record->sourcestatus == OnlineActivityStatus::COMPLETED) {
+//                $schedule->nextpulltime = -1;
+//                $schedule->nextpushtime = -1;
+//            }
+        }
+        if (isset($record->finishdatetime)) {
+            $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
+            $schedule->endpulldate  = $sourcefinishdate;
+            $schedule->endpushdate  = $sourcefinishdate;
+        }
+        manager::update_scheduling_information($schedule);
         $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
         // Create a new course group if required.
         if (!empty($data->customint2) && $data->customint2 == self::ARLO_CREATE_GROUP) {
