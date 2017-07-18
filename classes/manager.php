@@ -244,14 +244,25 @@ class manager {
                 self::trace('No matching Arlo enrolment instance.');
                 return;
             }
+            // Push configuration.
+            $pushonlineactivityresults = self::$plugin->get_config('pushonlineactivityresults');
+            $pusheventresults = self::$plugin->get_config('pusheventresults');
+            if ($arloinstance->type == \enrol_arlo_plugin::ARLO_TYPE_EVENT && !$pusheventresults) {
+                self::trace('Pushing Event results disabled in configuration');
+                return false;
+            }
+            if ($arloinstance->typ == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY && !$pushonlineactivityresults) {
+                self::trace('Pushing Online Activity results disabled in configuration');
+                return false;
+            }
             // Get schedule information.
             $schedule = self::get_schedule('registrations', $instance->id);
             if (!$schedule) {
                 self::trace('No matching schedule information');
-                return;
+                return false;
             }
             if (!self::can_push($schedule, $manualoverride)) {
-                return;
+                return false;
             }
             // Get in registrations that require a push.
             $conditions = array(
