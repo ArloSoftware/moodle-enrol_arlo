@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
-            "version": "6.2.3",
+            "version": "6.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "8d6c6cc55186db87b7dc5009827429ba4e9dc006"
+                "reference": "f4db5a78a5ea468d4831de7f0bf9d9415e348699"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/8d6c6cc55186db87b7dc5009827429ba4e9dc006",
-                "reference": "8d6c6cc55186db87b7dc5009827429ba4e9dc006",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f4db5a78a5ea468d4831de7f0bf9d9415e348699",
+                "reference": "f4db5a78a5ea468d4831de7f0bf9d9415e348699",
                 "shasum": ""
             },
             "require": {
@@ -27,8 +27,11 @@
             },
             "require-dev": {
                 "ext-curl": "*",
-                "phpunit/phpunit": "^4.0",
+                "phpunit/phpunit": "^4.0 || ^5.0",
                 "psr/log": "^1.0"
+            },
+            "suggest": {
+                "psr/log": "Required for using the Log middleware"
             },
             "type": "library",
             "extra": {
@@ -66,7 +69,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2017-02-28T22:50:30+00:00"
+            "time": "2017-06-22T18:50:49+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -425,16 +428,16 @@
         },
         {
             "name": "symfony/cache",
-            "version": "v3.3.2",
+            "version": "v3.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache.git",
-                "reference": "8e85dafad9c0680bcda90eec0a144d4b34923312"
+                "reference": "265987c7f524b9ad17d0a0b8819ac53ce1bb8054"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache/zipball/8e85dafad9c0680bcda90eec0a144d4b34923312",
-                "reference": "8e85dafad9c0680bcda90eec0a144d4b34923312",
+                "url": "https://api.github.com/repos/symfony/cache/zipball/265987c7f524b9ad17d0a0b8819ac53ce1bb8054",
+                "reference": "265987c7f524b9ad17d0a0b8819ac53ce1bb8054",
                 "shasum": ""
             },
             "require": {
@@ -493,11 +496,11 @@
                 "caching",
                 "psr6"
             ],
-            "time": "2017-06-06T03:13:52+00:00"
+            "time": "2017-07-17T17:27:31+00:00"
         },
         {
             "name": "symfony/inflector",
-            "version": "v3.3.2",
+            "version": "v3.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/inflector.git",
@@ -613,16 +616,16 @@
         },
         {
             "name": "symfony/property-access",
-            "version": "v3.3.2",
+            "version": "v3.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/property-access.git",
-                "reference": "70bbfe28f77070d41957495bc6fed34f139fe6f7"
+                "reference": "4cd2bc4afdfd914ad18cec97bb4159fc403384ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/property-access/zipball/70bbfe28f77070d41957495bc6fed34f139fe6f7",
-                "reference": "70bbfe28f77070d41957495bc6fed34f139fe6f7",
+                "url": "https://api.github.com/repos/symfony/property-access/zipball/4cd2bc4afdfd914ad18cec97bb4159fc403384ea",
+                "reference": "4cd2bc4afdfd914ad18cec97bb4159fc403384ea",
                 "shasum": ""
             },
             "require": {
@@ -677,20 +680,20 @@
                 "property path",
                 "reflection"
             ],
-            "time": "2017-06-02T09:51:43+00:00"
+            "time": "2017-07-03T08:12:02+00:00"
         },
         {
             "name": "symfony/property-info",
-            "version": "v3.3.2",
+            "version": "v3.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/property-info.git",
-                "reference": "15ddbee5ca52a5a8f92b14d6a8da085dbb8fc819"
+                "reference": "07823a3842d34297ad44165540791467b880604d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/property-info/zipball/15ddbee5ca52a5a8f92b14d6a8da085dbb8fc819",
-                "reference": "15ddbee5ca52a5a8f92b14d6a8da085dbb8fc819",
+                "url": "https://api.github.com/repos/symfony/property-info/zipball/07823a3842d34297ad44165540791467b880604d",
+                "reference": "07823a3842d34297ad44165540791467b880604d",
                 "shasum": ""
             },
             "require": {
@@ -698,7 +701,7 @@
                 "symfony/inflector": "~3.1"
             },
             "conflict": {
-                "phpdocumentor/reflection-docblock": "<3.0",
+                "phpdocumentor/reflection-docblock": "<3.0||>=3.2.0",
                 "phpdocumentor/type-resolver": "<0.2.0",
                 "symfony/dependency-injection": "<3.3"
             },
@@ -753,7 +756,7 @@
                 "type",
                 "validator"
             ],
-            "time": "2017-04-19T20:25:39+00:00"
+            "time": "2017-07-17T16:39:25+00:00"
         }
     ],
     "packages-dev": [],
