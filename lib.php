@@ -583,6 +583,11 @@ class enrol_arlo_plugin extends enrol_plugin {
     private function email_expiry_message($instance, $user) {
         global $CFG, $DB;
 
+        // Notify expiry set.
+        if (!$instance->notifyexpiry) {
+            return false;
+        }
+
         $emailtype = 'enrol_arlo_enrolment_expiry';
         $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
         $context = context_course::instance($course->id);
