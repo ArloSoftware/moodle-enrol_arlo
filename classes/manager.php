@@ -251,7 +251,7 @@ class manager {
                 self::trace('Pushing Event results disabled in configuration');
                 return false;
             }
-            if ($arloinstance->typ == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY && !$pushonlineactivityresults) {
+            if ($arloinstance->type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY && !$pushonlineactivityresults) {
                 self::trace('Pushing Online Activity results disabled in configuration');
                 return false;
             }
@@ -789,7 +789,7 @@ class manager {
         self::trace("Execution took {$difftime} seconds");
         return true;
     }
-
+    
     public function process_onlineactivities($manualoverride = false) {
         global $DB;
         $timestart = microtime();
