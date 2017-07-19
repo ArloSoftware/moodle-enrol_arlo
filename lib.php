@@ -88,20 +88,23 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function add_instance($course, array $fields = null) {
         global $DB;
 
-        $instance = new stdClass();
-        $instance->platform = self::get_config('platform');
+        $platform = self::get_config('platform');
+        $arloinstance = new stdClass();
+        // Set plaform.
+        $arloinstance->platform = $platform;
         if (empty($fields['arlotype'])) {
             throw new moodle_exception('Field arlotype is empty.');
         }
-        $instance->type = $fields['arlotype'];
-        if ($instance->type  == self::ARLO_TYPE_EVENT) {
+        // Set resourcetype Event or Online Activity
+        $arloinstance->type = $fields['arlotype'];
+        if ($arloinstance->type  == self::ARLO_TYPE_EVENT) {
             if (empty($fields['arloevent'])) {
                 throw new moodle_exception('Field arloevent is empty.');
             }
             $sourcetable = 'enrol_arlo_event';
             $sourceguid = $fields['arloevent'];
         }
-        if ($instance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
+        if ($arloinstance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
             if (empty($fields['arloonlineactivity'])) {
                 throw new moodle_exception('Field sourceguid is empty.');
             }
@@ -109,42 +112,42 @@ class enrol_arlo_plugin extends enrol_plugin {
             $sourceguid = $fields['arloonlineactivity'];
         }
         // Check Event or Online Activity not already in play.
-        $conditions = array('platform' => $instance->platform, 'sourceguid' => $sourceguid);
+        $conditions = array('platform' => $platform, 'sourceguid' => $sourceguid);
         if ($DB->record_exists('enrol_arlo_instance', $conditions)) {
             return false;
         }
-        // Get either Event or Online Activity record.
+        // Get either Event or Online Activity resource record.
+        $conditions = array('platform' => $platform, 'sourceguid' => $sourceguid);
         $resourcerecord = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
         // Create a new course group if required.
         if (!empty($fields['customint2']) && $fields['customint2'] == self::ARLO_CREATE_GROUP) {
             $context = \context_course::instance($course->id);
             require_capability('moodle/course:managegroups', $context);
-            $groupid = static::create_course_group($course->id, $resourcerecord->code);
+            $groupid = static::create_course_group($course->id, $resourcerecord->code); // Pass code to use as name.
             // Map group id to customint2.
             $fields['customint2']   = $groupid;
         }
         // Set name to be passed to parent.
-        $fields['name']         = $record->code;
+        $fields['name']         = $resourcerecord->code;
         $fields['roleid']       = self::get_config('roleid');
-        // Insert enrol and enrol_arlo_instance records.
-        $arloinstance               = new stdClass();
-        $arloinstance->enrolid      = parent::add_instance($course, $fields);
-        $arloinstance->sourceid     = $record->sourceid;
-        $arloinstance->sourceguid   = $record->sourceguid;
+        // Create enrol instance get id for use latter.
+        $enrolid                    = parent::add_instance($course, $fields);
+        $arloinstance->enrolid      = $enrolid;
+        $arloinstance->sourceid     = $resourcerecord->sourceid;
+        $arloinstance->sourceguid   = $resourcerecord->sourceguid;
         $arloinstance->modified     = time();
-        $DB->insert_record('enrol_arlo_instance', $instance);
-        // Add extra schedule type information. Use arloinstance for schedule record.
-        $arloinstance->endpulldate  = 0;
-        $arloinstance->endpushdate  = 0;
-        $conditions = array('platform' => $instance->platform, 'sourceguid' => $sourceguid);
+        $DB->insert_record('enrol_arlo_instance', $arloinstance);
+        // Setup schedule type information.
+        $endpulldate  = 0;
+        $endpushdate  = 0;
         if (isset($record->finishdatetime)) {
             $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
-            $arloinstance->endpulldate  = $sourcefinishdate;
-            $arloinstance->endpushdate  = $sourcefinishdate;
+            $endpulldate  = $sourcefinishdate;
+            $endpushdate  = $sourcefinishdate;
         }
-        \enrol_arlo\manager::schedule('registrations', $arloinstance->enrolid, $arloinstance->endpulldate, $arloinstance->endpushdate);
-        \enrol_arlo\manager::schedule('contacts', $arloinstance->enrolid, $arloinstance->endpulldate, $arloinstance->endpushdate);
-        return $instance->enrolid;
+        \enrol_arlo\manager::schedule('registrations', $enrolid, $endpulldate, $endpushdate);
+        \enrol_arlo\manager::schedule('contacts', $enrolid, $endpulldate, $endpushdate);
+        return $arloinstance->enrolid;
     }
 
     /**
@@ -314,7 +317,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                  WHERE sourcestatus = :sourcestatus
                    AND sourceguid NOT IN (SELECT sourcetemplateguid
                                             FROM {enrol_arlo_templateassociate}
-                                           WHERE courseid <> :courseid)
+                                           WHERE courseid <> :courseid AND sourcetemplateid IS NOT NULL)
               ORDER BY code";
         $conditions = array(
             'platform' => self::get_config('platform', null),
@@ -342,12 +345,13 @@ class enrol_arlo_plugin extends enrol_plugin {
                  WHERE platform = :platform
                    AND sourcestatus = :sourcestatus 
                    AND sourceguid NOT IN (SELECT sourceguid 
-                                            FROM {enrol_arlo_instance})
+                                            FROM {enrol_arlo_instance} WHERE sourceguid IS NOT NULL)
               ORDER BY code";
         $conditions = array(
             'platform' => self::get_config('platform', null),
             'sourcestatus' => EventStatus::ACTIVE
         );
+
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
             $options[$record->sourceguid] = $record->code;
@@ -368,7 +372,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                  WHERE platform = :platform
                    AND sourcestatus = :sourcestatus 
                    AND sourceguid NOT IN (SELECT sourceguid 
-                                            FROM {enrol_arlo_instance})
+                                            FROM {enrol_arlo_instance} WHERE sourceguid IS NOT NULL)
               ORDER BY code";
         $conditions = array(
             'platform' => self::get_config('platform', null),
@@ -819,7 +823,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         $enrol = $this->get_name();
 
         if (empty($instance->name)) {
-            throw new moodle_exception('Arlo code does not exist.');
+            // Shouldn't happen.
+            $instance->name = 'Arlo code missing, remove this instance.';
         }
 
         if (!empty($instance->roleid) and $role = $DB->get_record('role', array('id' => $instance->roleid))) {
