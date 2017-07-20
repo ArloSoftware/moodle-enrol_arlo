@@ -59,22 +59,22 @@ class manager {
             return false;
         }
         // Client errors.
-        if ($apilaststatus == 401 && $apilaststatus == 403) {
-            if ($apilastrequested + self::DELAY_REQUEST_SECONDS > time()) {
-                self::trace(sprintf("API delay request until: %s", userdate($apilastrequested)));
+        if ($apilaststatus == 401 || $apilaststatus == 403) {
+            $delay = $apilastrequested + self::DELAY_REQUEST_SECONDS;
+            if ($delay > time()) {
+                self::trace(sprintf("Client connection issue. Next request delayed until: %s", userdate($delay)));
                 return false;
             }
-            return true;
         }
         // Server errors.
         if ($apilaststatus > 500 && $apilaststatus < 599) {
-            if ($apilastrequested + self::DELAY_REQUEST_SECONDS > time()) {
-                self::trace(sprintf("API delay request until: %s", userdate($apilastrequested)));
+            $delay = $apilastrequested + self::DELAY_REQUEST_SECONDS;
+            if ($delay > time()) {
+                self::trace(sprintf("Server issue. Next request delayed until: %s", userdate($delay)));
                 return false;
             }
-            return true;
         }
-        return true;
+        return true; // Callable if get this far.
     }
 
     /**
@@ -109,6 +109,10 @@ class manager {
      * @param bool $manualoverride
      */
     public function process_all($manualoverride = false) {
+        // Check API callable.
+        if (!self::api_callable()) {
+            return; // Don't break scheduled task be returning false.
+        }
         // Order of processing.
         self::process_templates($manualoverride);
         self::process_events($manualoverride);
@@ -431,7 +435,6 @@ class manager {
     public function update_instance_contacts($instance, $manualoverride) {
         $timestart = microtime();
         if (!self::api_callable()) {
-            self::trace('API not callable due to status');
             return false;
         }
         list($platform, $apiusername, $apipassword) = self::get_connection_vars();
@@ -639,7 +642,6 @@ class manager {
     public function process_instance_registrations($instance, $manualoverride = false) {
         $timestart = microtime();
         if (!self::api_callable()) {
-            self::trace('API not callable due to status');
             return false;
         }
         list($platform, $apiusername, $apipassword) = self::get_connection_vars();
