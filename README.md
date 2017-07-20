@@ -12,12 +12,6 @@ Get started today with a [30 day risk-free trial.](https://www.arlo.co/try-arlo)
 
 ## Installation
 
-This plugin is part of a set:
-- Arlo for Moodle - enrolment plugin
-- Arlo for Moodle - local plugin
-
-Both plugin's are required for integrating with Arlo
-
 1. The plugin is installed as any other Moodle plugin.
 
 2. Unzip source to enrol/arlo folder on your Moodle server.
