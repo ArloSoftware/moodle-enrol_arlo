@@ -130,7 +130,10 @@ class user extends \core_user {
             $trigger            = true;
             $user               = self::get_dummy_user_record();
             $user->auth         = self::$plugin->get_config('authplugin');
-            $user->username     = self::generate_username(self::get_contact_resource()->FirstName, self::get_contact_resource()->LastName);
+            $contactfirstname   = self::get_contact_resource()->FirstName;
+            $contactlastname    = self::get_contact_resource()->LastName;
+            $contactemail       = self::get_contact_resource()->Email;
+            $user->username     = self::generate_username($contactfirstname, $contactlastname, $contactemail);
             $user->firstname    = (string) self::get_contact_resource()->FirstName;
             $user->lastname     = (string) self::get_contact_resource()->LastName;
             $user->email        = (string) self::get_contact_resource()->Email;
@@ -177,23 +180,54 @@ class user extends \core_user {
         return false;
     }
 
-    public static function generate_username($firstname, $lastname) {
+    /**
+     * Scheme for generating usernames.
+     *
+     * Order:
+     *
+     *  1. first 3 letters of firstname + first 3 letters of lastname + random 3 digit number
+     *  2. email address before @ symbol
+     *  3. email address before @ symbol + random 3 digit number
+     *  4. full email address
+     *  5. full email address + random 3 digit number
+     *
+     * @param $firstname
+     * @param $lastname
+     * @param $email
+     * @return mixed|string
+     * @throws \moodle_exception
+     */
+    public static function generate_username($firstname, $lastname, $email) {
         global $DB;
-        $firstname = clean_param($firstname, PARAM_USERNAME);
-        $lastname  = clean_param($lastname, PARAM_USERNAME);
+
+        // Clean all variables as USERNAMES since going to be used in contructing username.
+        $firstname  = clean_param($firstname, PARAM_USERNAME);
+        $lastname   = clean_param($lastname, PARAM_USERNAME);
+        $email      = clean_param($email, PARAM_USERNAME);
+        $local      = strstr($email, '@', true);
+
         $tries = 0;
-        $max = 99;
         $exists = true;
         while ($exists) {
             ++$tries;
-            if ($tries > 5) {
-                $max = 99999999;
+            switch($tries) {
+                case 1;
+                    $username = \core_text::strtolower(\core_text::substr($firstname, 0 , 3) .
+                        \core_text::substr($lastname, 0 , 3) . rand(0, 3));
+                    break;
+                case 2:
+                    $username = $local;
+                    break;
+                case 3:
+                    $username = $local + rand(0, 3);
+                    break;
+                case 4:
+                    $username = $email;
+                case 5:
+                    $username = $email + rand(0, 3);
+                default:
+                    throw new \moodle_exception('Generate username could not failed');
             }
-            if ($tries > 100) {
-                throw new \moodle_exception('Generate username reached maximum tries.');
-            }
-            $username = \core_text::strtolower(\core_text::substr($firstname, 0 , 3) .
-                \core_text::substr($lastname, 0 , 3) . rand(0, $max));
             $exists = $DB->get_record('user', array('username' => $username));
         }
         return $username;
