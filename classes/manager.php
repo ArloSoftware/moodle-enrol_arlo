@@ -398,14 +398,16 @@ class manager {
                     foreach ($collection as $registration) {
                         $contactresource = $registration->getContact();
                         $user = new user(self::$trace);
-                        $user->load_by_resource($contactresource);
+                        if (!$user->load_by_resource($contactresource)) {
+                            throw new \moodle_exception("User doesn't exist.");
+                        }
                         $user->update();
                         self::trace(sprintf("Updated %s", $user->get_user_fullname()));
                         $latestmodified = $contactresource->LastModifiedDateTime;
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    $schedule->updatenextpulltime = !$hasnext;
+                    $schedule->updatenextpulltime = ($hasnext) ? false : true;
                     self::update_scheduling_information($schedule);
                 }
             }
@@ -532,7 +534,7 @@ class manager {
             return false;
         }
         list($platform, $apiusername, $apipassword) = self::get_connection_vars();
-        self::trace("Updating Registrations for instance");
+        self::trace(sprintf("Processing Registrations for instance %s", $instance->name));
         try {
             $hasnext = true; // Initialise to for multiple pages.
             while ($hasnext) {
@@ -596,16 +598,8 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    $apionepageperrequest = self::$plugin->get_config('apionepageperrequest', false);
-                    if ($apionepageperrequest) {
-                        return;
-                    }
-                    $schedule->updatenextpulltime = !$hasnext;
+                    $schedule->updatenextpulltime = ($hasnext) ? false : true;
                     self::update_scheduling_information($schedule);
-                    $delayemail = self::$plugin->get_config('delayemail', false);
-                    if ($delayemail) {
-                        break;
-                    }
                     self::email_new_user_passwords();
                     self::email_welcome_message_per_instance($instance);
                 }
@@ -641,6 +635,7 @@ class manager {
         $records = $DB->get_records_sql($sql, array('enrol_arlo_createpassword'));
         foreach($records as $user) {
             self::$plugin->email_newpassword($user);
+            self::trace(sprintf("Sending new password email to %s", $user->id));
         }
     }
 
@@ -659,6 +654,7 @@ class manager {
         $records = $DB->get_records_sql($sql, $conditions);
         foreach($records as $user) {
             self::$plugin->email_welcome_message($instance, $user);
+            self::trace(sprintf("Sending course welcome email to %s", $user->id));
         }
     }
 
@@ -775,7 +771,7 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    $schedule->updatenextpulltime = !$hasnext;
+                    $schedule->updatenextpulltime = ($hasnext) ? false : true;
                     self::update_scheduling_information($schedule);
                 }
             }
@@ -878,7 +874,7 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    $schedule->lastpulltime = time();
+                    $schedule->updatenextpulltime = ($hasnext) ? false : true;
                     self::update_scheduling_information($schedule);
                 }
             }
@@ -950,7 +946,7 @@ class manager {
                         $schedule->latestsourcemodified = $latestmodified;
                     }
                     $hasnext = (bool) $collection->hasNext();
-                    $schedule->updatenextpulltime = !$hasnext;
+                    $schedule->updatenextpulltime = ($hasnext) ? false : true;
                     self::update_scheduling_information($schedule);
                 }
             }
