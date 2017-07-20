@@ -88,11 +88,11 @@ class manager {
         $platform = self::$plugin->get_config('platform');
         $sql = "SELECT e.*
                   FROM {enrol} e
-                  JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
+                  JOIN {enrol_arlo_instance} eai ON eai.enrolid = e.id
                   JOIN {course} c ON c.id = e.courseid
                  WHERE e.enrol = :enrol
                    AND e.status = :status
-                   AND ai.platform = :platform
+                   AND eai.platform = :platform
                    AND c.visible = 1";
         $conditions = array(
             'enrol' => 'arlo',
@@ -102,6 +102,12 @@ class manager {
         return $DB->get_records_sql($sql, $conditions);
     }
 
+    /**
+     * Main processing function. Provide order of processing. Envoked by
+     * scheduled task.
+     *
+     * @param bool $manualoverride
+     */
     public function process_all($manualoverride = false) {
         // Order of processing.
         self::process_templates($manualoverride);
@@ -112,6 +118,7 @@ class manager {
         self::process_contacts($manualoverride);
         self::process_expirations();
     }
+
     /**
      * Function for get enrolment instance to process. Hidden instances or instances in a hidden
      * course are not included.
@@ -121,9 +128,27 @@ class manager {
      */
     public function process_instances($manualoverride = false) {
         global $DB;
-        $instances = self::get_enrol_instances();
+        $platform = self::$plugin->get_config('platform');
+        $sql = "SELECT e.*
+                  FROM {enrol} e
+                  JOIN {enrol_arlo_instance} eai ON eai.enrolid = e.id
+                  JOIN {enrol_arlo_schedule} eas ON eas.enrolid = e.id
+                  JOIN {course} c ON c.id = e.courseid
+                 WHERE e.enrol = :enrol
+                   AND e.status = :status
+                   AND eai.platform = :platform
+                   AND eas.resourcetype = :resourcetype
+                   AND c.visible = 1
+              ORDER BY eas.lastpulltime";
+        $conditions = array(
+            'enrol' => 'arlo',
+            'status' => ENROL_INSTANCE_ENABLED,
+            'platform' => $platform,
+            'resourcetype' => 'registrations'
+        );
+        $instances = $DB->get_records_sql($sql, $conditions);
         if (empty($instances)) {
-            self::trace('No enrolment instances to process.');
+            self::trace('No Arlo Registration instances found to pull.');
         } else {
             foreach ($instances as $instance) {
                 self::process_instance_registrations($instance, $manualoverride);
@@ -132,20 +157,92 @@ class manager {
         return true;
     }
 
+    /**
+     * Process Result information for any users in a active and enabled Arlo
+     * enrolment instance. Information is pushed to Arlo.
+     *
+     * @param bool $manualoverride
+     */
     public function process_results($manualoverride = false) {
-        $records = self::get_enrol_instances();
-        foreach ($records as $instance) {
-            self::process_instance_results($instance, $manualoverride);
+        global $DB;
+        $platform = self::$plugin->get_config('platform');
+        $sql = "SELECT e.*
+                  FROM {enrol} e
+                  JOIN {enrol_arlo_instance} eai ON eai.enrolid = e.id
+                  JOIN {enrol_arlo_schedule} eas ON eas.enrolid = e.id
+                  JOIN {course} c ON c.id = e.courseid
+                 WHERE e.enrol = :enrol
+                   AND e.status = :status
+                   AND eai.platform = :platform
+                   AND eas.resourcetype = :resourcetype
+                   AND c.visible = 1
+              ORDER BY eas.lastpushtime";
+        $conditions = array(
+            'enrol' => 'arlo',
+            'status' => ENROL_INSTANCE_ENABLED,
+            'platform' => $platform,
+            'resourcetype' => 'registrations'
+        );
+        $instances = $DB->get_records_sql($sql, $conditions);
+        if (empty($instances)) {
+            self::trace('No Arlo Result instances found to push');
+        } else {
+            foreach ($instances as $instance) {
+                self::process_instance_results($instance, $manualoverride);
+            }
         }
     }
 
+    /**
+     * Update Contact information for Moodle users that are in active and
+     * enabled Arlo enrolment instances.
+     *
+     * @param bool $manualoverride
+     * @return bool
+     */
     public function process_contacts($manualoverride = false) {
-        $records = self::get_enrol_instances();
-        foreach ($records as $instance) {
-            self::update_instance_contacts($instance, $manualoverride);
+        global $DB;
+        $platform = self::$plugin->get_config('platform');
+        $sql = "SELECT e.*
+                  FROM {enrol} e
+                  JOIN {enrol_arlo_instance} eai ON eai.enrolid = e.id
+                  JOIN {enrol_arlo_schedule} eas ON eas.enrolid = e.id
+                  JOIN {course} c ON c.id = e.courseid
+                 WHERE e.enrol = :enrol
+                   AND e.status = :status
+                   AND eai.platform = :platform
+                   AND eas.resourcetype = :resourcetype
+                   AND c.visible = 1
+              ORDER BY eas.lastpulltime";
+        $conditions = array(
+            'enrol' => 'arlo',
+            'status' => ENROL_INSTANCE_ENABLED,
+            'platform' => $platform,
+            'resourcetype' => 'contacts'
+        );
+        $instances = $DB->get_records_sql($sql, $conditions);
+        if (empty($instances)) {
+            self::trace('No Arlo Contact instances found to pull.');
+        } else {
+            foreach ($instances as $instance) {
+                self::update_instance_contacts($instance, $manualoverride);
+            }
         }
+        return true;
     }
 
+    /**
+     * Creates a schedule record for a resource type, can be enrolment instance specific.
+     * Zero enrolment idenfier denotes a schedule for system wide collection. Such as
+     * Event Templates, Events and Online Activities.
+     *
+     * @param $resourcetype
+     * @param int $enrolid
+     * @param int $endpulltime
+     * @param int $endpushtime
+     * @return mixed|\stdClass
+     * @throws \coding_exception
+     */
     public static function schedule($resourcetype, $enrolid = 0, $endpulltime = 0, $endpushtime = 0) {
         global $DB;
         if (!is_string($resourcetype)) {
@@ -324,6 +421,13 @@ class manager {
         return true;
     }
 
+    /**
+     * Update Contacts for a specific Arlo enrolment instance.
+     *
+     * @param $instance
+     * @param $manualoverride
+     * @return bool
+     */
     public function update_instance_contacts($instance, $manualoverride) {
         $timestart = microtime();
         if (!self::api_callable()) {
@@ -428,7 +532,6 @@ class manager {
 
     }
 
-
     /**
      * Check if item can be pulled based on scheduling information.
      *
@@ -510,7 +613,13 @@ class manager {
         return true;
     }
 
-
+    /**
+     * Get associated Arlo instance information. This contains information about the Event or Online Activity
+     * linked to a Moodle enrolment instance record.
+     *
+     * @param $enrolid
+     * @return mixed
+     */
     public static function get_associated_arlo_instance($enrolid) {
         global $DB;
         $arloinstance = $DB->get_record('enrol_arlo_instance', array('enrolid' => $enrolid));
