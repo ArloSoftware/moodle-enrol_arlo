@@ -38,9 +38,11 @@ if ($hassiteconfig) {
     $name = get_string('arloconnection', 'enrol_arlo');
     $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
 
+    $settings->add(new admin_setting_configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
+
     $name = get_string('platform', 'enrol_arlo');
     $description = get_string('platform_desc', 'enrol_arlo');
-    $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, 'arlo.co', PARAM_HOST));
+    $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, '', PARAM_HOST));
 
     $name = get_string('apiusername', 'enrol_arlo');
     $settings->add(new admin_setting_configtext('enrol_arlo/apiusername', $name, '', ''));
@@ -53,10 +55,6 @@ if ($hassiteconfig) {
         $name = get_string('managearlo', 'enrol_arlo');
         $category = new admin_category('enrolsettingsarlomanage', $name);
         $ADMIN->add('enrolments', $category);
-
-        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlostatus',
-            $name = get_string('pluginstatus', 'enrol_arlo'),
-            new moodle_url('/enrol/arlo/admin/status.php')));
 
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloconfiguration',
             $name = get_string('configuration', 'enrol_arlo'),
