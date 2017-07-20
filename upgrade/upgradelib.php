@@ -126,5 +126,78 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_index('registrationsourceguid', XMLDB_INDEX_UNIQUE, array('sourceguid'));
         $dbman->create_table($table);
     }
+    // Conditionally add Schedule table.
+    if (!$dbman->table_exists('enrol_arlo_schedule')) {
+        $table = new xmldb_table('enrol_arlo_schedule');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('enrolid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('resourcetype', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('latestsourcemodified', XMLDB_TYPE_CHAR, '36', null, null, null, null);
+        $table->add_field('nextpulltime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('lastpulltime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('endpulltime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('nextpushtime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('lastpushtime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('endpushtime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('errorcount', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('modified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+    }
+    // Conditionally add Event Template table.
+    if (!$dbman->table_exists('enrol_arlo_template')) {
+        $table = new xmldb_table('enrol_arlo_template');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('sourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('sourceguid', XMLDB_TYPE_CHAR, '36', null, null, null, null);
+        $table->add_field('name', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        $table->add_field('code', XMLDB_TYPE_CHAR, '32', null, null, null, null);
+        $table->add_field('sourcestatus', XMLDB_TYPE_CHAR, '10', null, null, null, null);
+        $table->add_field('sourcecreated', XMLDB_TYPE_CHAR, '36', null, null, null, null);
+        $table->add_field('sourcemodified', XMLDB_TYPE_CHAR, '36', null, null, null, null);
+        $table->add_field('modified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_index('templatesourceguid', XMLDB_INDEX_UNIQUE, array('sourceguid'));
+        $dbman->create_table($table);
+    }
+    // Conditionally add Template Associate table.
+    if (!$dbman->table_exists('enrol_arlo_templateassociate')) {
+        $table = new xmldb_table('enrol_arlo_templateassociate');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        $table->add_field('sourcetemplateid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('sourcetemplateguid', XMLDB_TYPE_CHAR, '36', null, null, null, null);
+        $table->add_field('modified', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_index('uniquecourseid', XMLDB_INDEX_UNIQUE, array('courseid'));
+        $dbman->create_table($table);
+    }
+    // Conditionally add email table.
+    if (!$dbman->table_exists('enrol_arlo_emaillog')) {
+        $table = new xmldb_table('enrol_arlo_emaillog');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('timelogged', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('type', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('delivered', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('extra', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+    }
+    // Conditionally add request log table.
+    if (!$dbman->table_exists('enrol_arlo_requestlog')) {
+        $table = new xmldb_table('enrol_arlo_requestlog');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('timelogged', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        $table->add_field('uri', XMLDB_TYPE_CHAR, '512', null, null, null, null);
+        $table->add_field('status', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('extra', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+    }
 
 }
