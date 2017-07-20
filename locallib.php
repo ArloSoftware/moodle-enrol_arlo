@@ -38,8 +38,11 @@ use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
  */
 function enrol_arlo_change_platform($oldinstance, $newinstance) {
     global $DB, $CFG;
-
     require_once($CFG->dirroot.'/enrol/arlo/lib.php');
+    // Do nothing on empties.
+    if (empty($oldinstance) || empty($newinstance)){
+        return;
+    }
     // Nothing changed.
     if ($oldinstance  === $newinstance) {
         return;
