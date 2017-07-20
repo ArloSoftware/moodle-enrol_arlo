@@ -123,3 +123,34 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
             $this->description, true, '', NULL, $query);
     }
 }
+
+class admin_setting_configarlostatus extends admin_setting {
+    public function __construct($name, $visiblename) {
+        $this->nosave = true;
+        parent::__construct($name, $visiblename, '', '');
+    }
+    public function get_setting() {}
+    public function write_setting($data) {}
+    public function output_html($data, $query = '') {
+        global $OUTPUT;
+        $return = '';
+        $apistatus = get_config('enrol_arlo', 'apistatus');
+        if (empty($apistatus)) {
+            return $return;
+        }
+        if (200 == $apistatus) {
+            $statusicon = $OUTPUT->pix_icon('t/go', get_string('ok', 'enrol_arlo'));
+            $description = '';
+        } else {
+            $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            $description = '';
+        }
+
+        $return = '<div class="form-item clearfix" id="admin-'.$this->name.'">
+                   <div class="form-label"></div>
+                   <div class="form-setting">Integration status '.$statusicon.'</div>
+                   <div class="form-description">'.$description.'</div>
+                   </div>';
+        return $return;
+    }
+}
