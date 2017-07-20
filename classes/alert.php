@@ -22,7 +22,7 @@ class alert {
     private $identifier;
     private $params;
     private $applog;
-    public static function create($identifier, $params, $applog = false) {
+    public static function create($identifier, $params) {
         if (empty($identifier) && !is_string($identifier)) {
             throw new \Exception('Alert identifier is empty or not a string.');
         }
@@ -32,7 +32,6 @@ class alert {
         $alert = new alert();
         $alert->identifier = $identifier;
         $alert->params     = $params;
-        $alert->applog     = $applog;
         return $alert;
     }
     public function send() {
@@ -54,15 +53,6 @@ class alert {
         $message->fullmessageformat = FORMAT_HTML;
         $message->fullmessagehtml   = get_string($identifier . '_fullhtml', 'enrol_arlo', $params);
         $message->smallmessage      = get_string($identifier . '_smallmessage', 'enrol_arlo', $params);
-
-        if ($this->applog) {
-            $record                 = new \stdClass();
-            $record->timelogged     = time();
-            $record->message        = $message->fullmessage;
-            $DB->insert_record('enrol_arlo_applicationlog', $record);
-
-        }
-
         // Send to all administrators.
         foreach (get_admins() as $admin) {
             $messagecopy = clone($message);

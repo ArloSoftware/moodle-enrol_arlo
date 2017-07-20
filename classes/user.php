@@ -120,7 +120,7 @@ class user extends \core_user {
                 'idnumber'  => self::get_contact_resource()->CodePrimary,
                 'count'     => count($matches)
             );
-            alert::create('error_duplicateusers', $params, true)->send();
+            alert::create('error_duplicateusers', $params)->send();
         }
         // Don't touch anything on Match just clone. Else create user.
         if ($match) {
