@@ -202,7 +202,62 @@ function enrol_arlo_upgrade_prepare_new_tables() {
 
 }
 
-function enrol_arlo_upgrade_migrate_config() {}
+function enrol_arlo_upgrade_migrate_config() {
+    $config = get_config('local_arlo');
+
+    set_config('apistatus', -1, 'enrol_arlo');
+    set_config('apilastrequested', 0, 'enrol_arlo');
+    set_config('apierrorcount', 0, 'enrol_arlo');
+
+    $platform = '';
+    if (!empty($config->platformname)) {
+        $platform = $config->platformname;
+    } else if (!empty($config->setting_arlo_orgname)) {
+        $platform = $config->setting_arlo_orgname;
+    }
+    if (!strstr($platform, '.', true)) {
+        $platform .= '.arlo.co';
+    }
+    set_config('platform', $platform, 'enrol_arlo');
+
+    $apiusername = '';
+    if (!empty($config->apiusername)) {
+        $apiusername = $config->apiusername;
+    } else if (!empty($config->setting_arlo_username)) {
+        $apiusername = $config->setting_arlo_username;
+    }
+    set_config('apiusername', $apiusername, 'enrol_arlo');
+
+    $apipassword = '';
+    if (!empty($config->apipassword)) {
+        $apipassword = $config->apipassword;
+    } else if (!empty($config->setting_arlo_password)) {
+        $apipassword = $config->setting_arlo_password;
+    }
+    set_config('apipassword', $apipassword, 'enrol_arlo');
+
+    if (isset($config->authplugin)) {
+        set_config('authplugin', $config->authplugin, 'enrol_arlo');
+    } else {
+        set_config('authplugin', 'manual', 'enrol_arlo');
+    }
+    if (isset($config->matchuseraccountsby)) {
+        set_config('matchuseraccountsby', $config->matchuseraccountsby, 'enrol_arlo');
+    } else {
+        set_config('matchuseraccountsby', enrol_arlo\user::MATCH_BY_DEFAULT, 'enrol_arlo');
+    }
+    if (isset($config->eventresults)) {
+        set_config('pusheventresults', $config->eventresults, 'enrol_arlo');
+    } else {
+        set_config('pusheventresults', 0, 'enrol_arlo');
+    }
+    if (isset($config->onlineactivityresults)) {
+        set_config('pushonlineactivityresults', $config->onlineactivityresults, 'enrol_arlo');
+    } else {
+        set_config('pushonlineactivityresults', 0, 'enrol_arlo');
+    }
+    set_config('alertsiteadmins', 1, 'enrol_arlo');
+}
 
 function enrol_arlo_upgrade_disable_local_tasks() {
     $disable = array('local_arlo\task\full_sync', 'local_arlo\task\pointintime_sync');
