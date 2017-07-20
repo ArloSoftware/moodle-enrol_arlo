@@ -201,3 +201,16 @@ function enrol_arlo_upgrade_prepare_new_tables() {
     }
 
 }
+
+function enrol_arlo_upgrade_migrate_config() {}
+
+function enrol_arlo_upgrade_disable_local_tasks() {
+    $disable = array('local_arlo\task\full_sync', 'local_arlo\task\pointintime_sync');
+    foreach ($disable as $taskname) {
+        $task = \core\task\manager::get_scheduled_task($taskname);
+        $task->set_disabled(true);
+        $task->set_customised(true);
+        \core\task\manager::configure_scheduled_task($task);
+    }
+    return true;
+}
