@@ -50,8 +50,9 @@ class enrol_arlo_plugin extends enrol_plugin {
             $studentroleid = $student->id;
         }
         $defaults = array(
-            'apistatus' => 0,
+            'apistatus' => -1,
             'apilastrequested' => 0,
+            'apilasterror' => '',
             'apierrorcount' => 0,
             'platform' => '',
             'apiusername' => '',
