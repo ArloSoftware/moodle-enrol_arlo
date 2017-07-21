@@ -38,7 +38,7 @@ if ($hassiteconfig) {
     $name = get_string('arloconnection', 'enrol_arlo');
     $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
 
-    $settings->add(new admin_setting_configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
+    //$settings->add(new admin_setting_configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
 
     $name = get_string('platform', 'enrol_arlo');
     $description = get_string('platform_desc', 'enrol_arlo');
