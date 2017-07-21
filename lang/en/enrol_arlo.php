@@ -259,3 +259,6 @@ $string['associatetemplatewithcourse'] = 'Associate Arlo Template with Moodle co
 $string['errorselecttemplate'] = 'Please select a Event Template';
 $string['ok'] = 'OK';
 $string['notok'] = 'Not OK';
+$string['hasnotrunyet'] = 'Has not run yet';
+$string['integrationstatus'] = 'Integration status ';
+$string['pleasecheckrequestlog'] = 'Please check request log';
