@@ -269,3 +269,32 @@ function enrol_arlo_upgrade_disable_local_tasks() {
     }
     return true;
 }
+
+function enrol_arlo_upgrade_get_usercontacts() {
+    global $DB;
+
+    $sql = "SELECT u.id AS userid, lac.contactid AS sourceid, lac.contactguid AS sourceguid, lac.created, lac.modified
+              FROM {user} u
+              JOIN {user_info_data} uid
+                ON uid.userid = u.id
+              JOIN {user_info_field} uif
+                ON (uid.fieldid = uif.id AND uif.shortname = 'arloguid')
+              JOIN {local_arlo_contacts} lac
+                ON lac.contactguid = uid.data
+              WHERE uid.data <> ''
+           ORDER BY lac.modified";
+    return $DB->get_records_sql($sql);
+}
+
+function enrol_arlo_upgrade_get_user_enrolments() {
+    global $DB;
+    $sql = "SELECT ue.id, ue.enrolid, ue.userid, e.customint3 AS resourcetype, 
+                   e.customchar3 AS resourcesourceguid, eac.sourceid AS contactid, 
+                   eac.sourceguid AS contactguid
+              FROM {enrol} e 
+              JOIN {user_enrolments} ue ON ue.enrolid = e.id
+              JOIN {enrol_arlo_contact} eac ON eac.userid = ue.userid
+             WHERE enrol = 'arlo' 
+          ORDER BY ue.enrolid, ue.userid";
+    return $DB->get_records_sql($sql);
+}
