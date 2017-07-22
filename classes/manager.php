@@ -14,7 +14,7 @@ use enrol_arlo\exception\invalidcontent_exception;
 use enrol_arlo\request\collection;
 use GuzzleHttp\Psr7\Response;
 
-
+require_once("$CFG->dirroot/enrol/arlo/lib.php");
 
 class manager {
     /** @var REQUEST_INTERVAL_SECONDS default for normal pull and push operations. */
