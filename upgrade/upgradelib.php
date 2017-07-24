@@ -16,6 +16,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Make new Arlo enrolment tables.
+ *
+ * @return bool
+ */
 function enrol_arlo_upgrade_prepare_new_tables() {
     global $DB;
 
@@ -199,9 +204,14 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
         $dbman->create_table($table);
     }
-
+    return true;
 }
 
+/**
+ * Migrate config.
+ *
+ * @return bool
+ */
 function enrol_arlo_upgrade_migrate_config() {
     $config = get_config('local_arlo');
 
@@ -257,8 +267,14 @@ function enrol_arlo_upgrade_migrate_config() {
         set_config('pushonlineactivityresults', 0, 'enrol_arlo');
     }
     set_config('alertsiteadmins', 1, 'enrol_arlo');
+    return true;
 }
 
+/**
+ * Disable old login plugin scheduled taska.
+ *
+ * @return bool
+ */
 function enrol_arlo_upgrade_disable_local_tasks() {
     $disable = array('local_arlo\task\full_sync', 'local_arlo\task\pointintime_sync');
     foreach ($disable as $taskname) {
@@ -270,6 +286,11 @@ function enrol_arlo_upgrade_disable_local_tasks() {
     return true;
 }
 
+/**
+ * Get array of Moodle users with associated Arlo contact link.
+ *
+ * @return array
+ */
 function enrol_arlo_upgrade_get_usercontacts() {
     global $DB;
 
@@ -286,6 +307,11 @@ function enrol_arlo_upgrade_get_usercontacts() {
     return $DB->get_records_sql($sql);
 }
 
+/**
+ * Get array of user enrolments.
+ *
+ * @return array
+ */
 function enrol_arlo_upgrade_get_user_enrolments() {
     global $DB;
     $sql = "SELECT ue.id, ue.enrolid, ue.userid, e.customint3 AS resourcetype, 
