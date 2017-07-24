@@ -160,19 +160,23 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public static function create_course_group($courseid, $code) {
         global $DB;
+        // Check code.
+        if (empty($code)) {
+            throw new coding_exception('Arlo code is empty cannot create course group');
+        }
         // Format group name.
         $groupname = get_string('defaultgroupnametext', 'enrol_arlo', array('name' => $code));
         // Check if group exists and return group id.
-        $group = $DB->get_record('groups', array('name' => $groupname, 'courseid' => $courseid));
+        $group = $DB->get_record('groups', array('idnumber' => $code, 'courseid' => $courseid));
         if ($group) {
             return $group->id;
         }
         // Create a new group for the for event or online activity.
-        $groupdata = new \stdClass();
-        $groupdata->courseid = $courseid;
-        $groupdata->name = $groupname;
-        $groupdata->idnumber = $code;
-        $groupid = groups_create_group($groupdata);
+        $groupdata              = new \stdClass();
+        $groupdata->courseid    = $courseid;
+        $groupdata->name        = $groupname;
+        $groupdata->idnumber    = $code;
+        $groupid                = groups_create_group($groupdata);
         return $groupid;
     }
 
