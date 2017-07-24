@@ -11,6 +11,7 @@ use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\exception\invalidcontent_exception;
+use enrol_arlo\exception\lock_exception;
 use enrol_arlo\request\collection;
 use GuzzleHttp\Psr7\Response;
 
@@ -28,6 +29,8 @@ class manager {
     /** @var CONTACT_REQUEST_INTERVAL_SECONDS */
     const CONTACT_REQUEST_INTERVAL_SECONDS  = 86400; // 24 hours.
     /** @var $plugin enrolment plugin instance. */
+    const LOCK_TIMEOUT_DEFAULT          = 5;
+
     private static $plugin;
     /** @var \progress_trace  */
     private static $trace;
@@ -330,7 +333,7 @@ class manager {
      * @param $manualoverride
      * @return bool
      */
-    public function process_instance_results($instance, $manualoverride) {
+    public function process_instance_results($instance, $manualoverride = false) {
         global $DB;
         $timestart = microtime();
         if (!self::api_callable()) {
@@ -339,86 +342,101 @@ class manager {
         list($platform, $apiusername, $apipassword) = self::get_connection_vars();
         self::trace(sprintf("Updating result information for %s", $instance->name));
         try {
-            // Get sync information.
-            $arloinstance = self::get_associated_arlo_instance($instance->id);
-            // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
-            if (!$arloinstance) {
-                self::trace('No matching Arlo enrolment instance.');
-                return;
-            }
-            // Push configuration.
-            $pushonlineactivityresults = self::$plugin->get_config('pushonlineactivityresults');
-            $pusheventresults = self::$plugin->get_config('pusheventresults');
-            if ($arloinstance->type == \enrol_arlo_plugin::ARLO_TYPE_EVENT && !$pusheventresults) {
-                self::trace('Pushing Event results disabled in configuration');
-                return false;
-            }
-            if ($arloinstance->type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY && !$pushonlineactivityresults) {
-                self::trace('Pushing Online Activity results disabled in configuration');
-                return false;
-            }
-            // Get schedule information.
-            $schedule = self::get_schedule('registrations', $instance->id);
-            if (!$schedule) {
-                self::trace('No matching schedule information');
-                return false;
-            }
-            if (!self::can_push($schedule, $manualoverride)) {
-                return false;
-            }
-            // Get in registrations that require a push.
-            $conditions = array(
-                'enrolid' => $instance->id,
-                'updatesource' => 1
-            );
-            $records = $DB->get_records('enrol_arlo_registration', $conditions);
-            if (!$records) {
-                self::trace("No records found requiring a registration result push.");
-            } else {
-                foreach ($records as $registrationrecord) {
-                    $result = new result($instance->courseid, $registrationrecord);
-                    $xmlbody = $result->export_to_xml();
-                    if (empty($xmlbody)) {
-                        continue;
-                    }
-                    $sourceid = $registrationrecord->sourceid;
-                    $requesturi = new RequestUri();
-                    $requesturi->setHost($platform);
-                    $resourcepath = 'registrations/' . $sourceid . '/';
-                    $requesturi->setResourcePath($resourcepath);
-                    $options = array();
-                    $options['auth'] = array(
-                        $apiusername,
-                        $apipassword
-                    );
-                    $headers = array('Content-type' => 'application/xml; charset=utf-8');
-                    $request = new \enrol_arlo\request\patch_request($schedule, $requesturi, $headers, $xmlbody, $options);
-                    $schedule->lastpushtime = time();
-                    $response = $request->execute();
-                    if (! (200 == $response->getStatusCode() || 201 == $response->getStatusCode())) {
-                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
-                        return false;
-                    }
-                    // Update changed record.
-                    $changed = $result->get_changed();
-                    $changed->updatesource = 0; // Clear update flag.
-                    $changed->id = $registrationrecord->id;
-                    $DB->update_record('enrol_arlo_registration', $changed);
-                    self::trace('Result updated');
+            $lockresource = 'instance:' . $instance->id;
+            $lockfactory = \core\lock\lock_config::get_lock_factory('enrol_arlo_process_instance');
+            if ($lock = $lockfactory->get_lock($lockresource, self::LOCK_TIMEOUT_DEFAULT)) {
+                // Get sync information.
+                $arloinstance = self::get_associated_arlo_instance($instance->id);
+                // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
+                if (!$arloinstance) {
+                    throw new \moodle_exception('No matching Arlo enrolment instance.');
                 }
-                $schedule->updatenextpushtime = true;
-                self::update_scheduling_information($schedule);
+                // Push configuration.
+                $pushonlineactivityresults = self::$plugin->get_config('pushonlineactivityresults');
+                $pusheventresults = self::$plugin->get_config('pusheventresults');
+                if ($arloinstance->type == \enrol_arlo_plugin::ARLO_TYPE_EVENT && !$pusheventresults) {
+                    $lock->release();
+                    self::trace('Pushing Event results disabled in configuration');
+                    return false;
+                }
+                if ($arloinstance->type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY && !$pushonlineactivityresults) {
+                    $lock->release();
+                    self::trace('Pushing Online Activity results disabled in configuration');
+                    return false;
+                }
+                // Get schedule information.
+                $schedule = self::get_schedule('registrations', $instance->id);
+                if (!$schedule) {
+                    throw new \moodle_exception('No matching schedule information');
+                }
+                if (!self::can_push($schedule, $manualoverride)) {
+                    $lock->release();
+                    return false;
+                }
+                // Get in registrations that require a push.
+                $conditions = array(
+                    'enrolid' => $instance->id,
+                    'updatesource' => 1
+                );
+                $records = $DB->get_records('enrol_arlo_registration', $conditions);
+                if (!$records) {
+                    self::trace("No records found requiring a registration result push.");
+                } else {
+                    foreach ($records as $registrationrecord) {
+                        $result = new result($instance->courseid, $registrationrecord);
+                        $xmlbody = $result->export_to_xml();
+                        if (empty($xmlbody)) {
+                            $lock->release();
+                            continue;
+                        }
+                        $sourceid = $registrationrecord->sourceid;
+                        $requesturi = new RequestUri();
+                        $requesturi->setHost($platform);
+                        $resourcepath = 'registrations/' . $sourceid . '/';
+                        $requesturi->setResourcePath($resourcepath);
+                        $options = array();
+                        $options['auth'] = array(
+                            $apiusername,
+                            $apipassword
+                        );
+                        $headers = array('Content-type' => 'application/xml; charset=utf-8');
+                        $request = new \enrol_arlo\request\patch_request($schedule, $requesturi, $headers, $xmlbody, $options);
+                        $schedule->lastpushtime = time();
+                        $response = $request->execute();
+                        if (! (200 == $response->getStatusCode() || 201 == $response->getStatusCode())) {
+                            $lock->release();
+                            self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                            return false;
+                        }
+                        // Update changed record.
+                        $changed = $result->get_changed();
+                        $changed->updatesource = 0; // Clear update flag.
+                        $changed->id = $registrationrecord->id;
+                        $DB->update_record('enrol_arlo_registration', $changed);
+                        self::trace('Result updated');
+                    }
+                    $schedule->updatenextpushtime = true;
+                    self::update_scheduling_information($schedule);
+                }
+            } else {
+                throw new lock_exception('operationiscurrentlylocked', 'enrol_arlo');
             }
         } catch (\Exception $exception) {
+            if ($exception instanceof lock_exception) {
+                self::trace(get_string('operationiscurrentlylocked', 'enrol_arlo'));
+            } else {
+                $lock->release();
+            }
             if (isset($schedule)) {
                 $errorcount = (int) $schedule->errorcount;
                 $schedule->errorcount = ++$errorcount;
                 $schedule->lasterror = $exception->getMessage();
                 self::update_scheduling_information($schedule);
             }
-            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
             return false;
         }
+        $lock->release();
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
@@ -525,7 +543,7 @@ class manager {
                 $schedule->lasterror = $exception->getMessage();
                 self::update_scheduling_information($schedule);
             }
-            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
             return false;
         }
         $timefinish = microtime();
@@ -647,84 +665,96 @@ class manager {
         list($platform, $apiusername, $apipassword) = self::get_connection_vars();
         self::trace(sprintf("Processing Registrations for instance %s", $instance->name));
         try {
-            $hasnext = true; // Initialise to for multiple pages.
-            while ($hasnext) {
-                $hasnext = false; // Avoid infinite loop by default.
-                // Get sync information.
-                $arloinstance = self::get_associated_arlo_instance($instance->id);
-                // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
-                if (!$arloinstance) {
-                    self::trace('No matching Arlo enrolment instance.');
-                    break;
-                }
-                // Get schedule information.
-                $schedule = self::get_schedule('registrations', $instance->id, true);
-                if (!$schedule) {
-                    self::trace('No matching schedule information');
-                    break;
-                }
-                if (!self::can_pull($schedule , $manualoverride)) {
-                    break;
-                }
-                $type     = $arloinstance->type;
-                $sourceid = $arloinstance->sourceid;
-                // Event, set resource path and expand accordingly.
-                if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
-                    $resourcepath = 'events/' . $sourceid . '/registrations/';
-                    $expand = 'Registration/Event';
-
-                }
-                // Online Activity, set resource path and expand accordingly.
-                if ($type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
-                    $resourcepath = 'onlineactivities/' . $sourceid . '/registrations/';
-                    $expand = 'Registration/OnlineActivity';
-                }
-                // Setup RequestUri for getting Events.
-                $requesturi = new RequestUri();
-                $requesturi->setHost($platform);
-                $requesturi->setResourcePath($resourcepath);
-                $requesturi->addExpand('Registration/Contact');
-                $requesturi->addExpand($expand);
-                $options = array();
-                $options['auth'] = array(
-                    $apiusername,
-                    $apipassword
-                );
-                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
-                $schedule->lastpulltime = time();
-                $response = $request->execute();
-                if (200 != $response->getStatusCode()) {
-                    self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
-                    return false;
-                }
-                $collection = self::deserialize_response_body($response);
-                // Any returned.
-                if (iterator_count($collection) == 0) {
-                    self::update_scheduling_information($schedule);
-                    self::trace("No new or updated resources found.");
-                } else {
-                    foreach ($collection as $registration) {
-                        self::process_enrolment_registration($instance, $arloinstance, $registration);
-                        $latestmodified = $registration->LastModifiedDateTime;
-                        $schedule->latestsourcemodified = $latestmodified;
+            $lockresource = 'instance:' . $instance->id;
+            $lockfactory = \core\lock\lock_config::get_lock_factory('enrol_arlo_process_instance');
+            if ($lock = $lockfactory->get_lock($lockresource, self::LOCK_TIMEOUT_DEFAULT)) {
+                $hasnext = true; // Initialise to for multiple pages.
+                while ($hasnext) {
+                    $hasnext = false; // Avoid infinite loop by default.
+                    // Get sync information.
+                    $arloinstance = self::get_associated_arlo_instance($instance->id);
+                    // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
+                    if (!$arloinstance) {
+                        throw new \moodle_exception('No matching Arlo enrolment instance.');
                     }
-                    $hasnext = (bool) $collection->hasNext();
-                    $schedule->updatenextpulltime = ($hasnext) ? false : true;
-                    self::update_scheduling_information($schedule);
-                    self::email_new_user_passwords();
-                    self::email_welcome_message_per_instance($instance);
+                    // Get schedule information.
+                    $schedule = self::get_schedule('registrations', $instance->id, true);
+                    if (!$schedule) {
+                        throw new \moodle_exception('No matching schedule information');
+                    }
+                    if (!self::can_pull($schedule, $manualoverride)) {
+                        $lock->release();
+                        break;
+                    }
+                    $type = $arloinstance->type;
+                    $sourceid = $arloinstance->sourceid;
+                    // Event, set resource path and expand accordingly.
+                    if ($type == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+                        $resourcepath = 'events/' . $sourceid . '/registrations/';
+                        $expand = 'Registration/Event';
+
+                    }
+                    // Online Activity, set resource path and expand accordingly.
+                    if ($type == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+                        $resourcepath = 'onlineactivities/' . $sourceid . '/registrations/';
+                        $expand = 'Registration/OnlineActivity';
+                    }
+                    // Setup RequestUri for getting Events.
+                    $requesturi = new RequestUri();
+                    $requesturi->setHost($platform);
+                    $requesturi->setResourcePath($resourcepath);
+                    $requesturi->addExpand('Registration/Contact');
+                    $requesturi->addExpand($expand);
+                    $options = array();
+                    $options['auth'] = array(
+                        $apiusername,
+                        $apipassword
+                    );
+                    $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                    $schedule->lastpulltime = time();
+                    $response = $request->execute();
+                    if (200 != $response->getStatusCode()) {
+                        $lock->release();
+                        self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
+                        return false;
+                    }
+                    $collection = self::deserialize_response_body($response);
+                    // Any returned.
+                    if (iterator_count($collection) == 0) {
+                        self::update_scheduling_information($schedule);
+                        self::trace("No new or updated resources found.");
+                    } else {
+                        foreach ($collection as $registration) {
+                            self::process_enrolment_registration($instance, $arloinstance, $registration);
+                            $latestmodified = $registration->LastModifiedDateTime;
+                            $schedule->latestsourcemodified = $latestmodified;
+                        }
+                        $hasnext = (bool)$collection->hasNext();
+                        $schedule->updatenextpulltime = ($hasnext) ? false : true;
+                        self::update_scheduling_information($schedule);
+                        self::email_new_user_passwords();
+                        self::email_welcome_message_per_instance($instance);
+                    }
                 }
+            } else {
+                throw new lock_exception('operationiscurrentlylocked', 'enrol_arlo');
             }
         } catch (\Exception $exception) {
+            if ($exception instanceof lock_exception) {
+                self::trace(get_string('operationiscurrentlylocked', 'enrol_arlo'));
+            } else {
+                $lock->release();
+            }
             if (isset($schedule)) {
                 $errorcount = (int) $schedule->errorcount;
                 $schedule->errorcount = ++$errorcount;
                 $schedule->lasterror = $exception->getMessage();
                 self::update_scheduling_information($schedule);
             }
-            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
             return false;
         }
+        $lock->release();
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
@@ -795,9 +825,6 @@ class manager {
             $user = $user->create();
         }
         $userid = $user->get_user_id();
-        if (!$userid) {
-            throw new \coding_exception('Empty userid');
-        }
         $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
         $registrationrecord = $DB->get_record('enrol_arlo_registration', $conditions);
         $parameters = $conditions;
@@ -893,7 +920,7 @@ class manager {
                 $schedule->lasterror = $exception->getMessage();
                 self::update_scheduling_information($schedule);
             }
-            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
             return false;
         }
         $timefinish = microtime();
@@ -996,7 +1023,7 @@ class manager {
                 $schedule->lasterror = $exception->getMessage();
                 self::update_scheduling_information($schedule);
             }
-            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
             return false;
         }
         $timefinish = microtime();
@@ -1068,7 +1095,7 @@ class manager {
                 $schedule->lasterror = $exception->getMessage();
                 self::update_scheduling_information($schedule);
             }
-            debugging($exception->getMessage(), DEBUG_NORMAL, $exception->getTrace());
+            debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
             return false;
         }
         $timefinish = microtime();

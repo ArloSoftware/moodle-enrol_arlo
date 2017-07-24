@@ -262,3 +262,5 @@ $string['notok'] = 'Not OK';
 $string['hasnotrunyet'] = 'Has not run yet';
 $string['integrationstatus'] = 'Integration status ';
 $string['pleasecheckrequestlog'] = 'Please check request log';
+$string['locktimeout'] = 'The operation timed out while waiting for a lock';
+$string['operationiscurrentlylocked'] = 'The operation is current locked by another process.';
