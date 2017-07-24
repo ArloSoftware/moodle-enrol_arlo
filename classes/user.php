@@ -142,8 +142,6 @@ class user extends \core_user {
             $user->idnumber     = (string) self::get_contact_resource()->CodePrimary;
             $user->mnethostid   = $CFG->mnet_localhost_id;
             $user->id           = user_create_user($user, true, false);
-            // Load new record.
-            self::load_user_record($user);
             // Set create password flag.
             set_user_preference('enrol_arlo_createpassword', 1, $user->id);
         }
@@ -157,6 +155,8 @@ class user extends \core_user {
         $contact->sourcemodified  = (string) self::get_contact_resource()->LastModifiedDateTime;
         $contact->modified        = time();
         $contact->id              = $DB->insert_record('enrol_arlo_contact', $contact);
+        // Load user record.
+        self::load_user_record($user);
         // Load contact record.
         self::load_contact_record($contact);
         // Trigger event for newly created users.
@@ -272,10 +272,7 @@ class user extends \core_user {
      * @return int
      */
     public function get_user_id() {
-        if (isset($this->userrecord->id)) {
-            return $this->userrecord->id;
-        }
-        return 0;
+        return $this->userrecord->id;
     }
 
     /**
