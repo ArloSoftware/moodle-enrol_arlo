@@ -124,31 +124,68 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
     }
 }
 
+/**
+ * Displays current Arlo API status in admin settings page.
+ */
 class admin_setting_configarlostatus extends admin_setting {
     public function __construct($name, $visiblename) {
         $this->nosave = true;
         parent::__construct($name, $visiblename, '', '');
     }
-    public function get_setting() {}
-    public function write_setting($data) {}
+    /**
+     * Always returns true
+     * @return bool Always returns true
+     */
+    public function get_setting() {
+        return true;
+    }
+    /**
+     * Always returns true
+     * @return bool Always returns true
+     */
+    public function get_defaultsetting() {
+        return true;
+    }
+    /**
+     * Never write settings
+     * @return string Always returns an empty string
+     */
+    public function write_setting($data) {
+        // Do not write any setting.
+        return '';
+    }
+
+    /**
+     * Output the current Arlo API status.
+     *
+     * @param mixed $data
+     * @param string $query
+     * @return string
+     */
     public function output_html($data, $query = '') {
         global $OUTPUT;
-        $return = '';
         $apistatus = get_config('enrol_arlo', 'apistatus');
-        if (empty($apistatus)) {
-            return $return;
-        }
-        if (200 == $apistatus) {
+        $apilastrequested = (int) get_config('enrol_arlo', 'apilastrequested');
+        if (-1 == $apistatus) {
+            return ''; // API has not been called yet.
+        } else if (200 == $apistatus) {
             $statusicon = $OUTPUT->pix_icon('t/go', get_string('ok', 'enrol_arlo'));
+            $reason = get_string('apistatusok', 'enrol_arlo', userdate($apilastrequested));
             $description = '';
-        } else {
+        } else if (0 == $apistatus || ($apistatus > 400 && $apistatus < 499)) {
             $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
-            $description = '';
+            $reason = get_string('apistatusclienterror', 'enrol_arlo');
+            $url = new moodle_url('/enrol/arlo/admin/apilog.php');
+            $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
+        } else if ($apistatus > 500 && $apistatus < 599) {
+            $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            $reason = get_string('apistatusservererror', 'enrol_arlo');
+            $url = new moodle_url('/enrol/arlo/admin/apilog.php');
+            $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
         }
-
         $return = '<div class="form-item clearfix" id="admin-'.$this->name.'">
                    <div class="form-label"></div>
-                   <div class="form-setting">Integration status '.$statusicon.'</div>
+                   <div class="form-setting">'.$statusicon.' '.$reason.'</div>
                    <div class="form-description">'.$description.'</div>
                    </div>';
         return $return;

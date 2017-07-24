@@ -259,8 +259,9 @@ $string['associatetemplatewithcourse'] = 'Associate Arlo Template with Moodle co
 $string['errorselecttemplate'] = 'Please select a Event Template';
 $string['ok'] = 'OK';
 $string['notok'] = 'Not OK';
-$string['hasnotrunyet'] = 'Has not run yet';
-$string['integrationstatus'] = 'Integration status ';
-$string['pleasecheckrequestlog'] = 'Please check request log';
+$string['pleasecheckrequestlog'] = 'Please check <a href="{$a}">request log</a>';
 $string['locktimeout'] = 'The operation timed out while waiting for a lock';
 $string['operationiscurrentlylocked'] = 'The operation is current locked by another process.';
+$string['apistatusok'] = 'OK, last request was {$a}';
+$string['apistatusclienterror'] = 'Client connection error!';
+$string['apistatusservererror'] = 'Service currently unavailable';
