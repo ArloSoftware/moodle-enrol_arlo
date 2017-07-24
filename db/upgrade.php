@@ -68,15 +68,13 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2015101503, 'enrol', 'arlo');
     }
 
+    // Migration to single plugin
     if ($oldversion < 2016052309) {
         require_once($CFG->dirroot . '/enrol/arlo/upgrade/upgradelib.php');
 
         enrol_arlo_upgrade_disable_local_tasks();
 
-        if (!$dbman->table_exists('enrol_arlo_instance')) {
-            $installfile = $CFG->dirroot . '/enrol/arlo/db/install.xml';
-            $dbman->install_from_xmldb_file($installfile);
-        }
+        enrol_arlo_upgrade_prepare_new_tables();
 
         enrol_arlo_upgrade_migrate_config();
 
