@@ -62,7 +62,7 @@ class manager {
             return false;
         }
         // Client errors.
-        if ($apilaststatus == 401 || $apilaststatus == 403) {
+        if ($apilaststatus == 0 || ($apilaststatus == 401 || $apilaststatus == 403)) {
             $delay = $apilastrequested + self::DELAY_REQUEST_SECONDS;
             if ($delay > time()) {
                 self::trace(sprintf("Client connection issue. Next request delayed until: %s", userdate($delay)));
