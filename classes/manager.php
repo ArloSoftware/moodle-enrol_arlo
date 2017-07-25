@@ -54,7 +54,7 @@ class manager {
      * @return bool
      */
     public function api_callable() {
-        $apilaststatus      = (int) self::$plugin->get_config('apistatus');
+        $apilaststatus      = self::$plugin->get_config('apistatus');
         $apilastrequested   = self::$plugin->get_config('apilastrequested');
         $apierrorcount      = self::$plugin->get_config('apierrorcount');
         if (!enrol_is_enabled('arlo')) {
@@ -70,7 +70,7 @@ class manager {
             }
         }
         // Server errors.
-        if ($apilaststatus > 500 && $apilaststatus < 599) {
+        if ($apilaststatus >= 500 && $apilaststatus <= 599) {
             $delay = $apilastrequested + self::DELAY_REQUEST_SECONDS;
             if ($delay > time()) {
                 self::trace(sprintf("Server issue. Next request delayed until: %s", userdate($delay)));
