@@ -63,7 +63,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             'unenrolaction' => ENROL_EXT_REMOVED_UNENROL,
             'expiredaction' => ENROL_EXT_REMOVED_SUSPEND,
             'pushonlineactivityresults' => 1,
-            'pusheventresults' => 0,
+            'pusheventresults' => 1,
             'alertsiteadmins' => 1
         );
         return $defaults;
