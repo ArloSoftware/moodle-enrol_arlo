@@ -18,7 +18,7 @@ define('CLI_SCRIPT', true);
 require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->libdir.'/clilib.php');         // CLI only functions.
 require_once($CFG->libdir.'/cronlib.php');
-require_once($CFG->dirroot.'/local/arlo/lib.php');
+require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
 // We may need a lot of memory here.
 @set_time_limit(0);
@@ -62,7 +62,6 @@ $CFG->debug = 38911;  // DEBUG_DEVELOPER // NOT FOR PRODUCTION SERVERS!
 $CFG->debugdisplay = true;   // NOT FOR PRODUCTION SERVERS!
 
 $interactive = empty($options['non-interactive']);
-require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
 cron_setup_user();
 
