@@ -124,10 +124,11 @@ You may access this course at the following url:
   {$a->courseurl}';
 
 $string['associatearlotemplate'] = 'Associate Arlo template';
-$string['platform'] = 'Platform FQDN';
-$string['platform_desc'] = 'This is name of platform on Arlo e.g {platform}.arlo.co';
-$string['apiusername'] = 'API username';
-$string['apipassword'] = 'API password';
+$string['platform'] = 'Arlo platform URL';
+$string['platform_desc'] = 'This is the URL of your Arlo management platform e.g. "yourplatform.arlo.co"';
+$string['apiusername'] = 'Arlo username';
+$string['apiusername_desc'] = 'The Arlo username must have API enabled, <a title="{$a->title}" href="{$a->url}">learn more.</a>';
+$string['apipassword'] = 'Arlo password';
 $string['savechanges'] = 'Save changes';
 $string['enrolment'] = 'Enrolment';
 $string['usercreation'] = 'User creation';
@@ -264,3 +265,4 @@ $string['operationiscurrentlylocked'] = 'The operation is current locked by anot
 $string['apistatusok'] = 'OK, last request was {$a}';
 $string['apistatusclienterror'] = 'Client connection error!';
 $string['apistatusservererror'] = 'Service currently unavailable';
+$string['opennewtabtitle'] = 'To open in a new tab on Windows: CTRL + click on Mac: command + click';
