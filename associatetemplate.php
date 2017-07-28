@@ -39,11 +39,10 @@ if (!empty($association->sourcetemplateguid)) {
         foreach ($instances as $instance) {
             $a .= '<span>' . $instance->name . '</span><br>';
         }
-        $message = get_string('warningnotice', 'enrol_arlo', $a);
-        echo $OUTPUT->box($message, 'generalbox');
+        echo $OUTPUT->box(get_string('removetemplatedanger', 'enrol_arlo', $a), 'generalbox');
     }
 } else {
-    echo $OUTPUT->box(get_string('linktemplatenotice', 'enrol_arlo'), 'generalbox');
+    echo $OUTPUT->box(get_string('associatetemplatedanger', 'enrol_arlo'), 'generalbox');
 }
 $form->display();
 echo $OUTPUT->footer();

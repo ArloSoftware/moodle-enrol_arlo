@@ -79,16 +79,15 @@ $string['linktemplatetocourse'] = 'Link Arlo template to this course';
 $string['remove'] = 'Remove';
 $string['template'] = 'Template';
 
-$string['linktemplatenotice'] =
-'<div class="alert alert-info" role="alert">
-<strong>Notice</strong>
-<p>This will add every event or online activity using the template as enrolment instances to this course.</p>
+$string['associatetemplatedanger'] =
+'<div class="alert alert-danger" role="alert">
+<strong>Important!</strong>
+<p>This will associate every Event or Online Activity based off the Template. This does not include Events or Online Activities that have already been added to another course.</p>
 </div>';
-
-$string['warningnotice'] =
-'<div class="alert alert-warning" role="alert">
-<strong>WARNING</strong>
-<p>Removing the template link will remove all people from the course that are in the following enrolment instances:</p>
+$string['removetemplatedanger'] =
+'<div class="alert alert-danger" role="alert">
+<strong>Important!</strong>
+<p>Removing the template association will remove all people from the course that are in the following enrolment instances:</p>
 {$a}
 </div>';
 
