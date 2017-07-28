@@ -2,7 +2,7 @@
 <libraries>
     <library>
         <location>vendor/guzzlehttp/guzzle</location>
-        <name>guzzlehttp/guuzle</name>
+        <name>guzzlehttp/guzzle</name>
         <version></version>
         <license>MIT</license>
         <licenseversion></licenseversion>
@@ -15,10 +15,24 @@
         <licenseversion></licenseversion>
     </library>
     <library>
+        <location>vendor/symfony/property-access</location>
+        <name>symfony/property-access</name>
+        <version></version>
+        <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
         <location>vendor/symfony/cache</location>
         <name>symfony/cache</name>
         <version></version>
         <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>classes/Arlo/AuthAPI</location>
+        <name>arlo/authapi</name>
+        <version></version>
+        <license>GPL</license>
         <licenseversion></licenseversion>
     </library>
 </libraries>
