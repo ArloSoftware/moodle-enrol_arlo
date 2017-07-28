@@ -83,7 +83,7 @@ class Filter {
      * @return $this
      */
     public function setValue($value) {
-        $this->value;
+        $this->value = $value;
         return $this;
     }
 
