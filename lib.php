@@ -332,7 +332,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         $options = array();
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
-            $options[$record->sourceguid] = $record->code . ' ' . $record->name;
+            $options[$record->sourceguid] = $record->code . ' ' . shorten_text($record->name, 40);
         }
         return $options;
     }
@@ -345,11 +345,12 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function get_event_options() {
         global $DB;
         $options = array();
-        $sql = "SELECT sourceguid, code 
-                  FROM {enrol_arlo_event}
-                 WHERE platform = :platform
-                   AND sourcestatus = :sourcestatus 
-                   AND sourceguid NOT IN (SELECT sourceguid 
+        $sql = "SELECT ae.sourceguid, ae.code, aet.name
+                  FROM {enrol_arlo_event} ae
+                  JOIN {enrol_arlo_template} aet ON aet.sourceguid = ae.sourcetemplateguid
+                 WHERE ae.platform = :platform
+                   AND ae.sourcestatus = :sourcestatus
+                   AND ae.sourceguid NOT IN (SELECT sourceguid
                                             FROM {enrol_arlo_instance} WHERE sourceguid IS NOT NULL)
               ORDER BY code";
         $conditions = array(
@@ -359,7 +360,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
-            $options[$record->sourceguid] = $record->code;
+            $options[$record->sourceguid] = $record->code . ' ' . shorten_text($record->name, 40);
         }
         return $options;
     }
@@ -372,7 +373,7 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function get_onlineactivity_options() {
         global $DB;
         $options = array();
-        $sql = "SELECT sourceguid, code 
+        $sql = "SELECT sourceguid, code, name
                   FROM {enrol_arlo_onlineactivity}
                  WHERE platform = :platform
                    AND sourcestatus = :sourcestatus 
@@ -385,7 +386,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         );
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
-            $options[$record->sourceguid] = $record->code;
+            $options[$record->sourceguid] = $record->code . ' ' . shorten_text($record->name, 40);
         }
         return $options;
     }
