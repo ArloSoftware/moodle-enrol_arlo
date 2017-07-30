@@ -271,6 +271,9 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $DB->insert_record('enrol_arlo_templateassociate', $associate);
         }
 
+        // Remove local Arlo plugin configuration.
+        unset_all_config_for_plugin('local_arlo');
+
         upgrade_plugin_savepoint(true, 2016052309, 'enrol', 'arlo');
     }
 
