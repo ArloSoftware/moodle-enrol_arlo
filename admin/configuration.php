@@ -33,15 +33,12 @@ $data = $form->get_submitted_data();
 if ($data) {
     $plugin = enrol_get_plugin('arlo');
     $plugin->set_config('matchuseraccountsby', $data->matchuseraccountsby);
-    $plugin->set_config('authplugin', $data->authplugin);
     $plugin->set_config('roleid', $data->roleid);
     $plugin->set_config('unenrolaction', $data->unenrolaction);
     $plugin->set_config('expiredaction', $data->expiredaction);
-    $plugin->set_config('sendcoursewelcomemessage', $data->sendcoursewelcomemessage);
     $plugin->set_config('pushonlineactivityresults', $data->pushonlineactivityresults);
     $plugin->set_config('pusheventresults', $data->pusheventresults);
     $plugin->set_config('alertsiteadmins', $data->alertsiteadmins);
-
     redirect($PAGE->url, get_string('changessaved', 'enrol_arlo'));
 }
 echo $OUTPUT->header();

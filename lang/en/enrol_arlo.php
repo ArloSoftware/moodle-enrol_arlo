@@ -266,3 +266,5 @@ $string['apistatusok'] = 'OK, last request was {$a}';
 $string['apistatusclienterror'] = 'Client connection error!';
 $string['apistatusservererror'] = 'Service currently unavailable';
 $string['opennewtabtitle'] = 'To open in a new tab on Windows: CTRL + click on Mac: command + click';
+$string['defaultrole'] = 'Default role';
+$string['defaultrole_help'] = 'The role which should be assigned to users during enrolment';
