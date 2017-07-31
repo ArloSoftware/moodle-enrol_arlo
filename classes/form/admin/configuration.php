@@ -90,7 +90,8 @@ class configuration extends \moodleform {
         $form->addElement('header', 'alert', get_string('alert', 'enrol_arlo'));
 
         $form->addElement('advcheckbox', 'alertsiteadmins',
-            get_string('siteadmins', 'enrol_arlo'));
+            get_string('alertsiteadmins', 'enrol_arlo'));
+        $form->addHelpButton('alertsiteadmins', 'alertsiteadmins', 'enrol_arlo');
 
         // Hack - Quick load existing config if exists.
         $config = (array) get_config('enrol_arlo');

@@ -168,7 +168,8 @@ $string['pushonlineactivityresults'] = 'Push OnlineActivity results';
 $string['pushonlineactivityresults_help'] = 'Push result information from enrolment instances mapped to <strong>OnlineActivities</strong> back to Arlo';
 $string['pusheventresults'] = 'Push Event results';
 $string['pusheventresults_help'] = 'Push result information from enrolment instances mapped to <strong>Events</strong> back to Arlo';
-$string['siteadmins'] = 'Site administrators';
+$string['alertsiteadmins'] = 'Site administrators';
+$string['alertsiteadmins_help'] = 'Alert all site administrators through Moodle\'s messaging system of issues such as connection problems or duplicate user matches.';
 $string['changessaved'] = 'Changes saved';
 $string['synchronize'] = 'Synchronize';
 
