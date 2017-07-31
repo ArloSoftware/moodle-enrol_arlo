@@ -129,7 +129,7 @@ class user extends \core_user {
         } else {
             $trigger            = true;
             $user               = self::get_dummy_user_record();
-            $user->auth         = self::$plugin->get_config('authplugin');
+            $user->auth         = self::$plugin->get_config('authplugin', 'manual');
             $contactfirstname   = self::get_contact_resource()->FirstName;
             $contactlastname    = self::get_contact_resource()->LastName;
             $contactemail       = self::get_contact_resource()->Email;
