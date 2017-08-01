@@ -178,17 +178,17 @@ class result {
             $root->appendChild($element);
         }
         // Add or replace LastActivityDateTime element.
-        // Must use format: Y-m-d\TH:i:s.000+00:00
+        // Must use format: Y-m-d\TH:i:s.0000000+00:00
         // https://developer.arlo.co/doc/api/2012-02-01/auth/datetimeformats#datetimeoffset
         if (empty($registrationrecord->lastactivity) && !empty($this->lastactivity)) {
-            $lastactivitydate = date('Y-m-d\TH:i:s.000+00:00', $this->lastactivity);
+            $lastactivitydate = date('Y-m-d\TH:i:s.0000000+00:00', $this->lastactivity);
             $add = $dom->createElement("add");
             $add->setAttribute("sel", "Registration");
             $element = $dom->createElement('LastActivityDateTime', $lastactivitydate);
             $add->appendChild($element);
             $root->appendChild($add);
         } else if ($registrationrecord->lastactivity != $this->lastactivity && !empty($this->lastactivity)) {
-            $lastactivitydate = date('Y-m-d\TH:i:s.000+00:00', $this->lastactivity);
+            $lastactivitydate = date('Y-m-d\TH:i:s.0000000+00:00', $this->lastactivity);
             $replace = $dom->createElement('replace', $lastactivitydate);
             $replace->setAttribute("sel", "Registration/LastActivityDateTime/text()[1]");
             $root->appendChild($replace);
