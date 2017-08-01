@@ -46,6 +46,7 @@ if ($options['help']) {
 "
 Options:
 --non-interactive     No interactive questions or confirmations
+--manual              Manual override
 -h, --help            Print out this help
 
 Example:
