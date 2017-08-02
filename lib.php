@@ -944,10 +944,10 @@ class enrol_arlo_plugin extends enrol_plugin {
             $timestart = time();
             $timeend = $timestart + $instance->enrolperiod;
         }
-        // Send course welcome email.
         $conditions = array('enrolid' => $instance->id, 'userid' => $userid, 'status' => ENROL_USER_ACTIVE);
         $enrolmentexists = $DB->record_exists('user_enrolments', $conditions);
         if (!$enrolmentexists) {
+            // Send course welcome email.
             if ($instance->customint8) {
                 set_user_preference('enrol_arlo_coursewelcome_'.$instance->id, $instance->id, $userid);
             }
@@ -957,20 +957,6 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Always add group.
         if (!empty($instance->customint2) && $instance->customint2 != self::ARLO_CREATE_GROUP) {
             groups_add_member($instance->customint2, $userid, 'enrol_arlo');
-        }
-    }
-
-    /**
-     * Handles un-enrolling a user.
-     *
-     * @param stdClass $instance
-     * @param int $userid
-     * @return void
-     */
-    public function unenrol_user(stdClass $instance, $userid) {
-        global $DB;
-        if ($DB->record_exists('user_enrolments', array('enrolid' => $instance->id, 'userid' => $userid))) {
-            parent::unenrol_user($instance, $userid);
         }
     }
 
