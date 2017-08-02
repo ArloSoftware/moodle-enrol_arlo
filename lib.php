@@ -935,31 +935,6 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
     }
 
-    public function enrol_user(stdClass $instance, $userid, $roleid = null, $timestart = 0, $timeend = 0, $status = null, $recovergrades = null) {
-        global $DB;
-        // Enrolment period handling.
-        $timestart = 0;
-        $timeend = 0;
-        if ($instance->enrolperiod) {
-            $timestart = time();
-            $timeend = $timestart + $instance->enrolperiod;
-        }
-        $conditions = array('enrolid' => $instance->id, 'userid' => $userid, 'status' => ENROL_USER_ACTIVE);
-        $enrolmentexists = $DB->record_exists('user_enrolments', $conditions);
-        if (!$enrolmentexists) {
-            // Send course welcome email.
-            if ($instance->customint8) {
-                set_user_preference('enrol_arlo_coursewelcome_'.$instance->id, $instance->id, $userid);
-            }
-        }
-        // Parent checks timestart or timeend or status are different.
-        parent::enrol_user($instance, $userid, $instance->roleid, $timestart, $timeend, ENROL_USER_ACTIVE);
-        // Always add group.
-        if (!empty($instance->customint2) && $instance->customint2 != self::ARLO_CREATE_GROUP) {
-            groups_add_member($instance->customint2, $userid, 'enrol_arlo');
-        }
-    }
-
     public function suspend_and_remove_roles(stdClass $instance, $userid) {
         global $DB;
 

@@ -840,12 +840,33 @@ class manager {
                 unset($record->id);
                 $record->id = $DB->insert_record('enrol_arlo_registration', $record);
                 self::trace(sprintf('Created registration record: %s', $record->userid));
+                $timestart = time();
+                $timeend = 0;
+                if ($instance->enrolperiod) {
+                    $timeend = $timestart + $instance->enrolperiod;
+                }
+                $plugin->enrol_user($instance, $userid, $instance->roleid, $timestart, $timeend, ENROL_USER_ACTIVE);
+                self::trace(sprintf('User %s enrolment created', $record->userid));
+                // Send course welcome email.
+                if ($instance->customint8) {
+                    set_user_preference('enrol_arlo_coursewelcome_'.$instance->id, $instance->id, $userid);
+                }
             } else {
                 $DB->update_record('enrol_arlo_registration', $record);
-                self::trace(sprintf('Updated registration record: %s', $record->userid));
+                $ue = $DB->get_record('user_enrolments', array('enrolid' => $instance->id, 'userid' => $userid));
+                if ($instance->enrolperiod) {
+                    $timestart = $ue->timestart;
+                    $timeend = $timestart + $instance->enrolperiod;
+                    if ($timeend != $ue->timeend) {
+                        $plugin->update_user_enrol($instance, $ue->userid, ENROL_USER_ACTIVE, $timestart, $timeend);
+                        self::trace(sprintf('User %s enrolment updated', $record->userid));
+                    }
+                }
             }
-            $plugin->enrol_user($instance, $userid);
-            self::trace(sprintf('User %s enrolled', $record->userid));
+            // Always add to group.
+            if (!empty($instance->customint2) && $instance->customint2 != \enrol_arlo_plugin::ARLO_CREATE_GROUP) {
+                groups_add_member($instance->customint2, $userid, 'enrol_arlo');
+            }
         }
         if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_UNENROL)) {
             $plugin->unenrol_user($instance, $userid);
