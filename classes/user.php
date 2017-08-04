@@ -54,6 +54,36 @@ class user extends \core_user {
     }
 
     /**
+     * Helper function to return dummy noreply user record.
+     *
+     * @return stdClass
+     */
+    protected static function get_dummy_user_record() {
+        global $CFG;
+
+        $noreplyaddressdefault = 'noreply@' . get_host_from_url($CFG->wwwroot);
+        $noreplyaddress = empty($CFG->noreplyaddress) ? $noreplyaddressdefault : $CFG->noreplyaddress;
+
+        $dummyuser = new stdClass();
+        $dummyuser->id = self::NOREPLY_USER;
+        $dummyuser->email = $noreplyaddress;
+        $dummyuser->firstname = get_string('noreplyname');
+        $dummyuser->username = 'noreply';
+        $dummyuser->lastname = '';
+        $dummyuser->confirmed = 1;
+        $dummyuser->suspended = 0;
+        $dummyuser->deleted = 0;
+        $dummyuser->picture = 0;
+        $dummyuser->auth = 'manual';
+        $dummyuser->firstnamephonetic = '';
+        $dummyuser->lastnamephonetic = '';
+        $dummyuser->middlename = '';
+        $dummyuser->alternatename = '';
+        $dummyuser->imagealt = '';
+        return $dummyuser;
+    }
+
+    /**
      * @param Contact $contactresource
      * @return bool
      */
