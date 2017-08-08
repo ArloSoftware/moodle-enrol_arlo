@@ -304,8 +304,10 @@ class manager {
         if (!$schedule) {
             $schedule = self::schedule($resourcetype, $enrolid);
         }
-        $schedule->lasterror = ($reseterror) ? '' : $schedule->lasterror;
-        $schedule->errorcount = ($reseterror) ? 0 : $schedule->errorcount;
+        if ($reseterror) {
+            $schedule->lasterror = '';
+            $schedule->errorcount = 0;
+        }
         return $schedule;
     }
 
