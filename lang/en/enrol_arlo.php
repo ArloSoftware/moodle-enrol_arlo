@@ -127,7 +127,7 @@ $string['associatearlotemplate'] = 'Associate Arlo template';
 $string['platform'] = 'Arlo platform URL';
 $string['platform_desc'] = 'This is the URL of your Arlo management platform e.g. "yourplatform.arlo.co"';
 $string['apiusername'] = 'Arlo username';
-$string['apiusername_desc'] = 'The Arlo username must have API enabled, <a title="{$a->title}" href="{$a->url}">learn more.</a>';
+$string['apiusername_desc'] = 'The Arlo username must have API enabled, <a title="{$a->title}" href="{$a->url}" target="_blank">learn more.</a>';
 $string['apipassword'] = 'Arlo password';
 $string['savechanges'] = 'Save changes';
 $string['enrolment'] = 'Enrolment';

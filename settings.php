@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die();
 require_once (dirname(__FILE__).'/adminlib.php');
 
 if ($hassiteconfig) {
-
     $name = get_string('arloconnection', 'enrol_arlo');
     $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
 
@@ -45,9 +44,12 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, '', PARAM_HOST));
 
     $name = get_string('apiusername', 'enrol_arlo');
-    $url = "https://support.arlo.co/hc/en-gb/articles/115003692863?utm_source=Moodle%20Marketplace&utm_medium=referral%20organic&utm_campaign=Moodle%20plugin%20configuration";
+    $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/115003692863');
+    $url->param('utm_source','Moodle Marketplace');
+    $url->param('utm_medium','referral organic');
+    $url->param('utm_campaign','Moodle plugin configuration');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
-    $description = get_string('apiusername_desc', 'enrol_arlo', array('url' => $url, 'title' => $title));
+    $description = get_string('apiusername_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
     $settings->add(new admin_setting_configtext('enrol_arlo/apiusername', $name, $description, null));
 
     $name = get_string('apipassword', 'enrol_arlo');
