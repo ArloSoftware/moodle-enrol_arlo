@@ -272,8 +272,8 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         }
 
         // Remove local Arlo organisational name to disable local plugin.
-        unset_config('platformname', 'local_arlo');
-        unset_config('setting_arlo_orgname', 'local_arlo');
+        set_config('platformname', 'DISABLED', 'local_arlo');
+        set_config('setting_arlo_orgname', 'DISABLED', 'local_arlo');
 
         upgrade_plugin_savepoint(true, 2016052309, 'enrol', 'arlo');
     }

@@ -273,7 +273,7 @@ class manager {
             $schedule->nextpushtime             = 0;
             $schedule->lastpushtime             = 0;
             $schedule->endpushtime              = $endpushtime;
-            $schedule->lasterror                = 0;
+            $schedule->lasterror                = '';
             $schedule->errorcount               = 0;
             $schedule->modified                 = time();
             $schedule->id = $DB->insert_record('enrol_arlo_schedule', $schedule);
