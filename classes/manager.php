@@ -562,7 +562,7 @@ class manager {
      * @param bool $manualoverride
      * @return bool
      */
-    protected static function can_pull(\stdClass $record, $manualoverride = false) {
+    protected function can_pull(\stdClass $record, $manualoverride = false) {
         $timestart = time();
         if ($manualoverride) {
             return true;
@@ -605,7 +605,7 @@ class manager {
      * @param bool $manualoverride
      * @return bool
      */
-    protected static function can_push(\stdClass $record, $manualoverride = false) {
+    protected function can_push(\stdClass $record, $manualoverride = false) {
         $timestart = time();
         if ($manualoverride) {
             return true;
