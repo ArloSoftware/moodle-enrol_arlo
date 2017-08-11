@@ -101,7 +101,7 @@ class result {
             if ($coursecomplete) {
                 $this->progresspercent = 100;
                 $this->progressstatus = get_string('completed', 'enrol_arlo');
-            } else if (!$criteriacomplete && !$ccompletion->timestarted) {
+            } else if (empty($ccompletion->timestarted)) {
                 $this->progressstatus = get_string('notstarted', 'enrol_arlo');
             } else {
                 $this->progressstatus = get_string('inprogress', 'enrol_arlo');
