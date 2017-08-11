@@ -380,7 +380,7 @@ class manager {
                     'enrolid' => $instance->id,
                     'updatesource' => 1
                 );
-                $records = $DB->get_records('enrol_arlo_registration', $conditions);
+                $records = $DB->get_records('enrol_arlo_registration');
                 if (!$records) {
                     self::trace("No records found requiring a registration result push.");
                 } else {
