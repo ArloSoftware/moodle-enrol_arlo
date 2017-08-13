@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="enrol/arlo/db" VERSION="20170721" COMMENT="XMLDB file for Moodle enrol/arlo"
+<XMLDB PATH="enrol/arlo/db" VERSION="20170813" COMMENT="XMLDB file for Moodle enrol/arlo"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -101,7 +101,7 @@
         <FIELD NAME="outcome" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="lastactivity" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="Time when there was some activity"/>
         <FIELD NAME="progressstatus" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="A user-readable string representing the status of the registration"/>
-        <FIELD NAME="progresspercent" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="progresspercent" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="sourcestatus" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="A RegistrationStatus value representing the current state of this registration, such as pending approval, approved, cancelled, or completed."/>
         <FIELD NAME="sourcecreated" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was created on Arlo"/>
         <FIELD NAME="sourcemodified" TYPE="char" LENGTH="36" NOTNULL="false" SEQUENCE="false" COMMENT="When this resource was last modified on Arlo"/>

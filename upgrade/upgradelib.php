@@ -111,7 +111,7 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_field('outcome', XMLDB_TYPE_CHAR, '20', null, null, null, null);
         $table->add_field('lastactivity', XMLDB_TYPE_CHAR, '36', null, null, null, null);
         $table->add_field('progressstatus', XMLDB_TYPE_CHAR, '64', null, null, null, null);
-        $table->add_field('progresspercent', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+        $table->add_field('progresspercent', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
         $table->add_field('sourcestatus', XMLDB_TYPE_CHAR, '20', null, null, null, null);
         $table->add_field('sourcecreated', XMLDB_TYPE_CHAR, '36', null, null, null, null);
         $table->add_field('sourcemodified', XMLDB_TYPE_CHAR, '36', null, null, null, null);
@@ -120,7 +120,7 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_field('sourceeventid', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
         $table->add_field('sourceeventguid', XMLDB_TYPE_CHAR, '36', null, null, null, null);
         $table->add_field('sourceonlineactivityid', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
-        $table->add_field('sourceonlineactivtyguid', XMLDB_TYPE_CHAR, '36', null, null, null, null);
+        $table->add_field('sourceonlineactivityguid', XMLDB_TYPE_CHAR, '36', null, null, null, null);
         $table->add_field('updatesource', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('lastpulltime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('lastpushtime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
