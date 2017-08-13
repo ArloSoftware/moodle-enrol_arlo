@@ -386,11 +386,13 @@ class manager {
                 } else {
                     foreach ($records as $registrationrecord) {
                         $result = new result($instance->courseid, $registrationrecord);
-                        $xmlbody = $result->export_to_xml();
-                        if (empty($xmlbody)) {
-                            $lock->release();
+                        // No need to go any further if nothing has changed.
+                        if (!$result->has_changed()) {
+                            self::trace('Result information has not changed');
                             continue;
                         }
+                        // Get generated Xml for push to Arlo.
+                        $xmlbody = $result->export_to_xml();
                         $sourceid = $registrationrecord->sourceid;
                         $requesturi = new RequestUri();
                         $requesturi->setHost($platform);
@@ -405,17 +407,30 @@ class manager {
                         $request = new \enrol_arlo\request\patch_request($schedule, $requesturi, $headers, $xmlbody, $options);
                         $schedule->lastpushtime = time();
                         $response = $request->execute();
+                        $updateregistrationrecord = new \stdClass();
+                        $updateregistrationrecord->id = $registrationrecord->id;
+                        $updateregistrationrecord->lastpushtime = time();
+                        $updateregistrationrecord->modified = time();
                         if (! (200 == $response->getStatusCode() || 201 == $response->getStatusCode())) {
-                            $lock->release();
-                            self::trace(sprintf("Bad response (%s) leaving the room.", $response->getStatusCode()));
-                            return false;
+                            self::trace(sprintf("Bad response (%s)", $response->getStatusCode()));
+                            $lasterror = $response->getStatusCode();
+                            $errorcount = $registrationrecord->errorcount;
+                            $updateregistrationrecord->lasterror = $lasterror;
+                            $updateregistrationrecord->errorcount = ++$errorcount;
+                        } else {
+                            self::trace('Result information successfully pushed');
+                            // Add changed field values on to record object.
+                            $changed = $result->get_changed();
+                            foreach (get_object_vars($changed) as $field => $value) {
+                                $updateregistrationrecord->{$field} = $value;
+                            }
+                            // Clear flags for successful push.
+                            $updateregistrationrecord->updatesource = 0;
+                            $updateregistrationrecord->lasterror = '';
+                            $updateregistrationrecord->errorcount = 0;
                         }
-                        // Update changed record.
-                        $changed = $result->get_changed();
-                        $changed->updatesource = 0; // Clear update flag.
-                        $changed->id = $registrationrecord->id;
-                        $DB->update_record('enrol_arlo_registration', $changed);
-                        self::trace('Result updated');
+                        // Update registration record in Moodle.
+                        $DB->update_record('enrol_arlo_registration', $updateregistrationrecord);
                     }
                     $schedule->updatenextpushtime = true;
                     self::update_scheduling_information($schedule);
