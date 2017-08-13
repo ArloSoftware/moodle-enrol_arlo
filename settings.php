@@ -41,7 +41,7 @@ if ($hassiteconfig) {
 
     $name = get_string('platform', 'enrol_arlo');
     $description = get_string('platform_desc', 'enrol_arlo');
-    $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, '', PARAM_HOST));
+    $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, ''));
 
     $name = get_string('apiusername', 'enrol_arlo');
     $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/115003692863');
@@ -50,7 +50,8 @@ if ($hassiteconfig) {
     $url->param('utm_campaign','Moodle plugin configuration');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
     $description = get_string('apiusername_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
-    $settings->add(new admin_setting_configtext('enrol_arlo/apiusername', $name, $description, null, PARAM_EMAIL));
+
+    $settings->add(new admin_setting_configemail('enrol_arlo/apiusername', $name, $description, null));
 
     $name = get_string('apipassword', 'enrol_arlo');
     $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, '', ''));

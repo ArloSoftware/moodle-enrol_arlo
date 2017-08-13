@@ -38,40 +38,13 @@ defined('MOODLE_INTERNAL') || die();
 class admin_setting_configlockedtext extends admin_setting_configtext {
     /**
      * Constructor
-     * @param string $name unique ascii name, either 'mysetting' for settings that in config, or 'myplugin/mysetting' for ones in config_plugins.
+     * @param string $name unique name, 'mysetting' for settings that in config, 'myplugin/mysetting' for ones in config_plugins.
      * @param string $visiblename localised
      * @param string $description long localised info
      * @param string $defaultsetting default password
      */
     public function __construct($name, $visiblename, $description, $defaultsetting) {
         parent::__construct($name, $visiblename, $description, $defaultsetting, PARAM_RAW, 30);
-    }
-
-    /**
-     * Log config changes if necessary.
-     * @param string $name
-     * @param string $oldvalue
-     * @param string $value
-     */
-    protected function add_to_config_log($name, $oldvalue, $value) {
-        // Trigger an event for updating this field.
-        $event = \enrol_arlo\event\fqdn_updated::create(array(
-            'objectid' => 1,
-            'context' => context_system::instance(),
-            'other' => array(
-                'name' => $name,
-                'oldvalue' => $oldvalue,
-                'newvalue' => $value
-            )
-        ));
-        $event->trigger();
-        if ($value !== '') {
-            $value = '********';
-        }
-        if ($oldvalue !== '' and $oldvalue !== null) {
-            $oldvalue = '********';
-        }
-        parent::add_to_config_log($name, $oldvalue, $value);
     }
 
     /**
@@ -89,11 +62,8 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
         $unmaskjs = '<script type="text/javascript">
         //<![CDATA[
         var is_ie = (navigator.userAgent.toLowerCase().indexOf("msie") != -1);
-        
         document.getElementById("'.$id.'").setAttribute("autocomplete", "off");
-        
         var unmaskdiv = document.getElementById("'.$id.'unmaskdiv");
-        
         var unmaskchb = document.createElement("input");
         unmaskchb.setAttribute("type", "checkbox");
         unmaskchb.setAttribute("id", "'.$id.'unmask");
@@ -101,7 +71,6 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
             document.getElementById("id_s_enrol_arlo_platform").readOnly ^= true;
         };
         unmaskdiv.appendChild(unmaskchb);
-        
         var unmasklbl = document.createElement("label");
         unmasklbl.innerHTML = "'.addslashes_js($unmask).'";
         if (is_ie) {
@@ -110,7 +79,6 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
           unmasklbl.setAttribute("for", "'.$id.'unmask");
         }
         unmaskdiv.appendChild(unmasklbl);
-        
         if (is_ie) {
           // ugly hack to work around the famous onchange IE bug
           unmaskchb.onclick = function() {this.blur();};
@@ -118,9 +86,50 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
         }
         //]]>
         </script>';
-        return format_admin_setting($this, $this->visiblename,
-            '<div class="form-password"><input readonly="readonly" type="text" size="'.$this->size.'" id="'.$id.'" name="'.$this->get_full_name().'" value="'.s($data).'" /><div class="unmask" id="'.$id.'unmaskdiv"></div>'.$unmaskjs.'</div>',
-            $this->description, true, '', NULL, $query);
+        $html = '<div class="form-password">
+                 <input readonly="readonly" type="text" size="'.$this->size.'" id="'.$id.'" name="'.$this->get_full_name().'" value="'.s($data).'" />
+                 <div class="unmask" id="'.$id.'unmaskdiv">
+                 </div>'.$unmaskjs.'</div>';
+        return format_admin_setting($this, $this->visiblename, $html,
+            $this->description, true, '', null, $query);
+    }
+
+    /**
+     * Extent in order to trigger event.
+     *
+     * @param mixed $data
+     */
+    public function write_setting($data) {
+        $name = $this->name;
+        $oldvalue = $this->get_setting();
+        $newvalue = $data;
+        $return = parent::write_setting($data);
+        // Trigger an event for updating this field.
+        $event = \enrol_arlo\event\fqdn_updated::create(array(
+            'objectid' => 1,
+            'context' => context_system::instance(),
+            'other' => array(
+                'name' => $name,
+                'oldvalue' => $oldvalue,
+                'newvalue' => $newvalue
+            )
+        ));
+        $event->trigger();
+        return $return;
+    }
+
+    /**
+     * Validate FQDN - host.
+     *
+     * @param $data
+     * @return bool|string
+     */
+    public function validate($data) {
+        $cleaned = clean_param($data, PARAM_HOST);
+        if (empty($cleaned)) {
+            return get_string('validateerror', 'admin');
+        }
+        return true;
     }
 }
 
@@ -192,5 +201,23 @@ class admin_setting_configarlostatus extends admin_setting {
                    <div class="form-description">'.$description.'</div>
                    </div>';
         return $return;
+    }
+}
+
+/**
+ * Extends config text to allow email validation.
+ */
+class admin_setting_configemail extends admin_setting_configtext {
+    /**
+     * Validate email address.
+     *
+     * @param $data
+     * @return bool|string
+     */
+    public function validate($data) {
+        if (!validate_email($data)) {
+            return get_string('validateerror', 'admin');
+        }
+        return true;
     }
 }
