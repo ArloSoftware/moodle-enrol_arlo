@@ -60,28 +60,26 @@ class result {
             // Get course grade item.
             $gradeitem = grade_item::fetch_course_item($course->id);
             // Required grade to pass course.
-            if (!empty($gradeitem->gradepass)) {
-                $graderequiredtopass = round($gradeitem->gradepass);
-                // Real grade, needed to check if passed.
-                $realgrade = grade_format_gradevalue($coursegrade->grade,
-                    $gradeitem,
-                    true,
-                    GRADE_DISPLAY_TYPE_REAL,
-                    $decimalpoints);
-                // Display type of grade.
-                $gradetodisplay = grade_format_gradevalue($coursegrade->grade,
-                    $gradeitem,
-                    true,
-                    $displaytype,
-                    $decimalpoints);
-                // Check if any grade. - denotes no grade yet.
-                if ($gradetodisplay != '-') {
-                    $this->grade = $gradetodisplay;
-                    if ($realgrade >= $graderequiredtopass) {
-                        $this->outcome = get_string('pass', 'enrol_arlo');
-                    } else {
-                        $this->outcome = get_string('fail', 'enrol_arlo');
-                    }
+            $graderequiredtopass = $gradeitem->gradepass;
+            // Real grade, needed to check if passed.
+            $realgrade = grade_format_gradevalue($coursegrade->grade,
+                $gradeitem,
+                true,
+                GRADE_DISPLAY_TYPE_REAL,
+                $decimalpoints);
+            // Display type of grade.
+            $gradetodisplay = grade_format_gradevalue($coursegrade->grade,
+                $gradeitem,
+                true,
+                $displaytype,
+                $decimalpoints);
+            // Check if any grade. - denotes no grade yet.
+            if ($gradetodisplay != '-') {
+                $this->grade = $gradetodisplay;
+                if ($realgrade >= $graderequiredtopass) {
+                    $this->outcome = get_string('pass', 'enrol_arlo');
+                } else {
+                    $this->outcome = get_string('fail', 'enrol_arlo');
                 }
             }
         }
