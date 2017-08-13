@@ -90,7 +90,7 @@ class result {
     protected function set_completion_progress_information() {
         $course = self::get_course($this->courseid);
         $info = new completion_info($course);
-        if ($info->is_tracked_user($this->userid)) {
+        if ($info->has_criteria() && $info->is_tracked_user($this->userid)) {
             $coursecomplete = $info->is_course_complete($this->userid);
             $criteriacomplete = $info->count_course_user_data($this->userid);
             // Load course completion.
@@ -128,7 +128,7 @@ class result {
         $record = new stdClass();
         $fields = array('grade', 'outcome', 'lastactivity', 'progressstatus', 'progresspercent');
         foreach ($fields as $field) {
-            if ($this->{$field} != $this->registrationrecord->{$field}) {
+            if (!is_null($this->{$field}) && $this->{$field} != $this->registrationrecord->{$field}) {
                 $record->{$field} = $this->{$field};
             }
         }
@@ -138,7 +138,7 @@ class result {
     public function has_changed() {
         $fields = array('grade', 'outcome', 'lastactivity', 'progressstatus', 'progresspercent');
         foreach ($fields as $field) {
-            if ($this->{$field} != $this->registrationrecord->{$field}) {
+            if (!is_null($this->{$field}) && $this->{$field} != $this->registrationrecord->{$field}) {
                 return true;
             }
         }
@@ -216,8 +216,6 @@ class result {
             $replace = $dom->createElement('replace', $this->progresspercent);
             $replace->setAttribute("sel", "Registration/ProgressPercent/text()[1]");
             $root->appendChild($replace);
-
-
         }
         return $dom->saveXML();
     }
