@@ -43,6 +43,19 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_index('contactsourceguid', XMLDB_INDEX_UNIQUE, array('sourceguid'));
         $dbman->create_table($table);
     }
+    // Conditionally add email table.
+    if (!$dbman->table_exists('enrol_arlo_emailqueue')) {
+        $table = new xmldb_table('enrol_arlo_emailqueue');
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('enrolid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('type', XMLDB_TYPE_CHAR, '20', null, null, null, null);
+        $table->add_field('status', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('extra', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $table->add_field('modified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $dbman->create_table($table);
+    }
     // Conditionally add Event table.
     if (!$dbman->table_exists('enrol_arlo_event')) {
         $table = new xmldb_table('enrol_arlo_event');
@@ -179,18 +192,6 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_field('modified', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
         $table->add_index('uniquecourseid', XMLDB_INDEX_UNIQUE, array('courseid'));
-        $dbman->create_table($table);
-    }
-    // Conditionally add email table.
-    if (!$dbman->table_exists('enrol_arlo_emaillog')) {
-        $table = new xmldb_table('enrol_arlo_emaillog');
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-        $table->add_field('timelogged', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('type', XMLDB_TYPE_CHAR, '128', null, null, null, null);
-        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('delivered', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
-        $table->add_field('extra', XMLDB_TYPE_TEXT, null, null, null, null, null);
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
         $dbman->create_table($table);
     }
     // Conditionally add request log table.
