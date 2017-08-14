@@ -228,29 +228,35 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $registration->sourceid = $registrationrecord->registrationid;
             $registration->sourceguid = $registrationrecord->registrationguid;
             $registration->sourcestatus = $registrationrecord->status;
-
-            if (!empty($registrationrecord->attendance)) {
-                $registration->attendance = $registrationrecord->attendance;
+            if ($registrationrecord->attendance != 'Unknown') {
+                if (!empty($registrationrecord->attendance)) {
+                    $registration->attendance = $registrationrecord->attendance;
+                }
             }
-
-            if (!empty($registrationrecord->grade)) {
-                $registration->grade = $registrationrecord->grade;
+            if ($registrationrecord->grade != 'Unknown') {
+                if (!empty($registrationrecord->grade)) {
+                    $registration->grade = $registrationrecord->grade;
+                }
             }
-
-            if (!empty($registrationrecord->outcome)) {
-                $registration->outcome = $registrationrecord->outcome;
+            if ($registrationrecord->outcome != 'Unknown') {
+                if (!empty($registrationrecord->outcome)) {
+                    $registration->outcome = $registrationrecord->outcome;
+                }
             }
-
-            if (!empty($registrationrecord->lastactivity)) {
-                $registration->lastactivity = date('Y-m-d\TH:i:s.000+00:00', $registrationrecord->lastactivity);
+            if ($registrationrecord->lastactivity != 'Unknown') {
+                if (!empty($registrationrecord->lastactivity)) {
+                    $registration->lastactivity = $registrationrecord->lastactivity;
+                }
             }
-
-            if (!empty($registrationrecord->progressstatus)) {
-                $registration->progressstatus = $registrationrecord->progressstatus;
+            if ($registrationrecord->progressstatus != 'Unknown') {
+                if (!empty($registrationrecord->progressstatus)) {
+                    $registration->progressstatus = $registrationrecord->progressstatus;
+                }
             }
-
-            if (!empty($registrationrecord->progresspercent)) {
-                $registration->progresspercent = $registrationrecord->progresspercent;
+            if ($registrationrecord->progresspercent != 'Unknown') {
+                if (!empty($registrationrecord->progresspercent)) {
+                    $registration->progresspercent = $registrationrecord->progresspercent;
+                }
             }
             $created                      = \DateTime::createFromFormat('U', $registrationrecord->created, $tz);
             $registration->sourcecreated  = $created->format(DATE_ISO8601);
