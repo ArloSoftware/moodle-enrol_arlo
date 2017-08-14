@@ -18,6 +18,13 @@ use GuzzleHttp\Psr7\Response;
 require_once("$CFG->dirroot/enrol/arlo/lib.php");
 
 class manager {
+    const EMAIL_TYPE_NEW_ACCOUNT = 'newaccount';
+    const EMAIL_TYPE_COURSE_WELCOME = 'coursewelcome';
+    const EMAIL_TYPE_NOTIFY_EXPIRY = 'notifyexpiry';
+    const EMAIL_STATUS_QUEUED = 0;
+    const EMAIL_STATUS_DELIVERED = 200;
+    const EMAIL_STATUS_FAILED = 500;
+
     /** @var REQUEST_INTERVAL_SECONDS default for normal pull and push operations. */
     const REQUEST_INTERVAL_SECONDS      = 900; // 15 Minutes.
     /** @var REQUEST_EXTENSION_SECONDS default for normal pull and push operations. */
@@ -778,6 +785,193 @@ class manager {
         return true;
     }
 
+    public function queue_email($enrolid, $userid, $type) {
+        global $DB;
+
+        switch ($type) {
+            case self::EMAIL_TYPE_NEW_ACCOUNT:
+            case self::EMAIL_TYPE_COURSE_WELCOME:
+            case self::EMAIL_TYPE_NOTIFY_EXPIRY:
+                break;
+            default: // Type not supported.
+                return false;
+        }
+        $record             = new \stdClass();
+        $record->enrolid    = $enrolid;
+        $record->userid     = $userid;
+        $record->type       = $type;
+        $record->status     = $type;
+        $record->modified   = time();
+        $record->id         = $DB->insert_record('enrol_arlo_emailqueue', $record);
+        return $record->id;
+    }
+
+    /**
+     * Generate password for new user and email.
+     *
+     * @param $instance
+     * @param $user
+     * @return bool
+     */
+    public function email_newaccountdetails($instance, $user) {
+        global $CFG, $DB;
+        // We try to send the mail in language the user understands,
+        // unfortunately the filter_string() does not support alternative langs yet
+        // so multilang will not work properly for site->fullname.
+        $lang = empty($user->lang) ? $CFG->lang : $user->lang;
+        $site  = get_site();
+        $noreplyuser = \core_user::get_noreply_user();
+        $newpassword = generate_password();
+
+        update_internal_user_password($user, $newpassword);
+
+        $a = new \stdClass();
+        $a->firstname   = fullname($user, true);
+        $a->sitename    = format_string($site->fullname);
+        $a->username    = $user->username;
+        $a->newpassword = $newpassword;
+        $a->link        = $CFG->wwwroot .'/login/';
+        $a->signoff     = generate_email_signoff();
+
+        $message = (string)new lang_string('newusernewpasswordtext', '', $a, $lang);
+        $subject = format_string($site->fullname) .': '. (string)new lang_string('newusernewpasswordsubj', '', $a, $lang);
+        $status = email_to_user($user, $noreplyuser, $subject, $message);
+        // Update information in email queue.
+        $conditions = array('enrolid' => $instance->id, 'userid' => $user->id, 'type' => self::EMAIL_TYPE_NEW_ACCOUNT);
+        $record = $DB->get_record('enrol_arlo_emailqueue', $conditions);
+        if (!$record) {
+            $record = new \stdClass();
+            $record->enrolid = $instance->id;
+            $record->userid = $user->id;
+            $record->type = self::EMAIL_TYPE_NEW_ACCOUNT;
+        }
+        $record->status = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+        $record->modified = time();
+        $DB->update_record('enrol_arlo_emaillog', $log);
+        return $status;
+    }
+
+    /**
+     * Send course welcome email to specified user.
+     *
+     * @param $instance
+     * @param $user
+     * @return bool
+     */
+    public function email_coursewelcomes($instance, $user) {
+        global $CFG, $DB;
+
+        $conditions = array('enrolid' => $instance->id, 'userid' => $user->id, 'type' => self::EMAIL_TYPE_COURSE_WELCOME);
+        // Course welcome may of been removed.
+        if (empty($instance->customint2)) {
+            $DB->delete_records('enrol_arlo_emailqueue', $conditions);
+            return false;
+        }
+        $noreplyuser = \core_user::get_noreply_user();
+        $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
+        $context = context_course::instance($course->id);
+        $a = new stdClass();
+        $a->coursename = format_string($course->fullname, true, array('context' => $context));
+        $a->courseurl = "$CFG->wwwroot/course/view.php?id=$course->id";
+        $a->username = $user->username;
+        $a->forgotpasswordurl = "$CFG->wwwroot/login/forgot_password.php";
+        if (trim($instance->customtext1) !== '') {
+            $message = $instance->customtext1;
+            $key = array(
+                '{$a->coursename}',
+                '{$a->courseurl}',
+                '{$a->fullname}',
+                '{$a->email}',
+                '{$a->username}',
+                '{$a->forgotpasswordurl}');
+            $value = array(
+                $a->coursename,
+                $a->courseurl,
+                fullname($user),
+                $user->email,
+                $user->username,
+                $a->forgotpasswordurl
+            );
+            $message = str_replace($key, $value, $message);
+            if (strpos($message, '<') === false) {
+                // Plain text only.
+                $messagetext = $message;
+                $messagehtml = text_to_html($messagetext, null, false, true);
+            } else {
+                // This is most probably the tag/newline soup known as FORMAT_MOODLE.
+                $messagehtml = format_text($message, FORMAT_MOODLE,
+                    array('context' => $context, 'para' => false, 'newlines' => true, 'filter' => true));
+                $messagetext = html_to_text($messagehtml);
+            }
+        } else {
+            $messagetext = get_string('welcometocoursetext', 'enrol_arlo', $a);
+            $messagehtml = text_to_html($messagetext, null, false, true);
+        }
+
+        $subject = get_string('welcometocourse', 'enrol_arlo',
+            format_string($course->fullname, true, array('context' => $context)));
+
+        $status = email_to_user($user, $noreplyuser, $subject, $messagetext, $messagehtml);
+        // Update information in email queue.
+        $conditions = array('enrolid' => $instance->id, 'userid' => $user->id, 'type' => self::EMAIL_TYPE_COURSE_WELCOME);
+        $record = $DB->get_record('enrol_arlo_emailqueue', $conditions);
+        if (!$record) {
+            $record = new \stdClass();
+            $record->enrolid = $instance->id;
+            $record->userid = $user->id;
+            $record->type = self::EMAIL_TYPE_COURSE_WELCOME;
+        }
+        $record->status = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+        $record->modified = time();
+        $DB->update_record('enrol_arlo_emaillog', $log);
+        return $status;
+    }
+
+    /**
+     * Notify user their course expiry. Only if notification of enrolled users (aka students) is enabled in course.
+     *
+     *
+     * @param $instance
+     * @param $user
+     * @return bool
+     */
+    public function email_expirynotice($instance, $user) {
+        global $CFG, $DB;
+
+        $conditions = array('enrolid' => $instance->id, 'userid' => $user->id, 'type' => self::EMAIL_TYPE_NOTIFY_EXPIRY);
+        // Notify expiry may of been unset.
+        if (!$instance->notifyexpiry) {
+            $DB->delete_records('enrol_arlo_emailqueue', $conditions);
+            return false;
+        }
+        $noreplyuser = \core_user::get_noreply_user();
+        $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
+        $context = context_course::instance($course->id);
+
+        $a              = new \stdClass();
+        $a->coursename  = format_string($course->fullname, true, array('context' => $context));
+        $a->courseurl   = "$CFG->wwwroot/course/view.php?id=$course->id";
+        $a->user        = fullname($user, true);
+
+        $subject        = get_string('expirymessagesubject', 'enrol_arlo', $a);
+        $messagetext    = get_string('expirymessagetext', 'enrol_arlo', $a);
+        $messagehtml    = text_to_html($messagetext, null, false, true);
+
+        $status = email_to_user($user, $noreplyuser, $subject, $messagetext, $messagehtml);
+        // Update information in email queue.
+        $record = $DB->get_record('enrol_arlo_emailqueue', $conditions);
+        if (!$record) {
+            $record = new \stdClass();
+            $record->enrolid = $instance->id;
+            $record->userid = $user->id;
+            $record->type = self::EMAIL_TYPE_NOTIFY_EXPIRY;
+        }
+        $record->status = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+        $record->modified = time();
+        $DB->update_record('enrol_arlo_emaillog', $log);
+        return $status;
+    }
+
     /**
      * Get users with enrol_arlo_createpassword preference set and email new
      * password.
@@ -840,6 +1034,7 @@ class manager {
         $user->load_by_resource($contactresource);
         if (!$user->exists()) {
             $user = $user->create();
+            self::queue_email($instance->id, $user->get_user_id(), self::EMAIL_TYPE_NEW_ACCOUNT);
         }
         $userid = $user->get_user_id();
         $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
@@ -866,7 +1061,7 @@ class manager {
                 self::trace(sprintf('User %s enrolment created', $record->userid));
                 // Send course welcome email.
                 if ($instance->customint8) {
-                    set_user_preference('enrol_arlo_coursewelcome_'.$instance->id, $instance->id, $userid);
+                    self::queue_email($instance->id, $userid, self::EMAIL_TYPE_COURSE_WELCOME);
                 }
             } else {
                 $DB->update_record('enrol_arlo_registration', $record);
@@ -967,6 +1162,49 @@ class manager {
         return true;
     }
 
+    /**
+     * Overrides parent implementation to allow user notification on enrolment expiration.
+     *
+     * @param $instance
+     * @param $userenrolment
+     */
+    public function process_expiration($instance, $userenrolment) {
+        // Deal with expired accounts.
+        $action = self::$plugin->get_config('expiredaction', ENROL_EXT_REMOVED_KEEP);
+        if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES or $action == ENROL_EXT_REMOVED_SUSPEND) {
+            if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
+                if (!self::$plugin->roles_protected()) {
+                    // Let's just guess what roles should be removed.
+                    $count = $DB->count_records('role_assignments',
+                        array('userid' => $userenrolment->userid, 'contextid' => $userenrolment->contextid));
+                    if ($count == 1) {
+                        role_unassign_all(array('userid' => $userenrolment->userid,
+                            'contextid' => $userenrolment->contextid,
+                            'component' => '',
+                            'itemid' => 0));
+
+                    } else if ($count > 1 and $instance->roleid) {
+                        role_unassign($instance->roleid, $userenrolment->userid, $userenrolment->contextid, '', 0);
+                    }
+                }
+                // In any case remove all roles that belong to this instance and user.
+                role_unassign_all(array('userid' => $userenrolment->userid,
+                    'contextid' => $userenrolment->contextid,
+                    'component' => 'enrol_'.$name,
+                    'itemid' => $instance->id), true);
+                // Final cleanup of subcontexts if there are no more course roles.
+                if (0 == $DB->count_records('role_assignments', ['userid' => $userenrolment->userid, 'contextid' => $userenrolment->contextid])) {
+                    role_unassign_all(array('userid' => $userenrolment->userid,
+                        'contextid' => $userenrolment->contextid,
+                        'component' => '',
+                        'itemid' => 0), true);
+                }
+            }
+            // Update the users enrolment status.
+            self::$plugin->update_user_enrol($instance, $userenrolment->userid, ENROL_USER_SUSPENDED);
+            self::queue_email($instance->id, $userenrolment->userid, $manager::EMAIL_TYPE_NOTIFY_EXPIRY);
+        }
+    }
     /**
      * Process enrolment expirations.
      *
