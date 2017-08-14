@@ -172,8 +172,6 @@ class user extends \core_user {
             $user->idnumber     = (string) self::get_contact_resource()->CodePrimary;
             $user->mnethostid   = $CFG->mnet_localhost_id;
             $user->id           = user_create_user($user, true, false);
-            // Set create password flag.
-            set_user_preference('enrol_arlo_createpassword', 1, $user->id);
         }
         // Create Contact association.
         $contact                  = new stdClass();
