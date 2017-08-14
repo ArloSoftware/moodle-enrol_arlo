@@ -64,7 +64,8 @@ class enrol_arlo_plugin extends enrol_plugin {
             'expiredaction' => ENROL_EXT_REMOVED_SUSPEND,
             'pushonlineactivityresults' => 1,
             'pusheventresults' => 1,
-            'alertsiteadmins' => 1
+            'alertsiteadmins' => 1,
+            'processemailviacli' => 0
         );
         return $defaults;
     }
