@@ -18,12 +18,12 @@ use GuzzleHttp\Psr7\Response;
 require_once("$CFG->dirroot/enrol/arlo/lib.php");
 
 class manager {
-    const EMAIL_TYPE_NEW_ACCOUNT = 'newaccount';
+    const EMAIL_TYPE_NEW_ACCOUNT    = 'newaccount';
     const EMAIL_TYPE_COURSE_WELCOME = 'coursewelcome';
-    const EMAIL_TYPE_NOTIFY_EXPIRY = 'notifyexpiry';
-    const EMAIL_STATUS_QUEUED = 0;
-    const EMAIL_STATUS_DELIVERED = 200;
-    const EMAIL_STATUS_FAILED = 500;
+    const EMAIL_TYPE_NOTIFY_EXPIRY  = 'notifyexpiry';
+    const EMAIL_STATUS_QUEUED       = 100;
+    const EMAIL_STATUS_DELIVERED    = 200;
+    const EMAIL_STATUS_FAILED       = 500;
 
     /** @var REQUEST_INTERVAL_SECONDS default for normal pull and push operations. */
     const REQUEST_INTERVAL_SECONDS      = 900; // 15 Minutes.
@@ -756,8 +756,6 @@ class manager {
                         $hasnext = (bool)$collection->hasNext();
                         $schedule->updatenextpulltime = ($hasnext) ? false : true;
                         self::update_scheduling_information($schedule);
-                        self::email_new_user_passwords();
-                        self::email_welcome_message_per_instance($instance);
                     }
                 }
             } else {
@@ -807,7 +805,12 @@ class manager {
     }
 
     public function process_email_queue() {
-        if (ENROL_ARLO) {}
+        $plugin = self::$plugin;
+        if ($plugin->get_config('sendemailimmediately', 1)) {
+            self::trace('Email processing is configured to send immediately, skipping.');
+            return;
+        }
+        if (ENROL_ARLO_CLI_EMAIL_PROCESSING) {}
     }
 
     /**
