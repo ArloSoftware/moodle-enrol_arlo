@@ -304,6 +304,15 @@ class user extends \core_user {
     }
 
     /**
+     * Get user record.
+     *
+     * @return stdClass
+     */
+    public function get_record() {
+        return $this->userrecord;
+    }
+
+    /**
      * @param $user
      */
     private function load_user_record($user) {
