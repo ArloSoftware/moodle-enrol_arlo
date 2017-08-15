@@ -195,11 +195,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         $DB->delete_records('enrol_arlo_instance', array('enrolid' => $instance->id));
         // Delete scheduling information.
         $DB->delete_records('enrol_arlo_schedule', array('enrolid' => $instance->id));
-        // Clear our any welcome flags.
-        if ($instance->customint8) {
-            $DB->delete_records('user_preferences',
-                array('name' => 'enrol_arlo_coursewelcome_'.$instance->id, 'value' => $instance->id));
-        }
+        // Delete email queue information.
+        $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $instance->id));
         // Time for the parent to do it's thang, yeow.
         parent::delete_instance($instance);
     }
