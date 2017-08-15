@@ -131,6 +131,7 @@ class manager {
         self::process_results($manualoverride);
         self::process_contacts($manualoverride);
         self::process_expirations();
+        self::process_email_queue();
     }
 
     /**
@@ -805,12 +806,21 @@ class manager {
     }
 
     public function process_email_queue() {
+        global $DB;
         $plugin = self::$plugin;
         if ($plugin->get_config('sendemailimmediately', 1)) {
             self::trace('Email processing is configured to send immediately, skipping.');
             return;
         }
-        if (ENROL_ARLO_CLI_EMAIL_PROCESSING) {}
+        $emailprocessingviacli = $plugin->get_config('emailprocessingviacli', 0);
+        if ($emailprocessingviacli && !defined('ENROL_ARLO_CLI_EMAIL_PROCESSING')) {
+            self::trace('Email processing is configured to send via CLI, skipping.');
+            return;
+        }
+        // Setup caches.
+        $instances  = array();
+        $users      = array();
+        self::trace('Ready to process');
     }
 
     /**

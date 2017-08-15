@@ -53,5 +53,11 @@ if (!enrol_is_enabled('arlo')) {
 
 cron_setup_user();
 
+define('ENROL_ARLO_CLI_EMAIL_PROCESSING', true);
+
+$manager = new enrol_arlo\manager(
+    new \text_progress_trace()
+);
+$manager->process_email_queue();
 
 exit(0);
