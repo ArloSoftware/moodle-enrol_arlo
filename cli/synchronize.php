@@ -18,7 +18,7 @@ define('CLI_SCRIPT', true);
 require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->libdir.'/clilib.php');         // CLI only functions.
 require_once($CFG->libdir.'/cronlib.php');
-require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+require_once($CFG->dirroot.'/enrol/arlo/lib.php');
 
 // We may need a lot of memory here.
 @set_time_limit(0);
@@ -56,11 +56,8 @@ Example:
     die;
 }
 
-// Force a debugging mode regardless the settings in the site administration.
-@error_reporting(1023);  // NOT FOR PRODUCTION SERVERS!
-@ini_set('display_errors', '1'); // NOT FOR PRODUCTION SERVERS!
-$CFG->debug = 38911;  // DEBUG_DEVELOPER // NOT FOR PRODUCTION SERVERS!
-$CFG->debugdisplay = true;   // NOT FOR PRODUCTION SERVERS!
+// Ensure errors are well explained.
+set_debugging(DEBUG_DEVELOPER, true);
 
 $interactive = empty($options['non-interactive']);
 
@@ -73,4 +70,4 @@ $manager = new enrol_arlo\manager(
     new \text_progress_trace()
 );
 $manager->process_all($manualoverride);
-die;
+exit(0);
