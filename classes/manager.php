@@ -805,6 +805,18 @@ class manager {
         return $record->id;
     }
 
+    public function update_email_status_queue($enrolid, $userid, $type, $status) {
+        global $DB;
+        $conditions = array('enrolid' => $enrolid, 'userid' => $userid,'type' => $type);
+        $record = $DB->get_record('enrol_arlo_emailqueue', $conditions);
+        if ($record) {
+            $record->status = $status;
+            $record->modified = time();
+            $DB->update_record('enrol_arlo_emailqueue', $record);
+        }
+        return;
+    }
+
     public function process_email_queue() {
         global $DB;
         $plugin = self::$plugin;
@@ -820,7 +832,66 @@ class manager {
         // Setup caches.
         $instances  = array();
         $users      = array();
-        self::trace('Ready to process');
+        self::trace('Process new account emails');
+        // Process new account emails.
+        $conditions = array('type' => self::EMAIL_TYPE_NEW_ACCOUNT, 'status' => self::EMAIL_STATUS_QUEUED);
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified');
+        foreach ($rs as $record) {
+            if (!isset($instances[$record->enrolid])) {
+                $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
+                $instances[$record->enrolid] = $instance;
+            }
+            $instance = $instances[$record->enrolid];
+            if (!isset($users[$record->userid])) {
+                $user = $DB->get_record('user', array('id' => $record->userid), '*', MUST_EXIST);
+                $users[$record->userid] = $user;
+            }
+            $user = $users[$record->userid];
+            $status = self::email_newaccountdetails($instance, $user);
+            $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+            self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
+        }
+        $rs->close();
+        // Process course welcome emails.
+        self::trace('Process course welcome emails');
+        $conditions = array('type' => self::EMAIL_TYPE_COURSE_WELCOME, 'status' => self::EMAIL_STATUS_QUEUED);
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified');
+        foreach ($rs as $record) {
+            if (!isset($instances[$record->enrolid])) {
+                $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
+                $instances[$record->enrolid] = $instance;
+            }
+            $instance = $instances[$record->enrolid];
+            if (!isset($users[$record->userid])) {
+                $user = $DB->get_record('user', array('id' => $record->userid), '*', MUST_EXIST);
+                $users[$record->userid] = $user;
+            }
+            $user = $users[$record->userid];
+            $status = self::email_coursewelcome($instance, $user);
+            $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+            self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_COURSE_WELCOME, $deliverystatus);
+        }
+        $rs->close();
+        // Process expiration emails.
+        self::trace('Process course expiration emails');
+        $conditions = array('type' => self::EMAIL_TYPE_NOTIFY_EXPIRY, 'status' => self::EMAIL_STATUS_QUEUED);
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified');
+        foreach ($rs as $record) {
+            if (!isset($instances[$record->enrolid])) {
+                $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
+                $instances[$record->enrolid] = $instance;
+            }
+            $instance = $instances[$record->enrolid];
+            if (!isset($users[$record->userid])) {
+                $user = $DB->get_record('user', array('id' => $record->userid), '*', MUST_EXIST);
+                $users[$record->userid] = $user;
+            }
+            $user = $users[$record->userid];
+            $status = self::email_expirynotice($instance, $user);
+            $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+            self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_NOTIFY_EXPIRY, $deliverystatus);
+        }
+        $rs->close();
     }
 
     /**
@@ -927,7 +998,7 @@ class manager {
 
         $noreplyuser = \core_user::get_noreply_user();
         $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
-        $context = context_course::instance($course->id);
+        $context = \context_course::instance($course->id);
 
         $a              = new \stdClass();
         $a->coursename  = format_string($course->fullname, true, array('context' => $context));
