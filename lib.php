@@ -65,7 +65,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             'pushonlineactivityresults' => 1,
             'pusheventresults' => 1,
             'alertsiteadmins' => 1,
-            'processemailviacli' => 0
+            'sendemailimmediately' => 1
         );
         return $defaults;
     }
