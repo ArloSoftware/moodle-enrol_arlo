@@ -972,12 +972,14 @@ class manager {
         $user->load_by_resource($contactresource);
         if (!$user->exists()) {
             $user = $user->create();
-            if ($plugin->get_config('sendemailimmediately', 1)) {
-                $status = self::email_newaccountdetails($instance, $user->get_record());
-                $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED: self::EMAIL_STATUS_FAILED;
-                self::add_email_to_queue($instance->id, $user->get_record()->id, self::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
-            } else {
-                self::add_email_to_queue($instance->id, $user->get_record()->id, self::EMAIL_TYPE_NEW_ACCOUNT);
+            if ($plugin->get_config('sendnewaccountdetailsemail', 1)) {
+                if ($plugin->get_config('sendemailimmediately', 1)) {
+                    $status = self::email_newaccountdetails($instance, $user->get_record());
+                    $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+                    self::add_email_to_queue($instance->id, $user->get_record()->id, self::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
+                } else {
+                    self::add_email_to_queue($instance->id, $user->get_record()->id, self::EMAIL_TYPE_NEW_ACCOUNT);
+                }
             }
         }
         $userid = $user->get_user_id();
