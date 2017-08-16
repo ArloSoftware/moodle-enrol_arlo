@@ -26,25 +26,61 @@ class communications extends \table_sql {
         parent::__construct($uniqueid);
         $columns = array();
         $headers = array();
-        $columns[] = 'enrolid';
         $columns[] = 'userid';
+        $headers[] = get_string('user');
         $columns[] = 'type';
+        $headers[] = get_string('type', 'enrol_arlo');
         $columns[] = 'status';
+        $headers[] = get_string('status');
         $columns[] = 'modified';
+        $headers[] = get_string('modified');
 
         $this->define_columns($columns);
-        $this->define_headers($columns);
+        $this->define_headers($headers);
         $this->useridfield = 'userid';
         $this->define_baseurl("/enrol/arlo/admin/communications.php");
         $this->is_collapsible = false;
         $this->sort_default_column = 'modified';
         $this->sort_default_order  = SORT_DESC;
         $this->set_count_sql('SELECT COUNT(*) FROM {enrol_arlo_emailqueue}', array());
-        $this->set_sql('*', "{enrol_arlo_emailqueue}", true);
+        $fields = 'eq.id,';
+        $fields .= get_all_user_name_fields(true, 'u');
+        $fields .= ',eq.userid,eq.type,eq.status,eq.modified';
+        $from = "{enrol_arlo_emailqueue} eq JOIN {user} u ON u.id = eq.userid";
+        $this->set_sql($fields, $from, true);
+        $this->no_sorting('enrolid');
+        $this->no_sorting('userid');
         $this->pageable(true);
 
     }
     public function col_modified($values) {
         return userdate($values->modified);
+    }
+    public function col_status($values) {
+        switch ($values->status) {
+            case \enrol_arlo\manager::EMAIL_STATUS_QUEUED :
+                return get_string('queued', 'enrol_arlo');
+            case \enrol_arlo\manager::EMAIL_STATUS_DELIVERED:
+                return get_string('delivered', 'enrol_arlo');
+            case \enrol_arlo\manager::EMAIL_STATUS_FAILED:
+                return get_string('failed', 'enrol_arlo');
+            default:
+                return get_string('unknown', 'enrol_arlo');
+        }
+    }
+    public function col_type($values) {
+        switch ($values->type) {
+            case \enrol_arlo\manager::EMAIL_TYPE_NEW_ACCOUNT:
+                return get_string('newaccountdetails', 'enrol_arlo');
+            case \enrol_arlo\manager::EMAIL_TYPE_COURSE_WELCOME:
+                return get_string('coursewelcome', 'enrol_arlo');
+            case \enrol_arlo\manager::EMAIL_TYPE_NOTIFY_EXPIRY:
+                return get_string('nofifyexpiry', 'enrol_arlo');
+            default:
+                return get_string('unknown', 'enrol_arlo');
+        }
+    }
+    public function col_userid($values) {
+        return fullname($values);
     }
 }

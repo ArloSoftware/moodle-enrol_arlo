@@ -23,5 +23,5 @@ admin_externalpage_setup('enrolsettingscommunications');
 $report = new \enrol_arlo\report\communications('enrolsettingscommunications');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('communications', 'enrol_arlo'));
-$report->out(20, false);
+$report->out(50, false);
 echo $OUTPUT->footer();
