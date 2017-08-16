@@ -1014,25 +1014,6 @@ class manager {
     }
 
     /**
-     * Get users with enrol_arlo_createpassword preference set and email new
-     * password.
-     *
-     */
-    public function email_new_user_passwords() {
-        global $DB;
-
-        $sql = "SELECT u.*
-                  FROM mdl_user u
-                  JOIN mdl_user_preferences up ON up.userid = u.id
-                 WHERE name = ?";
-        $records = $DB->get_records_sql($sql, array('enrol_arlo_createpassword'));
-        foreach($records as $user) {
-            self::$plugin->email_newpassword($user);
-            self::trace(sprintf("Sending new password email to %s", $user->id));
-        }
-    }
-
-    /**
      * Process enrolment registration. Enrol, unenrol or suspend based on configuration.
      *
      * @param $instance
