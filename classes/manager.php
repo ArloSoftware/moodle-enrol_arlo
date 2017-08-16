@@ -852,6 +852,11 @@ class manager {
             self::trace('Email processing is configured to send via cli, skipping.');
             return;
         }
+        // Create lock and check if locked.
+        $lockfactory = \core\lock\lock_config::get_lock_factory('enrol_arlo_email_queue');
+        if (!$lock = $lockfactory->get_lock('enrol_arlo_email_queue', self::LOCK_TIMEOUT_DEFAULT)) {
+            throw new \moodle_exception('locktimeout');
+        }
         // Setup caches.
         $instances  = array();
         $users      = array();
@@ -918,6 +923,8 @@ class manager {
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
+        $lock->release();
+        return true;
     }
 
     /**
