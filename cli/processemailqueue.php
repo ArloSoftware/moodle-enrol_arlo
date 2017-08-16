@@ -22,8 +22,8 @@ define('CLI_SCRIPT', true);
  * This script is meant to be called from a cronjob to process emails in queue.
  *
  * Sample cron entry:
- * # 5 minutes past 4am
- * 5 4 * * * $sudo -u www-data /usr/bin/php /var/www/moodle/enrol/arlo/cli/processemailqueue.php
+ * # Every 5 minutes
+ * # * / 5 * * * * $sudo -u www-data /usr/bin/php /var/www/moodle/enrol/arlo/cli/processemailqueue.php
  *
  * Notes:
  *   - It is required to use the web server account when executing PHP CLI scripts.
@@ -59,5 +59,4 @@ $manager = new enrol_arlo\manager(
     new \text_progress_trace()
 );
 $manager->process_email_queue();
-
 exit(0);
