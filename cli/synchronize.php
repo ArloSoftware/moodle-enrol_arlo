@@ -65,7 +65,6 @@ cron_setup_user();
 
 $manualoverride = $options['manual'];
 
-$plugin = enrol_get_plugin('arlo');
 $manager = new enrol_arlo\manager(
     new \text_progress_trace()
 );
