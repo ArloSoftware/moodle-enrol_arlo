@@ -784,6 +784,15 @@ class manager {
         return true;
     }
 
+    /**
+     * Queue a email type for later processing.
+     *
+     * @param $enrolid
+     * @param $userid
+     * @param $type
+     * @param int $status
+     * @return bool|int
+     */
     public function add_email_to_queue($enrolid, $userid, $type, $status = self::EMAIL_STATUS_QUEUED) {
         global $DB;
 
@@ -805,6 +814,14 @@ class manager {
         return $record->id;
     }
 
+    /**
+     * Update email log entries status in queue table.
+     *
+     * @param $enrolid
+     * @param $userid
+     * @param $type
+     * @param $status
+     */
     public function update_email_status_queue($enrolid, $userid, $type, $status) {
         global $DB;
         $conditions = array('enrolid' => $enrolid, 'userid' => $userid,'type' => $type);
@@ -817,8 +834,14 @@ class manager {
         return;
     }
 
+    /**
+     * Process the email queue. Can be off loaded to php cli/processemailqueue.php
+     * for sites that have courses with 1000's of Arlo registrations. This to so the plugin
+     * doesn't block any other scheduled tasks.
+     */
     public function process_email_queue() {
         global $DB;
+        $timestart = microtime();
         $plugin = self::$plugin;
         if ($plugin->get_config('sendemailimmediately', 1)) {
             self::trace('Email processing is configured to send immediately, skipping.');
@@ -826,7 +849,7 @@ class manager {
         }
         $emailprocessingviacli = $plugin->get_config('emailprocessingviacli', 0);
         if ($emailprocessingviacli && !defined('ENROL_ARLO_CLI_EMAIL_PROCESSING')) {
-            self::trace('Email processing is configured to send via CLI, skipping.');
+            self::trace('Email processing is configured to send via cli, skipping.');
             return;
         }
         // Setup caches.
@@ -892,6 +915,9 @@ class manager {
             self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_NOTIFY_EXPIRY, $deliverystatus);
         }
         $rs->close();
+        $timefinish = microtime();
+        $difftime = microtime_diff($timestart, $timefinish);
+        self::trace("Execution took {$difftime} seconds");
     }
 
     /**
