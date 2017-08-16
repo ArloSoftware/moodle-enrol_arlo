@@ -30,7 +30,7 @@ $string['apilog'] = 'API log';
 $string['managearlo'] = 'Manage Arlo';
 $string['pluginname'] = 'Arlo enrolment';
 $string['pluginname_desc'] = '<p>These enrolments are managed by local_arlo</p>';
-
+$string['communications'] = 'Communications';
 $string['customchar1'] = 'Arlo Template Code';
 $string['customchar1_help'] = 'Set this value to the Template Code in Arlo, Warning: Changing this value once set will remove groups associated with the old template.';
 

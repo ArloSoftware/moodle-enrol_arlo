@@ -70,9 +70,9 @@ if ($hassiteconfig) {
             $name = get_string('apilog', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/apilog.php')));
 
-        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloemaillog',
-            $name = get_string('emaillog', 'enrol_arlo'),
-            new moodle_url('/enrol/arlo/admin/emaillog.php')));
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingscommunications',
+            $name = get_string('communications', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/communications.php')));
     }
 
 }
