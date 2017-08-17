@@ -24,6 +24,7 @@ class manager {
     const EMAIL_STATUS_QUEUED       = 100;
     const EMAIL_STATUS_DELIVERED    = 200;
     const EMAIL_STATUS_FAILED       = 500;
+    const EMAIL_PROCESSING_LIMIT    = 250;
 
     /** @var REQUEST_INTERVAL_SECONDS default for normal pull and push operations. */
     const REQUEST_INTERVAL_SECONDS      = 900; // 15 Minutes.
@@ -863,7 +864,8 @@ class manager {
         self::trace('Process new account emails');
         // Process new account emails.
         $conditions = array('type' => self::EMAIL_TYPE_NEW_ACCOUNT, 'status' => self::EMAIL_STATUS_QUEUED);
-        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified');
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
+            0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
             if (!isset($instances[$record->enrolid])) {
                 $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
@@ -883,7 +885,8 @@ class manager {
         // Process course welcome emails.
         self::trace('Process course welcome emails');
         $conditions = array('type' => self::EMAIL_TYPE_COURSE_WELCOME, 'status' => self::EMAIL_STATUS_QUEUED);
-        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified');
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
+            0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
             if (!isset($instances[$record->enrolid])) {
                 $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
@@ -903,7 +906,8 @@ class manager {
         // Process expiration emails.
         self::trace('Process course expiration emails');
         $conditions = array('type' => self::EMAIL_TYPE_NOTIFY_EXPIRY, 'status' => self::EMAIL_STATUS_QUEUED);
-        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified');
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
+            0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
             if (!isset($instances[$record->enrolid])) {
                 $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
