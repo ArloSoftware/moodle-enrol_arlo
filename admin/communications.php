@@ -20,9 +20,9 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/tablelib.php');
 
-admin_externalpage_setup('enrolsettingscommunications');
+admin_externalpage_setup('enrolsettingsarlocommunications');
 
-$report = new communications('enrolsettingscommunications');
+$report = new communications('enrolsettingsarlocommunications');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('communications', 'enrol_arlo'));
 $report->out(communications::PAGINATION_MAX_LIMIT, false);
