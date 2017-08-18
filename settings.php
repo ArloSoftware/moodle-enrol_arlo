@@ -66,11 +66,11 @@ if ($hassiteconfig) {
             $name = get_string('configuration', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/configuration.php')));
 
-        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapilog',
-            $name = get_string('apilog', 'enrol_arlo'),
-            new moodle_url('/enrol/arlo/admin/apilog.php')));
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapirequests',
+            $name = get_string('apirequests', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/apirequests.php')));
 
-        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingscommunications',
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlocommunications',
             $name = get_string('communications', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/communications.php')));
     }
