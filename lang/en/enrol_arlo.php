@@ -22,22 +22,20 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['apirequests'] = 'API requests';
 $string['arloconnection'] = 'Arlo connection';
 $string['configuration'] = 'Configuration';
 $string['pluginstatus'] = 'Status';
-$string['emaillog'] = 'Email log';
-$string['apilog'] = 'API log';
+$string['timelogged'] = 'Time logged';
+$string['uri'] = 'URI';
+$string['extra'] = 'Extra';
 $string['managearlo'] = 'Manage Arlo';
 $string['pluginname'] = 'Arlo enrolment';
 $string['pluginname_desc'] = '<p>These enrolments are managed by local_arlo</p>';
 $string['communications'] = 'Communications';
 $string['customchar1'] = 'Arlo Template Code';
 $string['customchar1_help'] = 'Set this value to the Template Code in Arlo, Warning: Changing this value once set will remove groups associated with the old template.';
-
 $string['notemplatesavali'] = 'There are currently no unassigned templates available to be added to this course.';
-
-
-
 $string['assignedgroup'] = 'Assigned group';
 $string['assignrole'] = 'Assign role';
 $string['arlo:config'] = 'Configure Arlo enrolment instances';
@@ -62,19 +60,15 @@ $string['defaultperiod_desc'] = 'Default length of time that the enrolment is va
 $string['defaultperiod_help'] = 'Default length of time that the enrolment is valid, starting with the moment the user is enrolled. If disabled, the enrolment duration will be unlimited by default.';
 $string['instanceexists'] = 'Arlo is already synchronised with selected role';
 $string['status'] = 'Active';
+$string['status_help'] = '';
 $string['creategroup'] = 'Create new group';
-
 $string['sendcoursewelcomemessage'] = 'Send course welcome message';
 $string['sendcoursewelcomemessage_help'] = 'If enabled, users receive a welcome message via email when they are enrolled in a course.';
-
-
 $string['event'] = 'Event';
 $string['events'] = 'Events';
 $string['onlineactivity'] = 'Online Activity';
 $string['onlineactivities'] = 'Online Activities';
-
 $string['type'] = 'Type of Event';
-
 $string['linktemplatetocourse'] = 'Link Arlo template to this course';
 $string['remove'] = 'Remove';
 $string['template'] = 'Template';
@@ -186,9 +180,7 @@ $string['error_incorrectcontenttype_fullhtml'] = '
 
 
 $string['enrolperiod'] = 'Enrolment duration';
-$string['status_help'] = '';
 $string['noeventsoractivitiesfound'] = 'No "Active" Events or Online Activities found.';
-
 $string['errorselecttype'] = 'You must select an Type';
 $string['errorselectevent'] = 'You must select an Event';
 $string['errorselectonlineactvity'] = 'You must select an Online Activity';
