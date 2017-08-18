@@ -14,14 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+use enrol_arlo\report\communications;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/tablelib.php');
 
 admin_externalpage_setup('enrolsettingscommunications');
 
-$report = new \enrol_arlo\report\communications('enrolsettingscommunications');
+$report = new communications('enrolsettingscommunications');
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('communications', 'enrol_arlo'));
-$report->out(50, false);
+$report->out(communications::PAGINATION_MAX_LIMIT, false);
 echo $OUTPUT->footer();

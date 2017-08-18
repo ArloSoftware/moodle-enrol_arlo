@@ -21,7 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->libdir/tablelib.php");
 
 class communications extends \table_sql {
-    public $perpage = 20;
+    const PAGINATION_MAX_LIMIT = 50;
     public function __construct($uniqueid) {
         parent::__construct($uniqueid);
         $columns = array();
