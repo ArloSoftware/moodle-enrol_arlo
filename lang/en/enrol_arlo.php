@@ -85,11 +85,6 @@ $string['removetemplatedanger'] =
 {$a}
 </div>';
 
-$string['syncinstanceonadd'] = 'Synchronise instance on adding';
-$string['syncinstanceonadd_help'] = '
-This will synchronise enrolments for a instance immediately after adding. If not enabled enrolments will be synchronised each time cron is run.
-<p><strong>Note:</strong> Enabling this option can degrade user experience due to the time it takes to execute.</p>';
-
 $string['enrolusers'] = 'Enrol users';
 $string['expiredaction'] = 'Enrolment expiration action';
 $string['expiredaction_help'] = 'Select action to carry out when user enrolment expires. Please note that some user data and settings are purged from course during course unenrolment.';
