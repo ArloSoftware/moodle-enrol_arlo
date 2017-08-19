@@ -75,7 +75,7 @@ class communications extends \table_sql {
             case \enrol_arlo\manager::EMAIL_TYPE_COURSE_WELCOME:
                 return get_string('coursewelcome', 'enrol_arlo');
             case \enrol_arlo\manager::EMAIL_TYPE_NOTIFY_EXPIRY:
-                return get_string('nofifyexpiry', 'enrol_arlo');
+                return get_string('notifyexpiry', 'enrol_arlo');
             default:
                 return get_string('unknown', 'enrol_arlo');
         }
