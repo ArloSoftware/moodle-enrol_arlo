@@ -550,7 +550,7 @@ class manager {
                         $contactresource = $registration->getContact();
                         $user = new user(self::$trace);
                         if (!$user->load_by_resource($contactresource)) {
-                            throw new \moodle_exception("User doesn't exist.");
+                            continue; // Cancelled before record was created.
                         }
                         $user->update();
                         self::trace(sprintf("Updated %s", $user->get_user_fullname()));
@@ -969,6 +969,11 @@ class manager {
         $message = get_string('newusernewpasswordtext', '', $a);
         $subject = format_string($site->fullname) .': '. get_string('newusernewpasswordsubj', '', $a);
         $status = email_to_user($user, $noreplyuser, $subject, $message);
+        $deliverystatus = get_string('delivered', 'enrol_arlo');
+        if (!$status) {
+            $deliverystatus = get_string('failed', 'enrol_arlo');
+        }
+        self::trace(sprintf("New account details email to user %s %s", $user->id, $deliverystatus));
         return $status;
     }
 
@@ -1027,6 +1032,11 @@ class manager {
             format_string($course->fullname, true, array('context' => $context)));
 
         $status = email_to_user($user, $noreplyuser, $subject, $messagetext, $messagehtml);
+        $deliverystatus = get_string('delivered', 'enrol_arlo');
+        if (!$status) {
+            $deliverystatus = get_string('failed', 'enrol_arlo');
+        }
+        self::trace(sprintf("Course welcome email to user %s %s", $user->id, $deliverystatus));
         return $status;
     }
 
@@ -1055,6 +1065,11 @@ class manager {
         $messagehtml    = text_to_html($messagetext, null, false, true);
 
         $status = email_to_user($user, $noreplyuser, $subject, $messagetext, $messagehtml);
+        $deliverystatus = get_string('delivered', 'enrol_arlo');
+        if (!$status) {
+            $deliverystatus = get_string('failed', 'enrol_arlo');
+        }
+        self::trace(sprintf("Emrolment expiry email to user %s %s", $user->id, $deliverystatus));
         return $status;
     }
 
@@ -1081,6 +1096,10 @@ class manager {
         $user = new user(self::$trace);
         $user->load_by_resource($contactresource);
         if (!$user->exists()) {
+            if ($registration->Status == RegistrationStatus::CANCELLED) {
+                self::trace('Not creating new user account for cancelled registration, skipping');
+                return true;
+            }
             $user = $user->create();
             if ($plugin->get_config('sendnewaccountdetailsemail', 1)) {
                 if ($plugin->get_config('sendemailimmediately', 1)) {
