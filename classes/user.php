@@ -228,7 +228,7 @@ class user extends \core_user {
     public static function generate_username($firstname, $lastname, $email) {
         global $DB;
 
-        // Clean all variables as USERNAMES since going to be used in contructing username.
+        // Clean all variables as USERNAMES since going to be used in constructing username.
         $firstname  = clean_param($firstname, PARAM_USERNAME);
         $lastname   = clean_param($lastname, PARAM_USERNAME);
         $email      = clean_param($email, PARAM_USERNAME);
@@ -240,8 +240,8 @@ class user extends \core_user {
             ++$tries;
             switch($tries) {
                 case 1;
-                    $username = \core_text::strtolower(\core_text::substr($firstname, 0 , 3) .
-                        \core_text::substr($lastname, 0 , 3) . rand(0, 3));
+                    $username = \core_text::substr($firstname, 0 , 3) .
+                        \core_text::substr($lastname, 0 , 3) . rand(0, 3);
                     break;
                 case 2:
                     $username = $local;
@@ -251,11 +251,14 @@ class user extends \core_user {
                     break;
                 case 4:
                     $username = $email;
+                    break;
                 case 5:
                     $username = $email + rand(0, 3);
+                    break;
                 default:
-                    throw new \moodle_exception('Generate username could not failed');
+                    throw new \moodle_exception('Generate username failed to create');
             }
+            $username = \core_text::strtolower($username);
             $exists = $DB->get_record('user', array('username' => $username));
         }
         return $username;
