@@ -207,8 +207,10 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                 $event = $events[$resourcesourceguid];
                 $registration->sourceeventid = $event->eventid;
                 $registration->sourceeventguid = $event->eventguid;
+                // Get registration, possible duplicate record with cancelled status we don't want.
+                $select = "eventguid = :eventguid AND contactguid = :contactguid AND status != 'Cancelled'";
                 $conditions = array('eventguid' => $event->eventguid, 'contactguid' => $record->contactguid);
-                $registrationrecord = $DB->get_record('local_arlo_registrations', $conditions);
+                $registrationrecord = $DB->get_record_select('local_arlo_registrations', $select, $conditions);
             }
             // Online Activity.
             if ($record->resourcetype == 1) {
@@ -222,8 +224,10 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                 $onlineactivity = $onlineactivities[$resourcesourceguid];
                 $registration->sourceonlineactivityid = $onlineactivity->onlineactivityid;
                 $registration->sourceonlineactivityguid = $onlineactivity->onlineactivityguid;
+                // Get registration, possible duplicate record with cancelled status we don't want.
+                $select = "onlineactivityguid = :onlineactivityguid AND contactguid = :contactguid AND status != 'Cancelled'";
                 $conditions = array('onlineactivityguid' => $onlineactivity->onlineactivityguid, 'contactguid' => $record->contactguid);
-                $registrationrecord = $DB->get_record('local_arlo_registrations', $conditions);
+                $registrationrecord = $DB->get_record_select('local_arlo_registrations', $select, $conditions);
             }
             $registration->sourceid = $registrationrecord->registrationid;
             $registration->sourceguid = $registrationrecord->registrationguid;
