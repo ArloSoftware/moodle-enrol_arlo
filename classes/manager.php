@@ -859,24 +859,28 @@ class manager {
             throw new \moodle_exception('locktimeout');
         }
         // Setup caches.
-        $instances  = array();
-        $users      = array();
+        $instances          = array();
+        $deletedinstances   = array();
+        $users              = array();
+        $deletedusers       = array();
         self::trace('Process new account emails');
         // Process new account emails.
         $conditions = array('type' => self::EMAIL_TYPE_NEW_ACCOUNT, 'status' => self::EMAIL_STATUS_QUEUED);
         $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
             0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
-            if (!isset($instances[$record->enrolid])) {
-                $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
-                $instances[$record->enrolid] = $instance;
+            $instance = $DB->get_record('enrol', array('id' => $record->enrolid));
+            if (!$instance) {
+                // Clean up.
+                $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $record->enrolid));
+                continue;
             }
-            $instance = $instances[$record->enrolid];
-            if (!isset($users[$record->userid])) {
-                $user = $DB->get_record('user', array('id' => $record->userid), '*', MUST_EXIST);
-                $users[$record->userid] = $user;
+            $user = $DB->get_record('user', array('id' => $record->userid));
+            if (!$user) {
+                // Clean up.
+                $DB->delete_records('enrol_arlo_emailqueue', array('userid' => $record->userid));
+                continue;
             }
-            $user = $users[$record->userid];
             $status = self::email_newaccountdetails($instance, $user);
             $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
             self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
@@ -888,16 +892,18 @@ class manager {
         $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
             0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
-            if (!isset($instances[$record->enrolid])) {
-                $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
-                $instances[$record->enrolid] = $instance;
+            $instance = $DB->get_record('enrol', array('id' => $record->enrolid));
+            if (!$instance) {
+                // Clean up.
+                $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $record->enrolid));
+                continue;
             }
-            $instance = $instances[$record->enrolid];
-            if (!isset($users[$record->userid])) {
-                $user = $DB->get_record('user', array('id' => $record->userid), '*', MUST_EXIST);
-                $users[$record->userid] = $user;
+            $user = $DB->get_record('user', array('id' => $record->userid));
+            if (!$user) {
+                // Clean up.
+                $DB->delete_records('enrol_arlo_emailqueue', array('userid' => $record->userid));
+                continue;
             }
-            $user = $users[$record->userid];
             $status = self::email_coursewelcome($instance, $user);
             $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
             self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_COURSE_WELCOME, $deliverystatus);
@@ -909,16 +915,18 @@ class manager {
         $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
             0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
-            if (!isset($instances[$record->enrolid])) {
-                $instance = $DB->get_record('enrol', array('id' => $record->enrolid), '*', MUST_EXIST);
-                $instances[$record->enrolid] = $instance;
+            $instance = $DB->get_record('enrol', array('id' => $record->enrolid));
+            if (!$instance) {
+                // Clean up.
+                $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $record->enrolid));
+                continue;
             }
-            $instance = $instances[$record->enrolid];
-            if (!isset($users[$record->userid])) {
-                $user = $DB->get_record('user', array('id' => $record->userid), '*', MUST_EXIST);
-                $users[$record->userid] = $user;
+            $user = $DB->get_record('user', array('id' => $record->userid));
+            if (!$user) {
+                // Clean up.
+                $DB->delete_records('enrol_arlo_emailqueue', array('userid' => $record->userid));
+                continue;
             }
-            $user = $users[$record->userid];
             $status = self::email_expirynotice($instance, $user);
             $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
             self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_NOTIFY_EXPIRY, $deliverystatus);
