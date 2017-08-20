@@ -160,6 +160,7 @@ class user extends \core_user {
             $trigger            = true;
             $user               = self::get_dummy_user_record();
             $user->auth         = self::$plugin->get_config('authplugin', 'manual');
+            $user->password     = generate_password();
             $contactfirstname   = self::get_contact_resource()->FirstName;
             $contactlastname    = self::get_contact_resource()->LastName;
             $contactemail       = self::get_contact_resource()->Email;
