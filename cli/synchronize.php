@@ -28,10 +28,12 @@ raise_memory_limit(MEMORY_HUGE);
 list($options, $unrecognized) = cli_get_params(
     array(
         'non-interactive'   => false,
+        'verbose'           => false,
         'help'              => false,
         'manual'            => false
     ),
     array(
+        'v'=>'verbose',
         'h' => 'help'
     )
 );
@@ -47,6 +49,7 @@ if ($options['help']) {
 Options:
 --non-interactive     No interactive questions or confirmations
 --manual              Manual override
+-v, --verbose         Print verbose progess information
 -h, --help            Print out this help
 
 Example:
@@ -64,9 +67,12 @@ $interactive = empty($options['non-interactive']);
 cron_setup_user();
 
 $manualoverride = $options['manual'];
+if (empty($options['verbose'])) {
+    $trace = new null_progress_trace();
+} else {
+    $trace = new text_progress_trace();
+}
 
-$manager = new enrol_arlo\manager(
-    new \text_progress_trace()
-);
+$manager = new enrol_arlo\manager($trace);
 $manager->process_all($manualoverride);
 exit(0);
