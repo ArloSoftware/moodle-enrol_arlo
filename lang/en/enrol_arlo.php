@@ -216,6 +216,7 @@ $string['sendcoursewelcomemessage_help'] = 'If enabled, users receive a welcome 
 $string['status'] = 'Active';
 $string['status_help'] = '';
 $string['synchronize'] = 'Synchronize';
+$string['synchronizeinstance'] = 'Manually pull new registrations and push new results for an enrolment instance';
 $string['synctask'] = 'Synchronization of Arlo data';
 $string['template'] = 'Template';
 $string['timelogged'] = 'Time logged';
