@@ -35,26 +35,29 @@ $context = context_course::instance($course->id, MUST_EXIST);
 require_login($course);
 require_capability('enrol/arlo:synchronizeinstance', $context);
 
-$PAGE->set_url('/enrol/instances.php', array('id' => $instance->id));
+$PAGE->set_url('/enrol/arlo/synchronizeinstance.php', array('id' => $instance->id, 'sesskey' => sesskey()));
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('enrolmentinstances', 'enrol'));
 $PAGE->set_heading($course->fullname);
 
 $returnurl = new moodle_url('/enrol/instances.php', array('id' => $course->id));
+$returnstring = get_string('backtoenrolmentmethods', 'enrol_arlo');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('enrol/arlo:synchronizeinstance', 'enrol_arlo'));
+echo $OUTPUT->heading(get_string('synchronizeinstance', 'enrol_arlo'));
 
 if (confirm_sesskey() and $confirm == true) {
     $trace = new html_list_progress_trace();
     $manager = new enrol_arlo\manager($trace);
     if (!$manager->process_instance_registrations($instance, true)) {
-        redirect('/');
+        $returnurl = new moodle_url('/');
+        $returnstring = get_string('continue');
     }
     if (!$manager->process_instance_results($instance, true)) {
-        redirect('/');
+        $returnurl = new moodle_url('/');
+        $returnstring = get_string('continue');
     }
-    echo $OUTPUT->single_button($returnurl, get_string('backtoenrolmentmethods', 'enrol_arlo'));
+    echo $OUTPUT->single_button($returnurl, $returnstring);
 } else if (confirm_sesskey()) {
     $confirmurl = new moodle_url('/enrol/arlo/synchronizeinstance.php', array('confirm' => true, 'sesskey' => sesskey(), 'id' => $instance->id));
     echo $OUTPUT->confirm(get_string('longtime', 'enrol_arlo'), $confirmurl, $returnurl);
