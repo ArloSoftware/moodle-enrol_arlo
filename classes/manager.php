@@ -264,13 +264,15 @@ class manager {
         if (!is_string($resourcetype)) {
             throw new \coding_exception('resourcetype must be string');
         }
-        $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid);
+        $plugin = new \enrol_arlo_plugin();
+        $platform = $plugin->get_config('platform');
+        $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid, 'platform' => $platform);
         $schedule = $DB->get_record('enrol_arlo_schedule', $conditions);
         if (!$schedule) {
             $plugin                             = new \enrol_arlo_plugin();
             $schedule                           = new \stdClass();
             $schedule->enrolid                  = $enrolid;
-            $schedule->platform                 = $plugin->get_config('platform');
+            $schedule->platform                 = $platform;
             $schedule->resourcetype             = $resourcetype;
             $servertimezone                     = \core_date::get_server_timezone();
             $tz                                 = new \DateTimeZone($servertimezone);
@@ -308,7 +310,9 @@ class manager {
         if (!is_string($resourcetype)) {
             throw new \coding_exception('resourcetype must be string');
         }
-        $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid);
+        $plugin = new \enrol_arlo_plugin();
+        $platform = $plugin->get_config('platform');
+        $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid, 'platform' => $platform);
         $schedule = $DB->get_record('enrol_arlo_schedule', $conditions);
         if (!$schedule) {
             $schedule = self::schedule($resourcetype, $enrolid);
