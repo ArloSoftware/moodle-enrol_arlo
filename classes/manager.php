@@ -10,6 +10,7 @@ use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\Arlo\AuthAPI\Resource\EventTemplate;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
+use enrol_arlo\exception\instance_exception;
 use enrol_arlo\exception\invalidcontent_exception;
 use enrol_arlo\exception\lock_exception;
 use enrol_arlo\request\collection;
@@ -86,6 +87,54 @@ class manager {
             }
         }
         return true; // Callable if get this far.
+    }
+
+    /**
+     * Clean orphaned records.
+     *
+     * This is used to clean up stale records that can be left behind
+     * when a course or enrolment instance is deleted during a sync.
+     */
+    public function cleanup_orphaned_instances() {
+        global $DB;
+        // Get orphaned Arlo instance records.
+        $sql = "SELECT DISTINCT (eai.enrolid) 
+                           FROM {enrol_arlo_instance} eai 
+                      LEFT JOIN {enrol} e 
+                             ON e.id = eai.enrolid 
+                          WHERE e.id IS NULL";
+        $instances = $DB->get_records_sql($sql);
+        $instances = array_keys($instances);
+        // Get orphaned Arlo schedule records.
+        $sql = "SELECT DISTINCT (eas.enrolid) 
+                           FROM {enrol_arlo_schedule} eas 
+                      LEFT JOIN {enrol} e 
+                             ON e.id = eas.enrolid 
+                          WHERE eas.enrolid <> 0 AND e.id IS NULL;";
+        $schedules = $DB->get_records_sql($sql);
+        $schedules = array_keys($schedules);
+        // Get orphaned Arlo registration records.
+        $sql = "SELECT DISTINCT (ear.enrolid) 
+                           FROM {enrol_arlo_registration} ear 
+                      LEFT JOIN {enrol} e 
+                             ON e.id = ear.enrolid 
+                          WHERE e.id IS NULL";
+        $registrations = $DB->get_records_sql($sql);
+        $registrations = array_keys($registrations);
+        // Unique orphans, no associated Moodle enrolment instance.
+        $orphans = array_unique(array_merge($instances, $registrations));
+        foreach ($orphans as $orphan) {
+            if ($orphan) {
+                // Delete Arlo instance information.
+                $DB->delete_records('enrol_arlo_instance', array('enrolid' => $orphan));
+                // Delete scheduling information.
+                $DB->delete_records('enrol_arlo_schedule', array('enrolid' => $orphan));
+                // Delete associated registrations.
+                $DB->delete_records('enrol_arlo_registration', array('enrolid' => $orphan));
+                // Delete email queue information.
+                $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $orphan));
+            }
+        }
     }
 
     /**
@@ -364,7 +413,7 @@ class manager {
                 $arloinstance = self::get_associated_arlo_instance($instance->id);
                 // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
                 if (!$arloinstance) {
-                    throw new \moodle_exception('No matching Arlo enrolment instance.');
+                    throw new instance_exception('No matching Arlo enrolment instance.');
                 }
                 // Push configuration.
                 $pushonlineactivityresults = self::$plugin->get_config('pushonlineactivityresults');
@@ -382,7 +431,7 @@ class manager {
                 // Get schedule information.
                 $schedule = self::get_schedule('registrations', $instance->id);
                 if (!$schedule) {
-                    throw new \moodle_exception('No matching schedule information');
+                    throw new instance_exception('No matching schedule information');
                 }
                 if (!self::can_push($schedule, $manualoverride)) {
                     $lock->release();
@@ -452,6 +501,9 @@ class manager {
                 throw new lock_exception('operationiscurrentlylocked', 'enrol_arlo');
             }
         } catch (\Exception $exception) {
+            if ($exception instanceof instance_exception) {
+                self::trace($exception->getMessage());
+            }
             if ($exception instanceof lock_exception) {
                 self::trace(get_string('operationiscurrentlylocked', 'enrol_arlo'));
             } else {
@@ -689,6 +741,9 @@ class manager {
      */
     public function process_instance_registrations($instance, $manualoverride = false) {
         $timestart = microtime();
+        // Always run clean up first.
+        self::cleanup_orphaned_instances();
+        // Check if can call API.
         if (!self::api_callable()) {
             return false;
         }
@@ -705,12 +760,12 @@ class manager {
                     $arloinstance = self::get_associated_arlo_instance($instance->id);
                     // Shouldn't happen. Just extra check if somehow  enrol record exists but no associated Arlo instance record.
                     if (!$arloinstance) {
-                        throw new \moodle_exception('No matching Arlo enrolment instance.');
+                        throw new instance_exception('No matching Arlo enrolment instance.');
                     }
                     // Get schedule information.
                     $schedule = self::get_schedule('registrations', $instance->id, true);
                     if (!$schedule) {
-                        throw new \moodle_exception('No matching schedule information');
+                        throw new instance_exception('No matching schedule information');
                     }
                     if (!self::can_pull($schedule, $manualoverride)) {
                         $lock->release();
@@ -768,6 +823,9 @@ class manager {
                 throw new lock_exception('operationiscurrentlylocked', 'enrol_arlo');
             }
         } catch (\Exception $exception) {
+            if ($exception instanceof instance_exception) {
+                self::trace($exception->getMessage());
+            }
             if ($exception instanceof lock_exception) {
                 self::trace(get_string('operationiscurrentlylocked', 'enrol_arlo'));
             } else {
@@ -1116,15 +1174,19 @@ class manager {
             }
         }
         $userid = $user->get_user_id();
-        $conditions = array('userid' => $userid, 'enrolid' => $instance->id);
-        $registrationrecord = $DB->get_record('enrol_arlo_registration', $conditions);
-        $parameters = $conditions;
-        // Add id if available.
-        if ($registrationrecord) {
-            $parameters['id'] = $registrationrecord->id;
-        }
         // Build record for Moodle.
-        $record = helper::resource_to_record($registration, $parameters);
+        $record = helper::resource_to_record($registration, array('userid' => $userid, 'enrolid' => $instance->id));
+        // One user registration associated per enrolment instance get record in database.
+        $registrationrecord = $DB->get_record('enrol_arlo_registration', array('sourceguid' => $record->sourceguid));
+        if ($registrationrecord) {
+            if ($registrationrecord->enrolid != $instance->id) {
+                // Clean up. Potententially happen when deleted an instance while was syncing.
+                $DB->delete_records('enrol_arlo_registration', array('id' => $registrationrecord->id));
+            } else {
+                $record->id = $registrationrecord->id;
+            }
+        }
+        // Perform certain enrolment action based on registration status.
         if ($registration->Status == RegistrationStatus::APPROVED || $registration->Status == RegistrationStatus::COMPLETED) {
             $record->modified = time();
             if (empty($record->id)) {
