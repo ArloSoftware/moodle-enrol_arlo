@@ -6,7 +6,7 @@ class RequestUri {
     /** @var string Arlo API entry point. */
     const API_ENTRY_POINT = '/api/2012-02-01/auth/resources/';
     /** @var int COLLECTION_TOP_MAXIMUM maximum records can be returned. */
-    const COLLECTION_TOP_MAXIMUM = 100;
+    const COLLECTION_TOP_MAXIMUM = 250;
     /** @var string Uri host. */
     private $host = '';
     /** @var string Uri dummyhost. */
