@@ -160,7 +160,6 @@ class user extends \core_user {
             $trigger            = true;
             $user               = self::get_dummy_user_record();
             $user->auth         = self::$plugin->get_config('authplugin', 'manual');
-            $user->password     = generate_password();
             $contactfirstname   = self::get_contact_resource()->FirstName;
             $contactlastname    = self::get_contact_resource()->LastName;
             $contactemail       = self::get_contact_resource()->Email;
@@ -172,7 +171,7 @@ class user extends \core_user {
             $user->phone2       = (string) self::get_contact_resource()->PhoneMobile;
             $user->idnumber     = (string) self::get_contact_resource()->CodePrimary;
             $user->mnethostid   = $CFG->mnet_localhost_id;
-            $user->id           = user_create_user($user, true, false);
+            $user->id           = user_create_user($user, false, false);
         }
         // Create Contact association.
         $contact                  = new stdClass();
