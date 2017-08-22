@@ -313,6 +313,11 @@ class manager {
         if (!is_string($resourcetype)) {
             throw new \coding_exception('resourcetype must be string');
         }
+        $nextpulltime = 0;
+        $nextpushtime = time() + 86400;
+        if ($resourcetype == 'contacts') {
+            $nextpulltime = time() + 86400;
+        }
         $plugin = new \enrol_arlo_plugin();
         $platform = $plugin->get_config('platform');
         $conditions = array('resourcetype' => $resourcetype, 'enrolid' => $enrolid, 'platform' => $platform);
@@ -327,10 +332,10 @@ class manager {
             $tz                                 = new \DateTimeZone($servertimezone);
             $date                               = \DateTime::createFromFormat('U', 0, $tz);
             $schedule->latestsourcemodified     = $date->format(DATE_ISO8601); // Default 0 to 1970-01-01T00:00:00+0000.
-            $schedule->nextpulltime             = 0;
+            $schedule->nextpulltime             = $nextpulltime;
             $schedule->lastpulltime             = 0;
             $schedule->endpulltime              = $endpulltime;
-            $schedule->nextpushtime             = 0;
+            $schedule->nextpushtime             = $nextpushtime;
             $schedule->lastpushtime             = 0;
             $schedule->endpushtime              = $endpushtime;
             $schedule->lasterror                = '';
@@ -380,10 +385,10 @@ class manager {
      */
     public static function update_scheduling_information(\stdClass $schedule) {
         global $DB;
-        if (isset($schedule->updatenextpulltime) && $schedule->nextpulltime != '-1') {
+        if (!empty($schedule->updatenextpulltime) && $schedule->nextpulltime != '-1') {
             $schedule->nextpulltime = time();
         }
-        if (isset($schedule->updatenextpushtime) && $schedule->nextpushtime != '-1') {
+        if (!empty($schedule->updatenextpushtime) && $schedule->nextpushtime != '-1') {
             $schedule->nextpushtime = time();
         }
         $schedule->modified = time();
@@ -768,6 +773,7 @@ class manager {
                         throw new instance_exception('No matching schedule information');
                     }
                     if (!self::can_pull($schedule, $manualoverride)) {
+                        self::trace('No pull, break');
                         $lock->release();
                         break;
                     }
@@ -790,6 +796,7 @@ class manager {
                     $requesturi->setResourcePath($resourcepath);
                     $requesturi->addExpand('Registration/Contact');
                     $requesturi->addExpand($expand);
+                    $requesturi->setPagingTop(250);
                     $options = array();
                     $options['auth'] = array(
                         $apiusername,
@@ -814,8 +821,13 @@ class manager {
                             $latestmodified = $registration->LastModifiedDateTime;
                             $schedule->latestsourcemodified = $latestmodified;
                         }
-                        $hasnext = (bool)$collection->hasNext();
-                        $schedule->updatenextpulltime = ($hasnext) ? false : true;
+                        $hasnext = (bool) $collection->hasNext();
+                        if ($hasnext) {
+                            $schedule->updatenextpulltime = false;
+                            self::trace('Get next page from Arlo');
+                        } else {
+                            $schedule->updatenextpulltime = true;
+                        }
                         self::update_scheduling_information($schedule);
                     }
                 }
