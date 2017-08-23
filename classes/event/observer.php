@@ -80,6 +80,8 @@ class observer {
     public static function user_deleted($event) {
         global $DB;
         $DB->delete_records('enrol_arlo_contact', array('userid' => $event->relateduserid));
+        $DB->delete_records('enrol_arlo_registration', array('userid' => $event->relateduserid));
+        $DB->delete_records('enrol_arlo_emailqueue', array('userid' => $event->relateduserid));
     }
 
     /**
