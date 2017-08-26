@@ -447,7 +447,7 @@ class manager {
                     'enrolid' => $instance->id,
                     'updatesource' => 1
                 );
-                $records = $DB->get_records('enrol_arlo_registration');
+                $records = $DB->get_records('enrol_arlo_registration', array('enrolid' => $instance->id), 'lastpushtime');
                 if (!$records) {
                     self::trace("No records found requiring a registration result push.");
                 } else {
@@ -671,7 +671,7 @@ class manager {
 
         // Return if next pull time hasn't passed current time.
         if ($timestart < ($nextpulltime + $interval)) {
-            self::trace('Next pull time not yet reached');
+            self::trace(sprintf('Next pull time not yet reached %s', userdate($nextpulltime + $interval)));
             return false;
         }
 
@@ -709,7 +709,7 @@ class manager {
         }
         // Return if next push time hasn't passed current time.
         if ($timestart < ($nextpushtime + $interval)) {
-            self::trace('Next push time not yet reached');
+            self::trace(sprintf('Next push time not yet reached %s', userdate($nextpushtime + $interval)));
             return false;
         }
 
@@ -773,7 +773,6 @@ class manager {
                         throw new instance_exception('No matching schedule information');
                     }
                     if (!self::can_pull($schedule, $manualoverride)) {
-                        self::trace('No pull, break');
                         $lock->release();
                         break;
                     }
@@ -1155,7 +1154,8 @@ class manager {
      * @param Registration $registration
      * @throws \moodle_exception
      */
-    public function process_enrolment_registration($instance, $arloinstance, Registration $registration) {
+    public function process_enrolment_registration($instance, $arloinstance, Registration $registration)
+    {
         global $DB;
 
         $plugin = self::$plugin;
@@ -1216,7 +1216,7 @@ class manager {
                 if ($instance->customint8) {
                     if ($plugin->get_config('sendemailimmediately', 1)) {
                         $status = self::email_coursewelcome($instance, $user->get_record());
-                        $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED: self::EMAIL_STATUS_FAILED;
+                        $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
                         self::add_email_to_queue($instance->id, $user->get_record()->id, self::EMAIL_TYPE_COURSE_WELCOME, $deliverystatus);
                     } else {
                         self::add_email_to_queue($instance->id, $user->get_record()->id, self::EMAIL_TYPE_COURSE_WELCOME);
@@ -1224,6 +1224,7 @@ class manager {
                 }
             } else {
                 $DB->update_record('enrol_arlo_registration', $record);
+                self::trace(sprintf('Updated registration record: %s', $record->userid));
                 $ue = $DB->get_record('user_enrolments', array('enrolid' => $instance->id, 'userid' => $userid));
                 if ($instance->enrolperiod) {
                     $timestart = $ue->timestart;
@@ -1239,13 +1240,18 @@ class manager {
                 groups_add_member($instance->customint2, $userid, 'enrol_arlo');
             }
         }
-        if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_UNENROL)) {
-            $plugin->unenrol_user($instance, $userid);
-            self::trace(sprintf('User %s unenrolled', $record->userid));
-        }
-        if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES)) {
-            $plugin->suspend_and_remove_roles($instance, $userid);
-            self::trace(sprintf('User %s suspended', $record->userid));
+        if ($registration->Status == RegistrationStatus::CANCELLED) {
+            if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_UNENROL)) {
+                $plugin->unenrol_user($instance, $userid);
+                self::trace(sprintf('User %s unenrolled', $record->userid));
+            }
+            if ($registration->Status == RegistrationStatus::CANCELLED && ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES)) {
+                $plugin->suspend_and_remove_roles($instance, $userid);
+                self::trace(sprintf('User %s suspended', $record->userid));
+            }
+            if ($registrationrecord) {
+                $DB->delete_records('enrol_arlo_registration', array('id' => $registrationrecord->id));
+            }
         }
         return true;
     }
