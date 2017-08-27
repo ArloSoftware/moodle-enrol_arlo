@@ -40,7 +40,10 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
 
     $name = get_string('platform', 'enrol_arlo');
-    $description = get_string('platform_desc', 'enrol_arlo');
+
+    $url = new moodle_url('https://www.arlo.co/register#stage1');
+    $title = get_string('opennewtabtitle', 'enrol_arlo');
+    $description = get_string('platform_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
     $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, ''));
 
     $name = get_string('apiusername', 'enrol_arlo');
@@ -53,8 +56,15 @@ if ($hassiteconfig) {
 
     $settings->add(new admin_setting_configemail('enrol_arlo/apiusername', $name, $description, null));
 
+    $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/211902623');
+    $url->param('utm_source','Moodle Marketplace');
+    $url->param('utm_medium','referral organic');
+    $url->param('utm_campaign','Moodle plugin configuration');
+    $title = get_string('opennewtabtitle', 'enrol_arlo');
+    $description = get_string('apipassword_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
+
     $name = get_string('apipassword', 'enrol_arlo');
-    $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, '', ''));
+    $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, $description, ''));
 
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
