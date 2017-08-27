@@ -152,6 +152,7 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);
         $table->add_field('resourcetype', XMLDB_TYPE_CHAR, '50', null, null, null, null);
         $table->add_field('latestsourcemodified', XMLDB_TYPE_CHAR, '36', null, null, null, null);
+        $table->add_field('lastsourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('nextpulltime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('lastpulltime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('endpulltime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
@@ -200,7 +201,7 @@ function enrol_arlo_upgrade_prepare_new_tables() {
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('timelogged', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, null, null, null);
-        $table->add_field('uri', XMLDB_TYPE_CHAR, '512', null, null, null, null);
+        $table->add_field('uri', XMLDB_TYPE_CHAR, '1024', null, null, null, null);
         $table->add_field('status', XMLDB_TYPE_INTEGER, '3', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('extra', XMLDB_TYPE_TEXT, null, null, null, null, null);
         $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
