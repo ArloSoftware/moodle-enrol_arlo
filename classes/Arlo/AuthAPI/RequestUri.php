@@ -21,6 +21,8 @@ class RequestUri {
     private $expands = array();
     /** @var array filters array of filter options. */
     private $filters = array();
+
+    private $filterBy;
     /** @var string orderBy set order of records in collection. */
     private $orderBy;
 
@@ -56,6 +58,15 @@ class RequestUri {
      */
     public function addFilter(Filter $filter) {
         $this->filters[$filter->getResourceField()] = $filter;
+    }
+
+    /**
+     * Add string filter option. Quick workaround to issue #68.
+     *
+     * @param $filterBy
+     */
+    public function setFilterBy($filterBy) {
+        $this->filterBy = $filterBy;
     }
 
     public static function createFromUri($uri) {
@@ -115,6 +126,9 @@ class RequestUri {
                 $pieces[] = $filter->export();
             }
             $params['filter'] = implode(' or ', $pieces);
+        }
+        if (!empty($this->filterBy)) {
+            $params['filter'] = $this->filterBy;
         }
         if (!empty($this->orderBy)) {
             $params['orderby'] = $this->orderBy;
