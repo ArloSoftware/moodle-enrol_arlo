@@ -796,6 +796,22 @@ class manager {
                     $requesturi->addExpand('Registration/Contact');
                     $requesturi->addExpand($expand);
                     $requesturi->setPagingTop(250);
+                    $latestmodified = $schedule->latestsourcemodified;
+                    if (empty($latestmodified)) {
+                        $servertimezone = \core_date::get_server_timezone();
+                        $tz = new \DateTimeZone($servertimezone);
+                        $date = \DateTime::createFromFormat('U', 0, $tz);
+                        $latestmodified = $date->format(DATE_ISO8601);
+                    }
+                    $lastsourceid = $schedule->lastsourceid;
+                    // Events end point doesn't like DateTimeOffset.
+                    $filter = '';
+                    $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
+                    if ($lastsourceid){
+                        $filter .= " OR (LastModifiedDateTime eq datetime('".$latestmodified."') AND RegistrationID gt ".$lastsourceid.")";
+                    }
+                    $requesturi->setFilterBy($filter);
+                    $requesturi->setOrderBy("LastModifiedDateTime ASC,RegistrationID ASC");
                     $options = array();
                     $options['auth'] = array(
                         $apiusername,
@@ -819,6 +835,8 @@ class manager {
                             self::process_enrolment_registration($instance, $arloinstance, $registration);
                             $latestmodified = $registration->LastModifiedDateTime;
                             $schedule->latestsourcemodified = $latestmodified;
+                            $lastsourceid = $registration->RegistrationID;
+                            $schedule->lastsourceid = $lastsourceid;
                         }
                         $hasnext = (bool) $collection->hasNext();
                         if ($hasnext) {
@@ -1280,8 +1298,25 @@ class manager {
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
                 $requesturi->setHost($platform);
+                $requesturi->setPagingTop(250);
                 $requesturi->setResourcePath('events/');
                 $requesturi->addExpand('Event/EventTemplate');
+                $latestmodified = $schedule->latestsourcemodified;
+                if (empty($latestmodified)) {
+                    $servertimezone = \core_date::get_server_timezone();
+                    $tz = new \DateTimeZone($servertimezone);
+                    $date = \DateTime::createFromFormat('U', 0, $tz);
+                    $latestmodified = $date->format(DATE_ISO8601);
+                }
+                $lastsourceid = $schedule->lastsourceid;
+                // Events end point doesn't like DateTimeOffset.
+                $filter = '';
+                $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
+                if ($lastsourceid){
+                    $filter .= " OR (LastModifiedDateTime eq datetime('".$latestmodified."') AND EventID gt ".$lastsourceid.")";
+                }
+                $requesturi->setFilterBy($filter);
+                $requesturi->setOrderBy("LastModifiedDateTime ASC,EventID ASC");
                 $options = array();
                 $options['auth'] = array(
                     $apiusername,
@@ -1305,6 +1340,8 @@ class manager {
                         $record = self::process_event($event);
                         $latestmodified = $event->LastModifiedDateTime;
                         $schedule->latestsourcemodified = $latestmodified;
+                        $lastsourceid = $event->EventID;
+                        $schedule->lastsourceid = $lastsourceid;
                     }
                     $hasnext = (bool) $collection->hasNext();
                     $schedule->updatenextpulltime = ($hasnext) ? false : true;
@@ -1426,8 +1463,25 @@ class manager {
                 // Setup RequestUri for getting Events.
                 $requesturi = new RequestUri();
                 $requesturi->setHost($platform);
+                $requesturi->setPagingTop(250);
                 $requesturi->setResourcePath('onlineactivities/');
                 $requesturi->addExpand('OnlineActivity/EventTemplate');
+                $latestmodified = $schedule->latestsourcemodified;
+                if (empty($latestmodified)) {
+                    $servertimezone = \core_date::get_server_timezone();
+                    $tz = new \DateTimeZone($servertimezone);
+                    $date = \DateTime::createFromFormat('U', 0, $tz);
+                    $latestmodified = $date->format(DATE_ISO8601);
+                }
+                $lastsourceid = $schedule->lastsourceid;
+                // Online Activity end point doesn't like DateTimeOffset.
+                $filter = '';
+                $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
+                if ($lastsourceid) {
+                    $filter = " OR (LastModifiedDateTime eq datetime('".$latestmodified."') AND OnlineActivityID gt ".$lastsourceid.")";
+                }
+                $requesturi->setFilterBy($filter);
+                $requesturi->setOrderBy("LastModifiedDateTime ASC,OnlineActivityID ASC");
                 $options = array();
                 $options['auth'] = array(
                     $apiusername,
@@ -1451,6 +1505,8 @@ class manager {
                         $record = self::process_onlineactivity($onlineactivity);
                         $latestmodified = $onlineactivity->LastModifiedDateTime;
                         $schedule->latestsourcemodified = $latestmodified;
+                        $lastsourceid = $onlineactivity->OnlineActivityID;
+                        $schedule->lastsourceid = $lastsourceid;
                     }
                     $hasnext = (bool) $collection->hasNext();
                     $schedule->updatenextpulltime = ($hasnext) ? false : true;
@@ -1501,6 +1557,21 @@ class manager {
                 $requesturi->setHost($platform);
                 $requesturi->setResourcePath('eventtemplates/');
                 $requesturi->addExpand('EventTemplate');
+                $latestmodified = $schedule->latestsourcemodified;
+                if (empty($latestmodified)) {
+                    $servertimezone = \core_date::get_server_timezone();
+                    $tz = new \DateTimeZone($servertimezone);
+                    $date = \DateTime::createFromFormat('U', 0, $tz);
+                    $latestmodified = $date->format(DATE_ISO8601);
+                }
+                $lastsourceid = $schedule->lastsourceid;
+                $filter = '';
+                $filter .= "(LastModifiedDateTime gt datetimeoffset('".$latestmodified."'))";
+                if ($lastsourceid) {
+                    $filter .= " OR (LastModifiedDateTime eq datetimeoffset('".$latestmodified."') AND TemplateID gt ".$lastsourceid.")";
+                }
+                $requesturi->setFilterBy($filter);
+                $requesturi->setOrderBy("LastModifiedDateTime ASC,TemplateID ASC");
                 $options = array();
                 $options['auth'] = array(
                     $apiusername,
@@ -1523,6 +1594,8 @@ class manager {
                         $record = self::process_template($template);
                         $latestmodified = $template->LastModifiedDateTime;
                         $schedule->latestsourcemodified = $latestmodified;
+                        $lastsourceid = $template->TemplateID;
+                        $schedule->lastsourceid = $lastsourceid;
                     }
                     $hasnext = (bool) $collection->hasNext();
                     $schedule->updatenextpulltime = ($hasnext) ? false : true;
