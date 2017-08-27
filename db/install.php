@@ -35,8 +35,5 @@ function xmldb_enrol_arlo_install() {
     foreach ($plugin->get_config_defaults() as $name => $value) {
         $plugin->set_config($name, $value);
     }
-    \enrol_arlo\manager::schedule('eventtemplates');
-    \enrol_arlo\manager::schedule('events');
-    \enrol_arlo\manager::schedule('onlineactivities');
     return true;
 }
