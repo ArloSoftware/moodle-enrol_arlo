@@ -14,13 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Observe events configuration.
- *
- * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
- * @copyright 2017 LearningWorks Ltd {@link http://www.learningworks.co.nz}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+
+// Observe events configuration.
 $observers = array(
     array(
         'eventname' => '\core\event\course_module_completion_updated',
