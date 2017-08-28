@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace enrol_arlo;
 
@@ -15,6 +29,8 @@ use enrol_arlo\exception\invalidcontent_exception;
 use enrol_arlo\exception\lock_exception;
 use enrol_arlo\request\collection;
 use GuzzleHttp\Psr7\Response;
+
+defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->dirroot/enrol/arlo/lib.php");
 
@@ -98,26 +114,26 @@ class manager {
     public function cleanup_orphaned_instances() {
         global $DB;
         // Get orphaned Arlo instance records.
-        $sql = "SELECT DISTINCT (eai.enrolid) 
-                           FROM {enrol_arlo_instance} eai 
-                      LEFT JOIN {enrol} e 
-                             ON e.id = eai.enrolid 
+        $sql = "SELECT DISTINCT (eai.enrolid)
+                           FROM {enrol_arlo_instance} eai
+                      LEFT JOIN {enrol} e
+                             ON e.id = eai.enrolid
                           WHERE e.id IS NULL";
         $instances = $DB->get_records_sql($sql);
         $instances = array_keys($instances);
         // Get orphaned Arlo schedule records.
-        $sql = "SELECT DISTINCT (eas.enrolid) 
-                           FROM {enrol_arlo_schedule} eas 
-                      LEFT JOIN {enrol} e 
-                             ON e.id = eas.enrolid 
+        $sql = "SELECT DISTINCT (eas.enrolid)
+                           FROM {enrol_arlo_schedule} eas
+                      LEFT JOIN {enrol} e
+                             ON e.id = eas.enrolid
                           WHERE eas.enrolid <> 0 AND e.id IS NULL;";
         $schedules = $DB->get_records_sql($sql);
         $schedules = array_keys($schedules);
         // Get orphaned Arlo registration records.
-        $sql = "SELECT DISTINCT (ear.enrolid) 
-                           FROM {enrol_arlo_registration} ear 
-                      LEFT JOIN {enrol} e 
-                             ON e.id = ear.enrolid 
+        $sql = "SELECT DISTINCT (ear.enrolid)
+                           FROM {enrol_arlo_registration} ear
+                      LEFT JOIN {enrol} e
+                             ON e.id = ear.enrolid
                           WHERE e.id IS NULL";
         $registrations = $DB->get_records_sql($sql);
         $registrations = array_keys($registrations);
@@ -599,12 +615,8 @@ class manager {
                 $requesturi->addExpand('Registration/Contact');
                 $requesturi->setOrderBy('Contact/LastModifiedDateTime ASC');
                 $latestmodified = $schedule->latestsourcemodified;
-                $modifiedfilter = Filter::create()
-                    ->setResourceField('Contact/LastModifiedDateTime')
-                    ->setOperator('gt')
-                    ->setDateValue($latestmodified);
+                $modifiedfilter = Filter::create()->setResourceField('Contact/LastModifiedDateTime')->setOperator('gt')->setDateValue($latestmodified);
                 $requesturi->addFilter($modifiedfilter);
-
                 $options = array();
                 $options['auth'] = array(
                     $apiusername,
@@ -825,7 +837,7 @@ class manager {
                     // Events end point doesn't like DateTimeOffset.
                     $filter = '';
                     $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
-                    if ($lastsourceid){
+                    if ($lastsourceid) {
                         $filter .= " OR (LastModifiedDateTime eq datetime('".$latestmodified."') AND RegistrationID gt ".$lastsourceid.")";
                     }
                     $requesturi->setFilterBy($filter);
@@ -935,7 +947,7 @@ class manager {
      */
     public function update_email_status_queue($enrolid, $userid, $type, $status) {
         global $DB;
-        $conditions = array('enrolid' => $enrolid, 'userid' => $userid,'type' => $type);
+        $conditions = array('enrolid' => $enrolid, 'userid' => $userid, 'type' => $type);
         $record = $DB->get_record('enrol_arlo_emailqueue', $conditions);
         if ($record) {
             $record->status = $status;
@@ -1191,8 +1203,7 @@ class manager {
      * @param Registration $registration
      * @throws \moodle_exception
      */
-    public function process_enrolment_registration($instance, $arloinstance, Registration $registration)
-    {
+    public function process_enrolment_registration($instance, $arloinstance, Registration $registration) {
         global $DB;
 
         $plugin = self::$plugin;
@@ -1331,7 +1342,7 @@ class manager {
                 // Events end point doesn't like DateTimeOffset.
                 $filter = '';
                 $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
-                if ($lastsourceid){
+                if ($lastsourceid) {
                     $filter .= " OR (LastModifiedDateTime eq datetime('".$latestmodified."') AND EventID gt ".$lastsourceid.")";
                 }
                 $requesturi->setFilterBy($filter);
