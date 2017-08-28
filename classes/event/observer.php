@@ -35,7 +35,7 @@ class observer {
      */
     private static function set_update_source($courseid, $relateduserid) {
         global $DB;
-        $sql = "SELECT ear.* 
+        $sql = "SELECT ear.*
                   FROM {enrol} e
                   JOIN {enrol_arlo_registration} ear ON ear.enrolid = e.id
                   JOIN {course} c ON c.id = e.courseid
