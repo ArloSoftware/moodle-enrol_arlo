@@ -101,14 +101,14 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         // Set resourcetype Event or Online Activity
         $arloinstance->type = $fields['arlotype'];
-        if ($arloinstance->type  == self::ARLO_TYPE_EVENT) {
+        if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
             if (empty($fields['arloevent'])) {
                 throw new moodle_exception('Field arloevent is empty.');
             }
             $sourcetable = 'enrol_arlo_event';
             $sourceguid = $fields['arloevent'];
         }
-        if ($arloinstance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
+        if ($arloinstance->type == self::ARLO_TYPE_ONLINEACTIVITY) {
             if (empty($fields['arloonlineactivity'])) {
                 throw new moodle_exception('Field sourceguid is empty.');
             }
@@ -213,19 +213,15 @@ class enrol_arlo_plugin extends enrol_plugin {
         global $DB;
         $arloinstance = manager::get_associated_arlo_instance($instance->id);
         $schedule = manager::get_schedule('registrations', $instance->id);
-        if ($arloinstance->type  == self::ARLO_TYPE_EVENT) {
+        if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
             $record = $DB->get_record('enrol_arlo_event', array('sourceguid' => $arloinstance->sourceguid));
             if ($record->sourcestatus == EventStatus::CANCELLED) {
                 $schedule->nextpulltime = -1;
                 $schedule->nextpushtime = -1;
             }
         }
-        if ($arloinstance->type  == self::ARLO_TYPE_ONLINEACTIVITY) {
+        if ($arloinstance->type == self::ARLO_TYPE_ONLINEACTIVITY) {
             $record = $DB->get_record('enrol_arlo_onlineactivity', array('sourceguid' => $arloinstance->sourceguid));
-//            if ($record->sourcestatus == OnlineActivityStatus::COMPLETED) {
-//                $schedule->nextpulltime = -1;
-//                $schedule->nextpushtime = -1;
-//            }
         }
         if (isset($record->finishdatetime)) {
             $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
@@ -376,8 +372,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         $sql = "SELECT sourceguid, code, name
                   FROM {enrol_arlo_onlineactivity}
                  WHERE platform = :platform
-                   AND sourcestatus = :sourcestatus 
-                   AND sourceguid NOT IN (SELECT sourceguid 
+                   AND sourcestatus = :sourcestatus
+                   AND sourceguid NOT IN (SELECT sourceguid
                                             FROM {enrol_arlo_instance} WHERE sourceguid IS NOT NULL)
               ORDER BY code";
         $conditions = array(
@@ -486,8 +482,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                 $mform->setConstant('arloonlineactivity', $arloinstance->sourceguid);
                 $mform->hardFreeze('arloonlineactivity', $arloinstance->sourceguid);
             }
-        // New instance.
-        } else {
+        } else { // New instance.
             $typeoptions = $this->get_type_options();
             $eventoptions = $this->get_event_options();
             $onlineactivityoptions = $this->get_onlineactivity_options();
@@ -555,7 +550,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function edit_instance_validation($data, $files, $instance, $context) {
         $errors = array();
-        if(empty($data['arlotype'])) {
+        if (empty($data['arlotype'])) {
             $errors['arlotype'] = get_string('errorselecttype', 'enrol_arlo');
         }
         if ($data['arlotype'] == self::ARLO_TYPE_EVENT && empty($data['arloevent'])) {
