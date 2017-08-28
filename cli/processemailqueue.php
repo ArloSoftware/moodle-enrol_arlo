@@ -16,25 +16,6 @@
 
 define('CLI_SCRIPT', true);
 
-/**
- * CLI sync for full LDAP synchronisation.
- *
- * This script is meant to be called from a cronjob to process emails in queue.
- *
- * Sample cron entry:
- * # Every 5 minutes
- * # * / 5 * * * * $sudo -u www-data /usr/bin/php /var/www/moodle/enrol/arlo/cli/processemailqueue.php
- *
- * Notes:
- *   - It is required to use the web server account when executing PHP CLI scripts.
- *   - You need to change the "www-data" to match the apache user account
- *   - Use "su" if "sudo" not available
- *   - If you have a large number of users, you may want to raise the memory limits
- *     by passing -d memory_limit=256M
- *   - For debugging & better logging, you are encouraged to use in the command line:
- *     -d log_errors=1 -d error_reporting=E_ALL -d display_errors=0 -d html_errors=0
- */
-
 require(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->libdir.'/clilib.php');
 require_once($CFG->libdir.'/cronlib.php');
@@ -44,6 +25,51 @@ require_once($CFG->dirroot.'/enrol/arlo/lib.php');
 @set_time_limit(0);
 raise_memory_limit(MEMORY_HUGE);
 
+// Now get cli options.
+list($options, $unrecognized) = cli_get_params(
+    array(
+        'help'              => false
+    ),
+    array(
+        'h' => 'help'
+    )
+);
+
+if ($unrecognized) {
+    $unrecognized = implode("\n  ", $unrecognized);
+    cli_error(get_string('cliunknowoption', 'admin', $unrecognized));
+}
+
+if ($options['help']) {
+    $help = "
+CLI sync for processing emails
+
+This script is meant to be called from a cronjob to process emails in queue.
+
+Sample cron entry:
+Every 5 minutes
+* / 5 * * * * \$sudo -u www-data /usr/bin/php /var/www/moodle/enrol/arlo/cli/processemailqueue.php
+
+Notes:
+- It is required to use the web server account when executing PHP CLI scripts.
+- You need to change the \"www-data\" to match the apache user account
+- Use \"su\" if \"sudo\" not available
+- If you have a large number of users, you may want to raise the memory limits by passing -d memory_limit=256M
+- For debugging & better logging, you are encouraged to use in the command line:
+  -d log_errors=1 -d error_reporting=E_ALL -d display_errors=0 -d html_errors=0
+
+Options:
+--non-interactive     No interactive questions or confirmations
+--manual              Manual override
+-v, --verbose         Print verbose progess information
+-h, --help            Print out this help
+
+Example:
+\$sudo -u www-data /usr/bin/php synchronize.php
+";
+    echo $help;
+    die;
+}
 // Ensure errors are well explained.
 set_debugging(DEBUG_DEVELOPER, true);
 
