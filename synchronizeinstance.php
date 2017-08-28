@@ -28,7 +28,7 @@ require_once('../../config.php');
 $id = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_INT);
 
-$instance = $DB->get_record('enrol', array('id' => $id, 'enrol'=>'arlo'), '*', MUST_EXIST);
+$instance = $DB->get_record('enrol', array('id' => $id, 'enrol' => 'arlo'), '*', MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
 $context = context_course::instance($course->id, MUST_EXIST);
 
