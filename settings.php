@@ -31,7 +31,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once (dirname(__FILE__).'/adminlib.php');
+require_once(dirname(__FILE__).'/adminlib.php');
 
 if ($hassiteconfig) {
     $name = get_string('arloconnection', 'enrol_arlo');
@@ -48,18 +48,18 @@ if ($hassiteconfig) {
 
     $name = get_string('apiusername', 'enrol_arlo');
     $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/115003692863');
-    $url->param('utm_source','Moodle Marketplace');
-    $url->param('utm_medium','referral organic');
-    $url->param('utm_campaign','Moodle plugin configuration');
+    $url->param('utm_source', 'Moodle Marketplace');
+    $url->param('utm_medium', 'referral organic');
+    $url->param('utm_campaign', 'Moodle plugin configuration');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
     $description = get_string('apiusername_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
 
     $settings->add(new admin_setting_configemail('enrol_arlo/apiusername', $name, $description, null));
 
     $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/211902623');
-    $url->param('utm_source','Moodle Marketplace');
-    $url->param('utm_medium','referral organic');
-    $url->param('utm_campaign','Moodle plugin configuration');
+    $url->param('utm_source', 'Moodle Marketplace');
+    $url->param('utm_medium', 'referral organic');
+    $url->param('utm_campaign', 'Moodle plugin configuration');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
     $description = get_string('apipassword_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
 
