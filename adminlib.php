@@ -190,7 +190,7 @@ class admin_setting_configarlostatus extends admin_setting {
         } else if ($apistatus >= 500 && $apistatus < 599) {
             $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
             $reason = get_string('apistatusservererror', 'enrol_arlo');
-            $url = new moodle_url('/enrol/arlo/admin/apilog.php');
+            $url = new moodle_url('/enrol/arlo/admin/apirequests.php');
             $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
         } else {
             return '';
