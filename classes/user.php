@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace enrol_arlo;
 
@@ -6,6 +20,8 @@ use stdClass;
 use enrol_arlo\utility\dml;
 use enrol_arlo\Arlo\AuthAPI\Resource\Contact;
 use enrol_arlo\Arlo\AuthAPI\Enum\ContactStatus;
+
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/user/lib.php');
 
@@ -33,7 +49,7 @@ class user extends \core_user {
 
     /** @var $contactrecord stdClass */
     private $contactrecord;
-    
+
     /** @var $contactresource Contact */
     private $contactresource;
 
@@ -97,7 +113,7 @@ class user extends \core_user {
         // Add user and contact fields together to be used in SQL.
         $fields = "$aliaseduserfields, $aliasedcontactfields ";
         $sql = "SELECT $fields
-                  FROM {enrol_arlo_contact} ac 
+                  FROM {enrol_arlo_contact} ac
                   JOIN {user} u ON  u.id = ac.userid
                  WHERE u.deleted = 0
                    AND ac.platform = :platform
@@ -279,8 +295,8 @@ class user extends \core_user {
      *
      * @return string
      */
-    public function get_user_fullname(){
-        if (self::exists()){
+    public function get_user_fullname() {
+        if (self::exists()) {
             return fullname($this->userrecord);
         }
         return '';
