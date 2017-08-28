@@ -317,13 +317,13 @@ function enrol_arlo_upgrade_get_usercontacts() {
  */
 function enrol_arlo_upgrade_get_user_enrolments() {
     global $DB;
-    $sql = "SELECT ue.id, ue.enrolid, ue.userid, e.customint3 AS resourcetype, 
-                   e.customchar3 AS resourcesourceguid, eac.sourceid AS contactid, 
+    $sql = "SELECT ue.id, ue.enrolid, ue.userid, e.customint3 AS resourcetype,
+                   e.customchar3 AS resourcesourceguid, eac.sourceid AS contactid,
                    eac.sourceguid AS contactguid
-              FROM {enrol} e 
+              FROM {enrol} e
               JOIN {user_enrolments} ue ON ue.enrolid = e.id
               JOIN {enrol_arlo_contact} eac ON eac.userid = ue.userid
-             WHERE enrol = 'arlo' 
+             WHERE enrol = 'arlo'
           ORDER BY ue.enrolid, ue.userid";
     return $DB->get_records_sql($sql);
 }
