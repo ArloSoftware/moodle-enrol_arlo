@@ -33,7 +33,7 @@ list($options, $unrecognized) = cli_get_params(
         'manual'            => false
     ),
     array(
-        'v'=>'verbose',
+        'v' => 'verbose',
         'h' => 'help'
     )
 );
@@ -44,8 +44,7 @@ if ($unrecognized) {
 }
 
 if ($options['help']) {
-    $help =
-"
+    $help = "
 Options:
 --non-interactive     No interactive questions or confirmations
 --manual              Manual override
