@@ -163,6 +163,23 @@ class manager {
     }
 
     /**
+     * Headers used to identify plugin and requests to API.
+     *
+     * @return array
+     */
+    public function get_client_identity_headers() {
+        global $CFG;
+        require_once("$CFG->libdir/adminlib.php");
+        static $headers;
+        if (!isset($headers)) {
+            $headers = array();
+            $headers['User-Agent'] = 'Moodle/' . moodle_major_version() . ';' . $CFG->wwwroot;
+            $headers['X-Plugin-Version'] = get_component_version('enrol_arlo');
+        }
+        return $headers;
+    }
+
+    /**
      * Main processing function. Provide order of processing. Envoked by
      * scheduled task.
      *
@@ -470,7 +487,8 @@ class manager {
                             $apiusername,
                             $apipassword
                         );
-                        $headers = array('Content-type' => 'application/xml; charset=utf-8');
+                        $headers = self::get_client_identity_headers();
+                        $headers['Content-type'] = 'application/xml; charset=utf-8';
                         $request = new \enrol_arlo\request\patch_request($schedule, $requesturi, $headers, $xmlbody, $options);
                         $schedule->lastpushtime = time();
                         $response = $request->execute();
@@ -592,8 +610,8 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
-
-                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $headers = self::get_client_identity_headers();
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, $headers, null, $options);
                 $schedule->lastpulltime = time();
                 $response = $request->execute();
                 $schedule->lastpulltime = time();
@@ -817,7 +835,8 @@ class manager {
                         $apiusername,
                         $apipassword
                     );
-                    $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                    $headers = self::get_client_identity_headers();
+                    $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, $headers, null, $options);
                     $schedule->lastpulltime = time();
                     $response = $request->execute();
                     if (200 != $response->getStatusCode()) {
@@ -1322,7 +1341,8 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
-                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $headers = self::get_client_identity_headers();
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, $headers, null, $options);
                 $schedule->lastpulltime = time();
                 $response = $request->execute();
                 $schedule->lastpulltime = time();
@@ -1478,7 +1498,7 @@ class manager {
                 $filter = '';
                 $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
                 if ($lastsourceid) {
-                    $filter = " OR (LastModifiedDateTime eq datetime('".$latestmodified."') AND OnlineActivityID gt ".$lastsourceid.")";
+                    $filter .= " OR (LastModifiedDateTime eq datetime('".$latestmodified."') AND OnlineActivityID gt ".$lastsourceid.")";
                 }
                 $requesturi->setFilterBy($filter);
                 $requesturi->setOrderBy("LastModifiedDateTime ASC,OnlineActivityID ASC");
@@ -1488,7 +1508,8 @@ class manager {
                     $apipassword
                 );
                 $schedule->lastpulltime = time();
-                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $headers = self::get_client_identity_headers();
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, $headers, null, $options);
                 $schedule->lastpulltime = time();
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
@@ -1577,7 +1598,8 @@ class manager {
                     $apiusername,
                     $apipassword
                 );
-                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, array(), null, $options);
+                $headers = self::get_client_identity_headers();
+                $request = new \enrol_arlo\request\collection_request($schedule, $requesturi, $headers, null, $options);
                 $schedule->lastpulltime = time();
                 $response = $request->execute();
                 if (200 != $response->getStatusCode()) {
