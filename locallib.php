@@ -40,11 +40,11 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
     global $DB, $CFG;
     require_once($CFG->dirroot.'/enrol/arlo/lib.php');
     // Do nothing on empties.
-    if (empty($oldinstance) || empty($newinstance)){
+    if (empty($oldinstance) || empty($newinstance)) {
         return;
     }
     // Nothing changed.
-    if ($oldinstance  === $newinstance) {
+    if ($oldinstance === $newinstance) {
         return;
     }
     $rs = $DB->get_recordset('enrol', array('enrol' => 'arlo'));
@@ -85,9 +85,9 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
     // Container for the items to add.
     $adds = array();
     // Events.
-    $sql = "SELECT e.sourceguid 
+    $sql = "SELECT e.sourceguid
               FROM {enrol_arlo_event} e
-             WHERE e.sourcetemplateguid = :sourcetemplateguid 
+             WHERE e.sourcetemplateguid = :sourcetemplateguid
                AND e.sourcestatus = :sourcestatus
                AND e.sourceguid NOT IN (SELECT i.sourceguid FROM {enrol_arlo_instance} i)";
     $conditions = array(
@@ -102,9 +102,9 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
         $adds[] = $item;
     }
     // Online Activities.
-    $sql = "SELECT e.sourceguid 
+    $sql = "SELECT e.sourceguid
               FROM {enrol_arlo_onlineactivity} e
-             WHERE e.sourcetemplateguid = :sourcetemplateguid 
+             WHERE e.sourcetemplateguid = :sourcetemplateguid
                AND e.sourcestatus = :sourcestatus
                AND e.sourceguid NOT IN (SELECT i.sourceguid FROM {enrol_arlo_instance} i)";
     $conditions = array(
@@ -160,7 +160,7 @@ function enrol_arlo_get_associated_instances($course, $sourcetemplateguid) {
     $sql = "SELECT e.*
               FROM {enrol} e
               JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
-              JOIN {enrol_arlo_event} ae ON ae.sourceguid = ai.sourceguid 
+              JOIN {enrol_arlo_event} ae ON ae.sourceguid = ai.sourceguid
              WHERE e.enrol = 'arlo'
                AND e.courseid = :courseid
                AND ae.sourcetemplateguid = :sourcetemplateguid";
@@ -168,7 +168,7 @@ function enrol_arlo_get_associated_instances($course, $sourcetemplateguid) {
     $sql = "SELECT e.*
               FROM {enrol} e
               JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
-              JOIN {enrol_arlo_onlineactivity} aoa ON aoa.sourceguid = ai.sourceguid 
+              JOIN {enrol_arlo_onlineactivity} aoa ON aoa.sourceguid = ai.sourceguid
              WHERE e.enrol = 'arlo'
                AND e.courseid = :courseid
                AND aoa.sourcetemplateguid = :sourcetemplateguid";
@@ -199,7 +199,7 @@ function enrol_arlo_add_associated($arlotype, $eventdata) {
         }
     }
     // Associated Template.
-    $sql = "SELECT c.* 
+    $sql = "SELECT c.*
               FROM {course} c
               JOIN {enrol_arlo_templateassociate} ta
                 ON ta.courseid = c.id
@@ -230,7 +230,7 @@ function enrol_arlo_handle_update($arlotype, $eventdata) {
         return;
     }
     $sql  = "SELECT e.*
-               FROM {enrol} e 
+               FROM {enrol} e
                JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
               WHERE ai.platform = :platform AND ai.sourceguid = :sourceguid";
     $conditions = array(
