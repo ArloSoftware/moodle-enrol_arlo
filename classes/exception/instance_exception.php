@@ -19,4 +19,5 @@ namespace enrol_arlo\exception;
 /**
  * Exception wrapper for a missing Arlo instance record.
  */
-class instance_exception extends \moodle_exception {}
+class instance_exception extends \moodle_exception {
+}
