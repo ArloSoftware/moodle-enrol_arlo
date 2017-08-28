@@ -215,7 +215,8 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             // Online Activity.
             if ($record->resourcetype == 1) {
                 if (!isset($onlineactivities[$resourcesourceguid])) {
-                    $onlineactivity = $DB->get_record('local_arlo_onlineactivities', array('onlineactivityguid' => $resourcesourceguid), 'id, onlineactivityid, onlineactivityguid');
+                    $conditions = array('onlineactivityguid' => $resourcesourceguid);
+                    $onlineactivity = $DB->get_record('local_arlo_onlineactivities', $conditions, 'id, onlineactivityid, onlineactivityguid');
                     if (!$onlineactivity) {
                         continue;
                     }
@@ -287,7 +288,6 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
 
         upgrade_plugin_savepoint(true, 2016052309, 'enrol', 'arlo');
     }
-
 
     return true;
 }
