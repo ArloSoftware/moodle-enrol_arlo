@@ -17,7 +17,7 @@
 /**
  * @package     Arlo Moodle Integration
  * @subpackage  enrol_arlo
- * @author 		Corey Davis
+ * @author      Corey Davis
  * @copyright   2015 LearningWorks Ltd <http://www.learningworks.co.nz>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -204,8 +204,8 @@ $string['pluginname_desc'] = '<p>These enrolments are managed by local_arlo</p>'
 $string['pluginstatus'] = 'Status';
 $string['queued'] = 'Queued';
 $string['remove'] = 'Remove';
-$string['removetemplatedanger'] =
-    '<div class="alert alert-danger" role="alert">
+$string['removetemplatedanger'] = '
+<div class="alert alert-danger" role="alert">
 <strong>Important!</strong>
 <p>Removing the template association will remove all people from the course that are in the following enrolment instances:</p>
 {$a}
