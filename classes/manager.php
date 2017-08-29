@@ -188,9 +188,10 @@ class manager {
         require_once("$CFG->libdir/adminlib.php");
         static $headers;
         if (!isset($headers)) {
+            include("$CFG->dirroot/enrol/arlo/version.php");
             $headers = array();
             $headers['User-Agent'] = 'Moodle/' . moodle_major_version() . ';' . $CFG->wwwroot;
-            $headers['X-Plugin-Version'] = get_component_version('enrol_arlo');
+            $headers['X-Plugin-Version'] = $plugin->release;
         }
         return $headers;
     }
