@@ -62,7 +62,11 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
         $unmaskjs = '<script type="text/javascript">
         //<![CDATA[
         var is_ie = (navigator.userAgent.toLowerCase().indexOf("msie") != -1);
-        document.getElementById("'.$id.'").setAttribute("autocomplete", "off");
+        var textbox = document.getElementById("'.$id.'");
+        textbox.setAttribute("autocomplete", "off");
+        if (textbox.value != "") {
+            textbox.setAttribute("readonly", "readonly");
+        }
         var unmaskdiv = document.getElementById("'.$id.'unmaskdiv");
         var unmaskchb = document.createElement("input");
         unmaskchb.setAttribute("type", "checkbox");
@@ -87,7 +91,7 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
         //]]>
         </script>';
         $html = '<div class="form-password">
-                 <input readonly="readonly" type="text" size="'.$this->size.'" id="'.$id.'" name="'.$this->get_full_name().'" value="'.s($data).'" />
+                 <input type="text" size="'.$this->size.'" id="'.$id.'" name="'.$this->get_full_name().'" value="'.s($data).'" />
                  <div class="unmask" id="'.$id.'unmaskdiv">
                  </div>'.$unmaskjs.'</div>';
         return format_admin_setting($this, $this->visiblename, $html,
@@ -105,16 +109,18 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
         $newvalue = $data;
         $return = parent::write_setting($data);
         // Trigger an event for updating this field.
-        $event = \enrol_arlo\event\fqdn_updated::create(array(
-            'objectid' => 1,
-            'context' => context_system::instance(),
-            'other' => array(
-                'name' => $name,
-                'oldvalue' => $oldvalue,
-                'newvalue' => $newvalue
-            )
-        ));
-        $event->trigger();
+        if (!empty($oldvalue)) {
+            $event = \enrol_arlo\event\fqdn_updated::create(array(
+                'objectid' => 1,
+                'context' => context_system::instance(),
+                'other' => array(
+                    'name' => $name,
+                    'oldvalue' => $oldvalue,
+                    'newvalue' => $newvalue
+                )
+            ));
+            $event->trigger();
+        }
         return $return;
     }
 
