@@ -193,7 +193,7 @@ class result {
         }
         // Add or replace LastActivityDateTime element.
         // Must use format: Y-m-d\TH:i:s.0000000+00:00
-        // https://developer.arlo.co/doc/api/2012-02-01/auth/datetimeformats#datetimeoffset
+        // See https://developer.arlo.co/doc/api/2012-02-01/auth/datetimeformats#datetimeoffset.
         if (empty($registrationrecord->lastactivity) && !empty($this->lastactivity)) {
             $lastactivitydate = date('Y-m-d\TH:i:s.0000000+00:00', $this->lastactivity);
             $add = $dom->createElement("add");
