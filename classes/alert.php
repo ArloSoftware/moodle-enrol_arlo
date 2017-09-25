@@ -16,6 +16,8 @@
 
 namespace enrol_arlo;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Alert admin on integration problems.
  *
