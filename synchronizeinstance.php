@@ -59,7 +59,8 @@ if (confirm_sesskey() and $confirm == true) {
     }
     echo $OUTPUT->single_button($returnurl, $returnstring);
 } else if (confirm_sesskey()) {
-    $confirmurl = new moodle_url('/enrol/arlo/synchronizeinstance.php', array('confirm' => true, 'sesskey' => sesskey(), 'id' => $instance->id));
+    $params = array('confirm' => true, 'sesskey' => sesskey(), 'id' => $instance->id);
+    $confirmurl = new moodle_url('/enrol/arlo/synchronizeinstance.php', $params);
     echo $OUTPUT->confirm(get_string('longtime', 'enrol_arlo'), $confirmurl, $returnurl);
 } else {
     echo print_error('nopermissions', 'error', '', 'please ensure you are signed in and have permission');
