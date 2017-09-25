@@ -25,6 +25,7 @@
 
 namespace enrol_arlo\task;
 
+defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\manager;
 
