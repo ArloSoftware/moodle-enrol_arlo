@@ -16,6 +16,8 @@
 
 namespace enrol_arlo\exception;
 
+defined('MOODLE_INTERNAL') || die();
+
 class invalidcontent_exception extends \moodle_exception {
     public function __construct($parameters, $debuginfo = null) {
         $errorcode = 'error_incorrectcontenttype';
