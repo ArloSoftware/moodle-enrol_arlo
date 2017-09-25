@@ -16,6 +16,8 @@
 
 namespace enrol_arlo\exception;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Custom exception.
  */
