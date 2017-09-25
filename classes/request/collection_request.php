@@ -16,6 +16,7 @@
 
 namespace enrol_arlo\request;
 
+defined('MOODLE_INTERNAL') || die();
 
 use stdClass;
 use enrol_arlo\alert;
