@@ -68,7 +68,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2015101503, 'enrol', 'arlo');
     }
 
-    // Migration to single plugin
+    // Migration to single plugin.
     if ($oldversion < 2016052309) {
         require_once($CFG->dirroot . '/enrol/arlo/upgrade/upgradelib.php');
 
@@ -198,7 +198,8 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             // Event.
             if ($record->resourcetype == 0) {
                 if (!isset($events[$resourcesourceguid])) {
-                    $event = $DB->get_record('local_arlo_events', array('eventguid' => $resourcesourceguid), 'id, eventid, eventguid');
+                    $conditions = array('eventguid' => $resourcesourceguid);
+                    $event = $DB->get_record('local_arlo_events', $conditions, 'id, eventid, eventguid');
                     if (!$event) {
                         continue;
                     }
