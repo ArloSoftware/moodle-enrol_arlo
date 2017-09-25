@@ -16,6 +16,8 @@
 
 namespace enrol_arlo;
 
+defined('MOODLE_INTERNAL') || die();
+
 use stdClass;
 use ReflectionClass;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
