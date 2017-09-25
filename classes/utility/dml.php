@@ -24,6 +24,8 @@
 
 namespace enrol_arlo\utility;
 
+defined('MOODLE_INTERNAL') || die();
+
 class dml {
     /**
      * Alias array of fields.
