@@ -24,6 +24,8 @@
 
 namespace enrol_arlo\event;
 
+defined('MOODLE_INTERNAL') || die();
+
 class observer {
 
     /**
