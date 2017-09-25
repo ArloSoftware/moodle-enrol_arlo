@@ -16,6 +16,8 @@
 
 namespace enrol_arlo\request;
 
+defined('MOODLE_INTERNAL') || die();
+
 use stdClass;
 use enrol_arlo\alert;
 use enrol_arlo\Arlo\AuthAPI\Client;
@@ -26,7 +28,6 @@ use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 
-
 abstract class abstract_request {
     protected $tablename;
     protected $schedule;
@@ -35,7 +36,11 @@ abstract class abstract_request {
     protected $body;
     protected $options;
 
-    public function __construct(stdClass $schedule, RequestUri $requesturi, array $headers = [], $body = null, array $options = []) {
+    public function __construct(stdClass $schedule,
+                                RequestUri $requesturi,
+                                array $headers = [],
+                                $body = null,
+                                array $options = []) {
         self::load_schedule($schedule, self::get_requiredfields());
         $this->requesturi   = $requesturi;
         $this->headers      = $headers;
