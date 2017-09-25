@@ -16,6 +16,8 @@
 
 namespace enrol_arlo\exception;
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Exception when a server error is encountered (5xx codes)
  */
