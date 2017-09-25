@@ -96,7 +96,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         if (empty($fields['arlotype'])) {
             throw new moodle_exception('Field arlotype is empty.');
         }
-        // Set resourcetype Event or Online Activity
+        // Set resourcetype Event or Online Activity.
         $arloinstance->type = $fields['arlotype'];
         if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
             if (empty($fields['arloevent'])) {
@@ -507,7 +507,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Settings that are editable be instance new or existing.
         $options = $this->get_status_options();
         $mform->addElement('select', 'status', get_string('status', 'enrol_arlo'), $options);
-        // Groups
+        // Groups.
         $groups = array(0 => get_string('none'));
         if (has_capability('moodle/course:managegroups', $context)) {
             $groups[self::ARLO_CREATE_GROUP] = get_string('creategroup', 'enrol_arlo');
