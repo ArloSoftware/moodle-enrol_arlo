@@ -1339,7 +1339,7 @@ class manager {
                     $date = \DateTime::createFromFormat('U', 0, $tz);
                     $latestmodified = $date->format(DATE_ISO8601);
                 }
-                $lastsourceid = $schedule->lastsourceid;
+                $lastsourceid = isset($schedule->lastsourceid) ? $schedule->lastsourceid : 0;
                 // Events end point doesn't like DateTimeOffset.
                 $filter = '';
                 $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
@@ -1505,7 +1505,7 @@ class manager {
                     $date = \DateTime::createFromFormat('U', 0, $tz);
                     $latestmodified = $date->format(DATE_ISO8601);
                 }
-                $lastsourceid = $schedule->lastsourceid;
+                $lastsourceid = isset($schedule->lastsourceid) ? $schedule->lastsourceid : 0;
                 // Online Activity end point doesn't like DateTimeOffset.
                 $filter = '';
                 $filter .= "(LastModifiedDateTime gt datetime('".$latestmodified."'))";
@@ -1597,7 +1597,7 @@ class manager {
                     $date = \DateTime::createFromFormat('U', 0, $tz);
                     $latestmodified = $date->format(DATE_ISO8601);
                 }
-                $lastsourceid = $schedule->lastsourceid;
+                $lastsourceid = isset($schedule->lastsourceid) ? $schedule->lastsourceid : 0;
                 $filter = '';
                 $filter .= "(LastModifiedDateTime gt datetimeoffset('".$latestmodified."'))";
                 if ($lastsourceid) {
