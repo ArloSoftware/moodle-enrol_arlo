@@ -278,6 +278,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                         $conditions = array('eventguid' => $resourcesourceguid);
                         $event = $DB->get_record('local_arlo_events', $conditions, 'id, eventid, eventguid');
                         if (!$event) {
+                            $i++;
                             continue;
                         }
                         $events[$resourcesourceguid] = $event;
@@ -297,6 +298,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                         $fields = 'id, onlineactivityid, onlineactivityguid';
                         $onlineactivity = $DB->get_record('local_arlo_onlineactivities', $conditions, $fields);
                         if (!$onlineactivity) {
+                            $i++;
                             continue;
                         }
                         $onlineactivities[$resourcesourceguid] = $onlineactivity;
@@ -310,48 +312,51 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                         'contactguid' => $record->contactguid);
                     $registrationrecord = $DB->get_record_select('local_arlo_registrations', $select, $conditions);
                 }
-                $registration->sourceid = $registrationrecord->registrationid;
-                $registration->sourceguid = $registrationrecord->registrationguid;
-                $registration->sourcestatus = $registrationrecord->status;
-                if ($registrationrecord->attendance != 'Unknown') {
-                    if (!empty($registrationrecord->attendance)) {
-                        $registration->attendance = $registrationrecord->attendance;
+                // Registration record found.
+                if ($registrationrecord) {
+                    $registration->sourceid = $registrationrecord->registrationid;
+                    $registration->sourceguid = $registrationrecord->registrationguid;
+                    $registration->sourcestatus = $registrationrecord->status;
+                    if ($registrationrecord->attendance != 'Unknown') {
+                        if (!empty($registrationrecord->attendance)) {
+                            $registration->attendance = $registrationrecord->attendance;
+                        }
                     }
-                }
-                if ($registrationrecord->grade != 'Unknown') {
-                    if (!empty($registrationrecord->grade)) {
-                        $registration->grade = $registrationrecord->grade;
+                    if ($registrationrecord->grade != 'Unknown') {
+                        if (!empty($registrationrecord->grade)) {
+                            $registration->grade = $registrationrecord->grade;
+                        }
                     }
-                }
-                if ($registrationrecord->outcome != 'Unknown') {
-                    if (!empty($registrationrecord->outcome)) {
-                        $registration->outcome = $registrationrecord->outcome;
+                    if ($registrationrecord->outcome != 'Unknown') {
+                        if (!empty($registrationrecord->outcome)) {
+                            $registration->outcome = $registrationrecord->outcome;
+                        }
                     }
-                }
-                if ($registrationrecord->lastactivity != 'Unknown') {
-                    if (!empty($registrationrecord->lastactivity)) {
-                        $registration->lastactivity = $registrationrecord->lastactivity;
+                    if ($registrationrecord->lastactivity != 'Unknown') {
+                        if (!empty($registrationrecord->lastactivity)) {
+                            $registration->lastactivity = $registrationrecord->lastactivity;
+                        }
                     }
-                }
-                if ($registrationrecord->progressstatus != 'Unknown') {
-                    if (!empty($registrationrecord->progressstatus)) {
-                        $registration->progressstatus = $registrationrecord->progressstatus;
+                    if ($registrationrecord->progressstatus != 'Unknown') {
+                        if (!empty($registrationrecord->progressstatus)) {
+                            $registration->progressstatus = $registrationrecord->progressstatus;
+                        }
                     }
-                }
-                if ($registrationrecord->progresspercent != 'Unknown') {
-                    if (!empty($registrationrecord->progresspercent)) {
-                        $registration->progresspercent = $registrationrecord->progresspercent;
+                    if ($registrationrecord->progresspercent != 'Unknown') {
+                        if (!empty($registrationrecord->progresspercent)) {
+                            $registration->progresspercent = $registrationrecord->progresspercent;
+                        }
                     }
-                }
-                $created                      = \DateTime::createFromFormat('U', $registrationrecord->created, $tz);
-                $registration->sourcecreated  = $created->format(DATE_ISO8601);
-                $modified                     = \DateTime::createFromFormat('U', $registrationrecord->modified, $tz);
-                $registration->sourcemodified = $modified->format(DATE_ISO8601);
-                $registration->modified       = time();
-                // Should happed, duplicate records. Deal with it.
-                $exists = $DB->get_record('enrol_arlo_registration', array('sourceguid' => $registration->sourceguid));
-                if (!$exists) {
-                    $DB->insert_record('enrol_arlo_registration', $registration);
+                    $created                      = \DateTime::createFromFormat('U', $registrationrecord->created, $tz);
+                    $registration->sourcecreated  = $created->format(DATE_ISO8601);
+                    $modified                     = \DateTime::createFromFormat('U', $registrationrecord->modified, $tz);
+                    $registration->sourcemodified = $modified->format(DATE_ISO8601);
+                    $registration->modified       = time();
+                    // Should happed, duplicate records. Deal with it.
+                    $exists = $DB->get_record('enrol_arlo_registration', array('sourceguid' => $registration->sourceguid));
+                    if (!$exists) {
+                        $DB->insert_record('enrol_arlo_registration', $registration);
+                    }
                 }
                 $i++;
                 $progress->update($i, $count, "Migrating Registration Records - $i/$count.");
