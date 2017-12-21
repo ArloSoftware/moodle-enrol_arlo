@@ -47,7 +47,7 @@ class communications extends \table_sql {
         $fields .= get_all_user_name_fields(true, 'u');
         $fields .= ',eq.userid,eq.type,eq.status,eq.modified';
         $from = "{enrol_arlo_emailqueue} eq JOIN {user} u ON u.id = eq.userid";
-        $this->set_sql($fields, $from, true);
+        $this->set_sql($fields, $from, 'modified <> 0');
         $this->no_sorting('enrolid');
         $this->no_sorting('userid');
         $this->pageable(true);
