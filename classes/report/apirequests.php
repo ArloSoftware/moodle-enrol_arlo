@@ -43,7 +43,7 @@ class apirequests extends \table_sql {
         $this->sort_default_column = 'timelogged';
         $this->sort_default_order  = SORT_DESC;
         $this->set_count_sql('SELECT COUNT(*) FROM {enrol_arlo_requestlog}', array());
-        $this->set_sql('*', "{enrol_arlo_requestlog}", true);
+        $this->set_sql('*', "{enrol_arlo_requestlog}", 'timelogged <> 0');
         $this->no_sorting('platform');
         $this->no_sorting('uri');
         $this->no_sorting('extra');
