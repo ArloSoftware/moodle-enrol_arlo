@@ -181,32 +181,44 @@ class admin_setting_configarlostatus extends admin_setting {
         global $OUTPUT;
         $apistatus = get_config('enrol_arlo', 'apistatus');
         $apilastrequested = (int) get_config('enrol_arlo', 'apilastrequested');
+        $useimageiconclass = false;
+        if (class_exists('image_icon')) {
+            $useimageiconclass = true;
+        }
         $statusicon = '';
         $reason = '';
         $description = '';
         if (200 == $apistatus) {
-            $statusicon = $OUTPUT->pix_icon('t/go', get_string('ok', 'enrol_arlo'));
+            if ($useimageiconclass) {
+                $statusicon = $OUTPUT->image_icon('t/go', get_string('ok', 'enrol_arlo'));
+            } else {
+                $statusicon = $OUTPUT->pix_icon('t/go', get_string('ok', 'enrol_arlo'));
+            }
             $reason = get_string('apistatusok', 'enrol_arlo', userdate($apilastrequested));
             $description = '';
         } else if (0 == $apistatus || ($apistatus >= 400 && $apistatus < 499)) {
-            $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            if ($useimageiconclass) {
+                $statusicon = $OUTPUT->image_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            } else {
+                $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            }
             $reason = get_string('apistatusclienterror', 'enrol_arlo');
             $url = new moodle_url('/enrol/arlo/admin/apirequests.php');
             $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
         } else if ($apistatus >= 500 && $apistatus < 599) {
-            $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            if ($useimageiconclass) {
+                $statusicon = $OUTPUT->image_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            } else {
+                $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+            }
             $reason = get_string('apistatusservererror', 'enrol_arlo');
             $url = new moodle_url('/enrol/arlo/admin/apirequests.php');
             $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
         } else {
             return '';
         }
-        $return = '<div class="form-item clearfix" id="admin-'.$this->name.'">
-                   <div class="form-label"></div>
-                   <div class="form-setting">'.$statusicon.' '.$reason.'</div>
-                   <div class="form-description">'.$description.'</div>
-                   </div>';
-        return $return;
+        $element = '<div class="form-text">'.$statusicon.'&nbsp;'.$reason.'</div>';
+        return format_admin_setting($this, '', $element, $description, false, '', null, $query);
     }
 }
 
