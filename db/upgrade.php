@@ -381,5 +381,131 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2016052309, 'enrol', 'arlo');
     }
 
+    // Add required persistent columns.  @TODO change 2018051700
+    if ($oldversion < 2017051503) {
+        $admin = get_admin();
+        // Define field usermodified to be added to enrol_arlo_instance.
+        $table = new xmldb_table('enrol_arlo_instance');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Define field timecreated to be added to enrol_arlo_instance.
+        $table = new xmldb_table('enrol_arlo_instance');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'usermodified');
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Rename field modified on table enrol_arlo_instance to timemodified.
+        $table = new xmldb_table('enrol_arlo_instance');
+        $field = new xmldb_field('modified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally rename field modified.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'timemodified');
+        }
+
+        foreach ($DB->get_records('enrol_arlo_instance') as $instance) {
+            $instance->usermodified = $admin->id;
+            $instance->timecreated = $instance->timemodified;
+            $DB->update_record('enrol_arlo_instance', $instance);
+        }
+
+        // Define field updateinternal to be added to enrol_arlo_registration.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('updateinternal', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally launch add field updateinternal.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Define field usermodified to be added to enrol_arlo_registration.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Define field timecreated to be added to enrol_arlo_registration.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'usermodified');
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Rename field modified on table enrol_arlo_registration to timemodified.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('modified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally rename field modified.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'timemodified');
+        }
+
+        foreach ($DB->get_records('enrol_arlo_registration') as $registration) {
+            $registration->usermodified = $admin->id;
+            $registration->timecreated = $registration->timemodified;
+            $DB->update_record('enrol_arlo_registration', $registration);
+        }
+
+        // Define field usermodified to be added to enrol_arlo_contact.
+        $table = new xmldb_table('enrol_arlo_contact');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Define field timecreated to be added to enrol_arlo_contact.
+        $table = new xmldb_table('enrol_arlo_contact');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'usermodified');
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Rename field modified on table enrol_arlo_contact to timemodified.
+        $table = new xmldb_table('enrol_arlo_contact');
+        $field = new xmldb_field('modified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally rename field modified.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'timemodified');
+        }
+
+        foreach ($DB->get_records('enrol_arlo_contact') as $contact) {
+            $contact->usermodified = $admin->id;
+            $contact->timecreated = $contact->timemodified;
+            $DB->update_record('enrol_arlo_contact', $contact);
+        }
+
+        // Define field usermodified to be added to enrol_arlo_schedule.
+        $table = new xmldb_table('enrol_arlo_schedule');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Define field timecreated to be added to enrol_arlo_schedule.
+        $table = new xmldb_table('enrol_arlo_schedule');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'usermodified');
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Rename field modified on table enrol_arlo_schedule to timemodified.
+        $table = new xmldb_table('enrol_arlo_schedule');
+        $field = new xmldb_field('modified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally rename field modified.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'timemodified');
+        }
+
+        foreach ($DB->get_records('enrol_arlo_schedule') as $schedule) {
+            $schedule->usermodified = $admin->id;
+            $schedule->timecreated = $schedule->timemodified;
+            $DB->update_record('enrol_arlo_schedule', $schedule);
+        }
+
+        // Arlo savepoint reached.
+        upgrade_plugin_savepoint(true, 2017051503, 'enrol', 'arlo');
+    }
+
     return true;
 }
