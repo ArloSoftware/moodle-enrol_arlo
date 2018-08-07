@@ -33,4 +33,103 @@ class registration extends persistent {
     /** Table name. */
     const TABLE = 'enrol_arlo_registration';
 
+    /**
+     * Return the definition of the properties of this model.
+     *
+     * @return array
+     */
+    protected static function define_properties() {
+        return array(
+            'platform' => array(
+                'type' => PARAM_TEXT
+            ),
+            'enrolid' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'userid' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'sourceid' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'sourceguid' => array(
+                'type' => PARAM_TEXT
+            ),
+            'attendance' => array(
+                'type' => PARAM_TEXT
+            ),
+            'grade' => array(
+                'type' => PARAM_TEXT
+            ),
+            'outcome' => array(
+                'type' => PARAM_TEXT
+            ),
+            'lastactivity' => array(
+                'type' => PARAM_TEXT
+            ),
+            'progressstatus' => array(
+                'type' => PARAM_TEXT
+            ),
+            'progresspercent' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'sourcestatus' => array(
+                'type' => PARAM_TEXT
+            ),
+            'sourcecreated' => array(
+                'type' => PARAM_TEXT,
+            ),
+            'sourcemodified' => array(
+                'type' => PARAM_TEXT
+            ),
+            'sourcecontactid' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'sourcecontactguid' => array(
+                'type' => PARAM_TEXT
+            ),
+            'sourceeventid' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'sourceeventguid' => array(
+                'type' => PARAM_TEXT
+            ),
+            'sourceonlineactivityid' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'sourceonlineactivityguid' => array(
+                'type' => PARAM_TEXT
+            ),
+            'updateinternal' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'updatesource' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'lastpulltime' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'lastpushtime' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'lasterror' => array(
+                'type' => PARAM_TEXT
+            ),
+            'errorcount' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+        );
+    }
 }
