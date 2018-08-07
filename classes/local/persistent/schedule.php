@@ -48,7 +48,7 @@ class schedule extends persistent {
             'resourcetype' => array(
                 'type' => PARAM_TEXT
             ),
-            'latestsourcemodfied' => array(
+            'latestsourcemodified' => array(
                 'type' => PARAM_TEXT
             ),
             'lastsourceid' => array(
