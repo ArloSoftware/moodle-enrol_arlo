@@ -110,7 +110,6 @@ class XmlDeserializer {
         // Root node is a collection of resources.
         if ($classInstance instanceof AbstractCollection) {
             $this->parseCollectionNode($node, $classInstance);
-
         }
         // Root node is a single resource.
         if ($classInstance instanceof AbstractResource) {
