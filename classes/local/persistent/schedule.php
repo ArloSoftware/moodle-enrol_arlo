@@ -26,6 +26,7 @@ namespace enrol_arlo\local\persistent;
 defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
+use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\persistent;
 
 class schedule extends persistent {
@@ -38,9 +39,11 @@ class schedule extends persistent {
      * @return array
      */
     protected static function define_properties() {
+        $pluginconfig = new arlo_plugin_config();
         return array(
             'platform' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'default' => $pluginconfig->get('platform')
             ),
             'enrolid' => array(
                 'type' => PARAM_TEXT
