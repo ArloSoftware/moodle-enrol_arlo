@@ -26,12 +26,27 @@ namespace enrol_arlo;
 defined('MOODLE_INTERNAL') || die();
 
 //require_once($CFG->dirroot . '/enrol/arlo/require.php');
+require_once("$CFG->dirroot/enrol/arlo/lib.php");
 
+use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use core_plugin_manager;
+use enrol_arlo_plugin;
 use enrol_arlo\local\config\arlo_plugin_config;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use stdClass;
+use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
+use moodle_exception;
 
 class api {
+    public static function get_enrolment_plugin() {
+        static $enrolmentplugin;
+        if (is_null($enrolmentplugin)) {
+            $enrolmentplugin = new enrol_arlo_plugin();
+        }
+        return $enrolmentplugin;
+    }
+
     public static function get_http_client() {
         $pluginconfig = new arlo_plugin_config();
         $config = [
@@ -60,5 +75,40 @@ class api {
         return $information->release;
     }
 
-    public static function get_registrations($client, $request) {}
+    public static function parse_response($response) {
+        $statuscode = $response->getStatusCode();
+        if (200 != $statuscode) {
+            throw new moodle_exception('HTTP: ' . $statuscode);
+        }
+        $contenttype = $response->getHeaderLine('content-type');
+        if (strpos($contenttype, 'application/xml') === false) {
+            throw new moodle_exception('HTTP: 415');
+
+        }
+        $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
+        $stream = $response->getBody();
+        $contents = $stream->getContents();
+        if ($stream->eof()) {
+            $stream->rewind();
+        }
+        return $deserializer->deserialize($contents);
+    }
+
+    public static function get_contact_merge_requests_collection($uri = null) {
+        $client = self::get_http_client();
+        $pluginconfig = new arlo_plugin_config();
+        $uri = new RequestUri();
+        $uri->setHost($pluginconfig->get('platform'));
+        $uri->setResourcePath('contactmergerequests/');
+        $uri->addExpand('ContactMergeRequest');
+        $uri->setOrderBy("CreatedDateTime ASC");
+        $request = new Request('GET', (string) $uri);
+        $response = $client->send($request);
+        return static::parse_response($response);
+    }
+
+    public static function get_registrations_collection() {
+
+    }
+
 }
