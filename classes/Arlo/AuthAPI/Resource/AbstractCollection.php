@@ -46,6 +46,15 @@ class AbstractCollection implements \IteratorAggregate {
     }
 
     /**
+     * Count of resource items.
+     *
+     * @return int
+     */
+    public function count() {
+        return count($this->collection);
+    }
+
+    /**
      * @return bool
      */
     public function hasNext() {
