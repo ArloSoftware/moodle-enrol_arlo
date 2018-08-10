@@ -1774,20 +1774,22 @@ class manager {
     }
 
     public function process_onlineactivity(OnlineActivity $onlineactivity) {
-        global $DB;
+        global $DB, $USER;
 
         $platform               = self::$plugin->get_config('platform');
         $record                 = new \stdClass();
         $record->platform       = $platform;
         $record->sourceid       = $onlineactivity->OnlineActivityID;
         $record->sourceguid     = $onlineactivity->UniqueIdentifier;
-        $record->name           = $onlineactivity->Name;
-        $record->code           = $onlineactivity->Code;
-        $record->contenturi     = $onlineactivity->ContentUri;
+        $record->name           = \core_text::substr($onlineactivity->Name, 0, 128);
+        $record->code           = \core_text::substr($onlineactivity->Code, 0, 32);
+        $record->contenturi     = \core_text::substr($onlineactivity->ContentUri, 0, 256);
         $record->sourcestatus   = $onlineactivity->Status;
         $record->sourcecreated  = $onlineactivity->CreatedDateTime;
         $record->sourcemodified = $onlineactivity->LastModifiedDateTime;
-        $record->modified       = time();
+        $record->usermodified   = $USER->id;
+        $record->timecreated    = time();
+        $record->timemodified   = time();
 
         $template = $onlineactivity->getEventTemplate();
         if ($template) {
