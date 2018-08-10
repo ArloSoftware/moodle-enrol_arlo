@@ -7,11 +7,14 @@ namespace enrol_arlo\Arlo\AuthAPI\Resource;
  * @package enrol_arlo\Arlo\AuthAPI\Resource
  */
 class ContactMergeRequest extends AbstractResource {
+    /** @var RequestID unique identifier. */
     public $RequestID;
+
     /** @var ContactInfo source contact identifier structure. */
-    protected $SourceContactInfo;
+    public $SourceContactInfo;
+
     /** @var ContactInfo destination contact identifier structure. */
-    protected $DestinationContactInfo;
+    public $DestinationContactInfo;
 
     /**
      * @param ContactInfo $contactInfo
