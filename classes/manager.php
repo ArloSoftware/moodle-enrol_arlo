@@ -1672,7 +1672,7 @@ class manager {
     }
 
     public function process_event(Event $event) {
-        global $DB;
+        global $DB, $USER;
 
         $platform               = self::$plugin->get_config('platform');
         $record                 = new \stdClass();
@@ -1680,14 +1680,16 @@ class manager {
         $record->sourceid       = $event->EventID;
         $record->sourceguid     = $event->UniqueIdentifier;
 
-        $record->code           = $event->Code;
+        $record->code           = \core_text::substr($event->Code, 0, 32);
         $record->startdatetime  = $event->StartDateTime;
         $record->finishdatetime = $event->FinishDateTime;
 
         $record->sourcestatus   = $event->Status;
         $record->sourcecreated  = $event->CreatedDateTime;
         $record->sourcemodified = $event->LastModifiedDateTime;
-        $record->modified       = time();
+        $record->usermodified   = $USER->id;
+        $record->timecreated    = time();
+        $record->timemodified   = time();
 
         $template = $event->getEventTemplate();
         if ($template) {
