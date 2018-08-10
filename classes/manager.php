@@ -1738,19 +1738,21 @@ class manager {
     }
 
     public function process_template(EventTemplate $template) {
-        global $DB;
+        global $DB, $USER;
 
         $platform               = self::$plugin->get_config('platform');
         $record                 = new \stdClass();
         $record->platform       = $platform;
         $record->sourceid       = $template->TemplateID;
         $record->sourceguid     = $template->UniqueIdentifier;
-        $record->name           = $template->Name;
-        $record->code           = $template->Code;
+        $record->name           = \core_text::substr($template->Name, 0, 128);
+        $record->code           = \core_text::substr($template->Code, 0, 32);
         $record->sourcestatus   = $template->Status;
         $record->sourcecreated  = $template->CreatedDateTime;
         $record->sourcemodified = $template->LastModifiedDateTime;
-        $record->modified       = time();
+        $record->usermodified   = $USER->id;
+        $record->timecreated    = time();
+        $record->timemodified   = time();
 
         $params = array(
             'platform'      => $platform,
