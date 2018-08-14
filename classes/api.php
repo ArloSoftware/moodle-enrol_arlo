@@ -104,35 +104,43 @@ class api {
         global $DB;
         $pluginconfig = new arlo_plugin_config();
         try {
-            $uri = new RequestUri();
-            $uri->setHost($pluginconfig->get('platform'));
-            $uri->setResourcePath('contactmergerequests/');
-            $uri->addExpand('ContactMergeRequest');
-            $uri->setOrderBy('CreatedDateTime ASC');
-            $request = new Request('GET', (string) $uri);
-            $collection = static::request_collection(static::get_http_client(), $request);
-            if ($collection->count() > 0) {
-                foreach ($collection as $resource) {
-                    $sourceid               = $resource->RequestID;
-                    $sourcecontactid        = $resource->SourceContactInfo->ContactID;
-                    $sourcecontactguid      = $resource->SourceContactInfo->UniqueIdentifier;
-                    $destinationcontactid   = $resource->DestinationContactInfo->ContactID;
-                    $destinationcontactguid = $resource->DestinationContactInfo->UniqueIdentifier;
-                    $sourcecreated          = $resource->CreatedDateTime;
-                    try {
-                        $contactmergerequest = new contact_merge_request();
-                        $contactmergerequest->from_record_property('sourceid', $sourceid);
-                        $contactmergerequest->set('platform', $pluginconfig->get('platform'));
-                        $contactmergerequest->set('sourcecontactid', $sourcecontactid);
-                        $contactmergerequest->set('sourcecontactguid', $sourcecontactguid);
-                        $contactmergerequest->set('destinationcontactid', $destinationcontactid);
-                        $contactmergerequest->set('destinationcontactguid', $destinationcontactguid);
-                        $contactmergerequest->set('sourcecreated', $sourcecreated);
-                        $contactmergerequest->save();
-                    } catch (moodle_exception $exception) {
-                        // TODO what can we handle in loop and what has to be passed to outer?
-                        throw $exception;
+            $hasnext = true;
+            while ($hasnext) {
+                $hasnext = false; // Break paging by default.
+                $uri = new RequestUri();
+                $uri->setHost($pluginconfig->get('platform'));
+                $uri->setResourcePath('contactmergerequests/');
+                $uri->addExpand('ContactMergeRequest');
+                $uri->setOrderBy('CreatedDateTime ASC');
+                $uri->setPagingTop(5);
+                $request = new Request('GET', (string) $uri);
+                $collection = static::request_collection(static::get_http_client(), $request);
+                if ($collection->count() > 0) {
+                    foreach ($collection as $resource) {
+                        $sourceid               = $resource->RequestID;
+                        $sourcecontactid        = $resource->SourceContactInfo->ContactID;
+                        $sourcecontactguid      = $resource->SourceContactInfo->UniqueIdentifier;
+                        $destinationcontactid   = $resource->DestinationContactInfo->ContactID;
+                        $destinationcontactguid = $resource->DestinationContactInfo->UniqueIdentifier;
+                        $sourcecreated          = $resource->CreatedDateTime;
+                        try {
+                            $contactmergerequest = new contact_merge_request();
+                            $contactmergerequest->from_record_property('sourceid', $sourceid);
+                            $contactmergerequest->set('platform', $pluginconfig->get('platform'));
+                            $contactmergerequest->set('sourcecontactid', $sourcecontactid);
+                            $contactmergerequest->set('sourcecontactguid', $sourcecontactguid);
+                            $contactmergerequest->set('destinationcontactid', $destinationcontactid);
+                            $contactmergerequest->set('destinationcontactguid', $destinationcontactguid);
+                            $contactmergerequest->set('sourcecreated', $sourcecreated);
+                            $contactmergerequest->save();
+                        } catch (moodle_exception $exception) {
+                            // TODO what can we handle in loop and what has to be passed to outer?
+                            throw $exception;
+                        } finally {
+
+                        }
                     }
+                    $hasnext = (bool) $collection->hasNext();
                 }
             }
         } catch (moodle_exception $exception) {
