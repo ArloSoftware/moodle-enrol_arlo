@@ -25,13 +25,14 @@ namespace enrol_arlo;
 
 defined('MOODLE_INTERNAL') || die();
 
-//require_once($CFG->dirroot . '/enrol/arlo/require.php');
-require_once("$CFG->dirroot/enrol/arlo/lib.php");
+require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use core_plugin_manager;
+use enrol_arlo\local\persistent\contact_merge_request;
 use enrol_arlo_plugin;
 use enrol_arlo\local\config\arlo_plugin_config;
+use Exception;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use stdClass;
@@ -94,21 +95,48 @@ class api {
         return $deserializer->deserialize($contents);
     }
 
-    public static function get_contact_merge_requests_collection($uri = null) {
-        $client = self::get_http_client();
-        $pluginconfig = new arlo_plugin_config();
-        $uri = new RequestUri();
-        $uri->setHost($pluginconfig->get('platform'));
-        $uri->setResourcePath('contactmergerequests/');
-        $uri->addExpand('ContactMergeRequest');
-        $uri->setOrderBy("CreatedDateTime ASC");
-        $request = new Request('GET', (string) $uri);
+    public static function request_collection($client, $request) {
         $response = $client->send($request);
         return static::parse_response($response);
     }
 
-    public static function get_registrations_collection() {
-
+    public static function syncronize_contact_merge_requests() {
+        global $DB;
+        $pluginconfig = new arlo_plugin_config();
+        try {
+            $uri = new RequestUri();
+            $uri->setHost($pluginconfig->get('platform'));
+            $uri->setResourcePath('contactmergerequests/');
+            $uri->addExpand('ContactMergeRequest');
+            $uri->setOrderBy('CreatedDateTime ASC');
+            $request = new Request('GET', (string) $uri);
+            $collection = static::request_collection(static::get_http_client(), $request);
+            if ($collection->count() > 0) {
+                foreach ($collection as $resource) {
+                    $sourceid               = $resource->RequestID;
+                    $sourcecontactid        = $resource->SourceContactInfo->ContactID;
+                    $sourcecontactguid      = $resource->SourceContactInfo->UniqueIdentifier;
+                    $destinationcontactid   = $resource->DestinationContactInfo->ContactID;
+                    $destinationcontactguid = $resource->DestinationContactInfo->UniqueIdentifier;
+                    $sourcecreated          = $resource->CreatedDateTime;
+                    try {
+                        $contactmergerequest = new contact_merge_request();
+                        $contactmergerequest->from_record_property('sourceid', $sourceid);
+                        $contactmergerequest->set('platform', $pluginconfig->get('platform'));
+                        $contactmergerequest->set('sourcecontactid', $sourcecontactid);
+                        $contactmergerequest->set('sourcecontactguid', $sourcecontactguid);
+                        $contactmergerequest->set('destinationcontactid', $destinationcontactid);
+                        $contactmergerequest->set('destinationcontactguid', $destinationcontactguid);
+                        $contactmergerequest->set('sourcecreated', $sourcecreated);
+                        $contactmergerequest->save();
+                    } catch (moodle_exception $exception) {
+                        // TODO what can we handle in loop and what has to be passed to outer?
+                        throw $exception;
+                    }
+                }
+            }
+        } catch (moodle_exception $exception) {
+            // TODO handle and log.
+        }
     }
-
 }
