@@ -26,10 +26,12 @@ namespace enrol_arlo\local\persistent;
 defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
+use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\persistent;
 
-
 class contact_merge_request extends persistent {
+    use enrol_arlo_persistent_trait;
+
     /** Table name. */
     const TABLE = 'enrol_arlo_contactmerge';
 
@@ -39,23 +41,23 @@ class contact_merge_request extends persistent {
      * @return array
      */
     protected static function define_properties() {
+        $pluginconfig = new arlo_plugin_config();
         return array(
             'platform' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'default' => $pluginconfig->get('platform')
             ),
             'sourceid' => array(
                 'type' => PARAM_TEXT
             ),
             'sourcecontactid' => array(
                 'type' => PARAM_INT,
-                'default' => 0
             ),
             'sourcecontactguid' => array(
                 'type' => PARAM_TEXT
             ),
             'destinationcontactid' => array(
                 'type' => PARAM_INT,
-                'default' => 0
             ),
             'destinationcontactguid' => array(
                 'type' => PARAM_TEXT
