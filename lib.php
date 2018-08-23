@@ -42,6 +42,12 @@ class enrol_arlo_plugin extends enrol_plugin {
     const ARLO_TYPE_ONLINEACTIVITY  = 'onlineactivity';
     const ARLO_CREATE_GROUP         = -1;
 
+    public function get_plugin_release() {
+        $pluginmanager = core_plugin_manager::instance();
+        $information = $pluginmanager->get_plugin_info('enrol_arlo');
+        return $information->release;
+    }
+
     public function get_config_defaults() {
         static $studentroleid;
         if (is_null($studentroleid)) {
