@@ -89,4 +89,29 @@ class job extends persistent {
             )
         );
     }
+
+    /**
+     * Return array of valid types.
+     *
+     * @return array
+     */
+    public static function get_valid_types() {
+        return [
+            'site/eventtemplates',
+            'site/events',
+            'site/onlineactivities',
+            'site/contactmergerequests',
+            'enrol/memberships',
+            'enrol/outcomes',
+            'enrol/contacts'
+        ];
+    }
+
+    public function set_type($value) {
+        $types = static::get_valid_types();
+        if (!in_array($value, $types)) {
+            throw new coding_exception('Invalid type');
+        }
+        return $this->raw_set('type', $value);
+    }
 }
