@@ -32,6 +32,14 @@ use core_plugin_manager;
 
 class client {
 
+    /**
+     * Return a guzzle client setup with basic authentication and appropriate
+     * options and headers set.
+     *
+     * @param array $headers
+     * @return \GuzzleHttp\Client
+     * @throws \coding_exception
+     */
     public static function get_instance($headers = []) {
         $pluginconfig = new arlo_plugin_config();
         $config = [
@@ -50,6 +58,11 @@ class client {
         return new \GuzzleHttp\Client($config);
     }
 
+    /**
+     * Custom user agent string to identify the client.
+     *
+     * @return string
+     */
     public static function get_user_agent() {
         global $CFG;
         return 'Moodle/' . moodle_major_version() . ';' . $CFG->wwwroot;
