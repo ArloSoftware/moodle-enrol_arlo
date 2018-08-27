@@ -434,6 +434,30 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
+        // Conditionally add enrol_arlo_job table.
+        if (!$dbman->table_exists('enrol_arlo_job')) {
+            $table = new xmldb_table('enrol_arlo_job');
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+            $table->add_field('type', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('instanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('collection', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('endpoint', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('lastsourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('lastsourcetimemodified', XMLDB_TYPE_CHAR, '36', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timenextrequest', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timenorequestsafter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('errormessage', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('errorcounter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('disabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            // Primary key.
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+            $dbman->create_table($table);
+        }
+
         // Conditionally add enrol_arlo_contactmerge table.
         if (!$dbman->table_exists('enrol_arlo_contactmerge')) {
             $table = new xmldb_table('enrol_arlo_contactmerge');
@@ -458,32 +482,6 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
 
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2017051505, 'enrol', 'arlo');
-    }
-
-    if ($oldversion < 2017051506) {
-        if (!$dbman->table_exists('enrol_arlo_job')) {
-            $table = new xmldb_table('enrol_arlo_job');
-            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
-            $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, null, null, null);
-            $table->add_field('type', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
-            $table->add_field('instanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('collection', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, null);
-            $table->add_field('endpoint', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
-            $table->add_field('lastsourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('lastsourcetimemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('timenextrequest', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('timestoprequest', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('errormessage', XMLDB_TYPE_TEXT, null, null, null, null, null);
-            $table->add_field('errorcounter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('disabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
-            // Primary key.
-            $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-            $dbman->create_table($table);
-        }
-        upgrade_plugin_savepoint(true, 2017051506, 'enrol', 'arlo');
     }
 
     return true;
