@@ -26,6 +26,6 @@ namespace enrol_arlo\local\job;
 
 defined('MOODLE_INTERNAL') || die();
 
-interface job {
-    public function run();
+abstract class job {
+    abstract protected function run();
 }
