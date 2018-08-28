@@ -136,7 +136,7 @@ class api {
         $job = new local\persistent\job();
         $job->from_record_property('type', 'site/event_templates');
         $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'eventtemplates');
+        $job->set('collection', 'EventTemplates');
         $job->set('endpoint', 'eventtemplates/');
         if ($job->get('id') <= 0) {
             $job->create();
@@ -156,7 +156,7 @@ class api {
         $job = new local\persistent\job();
         $job->from_record_property('type', 'site/online_activities');
         $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'onlineactivities');
+        $job->set('collection', 'OnlineActivities');
         $job->set('endpoint', 'onlineactivities/');
         if ($job->get('id') <= 0) {
             $job->create();
@@ -166,7 +166,7 @@ class api {
         $job = new local\persistent\job();
         $job->from_record_property('type', 'site/contact_merge_requests');
         $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'contactmergerequests');
+        $job->set('collection', 'ContactMergeRequests');
         $job->set('endpoint', 'contactmergerequests/');
         if ($job->get('id') <= 0) {
             $job->create();
