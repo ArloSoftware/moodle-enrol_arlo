@@ -65,19 +65,22 @@ class job extends persistent {
                 'default' => 0
             ),
             'lastsourcetimemodified' => array(
-                'type' => PARAM_INT,
-                'default' => 0
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => '1970-01-01T00:00:00+0000'
             ),
             'timenextrequest' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),
-            'timestoprequest' => array(
+            'timenorequestsafter' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),
             'errormessage' => array(
-                'type' => PARAM_INT,
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => ''
             ),
             'errorcounter' => array(
                 'type' => PARAM_INT,
@@ -107,7 +110,7 @@ class job extends persistent {
         ];
     }
 
-    public function set_type($value) {
+    protected function set_type($value) {
         $types = static::get_valid_types();
         if (!in_array($value, $types)) {
             throw new coding_exception('Invalid type');
