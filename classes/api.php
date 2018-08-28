@@ -134,7 +134,7 @@ class api {
 
         // Register Event Templates job.
         $job = new local\persistent\job();
-        $job->from_record_property('type', 'site/eventtemplates');
+        $job->from_record_property('type', 'site/event_templates');
         $job->set('instanceid', $SITE->id);
         $job->set('collection', 'eventtemplates');
         $job->set('endpoint', 'eventtemplates/');
@@ -154,7 +154,7 @@ class api {
 
         // Register Online Activities job.
         $job = new local\persistent\job();
-        $job->from_record_property('type', 'site/onlineactivities');
+        $job->from_record_property('type', 'site/online_activities');
         $job->set('instanceid', $SITE->id);
         $job->set('collection', 'onlineactivities');
         $job->set('endpoint', 'onlineactivities/');
@@ -164,7 +164,7 @@ class api {
 
         // Register Contact Merge Requests job.
         $job = new local\persistent\job();
-        $job->from_record_property('type', 'site/contactmergerequests');
+        $job->from_record_property('type', 'site/contact_merge_requests');
         $job->set('instanceid', $SITE->id);
         $job->set('collection', 'contactmergerequests');
         $job->set('endpoint', 'contactmergerequests/');

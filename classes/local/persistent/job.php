@@ -100,10 +100,10 @@ class job extends persistent {
      */
     public static function get_valid_types() {
         return [
-            'site/eventtemplates',
+            'site/event_templates',
             'site/events',
-            'site/onlineactivities',
-            'site/contactmergerequests',
+            'site/online_activities',
+            'site/contact_merge_requests',
             'enrol/memberships',
             'enrol/outcomes',
             'enrol/contacts'
