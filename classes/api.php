@@ -146,7 +146,7 @@ class api {
         $job = new local\persistent\job();
         $job->from_record_property('type', 'site/events');
         $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'events');
+        $job->set('collection', 'Events');
         $job->set('endpoint', 'events/');
         if ($job->get('id') <= 0) {
             $job->create();
