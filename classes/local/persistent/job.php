@@ -73,7 +73,15 @@ class job extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0
             ),
+            'timenextrequestdelay' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
             'timenorequestsafter' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'timerequestsafterextension' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),

@@ -117,7 +117,9 @@
         <FIELD NAME="lastsourceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="lastsourcetimemodified" TYPE="char" LENGTH="36" NOTNULL="true" SEQUENCE="false" COMMENT="Arlo based timestamp"/>
         <FIELD NAME="timenextrequest" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timenextrequestdelay" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Throttling, time in seconds to delay next request."/>
         <FIELD NAME="timenorequestsafter" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timerequestsafterextension" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The period in seconds to allow extension after."/>
         <FIELD NAME="errormessage" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="errorcounter" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="disabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
