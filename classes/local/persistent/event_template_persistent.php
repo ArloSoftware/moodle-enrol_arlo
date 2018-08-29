@@ -30,7 +30,7 @@ use core_text;
 use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\persistent;
 
-class template extends persistent {
+class event_template_persistent extends persistent {
 
     /** Table name. */
     const TABLE = 'enrol_arlo_template';
@@ -39,6 +39,7 @@ class template extends persistent {
      * Return the definition of the properties of this model.
      *
      * @return array
+     * @throws coding_exception
      */
     protected static function define_properties() {
         $pluginconfig = new arlo_plugin_config();
@@ -83,6 +84,6 @@ class template extends persistent {
      */
     protected function set_name($value) {
         $truncated = core_text::substr($value, 0, 128);
-        return $this->raw_set('name', $value);
+        return $this->raw_set('name', $truncated);
     }
 }
