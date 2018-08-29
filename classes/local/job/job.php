@@ -32,10 +32,10 @@ abstract class job {
 
     protected $errors = [];
 
-    protected $persistent;
+    protected $jobpersistent;
 
-    public function __construct(persistent $persistent) {
-        $this->persistent = $persistent;
+    public function __construct(persistent $jobpersistent) {
+        $this->jobpersistent = $jobpersistent;
     }
 
     abstract protected function run();
