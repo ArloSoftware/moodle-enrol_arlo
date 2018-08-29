@@ -28,11 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
-use core_plugin_manager;
 use enrol_arlo\local\client;
 use enrol_arlo\local\factory\job_factory;
-use enrol_arlo\local\persistent\contact_merge_request;
-use enrol_arlo\local\persistent\job;
+use enrol_arlo\local\persistent\contact_merge_request_persistent;
 use enrol_arlo_plugin;
 use enrol_arlo\local\config\arlo_plugin_config;
 use Exception;
@@ -90,7 +88,7 @@ class api {
             'disabled' => 1
         ];
         $select = "timenextrequest < :now AND disabled <> :disabled";
-        $jobrecords = local\persistent\job::get_records_select($select, $conditions);
+        $jobrecords = local\persistent\job_persistent::get_records_select($select, $conditions);
         foreach ($jobrecords as $jobrecord) {
             $job = job_factory::create_from_persistent($jobrecord);
             $job->run();
@@ -120,7 +118,7 @@ class api {
                         $destinationcontactguid = $resource->DestinationContactInfo->UniqueIdentifier;
                         $sourcecreated          = $resource->CreatedDateTime;
                         try {
-                            $contactmergerequest = new contact_merge_request();
+                            $contactmergerequest = new contact_merge_request_persistent();
                             $contactmergerequest->from_record_property('sourceid', $sourceid);
                             $contactmergerequest->set('platform', $pluginconfig->get('platform'));
                             $contactmergerequest->set('sourcecontactid', $sourcecontactid);
@@ -156,7 +154,7 @@ class api {
         global $SITE;
 
         // Register Event Templates job.
-        $job = new local\persistent\job();
+        $job = new local\persistent\job_persistent();
         $job->from_record_property('type', 'site/event_templates');
         $job->set('instanceid', $SITE->id);
         $job->set('collection', 'EventTemplates');
@@ -166,7 +164,7 @@ class api {
         }
 
         // Register Events job.
-        $job = new local\persistent\job();
+        $job = new local\persistent\job_persistent();
         $job->from_record_property('type', 'site/events');
         $job->set('instanceid', $SITE->id);
         $job->set('collection', 'Events');
@@ -176,7 +174,7 @@ class api {
         }
 
         // Register Online Activities job.
-        $job = new local\persistent\job();
+        $job = new local\persistent\job_persistent();
         $job->from_record_property('type', 'site/online_activities');
         $job->set('instanceid', $SITE->id);
         $job->set('collection', 'OnlineActivities');
@@ -186,7 +184,7 @@ class api {
         }
 
         // Register Contact Merge Requests job.
-        $job = new local\persistent\job();
+        $job = new local\persistent\job_persistent();
         $job->from_record_property('type', 'site/contact_merge_requests');
         $job->set('instanceid', $SITE->id);
         $job->set('collection', 'ContactMergeRequests');
