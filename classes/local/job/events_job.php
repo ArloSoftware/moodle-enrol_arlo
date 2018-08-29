@@ -15,7 +15,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Job interface.
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -24,19 +23,11 @@
 
 namespace enrol_arlo\local\job;
 
-use enrol_arlo\persistent;
-
 defined('MOODLE_INTERNAL') || die();
 
-abstract class job {
+use enrol_arlo\local\config\arlo_plugin_config;
 
-    protected $errors = [];
+class events_job extends job {
 
-    protected $persistent;
-
-    public function __construct(persistent $persistent) {
-        $this->persistent = $persistent;
-    }
-
-    abstract protected function run();
+    public function run() {}
 }

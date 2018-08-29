@@ -15,28 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Job interface.
  *
- * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @package   {{PLUGIN_NAME}} {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace enrol_arlo\local\job;
+namespace enrol_arlo\local\factory;
 
 use enrol_arlo\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
-abstract class job {
+class job_factory {
 
-    protected $errors = [];
-
-    protected $persistent;
-
-    public function __construct(persistent $persistent) {
-        $this->persistent = $persistent;
+    public static function create_from_persistent(persistent $persistent) {
+        $parts = explode( '/', $persistent->get('type'));
+        $type = $parts[0];
+        $classname = $parts[1] . '_job';
+        $namespaceclassname = "enrol_arlo\\local\\job\\{$classname}";
+        return new $namespaceclassname($persistent);
     }
-
-    abstract protected function run();
 }
