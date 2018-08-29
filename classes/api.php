@@ -76,22 +76,15 @@ class api {
         return static::parse_response($response);
     }
 
-    public static function run_scheduled_jobs(int $time = null, progress_trace $trace = null) {
+    public static function run_scheduled_jobs($time = null, progress_trace $trace = null) {
         if (is_null($time)) {
             $time = time();
         }
         if (is_null($trace)) {
             $trace = new null_progress_trace();
         }
-        $conditions = [
-            'now' => $time,
-            'disabled' => 1
-        ];
-        $select = "timenextrequest < :now AND disabled <> :disabled";
-        $jobrecords = local\persistent\job_persistent::get_records_select($select, $conditions);
-        foreach ($jobrecords as $jobrecord) {
-            $job = job_factory::create_from_persistent($jobrecord);
-            $job->run();
+        foreach (job_factory::get_scheduled_jobs() as $scheduledjob) {
+            $scheduledjob->run();
         }
     }
 
