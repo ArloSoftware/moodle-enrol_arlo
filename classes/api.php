@@ -30,7 +30,9 @@ require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use core_plugin_manager;
 use enrol_arlo\local\client;
+use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\persistent\contact_merge_request;
+use enrol_arlo\local\persistent\job;
 use enrol_arlo_plugin;
 use enrol_arlo\local\config\arlo_plugin_config;
 use Exception;
@@ -39,6 +41,8 @@ use GuzzleHttp\Psr7\Response;
 use stdClass;
 use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
 use moodle_exception;
+use progress_trace;
+use null_progress_trace;
 
 class api {
 
@@ -72,6 +76,25 @@ class api {
     public static function request_collection($client, $request) {
         $response = $client->send($request);
         return static::parse_response($response);
+    }
+
+    public static function run_scheduled_jobs(int $time = null, progress_trace $trace = null) {
+        if (is_null($time)) {
+            $time = time();
+        }
+        if (is_null($trace)) {
+            $trace = new null_progress_trace();
+        }
+        $conditions = [
+            'now' => $time,
+            'disabled' => 1
+        ];
+        $select = "timenextrequest < :now AND disabled <> :disabled";
+        $jobrecords = local\persistent\job::get_records_select($select, $conditions);
+        foreach ($jobrecords as $jobrecord) {
+            $job = job_factory::create_from_persistent($jobrecord);
+            $job->run();
+        }
     }
 
     public static function syncronize_contact_merge_requests() {
