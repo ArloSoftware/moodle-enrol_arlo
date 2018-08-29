@@ -23,17 +23,49 @@
 
 namespace enrol_arlo\local\factory;
 
+use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
 class job_factory {
 
+    /**
+     * Construct and return associated worker class based off persistent.
+     *
+     * @param persistent $persistent
+     * @return mixed
+     * @throws \coding_exception
+     */
     public static function create_from_persistent(persistent $persistent) {
         $parts = explode( '/', $persistent->get('type'));
         $type = $parts[0];
         $classname = $parts[1] . '_job';
         $namespaceclassname = "enrol_arlo\\local\\job\\{$classname}";
         return new $namespaceclassname($persistent);
+    }
+
+    /**
+     * Get scheduled jobs that need to be run.
+     *
+     * @param null $time
+     * @return array
+     * @throws \coding_exception
+     */
+    public static function get_scheduled_jobs($time = null) {
+        $scheduledjobs = [];
+        if (is_null($time)) {
+            $time = time();
+        }
+        $conditions = [
+            'now' => $time,
+            'disabled' => 1
+        ];
+        $select = "timenextrequest < :now AND disabled <> :disabled";
+        $jobpersistents = job_persistent::get_records_select($select, $conditions, 'timenextrequest');
+        foreach ($jobpersistents as $jobpersistent) {
+            $scheduledjobs[] = job_factory::create_from_persistent($jobpersistent);
+        }
+        return $scheduledjobs;
     }
 }
