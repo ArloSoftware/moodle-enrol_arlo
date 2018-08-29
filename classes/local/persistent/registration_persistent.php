@@ -28,8 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 use coding_exception;
 use enrol_arlo\persistent;
 
-
-class registration extends persistent {
+class registration_persistent extends persistent {
     /** Table name. */
     const TABLE = 'enrol_arlo_registration';
 
