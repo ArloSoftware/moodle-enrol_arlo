@@ -25,9 +25,83 @@ namespace enrol_arlo\local\job;
 
 defined('MOODLE_INTERNAL') || die();
 
+use enrol_arlo\api;
+use enrol_arlo\Arlo\AuthAPI\RequestUri;
+use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
+use enrol_arlo\local\client;
 use enrol_arlo\local\config\arlo_plugin_config;
+use enrol_arlo\local\persistent\event_persistent;
+use GuzzleHttp\Psr7\Request;
+use Exception;
+use moodle_exception;
 
 class events_job extends job {
 
-    public function run() {}
+    public function run() {
+        $pluginconfig = new arlo_plugin_config();
+        $jobpersistent = $this->get_job_persistent();
+        try {
+            $hasnext = true;
+            while ($hasnext) {
+                $hasnext = false; // Break paging by default.
+                $uri = new RequestUri();
+                $uri->setHost($pluginconfig->get('platform'));
+                $uri->setResourcePath('events/');
+                $uri->addExpand('Event/EventTemplate');
+                $filter = "(LastModifiedDateTime gt datetimeoffset('" . $jobpersistent->get('lastsourcetimemodified') . "'))";
+                if ($jobpersistent->get('lastsourceid')) {
+                    $filter .= " OR ";
+                    $filter .= "(LastModifiedDateTime eq datetimeoffset('" . $jobpersistent->get('lastsourcetimemodified') . "')";
+                    $filter .= " AND ";
+                    $filter .= "EventID gt " . $jobpersistent->get('lastsourceid') . ")";
+                }
+                $uri->setFilterBy($filter);
+                $uri->setOrderBy("LastModifiedDateTime ASC,EventID ASC");
+                $request = new Request('GET', $uri->output(true));
+                $response = api::send_request(client::get_instance(), $request);
+                $collection = api::parse_response($response);
+                if ($collection instanceof AbstractCollection && $collection->count() > 0) {
+                    foreach ($collection as $resource) {
+                        $sourceid       = $resource->EventID;
+                        $sourceguid     = $resource->UniqueIdentifier;
+                        $code           = $resource->Code;
+                        $startdatetime  = $resource->StartDateTime;
+                        $finishdatetime = $resource->FinishDateTime;
+                        $sourcestatus   = $resource->Status;
+                        $sourcecreated  = $resource->CreatedDateTime;
+                        $sourcemodified = $resource->LastModifiedDateTime;
+                        $eventtemplate  = $resource->getEventTemplate();
+                        if ($eventtemplate) {
+                            $sourcetemplateid   = $eventtemplate->TemplateID;
+                            $sourcetemplateguid = $eventtemplate->UniqueIdentifier;
+                        }
+                        try {
+                            $event = new event_persistent();
+                            $event->from_record_property('sourceid', $sourceid);
+                            $event->set('sourceguid', $sourceguid);
+                            $event->set('code', $code);
+                            $event->set('startdatetime', $startdatetime);
+                            $event->set('finishdatetime', $finishdatetime);
+                            $event->set('sourcestatus', $sourcestatus);
+                            $event->set('sourcecreated', $sourcecreated);
+                            $event->set('sourcemodified', $sourcemodified);
+                            $event->set('sourcetemplateid', $sourcetemplateid);
+                            $event->set('sourcetemplateguid' , $sourcetemplateguid);
+                            $event->save();
+                            $jobpersistent->set('lastsourceid', $sourceid);
+                            $jobpersistent->set('lastsourcetimemodified', $sourcemodified);
+                            $jobpersistent->update();
+                        } catch (moodle_exception $exception) {
+                            $this->add_error($exception->getMessage());
+                        }
+                    }
+                }
+                $hasnext = (bool) $collection->hasNext();
+            }
+        } catch (moodle_exception $exception) {
+            $this->add_error($exception->getMessage());
+            return false;
+        }
+        return true;
+    }
 }
