@@ -64,7 +64,7 @@ class job_factory {
         $select = "timenextrequest < :now AND disabled <> :disabled";
         $jobpersistents = job_persistent::get_records_select($select, $conditions, 'timenextrequest');
         foreach ($jobpersistents as $jobpersistent) {
-            $scheduledjobs[] = job_factory::create_from_persistent($jobpersistent);
+            $scheduledjobs[] = static::create_from_persistent($jobpersistent);
         }
         return $scheduledjobs;
     }
