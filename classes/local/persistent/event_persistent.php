@@ -16,7 +16,7 @@
 
 /**
  * Event persistent model.
- * 
+ *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -102,26 +102,23 @@ class event_persistent extends persistent {
     /**
      * Fire event created event.
      *
-     * @param $result
      * @throws \dml_exception
      * @throws coding_exception
      */
-    protected function after_create($result) {
-        if ($result) {
-            $data = [
-                'objectid' => 1,
-                'context' => context_system::instance(),
-                'other' => [
-                    'id' => $this->raw_get('id'),
-                    'sourceid' => $this->raw_get('sourceid'),
-                    'sourceguid' => $this->raw_get('sourceguid'),
-                    'sourcestatus' => $this->raw_get('sourcestatus'),
-                    'sourcetemplateid' => $this->raw_get('sourcetemplateid'),
-                    'sourcetemplateguid' => $this->raw_get('sourcetemplateguid')
-                ]
-            ];
-            $systemevent = event_created::create($data)->trigger();
-        }
+    protected function after_create() {
+        $data = [
+            'objectid' => 1,
+            'context' => context_system::instance(),
+            'other' => [
+                'id' => $this->raw_get('id'),
+                'sourceid' => $this->raw_get('sourceid'),
+                'sourceguid' => $this->raw_get('sourceguid'),
+                'sourcestatus' => $this->raw_get('sourcestatus'),
+                'sourcetemplateid' => $this->raw_get('sourcetemplateid'),
+                'sourcetemplateguid' => $this->raw_get('sourcetemplateguid')
+            ]
+        ];
+        $systemevent = event_created::create($data)->trigger();
     }
 
     /**
