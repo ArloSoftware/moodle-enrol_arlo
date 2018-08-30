@@ -49,44 +49,44 @@ class event_persistent extends persistent {
      */
     protected static function define_properties() {
         $pluginconfig = new arlo_plugin_config();
-        return array(
-            'platform' => array(
+        return [
+            'platform' => [
                 'type' => PARAM_TEXT,
                 'default' => $pluginconfig->get('platform')
-            ),
-            'sourceid' => array(
+            ],
+            'sourceid' => [
                 'type' => PARAM_INT,
                 'default' => 0
-            ),
-            'sourceguid' => array(
+            ],
+            'sourceguid' => [
                 'type' => PARAM_TEXT
-            ),
-            'code' => array(
+            ],
+            'code' => [
                 'type' => PARAM_TEXT
-            ),
-            'startdatetime' => array(
+            ],
+            'startdatetime' => [
                 'type' => PARAM_TEXT
-            ),
-            'finishdatetime' => array(
+            ],
+            'finishdatetime' => [
                 'type' => PARAM_TEXT
-            ),
-            'sourcestatus' => array(
+            ],
+            'sourcestatus' => [
                 'type' => PARAM_TEXT
-            ),
-            'sourcecreated' => array(
-                'type' => PARAM_TEXT,
-            ),
-            'sourcemodified' => array(
+            ],
+            'sourcecreated' => [
                 'type' => PARAM_TEXT
-            ),
-            'sourcetemplateid' => array(
-            'type' => PARAM_INT,
-            'default' => 0
-        ),
-            'sourcetemplateguid' => array(
-            'type' => PARAM_TEXT
-        ),
-        );
+            ],
+            'sourcemodified' => [
+                'type' => PARAM_TEXT
+            ],
+            'sourcetemplateid' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
+            'sourcetemplateguid' => [
+                'type' => PARAM_TEXT
+            ]
+        ];
     }
 
     /**
