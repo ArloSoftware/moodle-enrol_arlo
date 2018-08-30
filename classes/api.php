@@ -59,7 +59,8 @@ class api {
         }
         $contenttype = $response->getHeaderLine('content-type');
         if (strpos($contenttype, 'application/xml') === false) {
-            throw new moodle_exception('HTTP: 415');
+            $code = 'httpstatus:415';
+            throw new moodle_exception($code, 'enrol_arlo', '', null, $exception->getTraceAsString());
 
         }
         $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
@@ -71,9 +72,16 @@ class api {
         return $deserializer->deserialize($contents);
     }
 
-    public static function request_collection($client, $request) {
-        $response = $client->send($request);
-        return static::parse_response($response);
+    public static function send_request($client, $request) {
+        try {
+            /** @var $client \GuzzleHttp\Client */
+            $response = $client->send($request);
+            return $response;
+        } catch (Exception $exception) {
+            // Re throw as a new moodle exception.
+            $code = 'httpstatus:' . $exception->getCode();
+            throw new moodle_exception($code, 'enrol_arlo', '', null, $exception->getTraceAsString());
+        }
     }
 
     public static function run_scheduled_jobs($time = null, progress_trace $trace = null) {
@@ -84,54 +92,11 @@ class api {
             $trace = new null_progress_trace();
         }
         foreach (job_factory::get_scheduled_jobs() as $scheduledjob) {
-            $scheduledjob->run();
-        }
-    }
-
-    public static function syncronize_contact_merge_requests() {
-        global $DB;
-        $pluginconfig = new arlo_plugin_config();
-        try {
-            $hasnext = true;
-            while ($hasnext) {
-                $hasnext = false; // Break paging by default.
-                $uri = new RequestUri();
-                $uri->setHost($pluginconfig->get('platform'));
-                $uri->setResourcePath('contactmergerequests/');
-                $uri->addExpand('ContactMergeRequest');
-                $uri->setOrderBy('CreatedDateTime ASC');
-                $request = new Request('GET', (string) $uri);
-                $collection = static::request_collection(client::get_instance(), $request);
-                if ($collection->count() > 0) {
-                    foreach ($collection as $resource) {
-                        $sourceid               = $resource->RequestID;
-                        $sourcecontactid        = $resource->SourceContactInfo->ContactID;
-                        $sourcecontactguid      = $resource->SourceContactInfo->UniqueIdentifier;
-                        $destinationcontactid   = $resource->DestinationContactInfo->ContactID;
-                        $destinationcontactguid = $resource->DestinationContactInfo->UniqueIdentifier;
-                        $sourcecreated          = $resource->CreatedDateTime;
-                        try {
-                            $contactmergerequest = new contact_merge_request_persistent();
-                            $contactmergerequest->from_record_property('sourceid', $sourceid);
-                            $contactmergerequest->set('platform', $pluginconfig->get('platform'));
-                            $contactmergerequest->set('sourcecontactid', $sourcecontactid);
-                            $contactmergerequest->set('sourcecontactguid', $sourcecontactguid);
-                            $contactmergerequest->set('destinationcontactid', $destinationcontactid);
-                            $contactmergerequest->set('destinationcontactguid', $destinationcontactguid);
-                            $contactmergerequest->set('sourcecreated', $sourcecreated);
-                            $contactmergerequest->save();
-                        } catch (moodle_exception $exception) {
-                            // TODO what can we handle in loop and what has to be passed to outer?
-                            throw $exception;
-                        } finally {
-
-                        }
-                    }
-                }
-                $hasnext = (bool) $collection->hasNext();
+            $status = $scheduledjob->run();
+            if (!$status) {
+                var_dump($scheduledjob->get_errors());
             }
-        } catch (moodle_exception $exception) {
-            // TODO handle and log.
+
         }
     }
 
