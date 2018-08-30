@@ -241,3 +241,16 @@ You can reset your password using following url:
 You may access this course at the following url:
 
   {$a->courseurl}';
+
+$string['httpstatus:200'] = 'OK';
+$string['httpstatus:201'] = 'Created';
+$string['httpstatus:302'] = 'Found';
+$string['httpstatus:400'] = 'Bad Request';
+$string['httpstatus:401'] = 'Unauthorized';
+$string['httpstatus:403'] = 'Forbidden';
+$string['httpstatus:403'] = 'Not Found';
+$string['httpstatus:406'] = 'Unacceptable';
+$string['httpstatus:409'] = 'Conflict';
+$string['httpstatus:415'] = 'Unsupported Media Type';
+$string['httpstatus:500'] = 'Internal Server Error';
+$string['httpstatus:503'] = 'Service Unavailable';

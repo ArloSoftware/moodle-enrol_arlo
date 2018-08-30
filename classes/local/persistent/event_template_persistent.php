@@ -78,6 +78,18 @@ class event_template_persistent extends persistent {
     }
 
     /**
+     * Custom setter for code, just for now until implement truncate support in persistent.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_code($value) {
+        $truncated = core_text::substr($value, 0, 32);
+        return $this->raw_set('code', $truncated);
+    }
+
+    /**
      * Custom setter for name, just for now until implement truncate support in persistent.
      *
      * @param $value
