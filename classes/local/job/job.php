@@ -30,12 +30,28 @@ defined('MOODLE_INTERNAL') || die();
 
 abstract class job {
 
-    protected $errors = [];
+    protected $errors;
 
     protected $jobpersistent;
 
+    protected $processed;
+
+    public function add_error($error) {
+        $this->errors[] = $error;
+    }
+
     public function __construct(persistent $jobpersistent) {
+        $this->errors = [];
         $this->jobpersistent = $jobpersistent;
+        $this->processed = 0;
+    }
+
+    public function get_job_persistent() {
+        return $this->jobpersistent;
+    }
+
+    public function get_errors() {
+        return $this->errors;
     }
 
     abstract protected function run();
