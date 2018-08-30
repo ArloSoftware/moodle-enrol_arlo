@@ -60,7 +60,7 @@ class api {
         $contenttype = $response->getHeaderLine('content-type');
         if (strpos($contenttype, 'application/xml') === false) {
             $code = 'httpstatus:415';
-            throw new moodle_exception($code, 'enrol_arlo', '', null, $exception->getTraceAsString());
+            throw new moodle_exception($code, 'enrol_arlo');
 
         }
         $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
