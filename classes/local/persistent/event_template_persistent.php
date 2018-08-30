@@ -32,6 +32,8 @@ use enrol_arlo\persistent;
 
 class event_template_persistent extends persistent {
 
+    use enrol_arlo_persistent_trait;
+
     /** Table name. */
     const TABLE = 'enrol_arlo_template';
 
