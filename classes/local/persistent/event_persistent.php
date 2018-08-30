@@ -62,12 +62,14 @@ class event_persistent extends persistent {
                 'type' => PARAM_TEXT
             ),
             'code' => array(
-                'type' => PARAM_TEXT,
-                'length' => 32,
-                'truncatable' => true
+                'type' => PARAM_TEXT
             ),
-            'startdatetime' => array(),
-            'finishdatetime' => array(),
+            'startdatetime' => array(
+                'type' => PARAM_TEXT
+            ),
+            'finishdatetime' => array(
+                'type' => PARAM_TEXT
+            ),
             'sourcestatus' => array(
                 'type' => PARAM_TEXT
             ),
@@ -118,7 +120,7 @@ class event_persistent extends persistent {
                 'sourcetemplateguid' => $this->raw_get('sourcetemplateguid')
             ]
         ];
-        $systemevent = event_created::create($data)->trigger();
+        event_created::create($data)->trigger();
     }
 
     /**
@@ -142,7 +144,7 @@ class event_persistent extends persistent {
                     'sourcetemplateguid' => $this->raw_get('sourcetemplateguid')
                 ]
             ];
-            $systemevent = event_updated::create($data)->trigger();
+            event_updated::create($data)->trigger();
         }
     }
 
