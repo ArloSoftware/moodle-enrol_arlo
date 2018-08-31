@@ -46,21 +46,17 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => -1,
             ],
-            'apierrorcount' => [
-                'type' => PARAM_INT,
-                'default' => 0,
+            'apierrormessage' => [
+                'type' => PARAM_TEXT,
+                'default' => ''
             ],
-            'apistatus' => [
+            'apierrortime' => [
                 'type' => PARAM_INT,
-                'default' => -1,
+                'default' => 0
             ],
-            'apilastrequested' => [
+            'apierrorcounter' => [
                 'type' => PARAM_INT,
-                'default' => 0,
-            ],
-            'apilasterror' => [
-                'type' => PARAM_RAW,
-                'default' => '',
+                'default' => 0
             ],
             'matchuseraccountsby' => [
                 'type' => PARAM_INT
