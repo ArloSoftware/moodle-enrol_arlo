@@ -70,6 +70,9 @@ class online_activity_persistent extends persistent {
             'contenturi' => [
                 'type' => PARAM_TEXT
             ],
+            'sourcestatus' => [
+                'type' => PARAM_TEXT
+            ],
             'sourcecreated' => [
                 'type' => PARAM_TEXT
             ],
@@ -107,7 +110,7 @@ class online_activity_persistent extends persistent {
      */
     protected function set_contenturi($value) {
         $truncated = core_text::substr($value, 0, 256);
-        return $this->raw_set('ontenturi', $truncated);
+        return $this->raw_set('contenturi', $truncated);
     }
 
     /**
