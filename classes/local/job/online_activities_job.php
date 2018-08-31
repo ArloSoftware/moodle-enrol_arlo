@@ -78,6 +78,7 @@ class online_activities_job extends job {
                             $onlineactivity = new online_activity_persistent();
                             $onlineactivity->from_record_property('sourceguid', $sourceguid);
                             $onlineactivity->set('sourceid', $sourceid);
+                            $onlineactivity->set('sourceguid', $sourceguid);
                             $onlineactivity->set('code', $code);
                             $onlineactivity->set('name', $name);
                             $onlineactivity->set('contenturi', $contenturi);

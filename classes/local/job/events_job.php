@@ -77,7 +77,8 @@ class events_job extends job {
                         }
                         try {
                             $event = new event_persistent();
-                            $event->from_record_property('sourceid', $sourceid);
+                            $event->from_record_property('sourceguid', $sourceguid);
+                            $event->set('sourceid', $sourceid);
                             $event->set('sourceguid', $sourceguid);
                             $event->set('code', $code);
                             $event->set('startdatetime', $startdatetime);
