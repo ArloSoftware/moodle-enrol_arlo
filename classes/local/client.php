@@ -29,17 +29,25 @@ defined('MOODLE_INTERNAL') || die();
 use enrol_arlo\api;
 use enrol_arlo\local\config\arlo_plugin_config;
 use core_plugin_manager;
+use Exception;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 class client {
 
+    /** @var $httpclient \GuzzleHttp\Client */
+    protected $httpclient;
+
     /**
-     * Return a guzzle client setup with basic authentication and appropriate
+     * Construct a guzzle client setup with basic authentication and appropriate
      * options and headers set.
      *
      * @param array $headers
-     * @return \GuzzleHttp\Client
      * @throws \coding_exception
      */
+
     public static function get_instance($headers = []) {
         $pluginconfig = new arlo_plugin_config();
         $config = [
@@ -55,7 +63,9 @@ class client {
             ]
         ];
         $config['headers'] = array_merge($config['headers'], $headers);
-        return new \GuzzleHttp\Client($config);
+        $client = new static();
+        $client->httpclient = new \GuzzleHttp\Client($config);
+        return $client;
     }
 
     /**
@@ -66,6 +76,42 @@ class client {
     public static function get_user_agent() {
         global $CFG;
         return 'Moodle/' . moodle_major_version() . ';' . $CFG->wwwroot;
+    }
+
+    /**
+     * Send PSR-7 Request to Arlo API. Count errors of same type.
+     *
+     * @param Request $request
+     * @return Response|mixed|\Psr\Http\Message\ResponseInterface
+     * @throws Exception
+     * @throws \coding_exception
+     */
+    public function send_request(Request $request) {
+        try {
+            $pluginconfig = new arlo_plugin_config();
+            $apierrormessage = $pluginconfig->get('apierrormessage');
+            $apierrorcounter = $pluginconfig->get('apierrorcounter');
+            /** @var $client \GuzzleHttp\Client */
+            $response = $this->httpclient->send($request);
+            $pluginconfig->set('apierrormessage', 0);
+            $pluginconfig->set('apierrorcounter', 0);
+            return $response;
+        } catch (Exception $exception) {
+            if ($exception instanceof ClientException || $exception instanceof ServerException) {
+                $statuscode = $exception->getResponse()->getStatusCode();
+                if ($apierrormessage == $statuscode) {
+                    $pluginconfig->set('apierrormessage', $statuscode);
+                    $pluginconfig->set('apierrorcounter', ++$apierrorcounter);
+                    $pluginconfig->set('apierrortime', time());
+                } else {
+                    $pluginconfig->set('apierrormessage', $statuscode);
+                    $pluginconfig->set('apierrorcounter', 1);
+                    $pluginconfig->set('apierrortime', time());
+                }
+                return new Response($statuscode); // TODO return false;
+            }
+            throw $exception;
+        }
     }
 
 }
