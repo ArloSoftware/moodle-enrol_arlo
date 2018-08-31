@@ -65,5 +65,5 @@ abstract class job {
         return $this->jobpersistent;
     }
 
-    abstract protected function run();
+    abstract public function run();
 }
