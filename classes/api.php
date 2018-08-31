@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\local\client;
 use enrol_arlo\local\factory\job_factory;
+use enrol_arlo\local\job\job;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
 use enrol_arlo_plugin;
 use enrol_arlo\local\config\arlo_plugin_config;
@@ -60,8 +61,8 @@ class api {
         $contenttype = $response->getHeaderLine('content-type');
         if (strpos($contenttype, 'application/xml') === false) {
             $code = 'httpstatus:415';
-            throw new moodle_exception($code, 'enrol_arlo');
-
+            $debuginfo = format_backtrace(debug_backtrace());
+            throw new moodle_exception($code, 'enrol_arlo', '', null, $debuginfo);
         }
         $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
         $stream = $response->getBody();
@@ -72,18 +73,6 @@ class api {
         return $deserializer->deserialize($contents);
     }
 
-    public static function send_request($client, $request) {
-        try {
-            /** @var $client \GuzzleHttp\Client */
-            $response = $client->send($request);
-            return $response;
-        } catch (Exception $exception) {
-            // Re throw as a new moodle exception.
-            $code = 'httpstatus:' . $exception->getCode();
-            throw new moodle_exception($code, 'enrol_arlo', '', null, $exception->getTraceAsString());
-        }
-    }
-
     public static function run_scheduled_jobs($time = null, progress_trace $trace = null) {
         if (is_null($time)) {
             $time = time();
@@ -92,11 +81,12 @@ class api {
             $trace = new null_progress_trace();
         }
         foreach (job_factory::get_scheduled_jobs() as $scheduledjob) {
+            /** @var  $scheduledjob job */
             $status = $scheduledjob->run();
-            if (!$status) {
-                var_dump($scheduledjob->get_errors());
+            if ($scheduledjob->has_errors()) {
+                print_object($scheduledjob->get_errors());
+                die;
             }
-
         }
     }
 
