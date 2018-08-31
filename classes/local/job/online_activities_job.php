@@ -57,7 +57,7 @@ class online_activities_job extends job {
                 $uri->setFilterBy($filter);
                 $uri->setOrderBy("LastModifiedDateTime ASC,OnlineActivityID ASC");
                 $request = new Request('GET', $uri->output(true));
-                $response = api::send_request(client::get_instance(), $request);
+                $response = client::get_instance()->send_request($request);
                 $collection = api::parse_response($response);
                 if ($collection instanceof AbstractCollection && $collection->count() > 0) {
                     foreach ($collection as $resource) {
