@@ -35,13 +35,16 @@ use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
 use enrol_arlo\user;
 use enrol_arlo\manager;
 
-
-
 class enrol_arlo_plugin extends enrol_plugin {
     const ARLO_TYPE_EVENT           = 'event';
     const ARLO_TYPE_ONLINEACTIVITY  = 'onlineactivity';
     const ARLO_CREATE_GROUP         = -1;
 
+    /**
+     * Get the release version.
+     *
+     * @return mixed
+     */
     public function get_plugin_release() {
         $pluginmanager = core_plugin_manager::instance();
         $information = $pluginmanager->get_plugin_info('enrol_arlo');
