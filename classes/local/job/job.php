@@ -69,55 +69,46 @@ abstract class job {
     abstract public function run();
 
     /**
-     * Register site level syncronisation jobs.
+     * Register in DB a scheduled job.
      *
+     * @param $type
+     * @param $instanceid
+     * @param $endpoint
+     * @param $collection
      * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws invalid_persistent_exception
-     * @throws local\persistent\coding_exception
+     */
+    public static function register_scheduled_job($type, $instanceid, $endpoint, $collection) {
+        $job = new job_persistent();
+        $conditions = [
+            'type' => $type,
+            'instanceid' => $instanceid
+        ];
+        $job->from_record_properties($conditions);
+        $job->set('collection', $endpoint);
+        $job->set('endpoint', $collection);
+        $job->save();
+    }
+
+    /**
+     * Register site level syncronisation jobs.
      */
     public static function register_site_level_scheduled_jobs() {
         global $SITE;
-
         // Register Event Templates job.
-        $job = new job_persistent();
-        $job->from_record_property('type', 'site/event_templates');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'EventTemplates');
-        $job->set('endpoint', 'eventtemplates/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
+        static::register_scheduled_job(
+            'site/event_templates',  $SITE->id, 'EventTemplates', 'eventtemplates/'
+        );
         // Register Events job.
-        $job = new job_persistent();
-        $job->from_record_property('type', 'site/events');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'Events');
-        $job->set('endpoint', 'events/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
+        static::register_scheduled_job(
+            'site/events', $SITE->id, 'Events','events/'
+        );
         // Register Online Activities job.
-        $job = new job_persistent();
-        $job->from_record_property('type', 'site/online_activities');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'OnlineActivities');
-        $job->set('endpoint', 'onlineactivities/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
+        static::register_scheduled_job(
+            'site/online_activities', $SITE->id, 'OnlineActivities', 'onlineactivities/'
+        );
         // Register Contact Merge Requests job.
-        $job = new job_persistent();
-        $job->from_record_property('type', 'site/contact_merge_requests');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'ContactMergeRequests');
-        $job->set('endpoint', 'contactmergerequests/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
+        static::register_scheduled_job(
+            'site/contact_merge_requests', $SITE->id, 'ContactMergeRequests', 'contactmergerequests/'
+        );
     }
 }
