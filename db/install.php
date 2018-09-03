@@ -30,11 +30,8 @@ defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 function xmldb_enrol_arlo_install() {
     global $CFG, $DB;
-    // Get and set default configs.
-    $plugin = enrol_get_plugin('arlo');
-    foreach ($plugin->get_config_defaults() as $name => $value) {
-        $plugin->set_config($name, $value);
-    }
+    // Install configuration defaults.
+    \enrol_arlo\local\config\arlo_plugin_config::install_defaults();
     // Enable plugin.
     $enabled = explode(',', $CFG->enrol_plugins_enabled);
     if (!in_array('arlo', $enabled)) {
