@@ -115,6 +115,7 @@ class client {
             }
             throw $exception;
         } finally {
+            $pluginconfig->set('apistatus', $statuscode);
             // Log request.
             $requestlog = new request_log_persistent();
             $requestlog->set('timelogged', $time);
