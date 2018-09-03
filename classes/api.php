@@ -90,56 +90,5 @@ class api {
         }
     }
 
-    /**
-     * Register site level syncronisation jobs.
-     *
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws invalid_persistent_exception
-     * @throws local\persistent\coding_exception
-     */
-    public static function register_site_level_scheduled_jobs() {
-        global $SITE;
 
-        // Register Event Templates job.
-        $job = new local\persistent\job_persistent();
-        $job->from_record_property('type', 'site/event_templates');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'EventTemplates');
-        $job->set('endpoint', 'eventtemplates/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
-        // Register Events job.
-        $job = new local\persistent\job_persistent();
-        $job->from_record_property('type', 'site/events');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'Events');
-        $job->set('endpoint', 'events/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
-        // Register Online Activities job.
-        $job = new local\persistent\job_persistent();
-        $job->from_record_property('type', 'site/online_activities');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'OnlineActivities');
-        $job->set('endpoint', 'onlineactivities/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
-        // Register Contact Merge Requests job.
-        $job = new local\persistent\job_persistent();
-        $job->from_record_property('type', 'site/contact_merge_requests');
-        $job->set('instanceid', $SITE->id);
-        $job->set('collection', 'ContactMergeRequests');
-        $job->set('endpoint', 'contactmergerequests/');
-        if ($job->get('id') <= 0) {
-            $job->create();
-        }
-
-    }
 }
