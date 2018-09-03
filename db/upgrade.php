@@ -482,6 +482,9 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
+        // Register site level jobs.
+        \enrol_arlo\local\job\job::register_site_level_scheduled_jobs();
+
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2017051505, 'enrol', 'arlo');
     }

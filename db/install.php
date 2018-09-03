@@ -38,6 +38,8 @@ function xmldb_enrol_arlo_install() {
         $enabled[] = 'arlo';
     }
     set_config('enrol_plugins_enabled', implode(',', $enabled));
+    // Register site level jobs.
+    \enrol_arlo\local\job\job::register_site_level_scheduled_jobs();
     core_plugin_manager::reset_caches();
     context_system::instance()->mark_dirty(); // Resets all enrol caches.
     return true;
