@@ -180,7 +180,7 @@ class admin_setting_configarlostatus extends admin_setting {
     public function output_html($data, $query = '') {
         global $OUTPUT;
         $apistatus = get_config('enrol_arlo', 'apistatus');
-        $apilastrequested = (int) get_config('enrol_arlo', 'apilastrequested');
+        $apilastrequested = (int) get_config('enrol_arlo', 'apitimelastrequest');
         $useimageiconclass = false;
         if (class_exists('image_icon')) {
             $useimageiconclass = true;
