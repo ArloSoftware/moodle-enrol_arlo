@@ -115,7 +115,6 @@ class arlo_plugin_config extends plugin_config {
         foreach (static::properties_definition() as $property => $settings) {
             $default = static::get_property_default($property);
             if (!is_null($default)) {
-                mtrace($property);
                 $plugin->raw_set($property, $default);
             }
         }
