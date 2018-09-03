@@ -43,13 +43,13 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => -1
             ],
+            'apitimelastrequest' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
             'apierrormessage' => [
                 'type' => PARAM_TEXT,
                 'default' => ''
-            ],
-            'apierrortime' => [
-                'type' => PARAM_INT,
-                'default' => 0
             ],
             'apierrorcounter' => [
                 'type' => PARAM_INT,
