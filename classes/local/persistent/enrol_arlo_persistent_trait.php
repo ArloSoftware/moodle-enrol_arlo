@@ -41,10 +41,36 @@ trait enrol_arlo_persistent_trait {
         }
         $record = $DB->get_record(static::TABLE, [$name => $value]);
         if (!$record) {
-            $this->raw_set($name, $value);
+            $this->set($name, $value);
         } else {
             $this->from_record($record);
         }
         return $this;
     }
+
+    /**
+     * Load a record based in key/value property array.
+     *
+     * @param array $properties
+     * @return $this
+     * @throws \coding_exception
+     */
+    public function from_record_properties(array $properties) {
+        global $DB;
+        foreach ($properties as $name => $value) {
+            if (!static::has_property($name)) {
+                throw new coding_exception("Property {$name} does not exist.");
+            }
+        }
+        $record = $DB->get_record(static::TABLE, $properties);
+        if (!$record) {
+            foreach ($properties as $name => $value) {
+                $this->set($name, $value);
+            }
+        } else {
+            $this->from_record($record);
+        }
+        return $this;
+    }
+
 }
