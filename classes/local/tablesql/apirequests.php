@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace enrol_arlo\report;
+namespace enrol_arlo\local\tablesql;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once("$CFG->libdir/tablelib.php");
+use table_sql;
 
-class apirequests extends \table_sql {
+class apirequests extends table_sql {
     const PAGINATION_MAX_LIMIT = 50;
     public function __construct($uniqueid) {
         parent::__construct($uniqueid);
