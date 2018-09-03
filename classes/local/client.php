@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 use enrol_arlo\api;
 use enrol_arlo\local\config\arlo_plugin_config;
 use core_plugin_manager;
+use enrol_arlo\local\persistent\request_log_persistent;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
@@ -88,29 +89,41 @@ class client {
      */
     public function send_request(Request $request) {
         try {
+            $time = time();
             $pluginconfig = new arlo_plugin_config();
             $apierrormessage = $pluginconfig->get('apierrormessage');
             $apierrorcounter = $pluginconfig->get('apierrorcounter');
-            /** @var $client \GuzzleHttp\Client */
-            $response = $this->httpclient->send($request);
             $pluginconfig->set('apierrormessage', 0);
             $pluginconfig->set('apierrorcounter', 0);
+            $pluginconfig->set('apitimelastrequest', $time);
+            /** @var $client \GuzzleHttp\Client */
+            $response = $this->httpclient->send($request);
+            $statuscode = $response->getStatusCode();
             return $response;
         } catch (Exception $exception) {
             if ($exception instanceof ClientException || $exception instanceof ServerException) {
                 $statuscode = $exception->getResponse()->getStatusCode();
+                $trace = $exception->getTraceAsString();
                 if ($apierrormessage == $statuscode) {
                     $pluginconfig->set('apierrormessage', $statuscode);
                     $pluginconfig->set('apierrorcounter', ++$apierrorcounter);
-                    $pluginconfig->set('apierrortime', time());
                 } else {
                     $pluginconfig->set('apierrormessage', $statuscode);
                     $pluginconfig->set('apierrorcounter', 1);
-                    $pluginconfig->set('apierrortime', time());
                 }
-                return new Response($statuscode); // TODO return false;
+                return $exception->getResponse(); // TODO maybe return false?
             }
             throw $exception;
+        } finally {
+            // Log request.
+            $requestlog = new request_log_persistent();
+            $requestlog->set('timelogged', $time);
+            $requestlog->set('uri', (string) $request->getUri());
+            $requestlog->set('status', $statuscode);
+            if (!empty($trace)) {
+                $requestlog->set('extra', $trace);
+            }
+            $requestlog->save();
         }
     }
 
