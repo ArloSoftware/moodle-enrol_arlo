@@ -24,9 +24,11 @@
 
 namespace enrol_arlo\form\admin;
 
-defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
+
+use enrol_arlo\local\enum\user_matching;
 
 class configuration extends \moodleform {
 
@@ -38,12 +40,12 @@ class configuration extends \moodleform {
 
         // User account matching.
         $options = array();
-        $options[\enrol_arlo\user::MATCH_BY_USER_DETAILS] = get_string('matchbyarlouserdetails', 'enrol_arlo');
-        $options[\enrol_arlo\user::MATCH_BY_CODE_PRIMARY] = get_string('matchbyarlocodeprimary', 'enrol_arlo');
-        $options[\enrol_arlo\user::MATCH_BY_AUTO] = get_string('matchbyauto', 'enrol_arlo');
+        $options[user_matching::MATCH_BY_USER_DETAILS] = get_string('matchbyarlouserdetails', 'enrol_arlo');
+        $options[user_matching::MATCH_BY_CODE_PRIMARY] = get_string('matchbyarlocodeprimary', 'enrol_arlo');
+        $options[user_matching::MATCH_BY_AUTO] = get_string('matchbyauto', 'enrol_arlo');
 
         $form->addElement('select', 'matchuseraccountsby', get_string('matchuseraccountsby', 'enrol_arlo'), $options);
-        $default = \enrol_arlo\user::MATCH_BY_DEFAULT;
+        $default = user_matching::MATCH_BY_DEFAULT;
         $form->setDefault('matchuseraccountsby', $default);
         $form->addHelpButton('matchuseraccountsby', 'matchuseraccountsby', 'enrol_arlo');
 

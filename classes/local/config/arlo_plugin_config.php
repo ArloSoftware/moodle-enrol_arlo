@@ -18,6 +18,8 @@ namespace enrol_arlo\local\config;
 
 defined('MOODLE_INTERNAL') || die();
 
+use enrol_arlo\local\enum\user_matching;
+
 class arlo_plugin_config extends plugin_config {
 
     const FRANKEN_NAME = 'enrol_arlo'; // Arlo enrolment component.
@@ -56,7 +58,8 @@ class arlo_plugin_config extends plugin_config {
                 'default' => 0
             ],
             'matchuseraccountsby' => [
-                'type' => PARAM_INT
+                'type' => PARAM_INT,
+                'default' => user_matching::MATCH_BY_DEFAULT
             ],
             'authplugin' => [
                 'type' => PARAM_TEXT,
