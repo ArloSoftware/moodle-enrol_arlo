@@ -31,20 +31,17 @@ class arlo_plugin_config extends plugin_config {
         global $CFG;
         return [
             'platform' => [
-                'type' => PARAM_RAW,
-                'default' => '',
+                'type' => PARAM_RAW
             ],
             'apiusername' => [
-                'type' => PARAM_RAW,
-                'default' => '',
+                'type' => PARAM_RAW
             ],
             'apipassword' => [
-                'type' => PARAM_RAW,
-                'default' => '',
+                'type' => PARAM_RAW
             ],
             'apistatus' => [
                 'type' => PARAM_INT,
-                'default' => -1,
+                'default' => -1
             ],
             'apierrormessage' => [
                 'type' => PARAM_TEXT,
@@ -63,7 +60,7 @@ class arlo_plugin_config extends plugin_config {
             ],
             'authplugin' => [
                 'type' => PARAM_TEXT,
-                'default' => 'manual',
+                'default' => 'manual'
             ],
             'roleid' => [
                 'type' => PARAM_INT,
@@ -83,29 +80,45 @@ class arlo_plugin_config extends plugin_config {
             ],
             'pushonlineactivityresults' => [
                 'type' => PARAM_INT,
-                'default' => 1,
+                'default' => 1
             ],
             'pusheventresults' => [
                 'type' => PARAM_INT,
-                'default' => 1,
+                'default' => 1
             ],
             'alertsiteadmins' => [
                 'type' => PARAM_INT,
-                'default' => 1,
+                'default' => 1
             ],
             'sendnewaccountdetailsemail' => [
                 'type' => PARAM_INT,
-                'default' => 1,
+                'default' => 1
             ],
             'sendemailimmediately' => [
                 'type' => PARAM_INT,
-                'default' => 1,
+                'default' => 1
             ],
             'emailprocessingviacli' => [
                 'type' => PARAM_INT,
-                'default' => 0,
+                'default' => 0
             ]
         ];
-
     }
+
+    /**
+     * Installs plugin configuration defaults.
+     *
+     * @throws \coding_exception
+     */
+    public static function install_defaults() {
+        $plugin = new static();
+        foreach (static::properties_definition() as $property => $settings) {
+            $default = static::get_property_default($property);
+            if (!is_null($default)) {
+                mtrace($property);
+                $plugin->raw_set($property, $default);
+            }
+        }
+    }
+
 }
