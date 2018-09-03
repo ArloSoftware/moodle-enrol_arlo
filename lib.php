@@ -51,33 +51,6 @@ class enrol_arlo_plugin extends enrol_plugin {
         return $information->release;
     }
 
-    public function get_config_defaults() {
-        static $studentroleid;
-        if (is_null($studentroleid)) {
-            $student = get_archetype_roles('student');
-            $student = reset($student);
-            $studentroleid = $student->id;
-        }
-        $defaults = array(
-            'apistatus' => -1,
-            'apilastrequested' => 0,
-            'apilasterror' => '',
-            'apierrorcount' => 0,
-            'matchuseraccountsby' => user::MATCH_BY_DEFAULT,
-            'authplugin' => 'manual',
-            'roleid' => $studentroleid,
-            'unenrolaction' => ENROL_EXT_REMOVED_UNENROL,
-            'expiredaction' => ENROL_EXT_REMOVED_SUSPEND,
-            'pushonlineactivityresults' => 1,
-            'pusheventresults' => 1,
-            'alertsiteadmins' => 1,
-            'sendnewaccountdetailsemail' => 1,
-            'sendemailimmediately' => 1,
-            'emailprocessingviacli' => 0
-        );
-        return $defaults;
-    }
-
     /**
      * Add new instance of enrol plugin with default settings.
      * @param stdClass $course
