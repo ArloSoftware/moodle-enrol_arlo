@@ -77,15 +77,15 @@ abstract class job {
      * @param $collection
      * @throws \coding_exception
      */
-    public static function register_scheduled_job($type, $instanceid, $endpoint, $collection) {
+    public static function register_scheduled_job($type, $instanceid, $endpoint, $collection, $timenorequestsafter = 0) {
         $job = new job_persistent();
         $conditions = [
             'type' => $type,
             'instanceid' => $instanceid
         ];
         $job->from_record_properties($conditions);
-        $job->set('collection', $endpoint);
-        $job->set('endpoint', $collection);
+        $job->set('collection', $collection);
+        $job->set('endpoint', $endpoint);
         $job->save();
     }
 
