@@ -104,6 +104,10 @@ class arlo_plugin_config extends plugin_config {
             'emailprocessingviacli' => [
                 'type' => PARAM_INT,
                 'default' => 0
+            ],
+            'allowhiddencourses' => [
+                'type' => PARAM_INT,
+                'default' => 0
             ]
         ];
     }
