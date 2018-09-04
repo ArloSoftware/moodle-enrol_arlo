@@ -26,15 +26,20 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
+use enrol_arlo\api;
+use enrol_arlo\local\config\arlo_plugin_config;
+use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 
 /**
- * Deletes all occurences of the old instance
- * troughout the arlo tables if FQDN setting is changed.
+ * Deletes all occurrences of the old instance throughout the Arlo tables
+ * if FQDN setting is changed.
  *
- * @param String $oldinstance
- * @param String $newinstance
+ * @param $oldinstance
+ * @param $newinstance
+ * @throws coding_exception
+ * @throws dml_exception
  */
 function enrol_arlo_change_platform($oldinstance, $newinstance) {
     global $DB, $CFG;
@@ -48,7 +53,7 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
         return;
     }
     $rs = $DB->get_recordset('enrol', array('enrol' => 'arlo'));
-    $plugin = new enrol_arlo_plugin();
+    $plugin = api::get_enrolment_plugin();
     foreach ($rs as $instance) {
         $plugin->delete_instance($instance);
     }
@@ -60,11 +65,10 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
     $DB->delete_records('enrol_arlo_contact', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_emailqueue');
     $DB->delete_records('enrol_arlo_event', array('platform' => $oldinstance));
-    $DB->delete_records('enrol_arlo_instance', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_job', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_onlineactivity', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_registration', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_requestlog', array('platform' => $oldinstance));
-    $DB->delete_records('enrol_arlo_schedule', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_template', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_templateassociate', array('platform' => $oldinstance));
     // Finally purge all caches.
@@ -97,7 +101,7 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
     $events = $DB->get_records_sql($sql, $conditions);
     foreach ($events as $event) {
         $item = new stdClass();
-        $item->arlotype = \enrol_arlo_plugin::ARLO_TYPE_EVENT;
+        $item->arlotype = arlo_type::EVENT;
         $item->arloevent = $event->sourceguid;
         $adds[] = $item;
     }
@@ -114,12 +118,12 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
     $onlineactivites = $DB->get_records_sql($sql, $conditions);
     foreach ($onlineactivites as $onlineactivity) {
         $item = new stdClass();
-        $item->arlotype = \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY;
+        $item->arlotype = arlo_type::ONLINEACTIVITY;
         $item->arloonlineactivity = $onlineactivity->sourceguid;
         $adds[] = $item;
     }
     // Get enrol plugin instance.
-    $plugin = new \enrol_arlo_plugin();
+    $plugin = api::get_enrolment_plugin();
     foreach ($adds as $add) {
         $newinstance = $plugin->get_instance_defaults();
         $newinstance['arlotype'] = $add->arlotype;
@@ -138,7 +142,7 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
 function enrol_arlo_unassociate_all($course, $sourcetemplateguid) {
     global $DB;
     // Get enrol plugin instance.
-    $plugin = new \enrol_arlo_plugin();
+    $plugin = api::get_enrolment_plugin();
     $instances = enrol_arlo_get_associated_instances($course, $sourcetemplateguid);
     foreach ($instances as $instance) {
         if ($plugin->can_delete_instance($instance)) {
@@ -188,12 +192,12 @@ function enrol_arlo_add_associated($arlotype, $eventdata) {
     $sourcestatus = $eventdata['sourcestatus'];
     $sourcetemplateguid = $eventdata['sourcetemplateguid'];
     // Can associate.
-    if ($arlotype == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+    if ($arlotype == arlo_type::EVENT) {
         if (! ($sourcestatus == EventStatus::ACTIVE) || ($sourcestatus == EventStatus::COMPLETED)) {
             return;
         }
     }
-    if ($arlotype == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+    if ($arlotype == arlo_type::ONLINEACTIVITY) {
         if (! ($sourcestatus == OnlineActivityStatus::ACTIVE) || ($sourcestatus == OnlineActivityStatus::COMPLETED)) {
             return;
         }
@@ -209,12 +213,12 @@ function enrol_arlo_add_associated($arlotype, $eventdata) {
         return;
     }
     $fields = $plugin->get_instance_defaults();
-    if ($arlotype == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+    if ($arlotype == arlo_type::EVENT) {
         unset($fields['arloonlineactivity']);
         $fields['arlotype'] = $arlotype;
         $fields['arloevent'] = $sourceguid;
     }
-    if ($arlotype == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+    if ($arlotype == arlo_type::ONLINEACTIVITY) {
         unset($fields['arloevent']);
         $fields['arlotype'] = $arlotype;
         $fields['arloonlineactivity'] = $sourceguid;
@@ -222,20 +226,27 @@ function enrol_arlo_add_associated($arlotype, $eventdata) {
     $plugin->add_instance($course, $fields);
 }
 
+/**
+ * Handle updated Events and Online Activities.
+ *
+ * @param $arlotype
+ * @param $eventdata
+ * @throws coding_exception
+ * @throws dml_exception
+ */
 function enrol_arlo_handle_update($arlotype, $eventdata) {
     global $DB;
-    $plugin = new enrol_arlo_plugin();
-    $platform = $plugin->get_config('platform', false);
-    if (!$platform) {
-        return;
-    }
+    $plugin = api::get_enrolment_plugin();
+    $pluginconfig = new arlo_plugin_config();
+    $platform = $pluginconfig->get('platform');
     $sql  = "SELECT e.*
                FROM {enrol} e
-               JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
-              WHERE ai.platform = :platform AND ai.sourceguid = :sourceguid";
+              WHERE e.customchar1 = :platform
+                AND e.customchar2 = :arlotype
+                AND e.customchar3 = :sourceguid";
     $conditions = array(
         'platform' => $platform,
-        'type' => $arlotype,
+        'arlotype' => $arlotype,
         'sourceguid' => $eventdata['sourceguid']
     );
     $instance = $DB->get_record_sql($sql, $conditions);
@@ -243,12 +254,12 @@ function enrol_arlo_handle_update($arlotype, $eventdata) {
         return;
     }
     $fields = $plugin->get_instance_defaults();
-    if ($arlotype == \enrol_arlo_plugin::ARLO_TYPE_EVENT) {
+    if ($arlotype == arlo_type::EVENT) {
         unset($fields['arloonlineactivity']);
         $fields['arlotype'] = $arlotype;
         $fields['arloevent'] = $eventdata['sourceguid'];
     }
-    if ($arlotype == \enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY) {
+    if ($arlotype == arlo_type::ONLINEACTIVITY) {
         unset($fields['arloevent']);
         $fields['arlotype'] = $arlotype;
         $fields['arloonlineactivity'] = $eventdata['sourceguid'];
