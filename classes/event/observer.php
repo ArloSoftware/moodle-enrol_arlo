@@ -26,6 +26,8 @@ namespace enrol_arlo\event;
 
 defined('MOODLE_INTERNAL') || die();
 
+use enrol_arlo\local\enum\arlo_type;
+
 class observer {
 
     /**
@@ -114,7 +116,7 @@ class observer {
     public static function event_created($event) {
         global $CFG;
         require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
-        enrol_arlo_add_associated(\enrol_arlo_plugin::ARLO_TYPE_EVENT, $event->other);
+        enrol_arlo_add_associated(arlo_type::EVENT, $event->other);
     }
 
     /**
@@ -125,7 +127,7 @@ class observer {
     public static function event_updated($event) {
         global $CFG;
         require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
-        enrol_arlo_handle_update(\enrol_arlo_plugin::ARLO_TYPE_EVENT, $event->other);
+        enrol_arlo_handle_update(arlo_type::EVENT, $event->other);
     }
 
     /**
@@ -136,7 +138,7 @@ class observer {
     public static function onlineactivity_created($event) {
         global $CFG;
         require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
-        enrol_arlo_add_associated(\enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY, $event->other);
+        enrol_arlo_add_associated(arlo_type::ONLINEACTIVITY, $event->other);
     }
 
     /**
@@ -147,6 +149,6 @@ class observer {
     public static function onlineactivity_updated($event) {
         global $CFG;
         require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
-        enrol_arlo_handle_update(\enrol_arlo_plugin::ARLO_TYPE_ONLINEACTIVITY, $event->other);
+        enrol_arlo_handle_update(arlo_type::ONLINEACTIVITY, $event->other);
     }
 }
