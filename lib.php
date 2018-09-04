@@ -34,11 +34,16 @@ use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
 use enrol_arlo\user;
 use enrol_arlo\manager;
+use enrol_arlo\local\config\arlo_plugin_config;
+use enrol_arlo\local\enum\arlo_type;
+use enrol_arlo\local\persistent\event_persistent;
+use enrol_arlo\local\persistent\online_activity_persistent;
+use enrol_arlo\local\job\job;
 
 class enrol_arlo_plugin extends enrol_plugin {
-    const ARLO_TYPE_EVENT           = 'event';
-    const ARLO_TYPE_ONLINEACTIVITY  = 'onlineactivity';
-    const ARLO_CREATE_GROUP         = -1;
+
+    /** @var  */
+    const CREATE_GROUP = -1;
 
     /**
      * Get the release version.
@@ -49,6 +54,35 @@ class enrol_arlo_plugin extends enrol_plugin {
         $pluginmanager = core_plugin_manager::instance();
         $information = $pluginmanager->get_plugin_info('enrol_arlo');
         return $information->release;
+    }
+
+    /**
+     * Mapped custom fields to human readables.
+     *
+     * @return array
+     */
+    public static function get_custom_property_map() {
+        return [
+            'customint2' => 'groupid',
+            'customint8' => 'sendcoursewelcomemessage',
+            'customchar1' => 'platform',
+            'customchar2' => 'endpoint',
+            'customchar3' => 'sourceguid',
+            'customtext1' => 'customcoursewelcomemessage'
+        ];
+    }
+
+    /**
+     * Check if instance exists based on passed in conditions.
+     *
+     * @param $conditions
+     * @return bool
+     * @throws dml_exception
+     */
+    public static function instance_exists($conditions) {
+        global $DB;
+        $conditions = array_merge($conditions, ['enrol' => 'arlo']);
+        return $DB->record_exists('enrol', $conditions);
     }
 
     /**
@@ -71,66 +105,72 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function add_instance($course, array $fields = null) {
         global $DB;
 
-        $platform = self::get_config('platform');
-        $arloinstance = new stdClass();
-        // Set plaform.
-        $arloinstance->platform = $platform;
+        $pluginconfig = new arlo_plugin_config();
+        $fields['roleid'] = $pluginconfig->get('roleid');
+        $fields['customchar1'] = $pluginconfig->get('platform');
         if (empty($fields['arlotype'])) {
             throw new moodle_exception('Field arlotype is empty.');
         }
-        // Set resourcetype Event or Online Activity.
-        $arloinstance->type = $fields['arlotype'];
-        if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
+        // Get information we need from Event to save against instance record.
+        if ($fields['arlotype'] == arlo_type::EVENT) {
             if (empty($fields['arloevent'])) {
                 throw new moodle_exception('Field arloevent is empty.');
             }
-            $sourcetable = 'enrol_arlo_event';
-            $sourceguid = $fields['arloevent'];
-        }
-        if ($arloinstance->type == self::ARLO_TYPE_ONLINEACTIVITY) {
-            if (empty($fields['arloonlineactivity'])) {
-                throw new moodle_exception('Field sourceguid is empty.');
+            $conditions = [
+                'sourceguid' => $fields['arloevent']
+            ];
+            $persistent = event_persistent::get_record($conditions);
+            if (!$persistent) {
+                throw new moodle_exception('No related record');
             }
-            $sourcetable = 'enrol_arlo_onlineactivity';
-            $sourceguid = $fields['arloonlineactivity'];
+            $fields['name'] = $persistent->get('code');
+            $endpoint = 'events/' . $persistent->get('sourceid') . '/registrations/';
+            $collection = 'Events';
+            $fields['customchar2'] = $endpoint;
+            $fields['customchar3'] = $persistent->get('sourceguid');
         }
-        // Check Event or Online Activity not already in play.
-        $conditions = array('platform' => $platform, 'sourceguid' => $sourceguid);
-        if ($DB->record_exists('enrol_arlo_instance', $conditions)) {
-            return false;
+        // Get information we need from Online Activity to save against instance record.
+        if ($fields['arlotype'] == arlo_type::ONLINEACTIVITY) {
+            if (empty($fields['arloonlineactivity'])) {
+                throw new moodle_exception('Field arloonlineactivity is empty.');
+            }
+            $conditions = [
+                'sourceguid' => $fields['arloonlineactivity']
+            ];
+            $persistent = online_activity_persistent::get_record($conditions);
+            if (!$persistent) {
+                throw new moodle_exception('No related record');
+            }
+            $fields['name'] = $persistent->get('code');
+            $endpoint = 'onlineactivities/' . $persistent->get('sourceid') . '/registrations/';
+            $collection = 'OnlineActivities';
+            $fields['customchar2'] = $endpoint;
+            $fields['customchar3'] = $persistent->get('sourceguid');
         }
-        // Get either Event or Online Activity resource record.
-        $conditions = array('platform' => $platform, 'sourceguid' => $sourceguid);
-        $resourcerecord = $DB->get_record($sourcetable, $conditions, '*', MUST_EXIST);
+        // Sanity check, make sure isn't already linked to another instance.
+        $conditions = [
+            'customchar1' => $pluginconfig->get('platform'),
+            'customchar2' => $persistent->get('sourceguid')
+        ];
+        if (static::instance_exists($conditions)) {
+            throw new coding_exception('An enrolment instance is already linked to this resource.');
+        }
         // Create a new course group if required.
-        if (!empty($fields['customint2']) && $fields['customint2'] == self::ARLO_CREATE_GROUP) {
-            $context = \context_course::instance($course->id);
+        if (!empty($fields['customint2']) && $fields['customint2'] == self::CREATE_GROUP) {
+            $context = context_course::instance($course->id);
             require_capability('moodle/course:managegroups', $context);
-            $groupid = static::create_course_group($course->id, $resourcerecord->code); // Pass code to use as name.
+            $groupid = static::create_course_group($course->id, $persistent->get('code')); // Pass code to use as name.
             // Map group id to customint2.
-            $fields['customint2']   = $groupid;
+            $fields['customint2'] = $groupid;
         }
-        // Set name to be passed to parent.
-        $fields['name']         = $resourcerecord->code;
-        $fields['roleid']       = self::get_config('roleid');
-        // Create enrol instance get id for use latter.
-        $enrolid                    = parent::add_instance($course, $fields);
-        $arloinstance->enrolid      = $enrolid;
-        $arloinstance->sourceid     = $resourcerecord->sourceid;
-        $arloinstance->sourceguid   = $resourcerecord->sourceguid;
-        $arloinstance->modified     = time();
-        $DB->insert_record('enrol_arlo_instance', $arloinstance);
-        // Setup schedule type information.
-        $endpulldate  = 0;
-        $endpushdate  = 0;
-        if (isset($record->finishdatetime)) {
-            $sourcefinishdate = date_timestamp_get(new \DateTime($record->finishdatetime));
-            $endpulldate  = $sourcefinishdate;
-            $endpushdate  = $sourcefinishdate;
-        }
-        \enrol_arlo\manager::schedule('registrations', $enrolid, $endpulldate, $endpushdate);
-        \enrol_arlo\manager::schedule('contacts', $enrolid, $endpulldate, $endpushdate);
-        return $arloinstance->enrolid;
+        // Use parent to create enrolment instance.
+        $instanceid = parent::add_instance($course, $fields);
+        // Register enrolment instance jobs.
+        job::register_scheduled_job('enrol/memberships', $instanceid, $endpoint, $collection);
+        job::register_scheduled_job('enrol/outcomes', $instanceid, 'registrations/', 'Registrations');
+        job::register_scheduled_job('enrol/contacts', $instanceid, $endpoint, $collection);
+
+        return $instanceid;
     }
 
     /**
@@ -154,7 +194,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             return $group->id;
         }
         // Create a new group for the for event or online activity.
-        $groupdata              = new \stdClass();
+        $groupdata              = new stdClass();
         $groupdata->courseid    = $courseid;
         $groupdata->name        = $groupname;
         $groupdata->idnumber    = $code;
@@ -190,6 +230,9 @@ class enrol_arlo_plugin extends enrol_plugin {
      */
     public function update_instance($instance, $data) {
         global $DB;
+
+
+
         $arloinstance = manager::get_associated_arlo_instance($instance->id);
         $schedule = manager::get_schedule('registrations', $instance->id);
         if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
@@ -377,7 +420,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         $fields['roleid']               = $this->get_config('roleid');
         $fields['enrolperiod']          = 0;
         $fields['expirynotify']         = 0;
-        $fields['customint2']           = self::ARLO_CREATE_GROUP;  // Group
+        $fields['customint2']           = self::CREATE_GROUP;  // Auto create group by default.
         $fields['customint8']           = 1; // Send course welcome.
         $fields['arlotype']             = '';
         $fields['arloevent']            = '';
@@ -387,8 +430,8 @@ class enrol_arlo_plugin extends enrol_plugin {
 
     public function get_type_options() {
         $options = array(
-            self::ARLO_TYPE_EVENT => get_string('event', 'enrol_arlo'),
-            self::ARLO_TYPE_ONLINEACTIVITY => get_string('onlineactivity', 'enrol_arlo')
+            arlo_type::EVENT => get_string('event', 'enrol_arlo'),
+            arlo_type::ONLINEACTIVITY => get_string('onlineactivity', 'enrol_arlo')
         );
         return $options;
     }
@@ -414,9 +457,9 @@ class enrol_arlo_plugin extends enrol_plugin {
                 MUST_EXIST
             );
             // Setup read-only Event.
-            if ($arloinstance->type == self::ARLO_TYPE_EVENT) {
+            if ($arloinstance->type == arlo_type::EVENT) {
                 $typeoptions = array(
-                    self::ARLO_TYPE_EVENT => get_string('event', 'enrol_arlo')
+                    arlo_type::EVENT => get_string('event', 'enrol_arlo')
                 );
                 $mform->addElement(
                     'select',
@@ -438,9 +481,9 @@ class enrol_arlo_plugin extends enrol_plugin {
                 $mform->hardFreeze('arloevent', $arloinstance->sourceguid);
             }
             // Setup read-only Online Activity.
-            if ($arloinstance->type == self::ARLO_TYPE_ONLINEACTIVITY) {
+            if ($arloinstance->type == arlo_type::ONLINEACTIVITY) {
                 $typeoptions = array(
-                    self::ARLO_TYPE_ONLINEACTIVITY => get_string('onlineactivity', 'enrol_arlo')
+                    arlo_type::ONLINEACTIVITY => get_string('onlineactivity', 'enrol_arlo')
                 );
                 $mform->addElement(
                     'select',
@@ -477,13 +520,13 @@ class enrol_arlo_plugin extends enrol_plugin {
             // Event selector.
             array_unshift($eventoptions, get_string('choose') . '...');
             $mform->addElement('select', 'arloevent', get_string('event', 'enrol_arlo'), $eventoptions);
-            $mform->disabledIf('arloevent', 'arlotype', 'eq', self::ARLO_TYPE_ONLINEACTIVITY);
+            $mform->disabledIf('arloevent', 'arlotype', 'eq', arlo_type::ONLINEACTIVITY);
             $mform->disabledIf('arloevent', 'arlotype', 'eq', 0);
             // Online Activity selector.
             array_unshift($onlineactivityoptions, get_string('choose') . '...');
             $mform->addElement('select', 'arloonlineactivity',
                 get_string('onlineactivity', 'enrol_arlo'), $onlineactivityoptions);
-            $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', self::ARLO_TYPE_EVENT);
+            $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', arlo_type::EVENT);
             $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', 0);
         }
         // Settings that are editable be instance new or existing.
@@ -492,13 +535,13 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Groups.
         $groups = array(0 => get_string('none'));
         if (has_capability('moodle/course:managegroups', $context)) {
-            $groups[self::ARLO_CREATE_GROUP] = get_string('creategroup', 'enrol_arlo');
+            $groups[self::CREATE_GROUP] = get_string('creategroup', 'enrol_arlo');
         }
         foreach (groups_get_all_groups($context->instanceid) as $group) {
             $groups[$group->id] = format_string($group->name, true, array('context' => $context));
         }
         $mform->addElement('select', 'customint2', get_string('assignedgroup', 'enrol_arlo'), $groups);
-        if ($instance->customint2 != self::ARLO_CREATE_GROUP || $instance->customint2 == '0') {
+        if ($instance->customint2 != self::CREATE_GROUP || $instance->customint2 == '0') {
             $mform->setConstant('customint2', $instance->customint2);
             $mform->hardFreeze('customint2', $instance->customint2);
         }
@@ -532,10 +575,10 @@ class enrol_arlo_plugin extends enrol_plugin {
         if (empty($data['arlotype'])) {
             $errors['arlotype'] = get_string('errorselecttype', 'enrol_arlo');
         }
-        if ($data['arlotype'] == self::ARLO_TYPE_EVENT && empty($data['arloevent'])) {
+        if ($data['arlotype'] == arlo_type::EVENT && empty($data['arloevent'])) {
             $errors['arloevent'] = get_string('errorselectevent', 'enrol_arlo');
         }
-        if ($data['arlotype'] == self::ARLO_TYPE_ONLINEACTIVITY && empty($data['arloonlineactivity'])) {
+        if ($data['arlotype'] == arlo_type::ONLINEACTIVITY && empty($data['arloonlineactivity'])) {
             $errors['arloonlineactivity'] = get_string('errorselectonlineactivity', 'enrol_arlo');
         }
         return $errors;
