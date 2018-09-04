@@ -53,6 +53,10 @@ class api {
         return $enrolmentplugin;
     }
 
+    public static function get_time_norequests_after(persistent $persistent) {
+        return 0;
+    }
+
     public static function parse_response($response) {
         $statuscode = $response->getStatusCode();
         if (200 != $statuscode) {
