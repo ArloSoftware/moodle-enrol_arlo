@@ -389,11 +389,10 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         $tablenames = [
             'enrol_arlo_contact',
             'enrol_arlo_event',
-            'enrol_arlo_instance',
             'enrol_arlo_onlineactivity',
             'enrol_arlo_registration',
-            'enrol_arlo_schedule',
-            'enrol_arlo_template'
+            'enrol_arlo_template',
+            'enrol_arlo_templateassociate'
         ];
 
         foreach ($tablenames as $tablename) {
@@ -484,6 +483,8 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
 
         // Register site level jobs.
         \enrol_arlo\local\job\job::register_site_level_scheduled_jobs();
+
+        // TODO migrate instances and schedules.
 
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2017051505, 'enrol', 'arlo');
