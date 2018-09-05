@@ -139,6 +139,14 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
     }
 }
 
+/**
+ * Remove all associated enrolment instances in a course.
+ *
+ *
+ * @param $course
+ * @param $sourcetemplateguid
+ * @throws dml_exception
+ */
 function enrol_arlo_unassociate_all($course, $sourcetemplateguid) {
     global $DB;
     // Get enrol plugin instance.
@@ -154,6 +162,14 @@ function enrol_arlo_unassociate_all($course, $sourcetemplateguid) {
     $DB->delete_records('enrol_arlo_templateassociate', $conditions);
 }
 
+/**
+ * Get array of all associated enrolment instances.
+ *
+ * @param $course
+ * @param $sourcetemplateguid
+ * @return array
+ * @throws dml_exception
+ */
 function enrol_arlo_get_associated_instances($course, $sourcetemplateguid) {
     global $DB;
     $conditions = array(
@@ -161,30 +177,42 @@ function enrol_arlo_get_associated_instances($course, $sourcetemplateguid) {
         'sourcetemplateguid' => $sourcetemplateguid
 
     );
+    // Get instances with associated Events.
     $sql = "SELECT e.*
               FROM {enrol} e
-              JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
-              JOIN {enrol_arlo_event} ae ON ae.sourceguid = ai.sourceguid
+              JOIN {enrol_arlo_event} ae ON ae.sourceguid = e.customchar3
              WHERE e.enrol = 'arlo'
                AND e.courseid = :courseid
                AND ae.sourcetemplateguid = :sourcetemplateguid";
     $events = $DB->get_records_sql($sql, $conditions);
+    // Get instances with associated Online Activities..
     $sql = "SELECT e.*
               FROM {enrol} e
-              JOIN {enrol_arlo_instance} ai ON ai.enrolid = e.id
-              JOIN {enrol_arlo_onlineactivity} aoa ON aoa.sourceguid = ai.sourceguid
+              JOIN {enrol_arlo_onlineactivity} aoa ON aoa.sourceguid = e.customchar3
              WHERE e.enrol = 'arlo'
                AND e.courseid = :courseid
                AND aoa.sourcetemplateguid = :sourcetemplateguid";
     $onlineactivities = $DB->get_records_sql($sql, $conditions);
-    // Merge Events and Online Activities.
+    // Merge Events and Online Activities enrolment instances.
     return array_merge($events, $onlineactivities);
 }
 
+/**
+ * Add associated Event or Online Activity as new enrolment instance.
+ * Triggered by Moodle events.
+ *
+ * @param $arlotype
+ * @param $eventdata
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws moodle_exception
+ */
 function enrol_arlo_add_associated($arlotype, $eventdata) {
     global $DB;
-    $plugin = new enrol_arlo_plugin();
-    $platform = $plugin->get_config('platform', false);
+    // Get enrol plugin instance.
+    $plugin = api::get_enrolment_plugin();
+    $pluginconfig = new arlo_plugin_config();
+    $platform = $pluginconfig->get('platform');
     if (!$platform) {
         return;
     }
