@@ -111,4 +111,14 @@ abstract class job {
             'site/contact_merge_requests', $SITE->id, 'contactmergerequests/', 'ContactMergeRequests'
         );
     }
+
+    /**
+     * Access attached persistent type.
+     *
+     * @return mixed
+     * @throws \coding_exception
+     */
+    public function get_type() {
+        return $this->jobpersistent->get('type');
+    }
 }
