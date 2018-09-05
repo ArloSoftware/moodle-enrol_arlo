@@ -96,19 +96,19 @@ abstract class job {
         global $SITE;
         // Register Event Templates job.
         static::register_scheduled_job(
-            'site/event_templates',  $SITE->id, 'EventTemplates', 'eventtemplates/'
+            'site/event_templates',  $SITE->id, 'eventtemplates/', 'EventTemplates'
         );
         // Register Events job.
         static::register_scheduled_job(
-            'site/events', $SITE->id, 'Events','events/'
+            'site/events', $SITE->id, 'events/', 'Events'
         );
         // Register Online Activities job.
         static::register_scheduled_job(
-            'site/online_activities', $SITE->id, 'OnlineActivities', 'onlineactivities/'
+            'site/online_activities', $SITE->id, 'onlineactivities/', 'OnlineActivities'
         );
         // Register Contact Merge Requests job.
         static::register_scheduled_job(
-            'site/contact_merge_requests', $SITE->id, 'ContactMergeRequests', 'contactmergerequests/'
+            'site/contact_merge_requests', $SITE->id, 'contactmergerequests/', 'ContactMergeRequests'
         );
     }
 }
