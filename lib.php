@@ -60,6 +60,19 @@ class enrol_arlo_plugin extends enrol_plugin {
     }
 
     /**
+     * Easy access to plugin config.
+     *
+     * @return arlo_plugin_config
+     */
+    public function get_plugin_config() {
+        static $pluginconfig;
+        if (is_null($pluginconfig)) {
+            $pluginconfig = new arlo_plugin_config();
+        }
+        return $pluginconfig;
+    }
+
+    /**
      * Mapped custom fields to human readables.
      *
      * @return array
