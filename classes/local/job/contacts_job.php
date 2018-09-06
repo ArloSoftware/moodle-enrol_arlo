@@ -36,5 +36,9 @@ use Exception;
 use moodle_exception;
 
 class contacts_job extends job {
+
+    /** @var TIME_PERIOD_DELAY time in seconds to delay next request. */
+    const TIME_PERIOD_DELAY = 86400; // 24 Hours.
+
     public function run() {}
 }
