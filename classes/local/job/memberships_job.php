@@ -36,5 +36,16 @@ use Exception;
 use moodle_exception;
 
 class memberships_job extends job {
-    public function run() {}
+
+    public function run() {
+        try {
+            $plugin = api::get_enrolment_plugin();
+            $config = $plugin->get_plugin_config();
+            $jobpersistent = $this->get_job_persistent();
+            $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'), MUST_EXIST);
+        } catch (Exception $exception) {
+            $this->add_error($exception->getMessage());
+        }
+    }
+
 }
