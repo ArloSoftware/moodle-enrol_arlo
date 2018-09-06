@@ -16,7 +16,7 @@
 
 /**
  *
- * @package   {{PLUGIN_NAME}} {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
