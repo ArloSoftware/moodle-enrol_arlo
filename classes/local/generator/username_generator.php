@@ -83,13 +83,13 @@ class username_generator {
                     $username = $emailusername;
                     break;
                 case 3:
-                    $username = $emailusername + rand(0, 3);
+                    $username = $emailusername . rand(0, 3);
                     break;
                 case 4:
                     $username = $email;
                     break;
                 case 5:
-                    $username = $email + rand(0, 3);
+                    $username = $email . rand(0, 3);
                     break;
                 default:
                     throw new moodle_exception('Failed to generate username');
