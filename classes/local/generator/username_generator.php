@@ -56,17 +56,17 @@ class username_generator {
         $firstname = trim($firstname);
         $firstname = clean_param($firstname, PARAM_USERNAME);
         if (empty($firstname)) {
-            throw new coding_exception('Required parameter firstname is empty');
+            throw new coding_exception('Parameter firstname is invalid');
         }
         $lastname = trim($lastname);
         $lastname = clean_param($lastname, PARAM_USERNAME);
         if (empty($lastname)) {
-            throw new coding_exception('Required parameter lastname is empty');
+            throw new coding_exception('Parameter lastname is invalid');
         }
         $email = trim($email);
         $email = clean_param($email, PARAM_USERNAME);
         if (empty($email)) {
-            throw new coding_exception('Required parameter email is empty');
+            throw new coding_exception('Parameter email is invalid');
         }
         $position = core_text::strpos($email, '@');
         $emailusername = core_text::substr($email, 0, $position);
