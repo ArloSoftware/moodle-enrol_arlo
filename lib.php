@@ -89,7 +89,24 @@ class enrol_arlo_plugin extends enrol_plugin {
     }
 
     /**
-     * Check if instance exists based on passed in conditions.
+     * Get a Arlo instance enrolment record based on id.
+     *
+     * @param $id
+     * @param int $strictness
+     * @return mixed
+     * @throws dml_exception
+     */
+    public static function get_instance_record($id, $strictness = IGNORE_MISSING) {
+        global $DB;
+        $conditions = [
+            'id' => $id,
+            'enrol' => 'arlo'
+        ];
+        return $DB->get_record('enrol', $conditions, '*', $strictness);
+    }
+
+    /**
+     * Check if instance exists based on passed in conditions. @TODO fix.
      *
      * @param $conditions
      * @return bool
