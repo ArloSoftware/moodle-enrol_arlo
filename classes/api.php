@@ -27,11 +27,15 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
+use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
+use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\local\client;
 use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\job\job;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\persistent\event_persistent;
+use enrol_arlo\local\persistent\online_activity_persistent;
 use enrol_arlo_plugin;
 use enrol_arlo\local\config\arlo_plugin_config;
 use Exception;
@@ -42,6 +46,8 @@ use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
 use moodle_exception;
 use progress_trace;
 use null_progress_trace;
+use core_date;
+use DateTime;
 
 class api {
 
@@ -54,7 +60,28 @@ class api {
     }
 
     public static function get_time_norequests_after(persistent $persistent) {
-        return 0;
+        // Use Events finish date.
+        if ($persistent instanceof event_persistent) {
+            $status = $persistent->get('sourcestatus');
+            if ($status == EventStatus::ACTIVE) {
+                $finishdate = new DateTime(
+                    $persistent->get('finishdatetime'),
+                    core_date::get_user_timezone_object()
+                );
+                return $finishdate->getTimestamp();
+            }
+        }
+        // Generate Online Actvity finish type date.
+        if ($persistent instanceof online_activity_persistent) {
+            $status = $persistent->get('sourcestatus');
+            // Online Activities don't have finish dates, 2 years from now is fair.
+            if ($status == OnlineActivityStatus::ACTIVE) {
+                $finishdate = new DateTime("2 years", core_date::get_server_timezone_object());
+                return $finishdate->getTimestamp();
+            }
+        }
+        // Completed Events and Online Activities use current time. The extension period will allow for syncronisation.
+        return time();
     }
 
     public static function parse_response($response) {
@@ -85,11 +112,12 @@ class api {
             $trace = new null_progress_trace();
         }
         foreach (job_factory::get_scheduled_jobs() as $scheduledjob) {
-            /** @var  $scheduledjob job */
+            /** @var $scheduledjob job */
+            $trace->output($scheduledjob->get_type());
             $status = $scheduledjob->run();
             if ($scheduledjob->has_errors()) {
                 print_object($scheduledjob->get_errors());
-                die;
+                //die;
             }
         }
     }
