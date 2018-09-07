@@ -50,46 +50,29 @@ class username_generator {
      * @throws coding_exception
      * @throws moodle_exception
      */
-    public static function create($firstname, $lastname, $email) {
+    public static function generate($firstname, $lastname, $email) {
         global $DB;
 
-        $firstname = trim($firstname);
-        $firstname = clean_param($firstname, PARAM_USERNAME);
-        if (empty($firstname)) {
-            throw new coding_exception('Parameter firstname is invalid');
-        }
-        $lastname = trim($lastname);
-        $lastname = clean_param($lastname, PARAM_USERNAME);
-        if (empty($lastname)) {
-            throw new coding_exception('Parameter lastname is invalid');
-        }
-        $email = trim($email);
-        $email = clean_param($email, PARAM_USERNAME);
-        if (empty($email)) {
-            throw new coding_exception('Parameter email is invalid');
-        }
-        $position = core_text::strpos($email, '@');
-        $emailusername = core_text::substr($email, 0, $position);
         $tries = 0;
+        $randmax = 999;
         $exists = true;
         while ($exists) {
             ++$tries;
             switch($tries) {
                 case 1;
-                    $username = core_text::substr($firstname, 0 , 3) .
-                        core_text::substr($lastname, 0 , 3) . rand(0, 3);
+                    $username = static::create_from_first_and_last_names($firstname, $lastname, 3, $randmax);
                     break;
                 case 2:
-                    $username = $emailusername;
+                    $username = static::create_from_email_address_local_part($email);
                     break;
                 case 3:
-                    $username = $emailusername . rand(0, 3);
+                    $username = static::create_from_email_address_local_part($email, $randmax);
                     break;
                 case 4:
-                    $username = $email;
+                    $username = static::create_from_email_address($email);
                     break;
                 case 5:
-                    $username = $email . rand(0, 3);
+                    $username = static::create_from_email_address($email, $randmax);
                     break;
                 default:
                     throw new moodle_exception('Failed to generate username');
@@ -114,6 +97,74 @@ class username_generator {
         $lastname = $contact->get('lastname');
         $email = $contact->get('email');
         return static::create($firstname, $lastname, $email);
+    }
+
+    /**
+     * Create username from email.
+     *
+     * @param $email
+     * @param null $randmax
+     * @return string
+     * @throws coding_exception
+     */
+    public static function create_from_email_address($email, $randmax = null) {
+        $username = '';
+        $email = trim($email);
+        $email = clean_param($email, PARAM_USERNAME);
+        if (is_null($randmax) && !is_number($randmax)) {
+            $username = $email;
+        } else {
+            $username = $email . rand(0, $randmax);
+        }
+        return core_text::strtolower($username);
+    }
+
+    /**
+     * Create username from local part of email.
+     *
+     * @param $email
+     * @param null $randmax
+     * @return string
+     * @throws coding_exception
+     */
+    public static function create_from_email_address_local_part($email, $randmax = null) {
+        $username = '';
+        $email = trim($email);
+        $email = clean_param($email, PARAM_USERNAME);
+        $position = core_text::strpos($email, '@');
+        $localpart = core_text::substr($email, 0, $position);
+        if (is_null($randmax) && !is_number($randmax)) {
+            $username = $localpart;
+        } else {
+            $username = $localpart . rand(0, $randmax);
+        }
+        return core_text::strtolower($username);
+    }
+
+    /**
+     * Create username using firstname and lastname.
+     *
+     * @param $firstname
+     * @param $lastname
+     * @param int $length
+     * @param null $randmax
+     * @return string
+     * @throws coding_exception
+     */
+    public static function create_from_first_and_last_names($firstname, $lastname, $length = 3, $randmax = null) {
+        $username = '';
+        $firstname = trim($firstname);
+        $firstname = clean_param($firstname, PARAM_USERNAME);
+        $lastname = trim($lastname);
+        $lastname = clean_param($lastname, PARAM_USERNAME);
+        if (is_null($randmax) && !is_number($randmax)) {
+            $username = core_text::substr($firstname, 0 , $length) .
+                core_text::substr($lastname, 0 , $length);
+        } else {
+            $username = core_text::substr($firstname, 0 , $length) .
+                core_text::substr($lastname, 0 , $length) . rand(0, $randmax);
+        }
+        return core_text::strtolower($username);
     }
 
 }
