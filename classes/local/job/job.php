@@ -24,6 +24,7 @@
 
 namespace enrol_arlo\local\job;
 
+use core\lock\lock_config;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\persistent;
 use null_progress_trace;
@@ -60,6 +61,28 @@ abstract class job {
 
     public function has_errors() {
         return 0 !== count($this->errors);
+    }
+
+    /**
+     * Return an instance of lock factory.
+     *
+     * @return \core\lock\lock_factory
+     * @throws \coding_exception
+     */
+    public static function get_lock_factory() {
+        return lock_config::get_lock_factory('enrol_arlo');
+    }
+
+    /**
+     * Use type and instanceid from persistent to make a lock resource name.
+     *
+     * @return string
+     * @throws \coding_exception
+     */
+    public function get_lock_resource() {
+        $type = $this->jobpersistent->get('type');
+        $instanceid = $this->jobpersistent->get('instanceid');
+        return $type . ':' . $instanceid;
     }
 
     public function get_job_persistent() {
