@@ -96,7 +96,7 @@ class username_generator {
         $firstname = $contact->get('firstname');
         $lastname = $contact->get('lastname');
         $email = $contact->get('email');
-        return static::create($firstname, $lastname, $email);
+        return static::generate($firstname, $lastname, $email);
     }
 
     /**
