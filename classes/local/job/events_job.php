@@ -48,10 +48,10 @@ class events_job extends job {
                 $uri->setHost($pluginconfig->get('platform'));
                 $uri->setResourcePath('events/');
                 $uri->addExpand('Event/EventTemplate');
-                $filter = "(LastModifiedDateTime gt datetimeoffset('" . $jobpersistent->get('lastsourcetimemodified') . "'))";
+                $filter = "(LastModifiedDateTime gt datetime('" . $jobpersistent->get('lastsourcetimemodified') . "'))";
                 if ($jobpersistent->get('lastsourceid')) {
                     $filter .= " OR ";
-                    $filter .= "(LastModifiedDateTime eq datetimeoffset('" . $jobpersistent->get('lastsourcetimemodified') . "')";
+                    $filter .= "(LastModifiedDateTime eq datetime('" . $jobpersistent->get('lastsourcetimemodified') . "')";
                     $filter .= " AND ";
                     $filter .= "EventID gt " . $jobpersistent->get('lastsourceid') . ")";
                 }
