@@ -38,9 +38,7 @@ class job_factory {
      * @throws \coding_exception
      */
     public static function create_from_persistent(persistent $persistent) {
-        $parts = explode( '/', $persistent->get('type'));
-        $type = $parts[0];
-        $classname = $parts[1] . '_job';
+        $classname = $persistent->get('type') . '_job';
         $namespaceclassname = "enrol_arlo\\local\\job\\{$classname}";
         return new $namespaceclassname($persistent);
     }

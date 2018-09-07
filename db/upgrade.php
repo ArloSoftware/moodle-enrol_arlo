@@ -433,12 +433,13 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-        // Conditionally add enrol_arlo_job table.
-        if (!$dbman->table_exists('enrol_arlo_job')) {
-            $table = new xmldb_table('enrol_arlo_job');
+        // Conditionally add enrol_arlo_scheduled_job table.
+        if (!$dbman->table_exists('enrol_arlo_scheduled_job')) {
+            $table = new xmldb_table('enrol_arlo_scheduled_job');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
             $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, null, null, null);
-            $table->add_field('type', XMLDB_TYPE_CHAR, '50', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('area', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('type', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
             $table->add_field('instanceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
             $table->add_field('collection', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
             $table->add_field('endpoint', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);

@@ -201,9 +201,30 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Work time that to stop making requests.
         $timenorequestsafter = api::get_time_norequests_after($persistent);
         // Register enrolment instance jobs.
-        job::register_scheduled_job('enrol/memberships', $instanceid, $endpoint, $collection, $timenorequestsafter);
-        job::register_scheduled_job('enrol/outcomes', $instanceid, 'registrations/', 'Registrations', $timenorequestsafter);
-        job::register_scheduled_job('enrol/contacts', $instanceid, $endpoint, $collection, $timenorequestsafter);
+        job::register_scheduled_job(
+            'enrolment',
+            'memberships',
+            $instanceid,
+            $endpoint,
+            $collection,
+            $timenorequestsafter
+        );
+        job::register_scheduled_job(
+            'enrolment',
+            'outcomes',
+            $instanceid,
+            'registrations/',
+            'Registrations',
+            $timenorequestsafter
+        );
+        job::register_scheduled_job(
+            'enrolment',
+            'contacts',
+            $instanceid,
+            $endpoint,
+            $collection,
+            $timenorequestsafter
+        );
 
         return $instanceid;
     }
@@ -248,11 +269,13 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Delete associated registrations.
         $DB->delete_records('enrol_arlo_registration', array('enrolid' => $instance->id));
         // Delete job scheduling information.
-        $select = "type LIKE 'enrol%' AND instanceid = :instanceid";
-        $DB->delete_records_select(
-            'enrol_arlo_job',
-            $select,
-            ['instanceid' => $instance->id]
+        $conditions = [
+            'area' => 'enrolment',
+            'instanceid' => $instance->id
+        ];
+        $DB->delete_records(
+            'enrol_arlo_scheduled_job',
+            $conditions
         );
         // Delete email queue information.
         $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $instance->id));
@@ -286,13 +309,13 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Work time that to stop making requests.
         $timenorequestsafter = api::get_time_norequests_after($persistent);
         // Set and save timenorequestsafter.
-        $job = job_persistent::get_record(['type' => 'enrol/memberships', 'instanceid' => $instance->id]);
+        $job = job_persistent::get_record(['type' => 'memberships', 'instanceid' => $instance->id]);
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->save();
-        $job = job_persistent::get_record(['type' => 'enrol/outcomes', 'instanceid' => $instance->id]);
+        $job = job_persistent::get_record(['type' => 'outcomes', 'instanceid' => $instance->id]);
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->save();
-        $job = job_persistent::get_record(['type' => 'enrol/contacts', 'instanceid' => $instance->id]);
+        $job = job_persistent::get_record(['type' => 'contacts', 'instanceid' => $instance->id]);
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->save();
         // Create a new course group if required.

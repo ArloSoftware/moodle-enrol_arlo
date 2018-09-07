@@ -80,9 +80,14 @@ abstract class job {
      * @throws \coding_exception
      */
     public function get_lock_resource() {
+        $area = $this->jobpersistent->get('area');
         $type = $this->jobpersistent->get('type');
         $instanceid = $this->jobpersistent->get('instanceid');
-        return $type . ':' . $instanceid;
+        // Enrolments share resource to avoid race conditions.
+        if ($area == 'enrolment') {
+            return $area . ':' . $instanceid;
+        }
+        return $area . '/'. $type . ':' . $instanceid;
     }
 
     public function get_job_persistent() {
@@ -94,15 +99,23 @@ abstract class job {
     /**
      * Register in DB a scheduled job.
      *
+     * @param $area
      * @param $type
      * @param $instanceid
      * @param $endpoint
      * @param $collection
+     * @param int $timenorequestsafter
      * @throws \coding_exception
      */
-    public static function register_scheduled_job($type, $instanceid, $endpoint, $collection, $timenorequestsafter = 0) {
+    public static function register_scheduled_job($area,
+                                                  $type,
+                                                  $instanceid,
+                                                  $endpoint,
+                                                  $collection,
+                                                  $timenorequestsafter = 0) {
         $job = new job_persistent();
         $conditions = [
+            'area' => $area,
             'type' => $type,
             'instanceid' => $instanceid
         ];
@@ -122,20 +135,46 @@ abstract class job {
         global $SITE;
         // Register Event Templates job.
         static::register_scheduled_job(
-            'site/event_templates',  $SITE->id, 'eventtemplates/', 'EventTemplates'
+            'site',
+            'event_templates',
+            $SITE->id,
+            'eventtemplates/',
+            'EventTemplates'
         );
         // Register Events job.
         static::register_scheduled_job(
-            'site/events', $SITE->id, 'events/', 'Events'
+            'site',
+            'events',
+            $SITE->id,
+            'events/',
+            'Events'
         );
         // Register Online Activities job.
         static::register_scheduled_job(
-            'site/online_activities', $SITE->id, 'onlineactivities/', 'OnlineActivities'
+            'site',
+            'online_activities',
+            $SITE->id,
+            'onlineactivities/',
+            'OnlineActivities'
         );
         // Register Contact Merge Requests job.
         static::register_scheduled_job(
-            'site/contact_merge_requests', $SITE->id, 'contactmergerequests/', 'ContactMergeRequests'
+            'site',
+            'contact_merge_requests',
+            $SITE->id,
+            'contactmergerequests/',
+            'ContactMergeRequests'
         );
+    }
+
+    /**
+     * Access attached persistent area.
+     *
+     * @return mixed
+     * @throws \coding_exception
+     */
+    public function get_area() {
+        return $this->jobpersistent->get('area');
     }
 
     /**

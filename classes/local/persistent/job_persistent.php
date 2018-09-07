@@ -34,7 +34,13 @@ class job_persistent extends persistent {
     use enrol_arlo_persistent_trait;
 
     /** Table name. */
-    const TABLE = 'enrol_arlo_job';
+    const TABLE = 'enrol_arlo_scheduled_job';
+
+    /** @var array Supported areas. */
+    private static $areas = [
+        'site',
+        'enrolment'
+    ];
 
     /** @var array Map of Arlo collection/resource names. */
     private static $resources = [
@@ -46,15 +52,15 @@ class job_persistent extends persistent {
         'Registrations' => 'Registration'
     ];
 
-    /** @var array Supported type namespaces. */
-    private static $typenamespaces = [
-        'site/event_templates',
-        'site/events',
-        'site/online_activities',
-        'site/contact_merge_requests',
-        'enrol/memberships',
-        'enrol/outcomes',
-        'enrol/contacts'
+    /** @var array Supported types. */
+    private static $types = [
+        'event_templates',
+        'events',
+        'online_activities',
+        'contact_merge_requests',
+        'memberships',
+        'outcomes',
+        'contacts'
     ];
 
     /**
@@ -69,6 +75,9 @@ class job_persistent extends persistent {
             'platform' => array(
                 'type' => PARAM_TEXT,
                 'default' => $pluginconfig->get('platform')
+            ),
+            'area' => array(
+                'type' => PARAM_TEXT
             ),
             'type' => array(
                 'type' => PARAM_TEXT
@@ -138,19 +147,49 @@ class job_persistent extends persistent {
     }
 
     /**
+     * Return valid areas.
+     *
+     * @return array
+     */
+    public static function get_valid_areas() {
+        return static::$areas;
+    }
+
+    /**
      * Return array of valid types.
      *
      * @return array
      */
     public static function get_valid_types() {
-        return static::$typenamespaces;
+        return static::$types;
     }
 
+    /**
+     * Set job area.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_area($value) {
+        if (!in_array($value, static::$areas)) {
+            throw new coding_exception('Invalid area');
+        }
+        return $this->raw_set('area', $value);
+    }
+
+    /**
+     * Set job type.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
     protected function set_type($value) {
-        $types = static::get_valid_types();
-        if (!in_array($value, $types)) {
+        if (!in_array($value, static::$types)) {
             throw new coding_exception('Invalid type');
         }
         return $this->raw_set('type', $value);
     }
+
 }
