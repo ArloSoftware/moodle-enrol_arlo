@@ -111,7 +111,7 @@ class username_generator {
         $username = '';
         $email = trim($email);
         $email = clean_param($email, PARAM_USERNAME);
-        if (is_null($randmax) && !is_number($randmax)) {
+        if (is_null($randmax) || !is_number($randmax)) {
             $username = $email;
         } else {
             $username = $email . rand(0, $randmax);
@@ -133,7 +133,7 @@ class username_generator {
         $email = clean_param($email, PARAM_USERNAME);
         $position = core_text::strpos($email, '@');
         $localpart = core_text::substr($email, 0, $position);
-        if (is_null($randmax) && !is_number($randmax)) {
+        if (is_null($randmax) || !is_number($randmax)) {
             $username = $localpart;
         } else {
             $username = $localpart . rand(0, $randmax);
@@ -157,7 +157,7 @@ class username_generator {
         $firstname = clean_param($firstname, PARAM_USERNAME);
         $lastname = trim($lastname);
         $lastname = clean_param($lastname, PARAM_USERNAME);
-        if (is_null($randmax) && !is_number($randmax)) {
+        if (is_null($randmax) || !is_number($randmax)) {
             $username = core_text::substr($firstname, 0 , $length) .
                 core_text::substr($lastname, 0 , $length);
         } else {
