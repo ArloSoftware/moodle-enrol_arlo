@@ -36,6 +36,27 @@ class job_persistent extends persistent {
     /** Table name. */
     const TABLE = 'enrol_arlo_job';
 
+    /** @var array Map of Arlo collection/resource names. */
+    private static $resources = [
+        'Contacts' => 'Contact',
+        'ContactMergeRequests' => 'ContactMergeRequest',
+        'Events' => 'Event',
+        'EventTemplates' => 'EventTemplate',
+        'OnlineActivities' => 'OnlineActivity',
+        'Registrations' => 'Registration'
+    ];
+
+    /** @var array Supported type namespaces. */
+    private static $typenamespaces = [
+        'site/event_templates',
+        'site/events',
+        'site/online_activities',
+        'site/contact_merge_requests',
+        'enrol/memberships',
+        'enrol/outcomes',
+        'enrol/contacts'
+    ];
+
     /**
      * Return the definition of the properties of this model.
      *
@@ -68,7 +89,7 @@ class job_persistent extends persistent {
             'lastsourcetimemodified' => array(
                 'type' => PARAM_TEXT,
                 'null' => NULL_ALLOWED,
-                'default' => '1970-01-01T00:00:00+0000'
+                'default' => '1970-01-01T00:00:00Z'
             ),
             'timenextrequest' => array(
                 'type' => PARAM_INT,
@@ -103,20 +124,26 @@ class job_persistent extends persistent {
     }
 
     /**
+     * Get resource name based of collection name.
+     *
+     * @return mixed|string
+     * @throws coding_exception
+     */
+    public function get_resource_name() {
+        $collection = $this->raw_get('collection');
+        if (!is_null($collection)) {
+            return static::$resources[$collection];
+        }
+        return '';
+    }
+
+    /**
      * Return array of valid types.
      *
      * @return array
      */
     public static function get_valid_types() {
-        return [
-            'site/event_templates',
-            'site/events',
-            'site/online_activities',
-            'site/contact_merge_requests',
-            'enrol/memberships',
-            'enrol/outcomes',
-            'enrol/contacts'
-        ];
+        return static::$typenamespaces;
     }
 
     protected function set_type($value) {
