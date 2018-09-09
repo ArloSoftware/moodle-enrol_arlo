@@ -385,7 +385,44 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     if ($oldversion < 2017051505) {
         $admin = get_admin();
 
-        // Add required fields to appropiate tables for persistent support.
+        // Add information fields to contact table.
+        $table = new xmldb_table('enrol_arlo_contact');
+        // Conditionally launch add field firstname.
+        $field = new xmldb_field('firstname', XMLDB_TYPE_CHAR, '64', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field lastname.
+        $field = new xmldb_field('lastname', XMLDB_TYPE_CHAR, '64', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field email.
+        $field = new xmldb_field('email', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field codeprimary.
+        $field = new xmldb_field('codeprimary', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field phonework.
+        $field = new xmldb_field('phonework', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field phonehome.
+        $field = new xmldb_field('phonehome', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field phonemobile.
+        $field = new xmldb_field('phonemobile', XMLDB_TYPE_CHAR, '128', null, null, null, null);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Add required fields to appropriate tables for persistent support.
         $tablenames = [
             'enrol_arlo_contact',
             'enrol_arlo_event',
