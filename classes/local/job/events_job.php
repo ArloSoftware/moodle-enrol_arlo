@@ -76,8 +76,12 @@ class events_job extends job {
                             $sourcetemplateguid = $eventtemplate->UniqueIdentifier;
                         }
                         try {
-                            $event = new event_persistent();
-                            $event->from_record_property('sourceguid', $sourceguid);
+                            $event = event_persistent::get_record(
+                                ['sourceguid' => $sourceguid]
+                            );
+                            if (!$event) {
+                                $event = new event_persistent();
+                            }
                             $event->set('sourceid', $sourceid);
                             $event->set('sourceguid', $sourceguid);
                             $event->set('code', $code);

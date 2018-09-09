@@ -30,8 +30,6 @@ use enrol_arlo\persistent;
 
 class contact_persistent extends persistent {
 
-    use enrol_arlo_persistent_trait;
-
     /** Table name. */
     const TABLE = 'enrol_arlo_contact';
 
@@ -39,7 +37,7 @@ class contact_persistent extends persistent {
      * Return the definition of the properties of this model.
      *
      * @return array
-     * @throws coding_exception
+     * @throws \coding_exception
      */
     protected static function define_properties() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();

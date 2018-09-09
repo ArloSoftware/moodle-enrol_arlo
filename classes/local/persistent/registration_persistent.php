@@ -26,21 +26,26 @@ namespace enrol_arlo\local\persistent;
 defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
+use enrol_arlo\api;
 use enrol_arlo\persistent;
 
 class registration_persistent extends persistent {
+
     /** Table name. */
     const TABLE = 'enrol_arlo_registration';
 
     /**
      * Return the definition of the properties of this model.
-     *
+     * 
      * @return array
+     * @throws coding_exception
      */
     protected static function define_properties() {
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         return array(
             'platform' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'default' => $pluginconfig->get('platform')
             ),
             'enrolid' => array(
                 'type' => PARAM_INT,

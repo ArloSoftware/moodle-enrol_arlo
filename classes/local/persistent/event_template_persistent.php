@@ -27,12 +27,10 @@ defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
 use core_text;
-use enrol_arlo\local\config\arlo_plugin_config;
+use enrol_arlo\api;
 use enrol_arlo\persistent;
 
 class event_template_persistent extends persistent {
-
-    use enrol_arlo_persistent_trait;
 
     /** Table name. */
     const TABLE = 'enrol_arlo_template';
@@ -44,7 +42,7 @@ class event_template_persistent extends persistent {
      * @throws coding_exception
      */
     protected static function define_properties() {
-        $pluginconfig = new arlo_plugin_config();
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         return array(
             'platform' => array(
                 'type' => PARAM_TEXT,

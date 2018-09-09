@@ -291,17 +291,18 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @return boolean
      */
     public function update_instance($instance, $data) {
-        global $DB;
 
         $arlotype = $instance->customchar2;
         $sourceguid = $instance->customchar3;
         if ($arlotype == arlo_type::EVENT) {
-            $persistent = new event_persistent();
-            $persistent->from_record_property('sourceguid', $sourceguid);
+            $persistent = event_persistent::get_record(
+                ['sourceguid' => $sourceguid]
+            );
         }
         if ($arlotype == arlo_type::ONLINEACTIVITY) {
-            $persistent = new online_activity_persistent();
-            $persistent->from_record_property('sourceguid', $sourceguid);
+            $persistent = online_activity_persistent::get_record(
+                ['sourceguid' => $sourceguid]
+            );
         }
         if (!$persistent) {
             throw new coding_exception('Invalid persistent.');
@@ -309,13 +310,19 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Work time that to stop making requests.
         $timenorequestsafter = api::get_time_norequests_after($persistent);
         // Set and save timenorequestsafter.
-        $job = job_persistent::get_record(['type' => 'memberships', 'instanceid' => $instance->id]);
+        $job = job_persistent::get_record(
+            ['type' => 'memberships', 'instanceid' => $instance->id]
+        );
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->save();
-        $job = job_persistent::get_record(['type' => 'outcomes', 'instanceid' => $instance->id]);
+        $job = job_persistent::get_record(
+            ['type' => 'outcomes', 'instanceid' => $instance->id]
+        );
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->save();
-        $job = job_persistent::get_record(['type' => 'contacts', 'instanceid' => $instance->id]);
+        $job = job_persistent::get_record(
+            ['type' => 'contacts', 'instanceid' => $instance->id]
+        );
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->save();
         // Create a new course group if required.

@@ -29,14 +29,12 @@ defined('MOODLE_INTERNAL') || die();
 use coding_exception;
 use core_text;
 use context_system;
+use enrol_arlo\api;
 use enrol_arlo\event\onlineactivity_created;
 use enrol_arlo\event\onlineactivity_updated;
-use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\persistent;
 
 class online_activity_persistent extends persistent {
-
-    use enrol_arlo_persistent_trait;
 
     /** Table name. */
     const TABLE = 'enrol_arlo_onlineactivity';
@@ -48,7 +46,7 @@ class online_activity_persistent extends persistent {
      * @throws coding_exception
      */
     protected static function define_properties() {
-        $pluginconfig = new arlo_plugin_config();
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         return [
             'platform' => [
                 'type' => PARAM_TEXT,

@@ -63,8 +63,12 @@ class contact_merge_requests_job extends job {
                         $destinationcontactguid = $resource->DestinationContactInfo->UniqueIdentifier;
                         $sourcecreated          = $resource->CreatedDateTime;
                         try {
-                            $contactmergerequest = new contact_merge_request_persistent();
-                            $contactmergerequest->from_record_property('sourceid', $sourceid);
+                            $contactmergerequest = contact_merge_request_persistent::get_record(
+                                ['sourceid' =>  $sourceid]
+                            );
+                            if (!$contactmergerequest) {
+                                $contactmergerequest = new contact_merge_request_persistent();
+                            }
                             $contactmergerequest->set('platform', $pluginconfig->get('platform'));
                             $contactmergerequest->set('sourcecontactid', $sourcecontactid);
                             $contactmergerequest->set('sourcecontactguid', $sourcecontactguid);

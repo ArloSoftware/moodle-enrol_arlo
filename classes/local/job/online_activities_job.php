@@ -75,8 +75,12 @@ class online_activities_job extends job {
                             $sourcetemplateguid = $eventtemplate->UniqueIdentifier;
                         }
                         try {
-                            $onlineactivity = new online_activity_persistent();
-                            $onlineactivity->from_record_property('sourceguid', $sourceguid);
+                            $onlineactivity = online_activity_persistent::get_record(
+                                ['sourceguid' => $sourceguid]
+                            );
+                            if (!$onlineactivity) {
+                                $onlineactivity = new online_activity_persistent();
+                            }
                             $onlineactivity->set('sourceid', $sourceid);
                             $onlineactivity->set('sourceguid', $sourceguid);
                             $onlineactivity->set('code', $code);

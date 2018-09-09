@@ -70,8 +70,12 @@ class event_templates_job extends job {
                         $sourcecreated  = $resource->CreatedDateTime;
                         $sourcemodified = $resource->LastModifiedDateTime;
                         try {
-                            $eventtemplate = new event_template_persistent();
-                            $eventtemplate->from_record_property('sourceguid', $sourceguid);
+                            $eventtemplate = event_template_persistent::get_record(
+                                ['sourceguid' => $sourceguid]
+                            );
+                            if (!$eventtemplate) {
+                                $eventtemplate = new event_template_persistent();
+                            }
                             $eventtemplate->set('sourceid', $sourceid);
                             $eventtemplate->set('sourceguid', $sourceguid);
                             $eventtemplate->set('code', $code);
