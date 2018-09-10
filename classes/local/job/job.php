@@ -122,6 +122,7 @@ abstract class job {
         $job->from_record_properties($conditions);
         $job->set('collection', $collection);
         $job->set('endpoint', $endpoint);
+        $job->set('timenextrequest', time());
         $job->set('timenextrequestdelay', self::TIME_PERIOD_DELAY);
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->set('timerequestsafterextension', self::TIME_PERIOD_EXTENSION);

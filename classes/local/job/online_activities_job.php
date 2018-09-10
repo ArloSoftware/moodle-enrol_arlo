@@ -92,6 +92,8 @@ class online_activities_job extends job {
                             $onlineactivity->set('sourcetemplateid', $sourcetemplateid);
                             $onlineactivity->set('sourcetemplateguid' , $sourcetemplateguid);
                             $onlineactivity->save();
+                            // Update scheduling information on persistent after successfull save.
+                            $jobpersistent->set('timenextrequest', time());
                             $jobpersistent->set('lastsourceid', $sourceid);
                             $jobpersistent->set('lastsourcetimemodified', $sourcemodified);
                             $jobpersistent->update();
