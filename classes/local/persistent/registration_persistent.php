@@ -136,4 +136,50 @@ class registration_persistent extends persistent {
             ),
         );
     }
+
+    /**
+     * Get associated contact persistent.
+     *
+     * @return \core\persistent|false
+     * @throws coding_exception
+     */
+    public function get_contact() {
+        if (empty($this->raw_get('sourcecontactguid'))) {
+            throw new coding_exception('Property sourcecontactguid not set');
+        }
+        return contact_persistent::get_record(
+            ['sourceguid' => $this->raw_get('sourcecontactguid')]
+        );
+    }
+
+    /**
+     * Get associated event persistent.
+     *
+     * @return bool|\core\persistent|false
+     * @throws coding_exception
+     */
+    public function get_event() {
+        if (empty($this->raw_get('sourceeventguid'))) {
+            return false;
+        }
+        return event_persistent::get_record(
+            ['sourceguid' => $this->raw_get('sourceeventguid')]
+        );
+    }
+
+    /**
+     * Get associated online activity persistent.
+     *
+     * @return bool|\core\persistent|false
+     * @throws coding_exception
+     */
+    public function get_online_activity() {
+        if (empty($this->raw_get('sourceonlineactivityguid'))) {
+            return false;
+        }
+        return online_activity_persistent::get_record(
+            ['sourceguid' => $this->raw_get('sourceonlineactivityguid')]
+        );
+    }
+
 }
