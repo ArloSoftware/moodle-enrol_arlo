@@ -34,7 +34,7 @@ class job_persistent extends persistent {
     use enrol_arlo_persistent_trait;
 
     /** Table name. */
-    const TABLE = 'enrol_arlo_scheduled_job';
+    const TABLE = 'enrol_arlo_scheduledjob';
 
     /** @var array Supported areas. */
     private static $areas = [
