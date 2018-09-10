@@ -127,6 +127,7 @@ abstract class job {
         $job->set('timenorequestsafter', $timenorequestsafter);
         $job->set('timerequestsafterextension', self::TIME_PERIOD_EXTENSION);
         $job->save();
+        return $job;
     }
 
     /**
