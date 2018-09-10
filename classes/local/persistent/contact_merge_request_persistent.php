@@ -25,6 +25,7 @@ namespace enrol_arlo\local\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
+use coding_exception;
 use enrol_arlo\api;
 use enrol_arlo\persistent;
 
@@ -79,4 +80,35 @@ class contact_merge_request_persistent extends persistent {
             )
         );
     }
+
+    /**
+     * Get source contact persistent.
+     *
+     * @return \core\persistent|false
+     * @throws coding_exception
+     */
+    public function get_source_contact() {
+        if (is_null($this->raw_get('sourcecontactguid'))) {
+            throw new coding_exception('Property sourcecontactguid not set');
+        }
+        return contact_persistent::get_record(
+            ['sourceguid' => $this->raw_get('sourcecontactguid')]
+        );
+    }
+
+    /**
+     * Get destination contact persistent.
+     *
+     * @return \core\persistent|false
+     * @throws coding_exception
+     */
+    public function get_destination_contact() {
+        if (is_null($this->raw_get('destinationcontactguid'))) {
+            throw new coding_exception('Property destinationcontactguid not set');
+        }
+        return contact_persistent::get_record(
+            ['sourceguid' => $this->raw_get('destinationcontactguid')]
+        );
+    }
+
 }
