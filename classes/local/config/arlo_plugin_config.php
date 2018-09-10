@@ -108,6 +108,10 @@ class arlo_plugin_config extends plugin_config {
             'allowhiddencourses' => [
                 'type' => PARAM_INT,
                 'default' => 0
+            ],
+            'allowoutcomespushing' => [
+                'type' => PARAM_INT,
+                'default' => 1
             ]
         ];
     }
