@@ -471,8 +471,8 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         }
 
         // Conditionally add enrol_arlo_scheduled_job table.
-        if (!$dbman->table_exists('enrol_arlo_scheduled_job')) {
-            $table = new xmldb_table('enrol_arlo_scheduled_job');
+        if (!$dbman->table_exists('enrol_arlo_scheduledjob')) {
+            $table = new xmldb_table('enrol_arlo_scheduledjob');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
             $table->add_field('platform', XMLDB_TYPE_CHAR, '128', null, null, null, null);
             $table->add_field('area', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
@@ -522,7 +522,26 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Register site level jobs.
         \enrol_arlo\local\job\job::register_site_level_scheduled_jobs();
 
-        // TODO migrate instances and schedules.
+        // Move instance information to enrol table.
+        $enrols = $DB->get_records('enrol', ['enrol' => 'arlo']);
+        foreach ($enrols as $enrol) {
+            $arloinstance = $DB->get_record(
+                'enrol_arlo_instance', ['enrolid' => $enrol->id]);
+            if ($arloinstance) {
+                // Platform.
+                $enrol->customchar1 = $arloinstance->platform;
+                // Type.
+                $enrol->customchar2 = $arloinstance->type;
+                // Source GUID.
+                $enrol->customchar3 = $arloinstance->sourceguid;
+                $DB->update_record('enrol', $enrol);
+            }
+        }
+        // Drop instance table.
+        $enrolarloinstancetable = new xmldb_table('enrol_arlo_instance');
+        if ($dbman->table_exists($enrolarloinstancetable)) {
+            $dbman->drop_table($enrolarloinstancetable);
+        }
 
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2017051505, 'enrol', 'arlo');
