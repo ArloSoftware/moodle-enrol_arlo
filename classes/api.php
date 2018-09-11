@@ -122,5 +122,20 @@ class api {
         }
     }
 
+    /**
+     * Main method for doing any clean up. Stale logs etc.
+     *
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function run_cleanup() {
+        global $DB;
+        $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
+        $period = $pluginconfig->get('requestlogcleanup');
+        if ($period) {
+            $time = time() - (86400 * $period);
+            $DB->delete_records_select('enrol_arlo_requestlog', "timelogged < ?", [$time]);
+        }
+    }
 
 }
