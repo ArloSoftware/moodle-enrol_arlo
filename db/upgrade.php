@@ -482,7 +482,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $table->add_field('endpoint', XMLDB_TYPE_CHAR, '128', null, XMLDB_NOTNULL, null, null);
             $table->add_field('lastsourceid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
             $table->add_field('lastsourcetimemodified', XMLDB_TYPE_CHAR, '36', null, XMLDB_NOTNULL, null, null);
-            $table->add_field('timenextrequest', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timelastrequest', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
             $table->add_field('timenextrequestdelay', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
             $table->add_field('timenorequestsafter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
             $table->add_field('timerequestsafterextension', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');

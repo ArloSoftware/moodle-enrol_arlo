@@ -100,7 +100,7 @@ class job_persistent extends persistent {
                 'null' => NULL_ALLOWED,
                 'default' => '1970-01-01T00:00:00Z'
             ),
-            'timenextrequest' => array(
+            'timelastrequest' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),

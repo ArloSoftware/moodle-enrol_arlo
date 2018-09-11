@@ -94,7 +94,7 @@ class events_job extends job {
                             $event->set('sourcetemplateguid' , $sourcetemplateguid);
                             $event->save();
                             // Update scheduling information on persistent after successfull save.
-                            $jobpersistent->set('timenextrequest', time());
+                            $jobpersistent->set('timelastrequest', time());
                             $jobpersistent->set('lastsourceid', $sourceid);
                             $jobpersistent->set('lastsourcetimemodified', $sourcemodified);
                             $jobpersistent->update();

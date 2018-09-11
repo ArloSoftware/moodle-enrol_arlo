@@ -78,7 +78,7 @@ class contact_merge_requests_job extends job {
                             $contactmergerequest->save();
                             // Update scheduling information on persistent after successfull save.
                             // Note, lastsourceid doesn't get updated as is a GUID.
-                            $jobpersistent->set('timenextrequest', time());
+                            $jobpersistent->set('timelastrequest', time());
                             $jobpersistent->set('lastsourcetimemodified', $sourcecreated);
                             $jobpersistent->update();
                         } catch (moodle_exception $exception) {
