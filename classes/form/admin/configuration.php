@@ -98,6 +98,7 @@ class configuration extends \moodleform {
         $form->addElement('header', 'cleanup', get_string('cleanup', 'enrol_arlo'));
         $options = array(
             0 => get_string('never'),
+            7 => get_string('numdays', '', 7),
             30 => get_string('numdays', '', 30),
             60 => get_string('numdays', '', 60),
             90 => get_string('numdays', '', 90)
