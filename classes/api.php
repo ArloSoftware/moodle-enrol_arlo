@@ -51,37 +51,17 @@ use DateTime;
 
 class api {
 
+    /**
+     * Get an instance on Arlo enrolment plugin.
+     *
+     * @return enrol_arlo_plugin
+     */
     public static function get_enrolment_plugin() {
         static $enrolmentplugin;
         if (is_null($enrolmentplugin)) {
             $enrolmentplugin = new enrol_arlo_plugin();
         }
         return $enrolmentplugin;
-    }
-
-    public static function get_time_norequests_after(persistent $persistent) {
-        // Use Events finish date.
-        if ($persistent instanceof event_persistent) {
-            $status = $persistent->get('sourcestatus');
-            if ($status == EventStatus::ACTIVE) {
-                $finishdate = new DateTime(
-                    $persistent->get('finishdatetime'),
-                    core_date::get_user_timezone_object()
-                );
-                return $finishdate->getTimestamp();
-            }
-        }
-        // Generate Online Actvity finish type date.
-        if ($persistent instanceof online_activity_persistent) {
-            $status = $persistent->get('sourcestatus');
-            // Online Activities don't have finish dates, 2 years from now is fair.
-            if ($status == OnlineActivityStatus::ACTIVE) {
-                $finishdate = new DateTime("2 years", core_date::get_server_timezone_object());
-                return $finishdate->getTimestamp();
-            }
-        }
-        // Completed Events and Online Activities use current time. The extension period will allow for syncronisation.
-        return time();
     }
 
     public static function parse_response($response) {
