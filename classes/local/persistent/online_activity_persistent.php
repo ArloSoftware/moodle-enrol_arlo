@@ -27,11 +27,15 @@ namespace enrol_arlo\local\persistent;
 defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
+use core_date;
 use core_text;
 use context_system;
+use DateTime;
 use enrol_arlo\api;
+use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\event\onlineactivity_created;
 use enrol_arlo\event\onlineactivity_updated;
+use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\persistent;
 
 class online_activity_persistent extends persistent {
@@ -85,6 +89,25 @@ class online_activity_persistent extends persistent {
                 'type' => PARAM_TEXT
             ]
         ];
+    }
+
+    /**
+     * Method that works out timenorequestafter.
+     *
+     * @return int
+     * @throws coding_exception
+     */
+    public function get_time_norequests_after() {
+        $status = $this->get('sourcestatus');
+        if (!empty($status)) {
+            // Online Activities don't have finish dates, 2 years from now is fair.
+            if ($status == OnlineActivityStatus::ACTIVE) {
+                $finishdate = new DateTime("2 years", core_date::get_server_timezone_object());
+                return $finishdate->getTimestamp();
+            }
+        }
+        return time();
+
     }
 
     /**

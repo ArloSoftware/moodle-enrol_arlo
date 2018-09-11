@@ -27,11 +27,15 @@ namespace enrol_arlo\local\persistent;
 defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
+use core_date;
 use core_text;
 use context_system;
+use DateTime;
 use enrol_arlo\api;
+use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\event\event_created;
 use enrol_arlo\event\event_updated;
+use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\persistent;
 
 class event_persistent extends persistent {
@@ -85,6 +89,28 @@ class event_persistent extends persistent {
                 'type' => PARAM_TEXT
             ]
         ];
+    }
+
+    /**
+     * Method that works out timenorequestafter.
+     *
+     * @return int
+     * @throws coding_exception
+     */
+    public function get_time_norequests_after() {
+        $status = $this->get('sourcestatus');
+        $finishdatetime = $this->get('finishdatetime');
+        if (!empty($status) && !empty($finishdatetime)) {
+            if ($status == EventStatus::ACTIVE) {
+                $finishdate = new DateTime(
+                    $finishdatetime,
+                    core_date::get_user_timezone_object()
+                );
+                return $finishdate->getTimestamp();
+            }
+        }
+        return time();
+
     }
 
     /**
