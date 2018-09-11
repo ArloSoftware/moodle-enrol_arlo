@@ -198,8 +198,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         }
         // Use parent to create enrolment instance.
         $instanceid = parent::add_instance($course, $fields);
-        // Work time that to stop making requests.
-        $timenorequestsafter = api::get_time_norequests_after($persistent);
+
         // Register enrolment instance jobs.
         job::register_scheduled_job(
             'enrolment',
@@ -207,7 +206,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             $instanceid,
             $endpoint,
             $collection,
-            $timenorequestsafter
+            $persistent->get_time_norequests_after()
         );
         job::register_scheduled_job(
             'enrolment',
@@ -215,7 +214,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             $instanceid,
             'registrations/',
             'Registrations',
-            $timenorequestsafter
+            $persistent->get_time_norequests_after()
         );
         job::register_scheduled_job(
             'enrolment',
@@ -223,7 +222,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             $instanceid,
             $endpoint,
             $collection,
-            $timenorequestsafter
+            $persistent->get_time_norequests_after()
         );
 
         return $instanceid;
@@ -307,24 +306,26 @@ class enrol_arlo_plugin extends enrol_plugin {
         if (!$persistent) {
             throw new coding_exception('Invalid persistent.');
         }
-        // Work time that to stop making requests.
-        $timenorequestsafter = api::get_time_norequests_after($persistent);
-        // Set and save timenorequestsafter.
-        $job = job_persistent::get_record(
-            ['type' => 'memberships', 'instanceid' => $instance->id]
+        $timenorequestsafter = $persistent->get_time_norequests_after();
+
+        $membershipsjob = job_persistent::get_record(
+            ['area' => 'enrolment', 'type' => 'memberships', 'instanceid' => $instance->id]
         );
-        $job->set('timenorequestsafter', $timenorequestsafter);
-        $job->save();
-        $job = job_persistent::get_record(
-            ['type' => 'outcomes', 'instanceid' => $instance->id]
+        $membershipsjob->set('timenorequestsafter', $timenorequestsafter);
+        $membershipsjob->save();
+
+        $outcomesjob = job_persistent::get_record(
+            ['area' => 'enrolment', 'type' => 'outcomes', 'instanceid' => $instance->id]
         );
-        $job->set('timenorequestsafter', $timenorequestsafter);
-        $job->save();
-        $job = job_persistent::get_record(
-            ['type' => 'contacts', 'instanceid' => $instance->id]
+        $outcomesjob->set('timenorequestsafter', $timenorequestsafter);
+        $outcomesjob->save();
+
+        $contactsjob = job_persistent::get_record(
+            ['area' => 'enrolment', 'type' => 'contacts', 'instanceid' => $instance->id]
         );
-        $job->set('timenorequestsafter', $timenorequestsafter);
-        $job->save();
+        $contactsjob->set('timenorequestsafter', $timenorequestsafter);
+        $contactsjob->save();
+
         // Create a new course group if required.
         $course = get_course($instance->courseid);
         if (!empty($data->customint2) && $data->customint2 == self::CREATE_GROUP) {
