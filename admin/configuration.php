@@ -39,6 +39,7 @@ if ($data) {
     $plugin->set_config('pushonlineactivityresults', $data->pushonlineactivityresults);
     $plugin->set_config('pusheventresults', $data->pusheventresults);
     $plugin->set_config('alertsiteadmins', $data->alertsiteadmins);
+    $plugin->set_config('requestlogcleanup', $data->requestlogcleanup);
     redirect($PAGE->url, get_string('changessaved', 'enrol_arlo'));
 }
 echo $OUTPUT->header();

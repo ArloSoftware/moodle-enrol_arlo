@@ -95,6 +95,18 @@ class configuration extends \moodleform {
             get_string('alertsiteadmins', 'enrol_arlo'));
         $form->addHelpButton('alertsiteadmins', 'alertsiteadmins', 'enrol_arlo');
 
+        $form->addElement('header', 'cleanup', get_string('cleanup', 'enrol_arlo'));
+        $options = array(
+            0 => get_string('never'),
+            30 => get_string('numdays', '', 30),
+            60 => get_string('numdays', '', 60),
+            90 => get_string('numdays', '', 90)
+        );
+        $form->addElement('select', 'requestlogcleanup',
+            get_string('requestlogcleanup', 'enrol_arlo'), $options);
+        $form->setDefault('requestlogcleanup', 0);
+        $form->addHelpButton('requestlogcleanup', 'requestlogcleanup', 'enrol_arlo');
+
         // Hack - Quick load existing config if exists.
         $config = (array) get_config('enrol_arlo');
         if ($config) {
@@ -107,6 +119,7 @@ class configuration extends \moodleform {
         $form->setExpanded('enrolment');
         $form->setExpanded('resulting');
         $form->setExpanded('alert');
+        $form->setExpanded('cleanup');
     }
 
     /**

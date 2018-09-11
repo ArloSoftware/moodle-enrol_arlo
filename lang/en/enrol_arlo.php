@@ -254,3 +254,6 @@ $string['httpstatus:409'] = 'Conflict';
 $string['httpstatus:415'] = 'Unsupported Media Type';
 $string['httpstatus:500'] = 'Internal Server Error';
 $string['httpstatus:503'] = 'Service Unavailable';
+$string['cleanup'] = 'Clean up';
+$string['requestlogcleanup'] = 'Request log clean up';
+$string['requestlogcleanup_help'] = 'Remove request log entries that are older than the selected time.';

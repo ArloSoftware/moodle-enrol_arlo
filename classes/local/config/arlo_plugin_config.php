@@ -112,6 +112,10 @@ class arlo_plugin_config extends plugin_config {
             'allowoutcomespushing' => [
                 'type' => PARAM_INT,
                 'default' => 1
+            ],
+            'requestlogcleanup' => [
+                'type' => PARAM_INT,
+                'default' => 0
             ]
         ];
     }
