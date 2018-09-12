@@ -34,6 +34,7 @@ use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
 use GuzzleHttp\Psr7\Request;
 use Exception;
+use coding_exception;
 use moodle_exception;
 
 class contact_merge_requests_job extends job {
@@ -56,7 +57,6 @@ class contact_merge_requests_job extends job {
                 $response = client::get_instance()->send_request($request);
                 $collection = api::parse_response($response);
                 if ($collection instanceof AbstractCollection && $collection->count() > 0) {
-                    mtrace('in');
                     foreach ($collection as $resource) {
                         $sourceid               = $resource->RequestID;
                         $sourcecontactid        = $resource->SourceContactInfo->ContactID;
@@ -86,7 +86,7 @@ class contact_merge_requests_job extends job {
                             $jobpersistent->update();
                         } catch (moodle_exception $exception) {
                             $this->add_error($exception->getMessage());
-                            if ($exception instanceof invalid_persistent_exception) {
+                            if ($exception instanceof invalid_persistent_exception || $exception instanceof coding_exception) {
                                 debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
                                 return false;
                             }
@@ -96,6 +96,7 @@ class contact_merge_requests_job extends job {
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (moodle_exception $exception) {
+            debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
             $this->add_error($exception->getMessage());
             return false;
         }

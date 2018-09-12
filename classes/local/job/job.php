@@ -44,6 +44,8 @@ abstract class job {
 
     protected $errors;
 
+    protected $lasterror;
+
     protected $jobpersistent;
 
     public function __construct(persistent $jobpersistent) {
@@ -52,11 +54,15 @@ abstract class job {
     }
 
     public function add_error($error) {
-        $this->errors[] = $error;
+        $this->errors[] = $this->lasterror = $error;
     }
 
     public function get_errors() {
         return $this->errors;
+    }
+
+    public function get_last_error() {
+        return $this->lasterror;
     }
 
     public function has_errors() {
