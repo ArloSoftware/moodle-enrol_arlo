@@ -179,6 +179,20 @@ class job_persistent extends persistent {
     }
 
     /**
+     * Use to set errors from associated scheduled job.
+     *
+     * @param array $errors
+     * @throws coding_exception
+     */
+    public function set_errors(array $errors) {
+        $errorcounter = $this->get('errorcounter');
+        $errorcounter += count($errors);
+        $errormessage = implode(PHP_EOL, $errors);
+        $this->raw_set('errormessage', $errormessage);
+        $this->raw_set('errorcounter', $errorcounter);
+    }
+
+    /**
      * Set job type.
      *
      * @param $value
