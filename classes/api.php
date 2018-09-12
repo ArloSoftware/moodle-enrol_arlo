@@ -101,9 +101,7 @@ class api {
         $trace->output($pluginconfig->get('apistatus'));
         $trace->output($pluginconfig->get('apierrormessage'));
         $trace->output($pluginconfig->get('apierrorcounter'));
-        //if ($apistatus) {}
-
-
+        $trace->output($pluginconfig->get('apitimelastrequest'));
         $conditions = [
             'disabled' => 1,
             'timerequestnow' => $time,
@@ -116,12 +114,14 @@ class api {
                    AND (:timenorequest < (timenorequestsafter + timerequestsafterextension) OR timenorequestsafter = 0)";
         $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
         foreach ($rs as $record) {
-            $persistent = new job_persistent(0, $record);
-            $scheduledjob = job_factory::create_from_persistent($persistent);
+            $jobpersistent = new job_persistent(0, $record);
+            $scheduledjob = job_factory::create_from_persistent($jobpersistent);
             $trace->output($scheduledjob->get_type());
             $status = $scheduledjob->run();
             if (!$status) {
-                print_object($scheduledjob->get_errors());
+                $jobpersistent->set_errors($scheduledjob->get_errors());
+                $jobpersistent->save();
+                die;
             }
         }
     }
