@@ -27,8 +27,6 @@ namespace enrol_arlo\local;
 defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
-use enrol_arlo\local\config\arlo_plugin_config;
-use core_plugin_manager;
 use enrol_arlo\local\persistent\request_log_persistent;
 use Exception;
 use GuzzleHttp\Exception\ClientException;
@@ -46,11 +44,11 @@ class client {
      * options and headers set.
      *
      * @param array $headers
+     * @return static
      * @throws \coding_exception
      */
-
     public static function get_instance($headers = []) {
-        $pluginconfig = new arlo_plugin_config();
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $config = [
             'auth' => [
                 $pluginconfig->get('apiusername'),
@@ -60,7 +58,7 @@ class client {
             'connect_timeout' => 30,
             'headers' => [
                 'User-Agent' => static::get_user_agent(),
-                'X-Plugin-Version' => api::get_enrolment_plugin()->get_plugin_release(),
+                'X-Plugin-Version' => api::get_enrolment_plugin()->get_plugin_release()
             ]
         ];
         $config['headers'] = array_merge($config['headers'], $headers);
@@ -90,7 +88,7 @@ class client {
     public function send_request(Request $request) {
         try {
             $time = time();
-            $pluginconfig = new arlo_plugin_config();
+            $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
             $apierrormessage = $pluginconfig->get('apierrormessage');
             $apierrorcounter = $pluginconfig->get('apierrorcounter');
             $pluginconfig->set('apierrormessage', 0);
