@@ -33,6 +33,7 @@ use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\local\client;
 use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\job\job;
+use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
 use enrol_arlo\local\persistent\event_persistent;
 use enrol_arlo\local\persistent\online_activity_persistent;
@@ -84,20 +85,43 @@ class api {
         return $deserializer->deserialize($contents);
     }
 
-    public static function run_scheduled_jobs($time = null, progress_trace $trace = null) {
+    public static function run_scheduled_jobs($time = null, $limit = 1000, progress_trace $trace = null) {
+        global $DB;
         if (is_null($time)) {
             $time = time();
+        }
+        if (!is_number($limit) || $limit > 1000) {
+            $limit = 1000;
         }
         if (is_null($trace)) {
             $trace = new null_progress_trace();
         }
-        foreach (job_factory::get_scheduled_jobs() as $scheduledjob) {
-            /** @var $scheduledjob job */
+        $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
+
+        $trace->output($pluginconfig->get('apistatus'));
+        $trace->output($pluginconfig->get('apierrormessage'));
+        $trace->output($pluginconfig->get('apierrorcounter'));
+        //if ($apistatus) {}
+
+
+        $conditions = [
+            'disabled' => 1,
+            'timerequestnow' => $time,
+            'timenorequest' => $time
+        ];
+        $sql = "SELECT *
+                  FROM {enrol_arlo_scheduledjob}
+                 WHERE disabled <> 1
+                   AND (timelastrequest + timenextrequestdelay) < :timerequestnow
+                   AND (:timenorequest < (timenorequestsafter + timerequestsafterextension) OR timenorequestsafter = 0)";
+        $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
+        foreach ($rs as $record) {
+            $persistent = new job_persistent(0, $record);
+            $scheduledjob = job_factory::create_from_persistent($persistent);
             $trace->output($scheduledjob->get_type());
             $status = $scheduledjob->run();
-            if ($scheduledjob->has_errors()) {
+            if (!$status) {
                 print_object($scheduledjob->get_errors());
-                //die;
             }
         }
     }
