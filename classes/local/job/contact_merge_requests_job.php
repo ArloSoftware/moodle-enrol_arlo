@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
+use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
@@ -55,6 +56,7 @@ class contact_merge_requests_job extends job {
                 $response = client::get_instance()->send_request($request);
                 $collection = api::parse_response($response);
                 if ($collection instanceof AbstractCollection && $collection->count() > 0) {
+                    mtrace('in');
                     foreach ($collection as $resource) {
                         $sourceid               = $resource->RequestID;
                         $sourcecontactid        = $resource->SourceContactInfo->ContactID;
@@ -68,6 +70,7 @@ class contact_merge_requests_job extends job {
                             );
                             if (!$contactmergerequest) {
                                 $contactmergerequest = new contact_merge_request_persistent();
+                                $contactmergerequest->set('sourceid', $sourceid);
                             }
                             $contactmergerequest->set('platform', $pluginconfig->get('platform'));
                             $contactmergerequest->set('sourcecontactid', $sourcecontactid);
@@ -83,6 +86,10 @@ class contact_merge_requests_job extends job {
                             $jobpersistent->update();
                         } catch (moodle_exception $exception) {
                             $this->add_error($exception->getMessage());
+                            if ($exception instanceof invalid_persistent_exception) {
+                                debugging($exception->getMessage(), DEBUG_DEVELOPER, $exception->getTrace());
+                                return false;
+                            }
                         }
                     }
                 }
