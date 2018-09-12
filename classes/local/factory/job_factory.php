@@ -43,27 +43,4 @@ class job_factory {
         return new $namespaceclassname($persistent);
     }
 
-    /**
-     * Get scheduled jobs that need to be run.
-     *
-     * @param null $time
-     * @return array
-     * @throws \coding_exception
-     */
-    public static function get_scheduled_jobs($time = null) {
-        $scheduledjobs = [];
-        if (is_null($time)) {
-            $time = time();
-        }
-        $conditions = [
-            'now' => $time,
-            'disabled' => 1
-        ];
-        $select = "disabled <> :disabled";
-        $jobpersistents = job_persistent::get_records_select($select, $conditions, 'timelastrequest');
-        foreach ($jobpersistents as $jobpersistent) {
-            $scheduledjobs[] = static::create_from_persistent($jobpersistent);
-        }
-        return $scheduledjobs;
-    }
 }
