@@ -73,7 +73,7 @@ class memberships_job extends job {
                     $uri->setOrderBy("LastModifiedDateTime ASC,RegistrationID ASC");
                     $request = new Request('GET', $uri->output(true));
                     $response = client::get_instance()->send_request($request);
-                    $collection = api::parse_response($response);
+                    $collection = response_processor::process($response);
                     if ($collection->count() > 0) {
                         try {
                             foreach ($collection as $registrationresource) {

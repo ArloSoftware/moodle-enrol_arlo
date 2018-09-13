@@ -109,7 +109,7 @@ class client {
                     $pluginconfig->set('apierrormessage', $statuscode);
                     $pluginconfig->set('apierrorcounter', 1);
                 }
-                return $exception->getResponse(); // TODO maybe return false?
+                return $exception->getResponse();
             }
             throw $exception;
         } finally {

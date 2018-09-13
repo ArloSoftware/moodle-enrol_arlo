@@ -32,6 +32,7 @@ use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\response_processor;
 use GuzzleHttp\Psr7\Request;
 use Exception;
 use coding_exception;
@@ -55,7 +56,7 @@ class contact_merge_requests_job extends job {
                 $uri->setOrderBy('CreatedDateTime ASC');
                 $request = new Request('GET', $uri->output(true));
                 $response = client::get_instance()->send_request($request);
-                $collection = api::parse_response($response);
+                $collection = response_processor::process($response);
                 if ($collection instanceof AbstractCollection && $collection->count() > 0) {
                     foreach ($collection as $resource) {
                         $sourceid               = $resource->RequestID;

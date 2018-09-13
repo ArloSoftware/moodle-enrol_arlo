@@ -29,6 +29,7 @@ use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\local\client;
+use enrol_arlo\local\response_processor;
 use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\persistent\online_activity_persistent;
 use GuzzleHttp\Psr7\Request;
@@ -58,7 +59,7 @@ class online_activities_job extends job {
                 $uri->setOrderBy("LastModifiedDateTime ASC,OnlineActivityID ASC");
                 $request = new Request('GET', $uri->output(true));
                 $response = client::get_instance()->send_request($request);
-                $collection = api::parse_response($response);
+                $collection = response_processor::process($response);
                 if ($collection instanceof AbstractCollection && $collection->count() > 0) {
                     foreach ($collection as $resource) {
                         $sourceid       = $resource->OnlineActivityID;
