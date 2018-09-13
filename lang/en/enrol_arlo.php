@@ -78,6 +78,15 @@ $string['errorselecttype'] = 'You must select an Type';
 $string['errorselectevent'] = 'You must select an Event';
 $string['errorselectonlineactvity'] = 'You must select an Online Activity';
 $string['errorselecttemplate'] = 'Please select a Event Template';
+
+$string['httpstatuserror_401_subject'] = 'Moodle cannot connect to Arlo API';
+$string['httpstatuserror_401_fullmessage'] = '
+Moodle cannot connect to Arlo API: 401 Unauthorized
+
+There is something wrong with your connection settings. Please check that the api username and api password are correct.
+Moodle Arlo connection settings: {$a->url}
+';
+
 $string['error_duplicateusers_subject'] = 'Duplicate users found in Moodle when matching Arlo Contact';
 $string['error_duplicateusers_smallmessage'] = 'Duplicate users found in Moodle when matching Arlo Contact';
 $string['error_duplicateusers_full'] = '
