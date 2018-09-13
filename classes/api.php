@@ -45,12 +45,17 @@ use GuzzleHttp\Psr7\Response;
 use stdClass;
 use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
 use moodle_exception;
+use moodle_url;
 use progress_trace;
 use null_progress_trace;
 use core_date;
+use core_user;
 use DateTime;
 
 class api {
+
+    /** @var MAXIMUM_ERROR_COUNT */
+    const MAXIMUM_ERROR_COUNT = 20;
 
     /**
      * Get an instance on Arlo enrolment plugin.
@@ -77,11 +82,33 @@ class api {
             $trace = new null_progress_trace();
         }
         $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
-
-        $trace->output($pluginconfig->get('apistatus'));
-        $trace->output($pluginconfig->get('apierrormessage'));
-        $trace->output($pluginconfig->get('apierrorcounter'));
-        $trace->output($pluginconfig->get('apitimelastrequest'));
+        $apierrorcounter = $pluginconfig->get('apierrorcounter');
+        if ($apierrorcounter >= self::MAXIMUM_ERROR_COUNT) {
+            $apistatus = $pluginconfig->get('apistatus');
+            $apitimelastrequest = $pluginconfig->get('apitimelastrequest');
+            $apierrorcountresetdelay = $pluginconfig->get('apierrorcountresetdelay');
+            if (time() < ($apitimelastrequest + $apierrorcountresetdelay)) {
+                $url = new moodle_url('/admin/settings.php', ['section' => 'enrolsettingsarlo']);
+                $noreplyuser = core_user::get_noreply_user();
+                $subject = get_string(
+                    "httpstatuserror_{$apistatus}_subject",
+                    'enrol_arlo',
+                    ['url' => $url->out()]
+                );
+                $messagetext = get_string(
+                    "httpstatuserror_{$apistatus}_fullmessage",
+                    'enrol_arlo',
+                    ['url' => $url->out()]
+                );
+                foreach (get_admins() as $admin) {
+                    email_to_user($admin, $noreplyuser, $subject, $messagetext);
+                }
+                return false;
+            } else {
+                $pluginconfig->set('apistatus', -1);
+                $pluginconfig->set('apierrorcounter', 0);
+            }
+        }
         $conditions = [
             'disabled' => 1,
             'timerequestnow' => $time,
