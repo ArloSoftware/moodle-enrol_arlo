@@ -89,10 +89,6 @@ class client {
         try {
             $time = time();
             $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
-            $apierrormessage = $pluginconfig->get('apierrormessage');
-            $apierrorcounter = $pluginconfig->get('apierrorcounter');
-            $pluginconfig->set('apierrormessage', 0);
-            $pluginconfig->set('apierrorcounter', 0);
             $pluginconfig->set('apitimelastrequest', $time);
             /** @var $client \GuzzleHttp\Client */
             $response = $this->httpclient->send($request);
@@ -101,14 +97,6 @@ class client {
         } catch (Exception $exception) {
             if ($exception instanceof ClientException || $exception instanceof ServerException) {
                 $statuscode = $exception->getResponse()->getStatusCode();
-                $trace = $exception->getTraceAsString();
-                if ($apierrormessage == $statuscode) {
-                    $pluginconfig->set('apierrormessage', $statuscode);
-                    $pluginconfig->set('apierrorcounter', ++$apierrorcounter);
-                } else {
-                    $pluginconfig->set('apierrormessage', $statuscode);
-                    $pluginconfig->set('apierrorcounter', 1);
-                }
                 return $exception->getResponse();
             }
             throw $exception;
