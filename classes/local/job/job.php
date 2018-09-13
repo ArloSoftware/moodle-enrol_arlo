@@ -48,6 +48,8 @@ abstract class job {
 
     protected $jobpersistent;
 
+    protected $reasons;
+
     public function __construct(persistent $jobpersistent) {
         $this->errors = [];
         $this->jobpersistent = $jobpersistent;
@@ -67,6 +69,18 @@ abstract class job {
 
     public function has_errors() {
         return 0 !== count($this->errors);
+    }
+
+    public function add_reasons($reason) {
+        $this->reasons[] = $reason;
+    }
+
+    public function get_reasons() {
+        return $this->reasons;
+    }
+
+    public function has_reasons() {
+        return 0 !== count($this->reasons);
     }
 
     /**
@@ -111,6 +125,7 @@ abstract class job {
      * @param $endpoint
      * @param $collection
      * @param int $timenorequestsafter
+     * @return job_persistent
      * @throws \coding_exception
      */
     public static function register_scheduled_job($area,

@@ -41,12 +41,16 @@ class memberships_job extends job {
         $plugin = api::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
-        $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         try {
             $jobpersistent = $this->get_job_persistent();
             $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'), MUST_EXIST);
+            if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
+                $this->add_reasons('Enrolment instance disabled.');
+                return false;
+            }
+            $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
             if ($lock) {
-                // We don't know how many records we will be retreiving it maybe 5 it maybe 5000,
+                // We don't know how many records we will be retrieving it maybe 5 it maybe 5000,
                 // and the page size limit is 250. So we have to keep calling the endpoint and
                 // adjusting and the filter each call to so we get all records and don't end up
                 // getting same 250 each call.
