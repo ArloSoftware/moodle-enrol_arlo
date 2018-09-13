@@ -50,11 +50,14 @@ class username_generator {
      * @throws coding_exception
      * @throws moodle_exception
      */
-    public static function generate($firstname, $lastname, $email) {
+    public static function generate($firstname, $lastname, $email, $randmax = 9) {
         global $DB;
 
+        $maxrandmax = 999;
+        if ($randmax > $maxrandmax) {
+            $randmax = $maxrandmax;
+        }
         $tries = 0;
-        $randmax = 999;
         $exists = true;
         while ($exists) {
             ++$tries;
