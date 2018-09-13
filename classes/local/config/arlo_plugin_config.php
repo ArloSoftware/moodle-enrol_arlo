@@ -57,6 +57,10 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 0
             ],
+            'apierrorcountresetdelay' => [
+                'type' => PARAM_INT,
+                'default' => 10800
+            ],
             'matchuseraccountsby' => [
                 'type' => PARAM_INT,
                 'default' => user_matching::MATCH_BY_DEFAULT
@@ -132,6 +136,35 @@ class arlo_plugin_config extends plugin_config {
             if (!is_null($default)) {
                 $plugin->raw_set($property, $default);
             }
+        }
+    }
+
+    /**
+     * Custom setter, actually tracks to properties status and error
+     * counter.
+     *
+     * @param $value
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    protected function set_apistatus($value) {
+        $previousapistatus = $this->raw_get('apistatus');
+        $apierrorcounter = $this->raw_get('apierrorcounter');
+        switch ($value) {
+            case 401;
+            case 403:
+            case 500:
+            case 503:
+                if ($previousapistatus == $value) {
+                    $this->raw_set('apierrorcounter', ++$apierrorcounter);
+                } else {
+                    $this->raw_set('apistatus', $value);
+                    $this->raw_set('apierrorcounter', 0);
+                }
+                break;
+            default:
+                $this->raw_set('apistatus', $value);
+                $this->raw_set('apierrorcounter', 0);
         }
     }
 
