@@ -26,12 +26,37 @@ namespace enrol_arlo\local;
 
 defined('MOODLE_INTERNAL') || die();
 
+use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
 use GuzzleHttp\Psr7\Response;
+use moodle_exception;
 
 class response_processor {
 
+    /**
+     * Deserialize response into usable collection of objects.
+     *
+     * @param Response $response
+     * @param int $expectedstatus
+     * @return mixed
+     * @throws \Exception
+     * @throws moodle_exception
+     */
     public static function process(Response $response, $expectedstatus = 200) {
-
+        $statuscode = $response->getStatusCode();
+        if ($statuscode != $expectedstatus) {
+            throw new moodle_exception('httpstatus:' . $statuscode);
+        }
+        $contenttype = $response->getHeaderLine('content-type');
+        if (strpos($contenttype, 'application/xml') === false) {
+            throw new moodle_exception('httpstatus:415', 'enrol_arlo');
+        }
+        $deserializer = new XmlDeserializer("enrol_arlo\\Arlo\\AuthAPI\\Resource\\");
+        $stream = $response->getBody();
+        $contents = $stream->getContents();
+        if ($stream->eof()) {
+            $stream->rewind();
+        }
+        return $deserializer->deserialize($contents);
     }
 
 }
