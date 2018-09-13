@@ -65,26 +65,6 @@ class api {
         return $enrolmentplugin;
     }
 
-    public static function parse_response($response) {
-        $statuscode = $response->getStatusCode();
-        if (200 != $statuscode) {
-            throw new moodle_exception('HTTP: ' . $statuscode);
-        }
-        $contenttype = $response->getHeaderLine('content-type');
-        if (strpos($contenttype, 'application/xml') === false) {
-            $code = 'httpstatus:415';
-            $debuginfo = format_backtrace(debug_backtrace());
-            throw new moodle_exception($code, 'enrol_arlo', '', null, $debuginfo);
-        }
-        $deserializer = new XmlDeserializer('\enrol_arlo\Arlo\AuthAPI\Resource\\');
-        $stream = $response->getBody();
-        $contents = $stream->getContents();
-        if ($stream->eof()) {
-            $stream->rewind();
-        }
-        return $deserializer->deserialize($contents);
-    }
-
     public static function run_scheduled_jobs($time = null, $limit = 1000, progress_trace $trace = null) {
         global $DB;
         if (is_null($time)) {
