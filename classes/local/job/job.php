@@ -28,6 +28,7 @@ use core\lock\lock_config;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\persistent;
 use null_progress_trace;
+use progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,17 +43,30 @@ abstract class job {
     /** @var TIME_LOCK_TIMEOUT time in seconds to wait for a lock before giving up. */
     const TIME_LOCK_TIMEOUT = 5; // 5 Seconds.
 
-    protected $errors;
+    protected $errors = [];
 
     protected $lasterror;
 
     protected $jobpersistent;
 
-    protected $reasons;
+    protected $reasons = [];
+
+    protected $trace;
 
     public function __construct(persistent $jobpersistent) {
-        $this->errors = [];
         $this->jobpersistent = $jobpersistent;
+        $this->trace = new null_progress_trace();
+
+
+    }
+
+    public function get_trace() {
+        return $this->trace;
+    }
+
+
+    public function set_trace(progress_trace $trace) {
+        $this->trace = $trace;
     }
 
     public function add_error($error) {
