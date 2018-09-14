@@ -273,7 +273,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             'instanceid' => $instance->id
         ];
         $DB->delete_records(
-            'enrol_arlo_scheduled_job',
+            'enrol_arlo_scheduledjob',
             $conditions
         );
         // Delete email queue information.
@@ -438,18 +438,24 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function get_event_options() {
         global $DB;
         $options = array();
+        $pluginconfig = $this->get_plugin_config();
+        $statuses = [EventStatus::ACTIVE];
+        if ($pluginconfig->get('allowcompletedevents')) {
+            array_push($statuses, EventStatus::COMPLETED);
+        }
+        list($insql, $inparams) = $DB->get_in_or_equal($statuses, SQL_PARAMS_NAMED);
+        $conditions = array(
+            'platform' => $pluginconfig->get('platform'),
+        );
+        $conditions = array_merge($conditions, $inparams);
         $sql = "SELECT ae.sourceguid, ae.code, aet.name
                   FROM {enrol_arlo_event} ae
                   JOIN {enrol_arlo_template} aet ON aet.sourceguid = ae.sourcetemplateguid
                  WHERE ae.platform = :platform
-                   AND ae.sourcestatus = :sourcestatus
-                   AND ae.sourceguid NOT IN (SELECT sourceguid
-                                            FROM {enrol_arlo_instance} WHERE sourceguid IS NOT NULL)
+                   AND ae.sourcestatus $insql
+                   AND ae.sourceguid NOT IN (SELECT customchar3
+                                               FROM {enrol} WHERE customchar3 IS NOT NULL)
               ORDER BY code";
-        $conditions = array(
-            'platform' => self::get_config('platform', null),
-            'sourcestatus' => EventStatus::ACTIVE
-        );
 
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
@@ -466,17 +472,23 @@ class enrol_arlo_plugin extends enrol_plugin {
     public function get_onlineactivity_options() {
         global $DB;
         $options = array();
+        $pluginconfig = $this->get_plugin_config();
+        $statuses = [OnlineActivityStatus::ACTIVE];
+        if ($pluginconfig->get('allowcompletedonlineactivities')) {
+            array_push($statuses, OnlineActivityStatus::COMPLETED);
+        }
+        list($insql, $inparams) = $DB->get_in_or_equal($statuses, SQL_PARAMS_NAMED);
+        $conditions = array(
+            'platform' => $pluginconfig->get('platform'),
+        );
+        $conditions = array_merge($conditions, $inparams);
         $sql = "SELECT sourceguid, code, name
                   FROM {enrol_arlo_onlineactivity}
                  WHERE platform = :platform
-                   AND sourcestatus = :sourcestatus
-                   AND sourceguid NOT IN (SELECT sourceguid
-                                            FROM {enrol_arlo_instance} WHERE sourceguid IS NOT NULL)
+                   AND sourcestatus $insql
+                   AND sourceguid NOT IN (SELECT customchar3
+                                            FROM {enrol} WHERE customchar3 IS NOT NULL)
               ORDER BY code";
-        $conditions = array(
-            'platform' => self::get_config('platform', null),
-            'sourcestatus' => OnlineActivityStatus::ACTIVE
-        );
         $records = $DB->get_records_sql($sql, $conditions);
         foreach ($records as $record) {
             $options[$record->sourceguid] = $record->code . ' ' . shorten_text($record->name, 40);

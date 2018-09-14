@@ -109,6 +109,14 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 0
             ],
+            'allowcompletedevents' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
+            'allowcompletedonlineactivities' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
             'allowhiddencourses' => [
                 'type' => PARAM_INT,
                 'default' => 0
