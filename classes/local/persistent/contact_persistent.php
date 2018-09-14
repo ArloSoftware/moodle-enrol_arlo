@@ -67,31 +67,36 @@ class contact_persistent extends persistent {
             ],
             'firstname' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'lastname' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'email' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'phonework' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'phonemobile' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'codeprimary' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'sourcestatus' => [
-                'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'type' => PARAM_TEXT
             ]
         ];
     }
