@@ -25,6 +25,7 @@ namespace enrol_arlo\local\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
+use coding_exception;
 use enrol_arlo\api;
 use enrol_arlo\persistent;
 
