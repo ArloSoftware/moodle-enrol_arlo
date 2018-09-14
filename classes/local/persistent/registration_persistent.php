@@ -63,23 +63,34 @@ class registration_persistent extends persistent {
                 'type' => PARAM_TEXT
             ),
             'attendance' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'grade' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'outcome' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'lastactivity' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'progressstatus' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'progresspercent' => array(
                 'type' => PARAM_INT,
-                'default' => 0
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'sourcestatus' => array(
                 'type' => PARAM_TEXT
@@ -102,14 +113,18 @@ class registration_persistent extends persistent {
                 'default' => 0
             ),
             'sourceeventguid' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'sourceonlineactivityid' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),
             'sourceonlineactivityguid' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'updateinternal' => array(
                 'type' => PARAM_INT,
@@ -128,7 +143,9 @@ class registration_persistent extends persistent {
                 'default' => 0
             ),
             'lasterror' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'errorcount' => array(
                 'type' => PARAM_INT,
