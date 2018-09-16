@@ -77,53 +77,83 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
 
 function enrol_arlo_associate_all($course, $sourcetemplateguid) {
     global $DB;
+    $adds = []; // Container for the items to add.
+    // Get enrol plugin instance.
+    $plugin = api::get_enrolment_plugin();
+    $pluginconfig = $plugin->get_plugin_config();
     $conditions = array('sourceguid' => $sourcetemplateguid);
     $template = $DB->get_record('enrol_arlo_template', $conditions, '*', MUST_EXIST);
-    $record = new stdClass();
-    $record->courseid = $course->id;
-    $record->platform = $template->platform;
-    $record->sourcetemplateid = $template->sourceid;
-    $record->sourcetemplateguid = $template->sourceguid;
-    $record->modified = time();
-    $DB->insert_record('enrol_arlo_templateassociate', $record);
-    // Container for the items to add.
-    $adds = array();
-    // Events.
-    $sql = "SELECT e.sourceguid
-              FROM {enrol_arlo_event} e
-             WHERE e.sourcetemplateguid = :sourcetemplateguid
-               AND e.sourcestatus = :sourcestatus
-               AND e.sourceguid NOT IN (SELECT i.sourceguid FROM {enrol_arlo_instance} i)";
+    $conditions = [
+        'courseid' => $course->id,
+        'sourcetemplateguid' => $sourcetemplateguid
+    ];
+    $associatetemplate = $DB->get_record('enrol_arlo_templateassociate', $conditions);
+    if ($associatetemplate) {
+        $associatetemplate->modified = time();
+        $DB->update_record('enrol_arlo_templateassociate', $associatetemplate);
+    } else {
+        $associatetemplate = new stdClass();
+        $associatetemplate->courseid = $course->id;
+        $associatetemplate->platform = $template->platform;
+        $associatetemplate->sourcetemplateid = $template->sourceid;
+        $associatetemplate->sourcetemplateguid = $template->sourceguid;
+        $associatetemplate->modified = time();
+        $DB->insert_record('enrol_arlo_templateassociate', $associatetemplate);
+    }
+    $statuses = [EventStatus::ACTIVE];
+    if ($pluginconfig->get('allowcompletedevents')) {
+        array_push($statuses, EventStatus::COMPLETED);
+    }
+    list($insql, $inparams) = $DB->get_in_or_equal($statuses, SQL_PARAMS_NAMED);
     $conditions = array(
-        'sourcetemplateguid' => $sourcetemplateguid,
-        'sourcestatus' => EventStatus::ACTIVE
+        'platform' => $pluginconfig->get('platform'),
+        'sourcetemplateguid' => $sourcetemplateguid
     );
+    $conditions = array_merge($conditions, $inparams);
+    // Events.
+    $sql = "SELECT eae.sourceguid
+              FROM {enrol_arlo_event} eae
+              JOIN {enrol_arlo_template} eat ON eat.sourceguid = eae.sourcetemplateguid
+             WHERE eat.sourceguid = :sourcetemplateguid
+               AND eae.sourcestatus $insql
+               AND eae.sourceguid NOT IN (SELECT e.customchar3
+                                            FROM {enrol} e
+                                           WHERE e.enrol = 'arlo')";
     $events = $DB->get_records_sql($sql, $conditions);
     foreach ($events as $event) {
         $item = new stdClass();
         $item->arlotype = arlo_type::EVENT;
         $item->arloevent = $event->sourceguid;
+        $item->sourcetemplateguid = $sourcetemplateguid;
         $adds[] = $item;
     }
     // Online Activities.
-    $sql = "SELECT e.sourceguid
-              FROM {enrol_arlo_onlineactivity} e
-             WHERE e.sourcetemplateguid = :sourcetemplateguid
-               AND e.sourcestatus = :sourcestatus
-               AND e.sourceguid NOT IN (SELECT i.sourceguid FROM {enrol_arlo_instance} i)";
+    $statuses = [OnlineActivityStatus::ACTIVE];
+    if ($pluginconfig->get('allowcompletedevents')) {
+        array_push($statuses, OnlineActivityStatus::COMPLETED);
+    }
+    list($insql, $inparams) = $DB->get_in_or_equal($statuses, SQL_PARAMS_NAMED);
     $conditions = array(
-        'sourcetemplateguid' => $sourcetemplateguid,
-        'sourcestatus' => OnlineActivityStatus::ACTIVE
+        'platform' => $pluginconfig->get('platform'),
+        'sourcetemplateguid' => $sourcetemplateguid
     );
+    $conditions = array_merge($conditions, $inparams);
+    $sql = "SELECT eaoa.sourceguid
+              FROM {enrol_arlo_onlineactivity} eaoa
+              JOIN {enrol_arlo_template} eat ON eat.sourceguid = eaoa.sourcetemplateguid
+             WHERE eat.sourceguid = :sourcetemplateguid
+               AND eaoa.sourcestatus $insql
+               AND eaoa.sourceguid NOT IN (SELECT e.customchar3
+                                            FROM {enrol} e
+                                           WHERE e.enrol = 'arlo')";
     $onlineactivites = $DB->get_records_sql($sql, $conditions);
     foreach ($onlineactivites as $onlineactivity) {
         $item = new stdClass();
         $item->arlotype = arlo_type::ONLINEACTIVITY;
         $item->arloonlineactivity = $onlineactivity->sourceguid;
+        $item->sourcetemplateguid = $sourcetemplateguid;
         $adds[] = $item;
     }
-    // Get enrol plugin instance.
-    $plugin = api::get_enrolment_plugin();
     foreach ($adds as $add) {
         $newinstance = $plugin->get_instance_defaults();
         $newinstance['arlotype'] = $add->arlotype;
