@@ -74,9 +74,9 @@ class contact_merge_request_persistent extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0
             ),
-            'applied' => array(
+            'active' => array(
                 'type' => PARAM_INT,
-                'default' => 0
+                'default' => 1
             )
         );
     }
@@ -109,6 +109,22 @@ class contact_merge_request_persistent extends persistent {
         return contact_persistent::get_record(
             ['sourceguid' => $this->raw_get('destinationcontactguid')]
         );
+    }
+
+    /**
+     * Get active Contact Merge Requests where contact is a source or destination.
+     *
+     * @param $contactguid
+     * @return \core\persistent[]
+     */
+    public static function find_active_requests_for_contact($contactguid) {
+        $conditions = [
+            'sourcecontactguid' => $contactguid,
+            'destinationcontactguid' => $contactguid,
+            'active' => 1
+        ];
+        $select = "sourcecontactguid = :sourcecontactguid OR destinationcontactguid = :destinationcontactguid AND active = :active";
+        return static::get_records_select($select, $conditions, 'sourceid');
     }
 
 }
