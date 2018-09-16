@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Contact persistent.
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -27,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
 use enrol_arlo\api;
+use enrol_arlo\Arlo\AuthAPI\Enum\ContactStatus;
 use enrol_arlo\persistent;
 
 class contact_persistent extends persistent {
@@ -89,7 +91,7 @@ class contact_persistent extends persistent {
             ],
             'sourcestatus' => [
                 'type' => PARAM_TEXT,
-                'default' => 'Unknown'
+                'default' => ContactStatus::UNKNOWN
             ],
             'sourcecreated' => [
                 'type' => PARAM_TEXT,
@@ -113,6 +115,18 @@ class contact_persistent extends persistent {
                 'default' => 0
             )
         ];
+    }
+
+    /**
+     * Return the associated Moodle user account linked to this Arlo contact.
+     *
+     * @return \core\persistent|false
+     * @throws coding_exception
+     */
+    public function get_associated_user() {
+        return user_persistent::get_record(
+            ['id' => $this->raw_get('userid')]
+        );
     }
 
 }
