@@ -71,16 +71,41 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        // Conditionally launch add field phonehome.
-        $field = new xmldb_field('phonehome', XMLDB_TYPE_CHAR, '128', null, null, null, null);
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
         // Conditionally launch add field phonemobile.
         $field = new xmldb_field('phonemobile', XMLDB_TYPE_CHAR, '128', null, null, null, null);
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
+        // Conditionally launch drop field lastpulltime.
+        $field = new xmldb_field('lastpulltime');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        // Conditionally launch add field sourcestatus.
+        $field = new xmldb_field('sourcestatus', XMLDB_TYPE_CHAR, '10', null, null, null, null;
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field userassociationfailure.
+        $field = new xmldb_field('userassociationfailure', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally rename field lasterror.
+        $field = new xmldb_field('lasterror', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        if ($dbman->field_exists($table, $field)) {
+            // Launch rename field lasterror.
+            $dbman->rename_field($table, $field, 'errormessage');
+        }
+        // Conditionally rename field errorcount and change precision.
+        $field = new xmldb_field('errorcount', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        if ($dbman->field_exists($table, $field)) {
+            // Launch change of precision for field errorcount.
+            $dbman->change_field_precision($table, $field);
+            // Launch rename field errorcount.
+            $dbman->rename_field($table, $field, 'errorcounter');
+        }
+
         // Add required fields to appropriate tables for persistent support.
         $tablenames = [
             'enrol_arlo_contact',

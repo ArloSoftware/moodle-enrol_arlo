@@ -57,14 +57,6 @@ class contact_persistent extends persistent {
             'sourceguid' => [
                 'type' => PARAM_TEXT
             ],
-            'sourcecreated' => [
-                'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
-            ],
-            'sourcemodified' => [
-                'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
-            ],
             'firstname' => [
                 'type' => PARAM_TEXT,
                 'null' => NULL_ALLOWED,
@@ -96,8 +88,30 @@ class contact_persistent extends persistent {
                 'default' => null
             ],
             'sourcestatus' => [
-                'type' => PARAM_TEXT
-            ]
+                'type' => PARAM_TEXT,
+                'default' => 'Unknown'
+            ],
+            'sourcecreated' => [
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED
+            ],
+            'sourcemodified' => [
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED
+            ],
+            'userassociationfailure' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
+            'errormessage' => array(
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => ''
+            ),
+            'errorcounter' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            )
         ];
     }
 
