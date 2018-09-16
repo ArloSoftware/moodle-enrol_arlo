@@ -26,15 +26,18 @@ namespace enrol_arlo\local\job;
 defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
+use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
+use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\local\response_processor;
 use GuzzleHttp\Psr7\Request;
-use Exception;
 use moodle_exception;
+use coding_exception;
 
 class memberships_job extends job {
 
@@ -42,6 +45,7 @@ class memberships_job extends job {
         $plugin = api::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
+        //$lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         $trace = self::get_trace();
         try {
             $jobpersistent = $this->get_job_persistent();
@@ -102,6 +106,7 @@ class memberships_job extends job {
                                 if (empty($eventresource) && empty($onlineactivityresource)) {
                                     throw new moodle_exception('Event or Online Activity missing from Registration.');
                                 }
+                                // Check for existing registration record.
                                 $registration = registration_persistent::get_record(
                                     ['sourceguid' => $sourceguid]
                                 );
@@ -130,7 +135,9 @@ class memberships_job extends job {
                                     $registration->set('sourceonlineactivityid', $onlineactivityresource->OnlineActivityID);
                                     $registration->set('sourceonlineactivityguid', $onlineactivityresource->UniqueIdentifier);
                                 }
-                                // Check is existing contact record.
+                                $registration->save();
+
+                                // Check for existing contact record.
                                 $contact = $registration->get_contact();
                                 if (!$contact) {
                                     $contact = new contact_persistent();
@@ -146,14 +153,18 @@ class memberships_job extends job {
                                 $contact->set('sourcestatus', $contactresource->Status);
                                 $contact->set('sourcecreated', $contactresource->CreatedDateTime);
                                 $contact->set('sourcemodified', $contactresource->LastModifiedDateTime);
-
-                                $registration->save();
                                 $contact->save();
 
+                                // Time to process registration.
+                                $status = static::process_registration($registration);
+
                             } catch (moodle_exception $exception) {
+                                debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                                // Can't really do anythink but break out on these types of exceptions.
+                                if ($exception instanceof invalid_persistent_exception || $exception instanceof coding_exception) {
+                                   throw $exception;
+                                }
                                 $this->add_error($exception->getMessage());
-                                debugging($exception->getMessage(), DEBUG_DEVELOPER); print_object($exception);
-                                throw $exception; // DEBUG just re throwing for testing. Need to log to record?.
                             }
                         }
                         $hasnext = (bool) $collection->hasNext();
@@ -162,9 +173,9 @@ class memberships_job extends job {
             } else {
                 throw new moodle_exception('locktimeout');
             }
-        } catch (Exception $exception) {
-            $this->add_error($exception->getMessage());
+        } catch (moodle_exception $exception) {
             debugging($exception->getMessage(), DEBUG_DEVELOPER);
+            $this->add_error($exception->getMessage());
             return false;
         } finally {
             $lock->release();
@@ -172,4 +183,32 @@ class memberships_job extends job {
         return true;
     }
 
+    /**
+     * @param persistent $registration
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public static function process_registration(persistent $registration) {
+        $plugin = api::get_enrolment_plugin();
+        if ($registration->get('id') <= 0) {
+            throw new coding_exception('Registration must be valid record.');
+        }
+        $enrolmentinstance = $plugin::get_instance_record($registration->get('enrolid'), MUST_EXIST);
+        $contact= $registration->get_contact();
+        if (!$contact) {
+            throw new coding_exception('Cannot find stored contact for registration.');
+        }
+        $contactmergerequests = contact_merge_request_persistent::find_active_requests_for_contact($contact->get('sourceguid'));
+        foreach ($contactmergerequests as $contactmergerequest) {
+            /** @var $contactmergerequest contact_merge_request_persistent */
+            $destinationcontact = $contactmergerequest->get_destination_contact();
+            $sourcecontact = $contactmergerequest->get_source_contact();
+            mtrace('DESTINATION');
+            print_object($destinationcontact);
+            mtrace('SOURCE');
+            print_object($sourcecontact);
+            mtrace('DB');
+            print_object($contact);
+        }
+    }
 }
