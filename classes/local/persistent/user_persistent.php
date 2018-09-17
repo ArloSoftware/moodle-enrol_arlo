@@ -50,14 +50,17 @@ class user_persistent extends persistent {
                     return get_config('core', 'mnet_localhost_id');
                 }
             ],
+            'username' => [
+                'type' => PARAM_USERNAME
+            ],
             'firstname' => [
-                'type' => PARAM_TEXT,
+                'type' => PARAM_TEXT
             ],
             'lastname' => [
-                'type' => PARAM_TEXT,
+                'type' => PARAM_TEXT
             ],
             'email' => [
-                'type' => PARAM_TEXT,
+                'type' => PARAM_EMAIL
             ],
             'phone1' => [
                 'type' => PARAM_TEXT,
