@@ -43,10 +43,10 @@ class user_matcher {
     public static function get_matches_based_on_preference(contact_persistent $contact) {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $matchuseraccountsby = $pluginconfig->get('matchuseraccountsby');
-        $firstname = $pluginconfig->get('firstname');
-        $lastname = $pluginconfig->get('lastname');
-        $email = $pluginconfig->get('email');
-        $idnumber = $pluginconfig->get('idnumber');
+        $firstname = $contact->get('firstname');
+        $lastname = $contact->get('lastname');
+        $email = $contact->get('email');
+        $idnumber = $contact->get('codeprimary');
         // Match by user details.
         if ($matchuseraccountsby == user_matching::MATCH_BY_USER_DETAILS) {
             return static::match_against_user_details($firstname, $lastname, $email);
