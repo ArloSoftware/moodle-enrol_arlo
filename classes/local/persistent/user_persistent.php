@@ -31,6 +31,7 @@ use core_user;
 use core_text;
 use enrol_arlo\api;
 use enrol_arlo\persistent;
+use stdClass;
 
 class user_persistent extends persistent {
     /** Table name. */
@@ -38,7 +39,11 @@ class user_persistent extends persistent {
 
     protected static function define_properties() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
-        return [
+        $properties =  [
+            'id' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
             'auth' => [
                 'type' => PARAM_TEXT,
                 'default' => function() use($pluginconfig) {
@@ -76,6 +81,39 @@ class user_persistent extends persistent {
                 'default' => ''
             ],
         ];
+        return $properties;
+    }
+
+    /**
+     * Constructor used to override base persistent to take advantage of
+     * functionality of persistent class.
+     *
+     * user_persistent constructor.
+     * @param int $id
+     * @param stdClass|null $record
+     * @throws \dml_exception
+     */
+    public function __construct($id = 0, stdClass $record = null) {
+        global $DB;
+        $properties = array_keys(static::define_properties());
+        $load = new stdClass();
+        if ($id > 0) {
+            $record = $DB->get_record(static::TABLE, ['id' => $id]);
+            foreach (get_object_vars($record) as $property => $value) {
+                if (in_array($property, $properties)) {
+                    $load->{$property} = $value;
+                }
+            }
+            parent::__construct(0, $load);
+        }
+        if (!empty($record)) {
+            foreach (get_object_vars($record) as $property => $value) {
+                if (in_array($property, $properties)) {
+                    $load->{$property} = $value;
+                }
+            }
+            parent::__construct(0, $load);
+        }
     }
 
     /**
@@ -168,11 +206,14 @@ class user_persistent extends persistent {
      */
     protected function set_idnumber($value) {
         if (core_text::strlen($value) > 255) {
-            throw new coding_exception('IDnumber exceeds length of 255.');
+            throw new coding_exception('ID number exceeds length of 255.');
         }
         return $this->raw_set('idnumber', $value);
     }
 
+    public function has_accessed() {}
+    public function has_accessed_courses() {}
+    public function has_enrolments() {}
     protected function before_create() {}
     protected function after_create() {}
     protected function before_update() {}
