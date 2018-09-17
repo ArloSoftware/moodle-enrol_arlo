@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\user_matcher;
 use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
@@ -194,21 +195,40 @@ class memberships_job extends job {
             throw new coding_exception('Registration must be valid record.');
         }
         $enrolmentinstance = $plugin::get_instance_record($registration->get('enrolid'), MUST_EXIST);
-        $contact= $registration->get_contact();
+        $contact = $registration->get_contact();
         if (!$contact) {
             throw new coding_exception('Cannot find stored contact for registration.');
         }
         $contactmergerequests = contact_merge_request_persistent::find_active_requests_for_contact($contact->get('sourceguid'));
+        list($status, $destinationcontact) = static::process_contact_merge_requests($contact, $contactmergerequests);
+        if (!$status) {
+            throw new coding_exception('Merge requests fail');
+        }
+        // Check for associated Moodle user account.
+        if ($contact->get('userid') <= 0) {
+            $matches = user_matcher::get_matches_based_on_preference($contact);
+        } else {
+
+        }
+
+    }
+
+    public static function process_contact_merge_requests(persistent $contact, array $contactmergerequests) {
+        $status = true;
+        $destinationcontact = $contact;
         foreach ($contactmergerequests as $contactmergerequest) {
             /** @var $contactmergerequest contact_merge_request_persistent */
-            $destinationcontact = $contactmergerequest->get_destination_contact();
             $sourcecontact = $contactmergerequest->get_source_contact();
-            mtrace('DESTINATION');
-            print_object($destinationcontact);
-            mtrace('SOURCE');
-            print_object($sourcecontact);
-            mtrace('DB');
-            print_object($contact);
+            $destinationcontact = $contactmergerequest->get_destination_contact();
+            // First stage: No source contact, a destination contact with no associated user.
+            if (!$sourcecontact && ($contact->get('sourceguid') == $destinationcontact->get('sourceguid'))) {
+                $contactmergerequest->set('active', 0);
+                $contactmergerequest->update();
+                $destinationcontact = $contact;
+                continue;
+            }
+            throw new coding_exception('TODO handler other scenerios');
         }
+        return [$status, $destinationcontact];
     }
 }
