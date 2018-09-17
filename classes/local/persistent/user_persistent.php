@@ -39,11 +39,7 @@ class user_persistent extends persistent {
 
     protected static function define_properties() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
-        $properties =  [
-            'id' => [
-                'type' => PARAM_INT,
-                'default' => 0
-            ],
+        return  [
             'auth' => [
                 'type' => PARAM_TEXT,
                 'default' => function() use($pluginconfig) {
@@ -58,6 +54,9 @@ class user_persistent extends persistent {
             ],
             'username' => [
                 'type' => PARAM_USERNAME
+            ],
+            'newpassword' => [
+                'type' => PARAM_TEXT
             ],
             'firstname' => [
                 'type' => PARAM_TEXT
@@ -80,40 +79,64 @@ class user_persistent extends persistent {
                 'type' => PARAM_TEXT,
                 'default' => ''
             ],
+            'calendartype' => [
+                'type' => PARAM_TEXT,
+                'default' => core_user::get_property_default('calendartype')
+            ],
+            'maildisplay' => [
+                'type' => PARAM_INT,
+                'default' => core_user::get_property_default('maildisplay')
+            ],
+            'mailformat' => [
+                'type' => PARAM_INT,
+                'default' => core_user::get_property_default('mailformat')
+            ],
+            'maildigest' => [
+                'type' => PARAM_INT,
+                'default' => core_user::get_property_default('maildigest')
+            ],
+            'autosubscribe' => [
+                'type' => PARAM_INT,
+                'default' => core_user::get_property_default('autosubscribe')
+            ],
+            'trackforums' => [
+                'type' => PARAM_INT,
+                'default' => core_user::get_property_default('trackforums')
+            ],
+            'lang' => [
+                'type' => PARAM_LANG,
+                'default' => core_user::get_property_default('lang')
+            ],
         ];
-        return $properties;
     }
 
     /**
-     * Constructor used to override base persistent to take advantage of
-     * functionality of persistent class.
+     * Workaround method to load limited record. Want to take advantage of functionality
+     * in persistent but no easy way import all of core_user property definition.
      *
-     * user_persistent constructor.
      * @param int $id
      * @param stdClass|null $record
+     * @return static
      * @throws \dml_exception
+     * @throws coding_exception
      */
-    public function __construct($id = 0, stdClass $record = null) {
+    public static function create_from($id = 0, stdClass $record = null) {
         global $DB;
-        $properties = array_keys(static::define_properties());
-        $load = new stdClass();
         if ($id > 0) {
             $record = $DB->get_record(static::TABLE, ['id' => $id]);
-            foreach (get_object_vars($record) as $property => $value) {
-                if (in_array($property, $properties)) {
-                    $load->{$property} = $value;
-                }
-            }
-            parent::__construct(0, $load);
         }
         if (!empty($record)) {
+            $compactedrecord = new stdClass();
+            $properties = array_keys(static::properties_definition());
             foreach (get_object_vars($record) as $property => $value) {
                 if (in_array($property, $properties)) {
-                    $load->{$property} = $value;
+                    $compactedrecord->{$property} = $value;
                 }
             }
-            parent::__construct(0, $load);
+            return new static(0, $compactedrecord);
+
         }
+        return new static();
     }
 
     /**
