@@ -77,6 +77,10 @@ class contact_merge_request_persistent extends persistent {
             'active' => array(
                 'type' => PARAM_INT,
                 'default' => 1
+            ),
+            'mergefailed' => array(
+                'type' => PARAM_INT,
+                'default' => 0
             )
         );
     }
