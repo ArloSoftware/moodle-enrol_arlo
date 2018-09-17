@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
 use core_user;
+use core_text;
 use enrol_arlo\api;
 use enrol_arlo\persistent;
 
@@ -75,6 +76,101 @@ class user_persistent extends persistent {
                 'default' => ''
             ],
         ];
+    }
+
+    /**
+     * Clean and set username, check precision.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_username($value) {
+        $cleanedvalue = clean_param($value, PARAM_USERNAME);
+        if (core_text::strlen($cleanedvalue) > 100) {
+            throw new coding_exception('Username exceeds length of 100.');
+        }
+        return $this->raw_set('username', $cleanedvalue);
+    }
+
+    /**
+     * Set first name and check precision.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_firstname($value) {
+        if (core_text::strlen($value) > 100) {
+            throw new coding_exception('Firstname exceeds length of 100.');
+        }
+        return $this->raw_set('firstname', $value);
+    }
+
+    /**
+     * Set last name and check precision.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_lastname($value) {
+        if (core_text::strlen($value) > 100) {
+            throw new coding_exception('Lastname exceeds length of 100.');
+        }
+        return $this->raw_set('lastname', $value);
+    }
+
+    /**
+     * Set email and check precision.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_email($value) {
+        if (core_text::strlen($value) > 100) {
+            throw new coding_exception('Email exceeds length of 100.');
+        }
+        return $this->raw_set('email', $value);
+    }
+
+    /**
+     * Set Phone1, truncate if required.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_phone1($value) {
+        $truncated = core_text::substr($value, 0, 20);
+        return $this->raw_set('phone1', $truncated);
+    }
+
+    /**
+     * Set Phone2, truncate if required.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_phone2($value) {
+        $truncated = core_text::substr($value, 0, 20);
+        return $this->raw_set('phone2', $truncated);
+    }
+
+    /**
+     * Set ID number, check precision.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_idnumber($value) {
+        if (core_text::strlen($value) > 255) {
+            throw new coding_exception('IDnumber exceeds length of 255.');
+        }
+        return $this->raw_set('idnumber', $value);
     }
 
     protected function before_create() {}
