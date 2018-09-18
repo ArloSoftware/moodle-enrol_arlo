@@ -27,9 +27,12 @@ namespace enrol_arlo\local\persistent;
 defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
+use context_helper;
+use context_user;
 use core_user;
 use core_text;
 use enrol_arlo\api;
+use enrol_arlo\manager;
 use enrol_arlo\persistent;
 use stdClass;
 
@@ -56,7 +59,9 @@ class user_persistent extends persistent {
                 'type' => PARAM_USERNAME
             ],
             'newpassword' => [
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'firstname' => [
                 'type' => PARAM_TEXT
@@ -78,6 +83,30 @@ class user_persistent extends persistent {
             'idnumber' => [
                 'type' => PARAM_TEXT,
                 'default' => ''
+            ],
+            'firstnamephonetic' => [
+                'type' => PARAM_TEXT,
+                'default' => '',
+                'null' => NULL_ALLOWED
+            ],
+            'lastnamephonetic' => [
+                'type' => PARAM_TEXT,
+                'default' => '',
+                'null' => NULL_ALLOWED
+            ],
+            'middlename' => [
+                'type' => PARAM_TEXT,
+                'default' => '',
+                'null' => NULL_ALLOWED
+            ],
+            'alternatename' => [
+                'type' => PARAM_TEXT,
+                'default' => '',
+                'null' => NULL_ALLOWED
+            ],
+            'confirmed' => [
+                'type' => PARAM_INT,
+                'default' => 1
             ],
             'calendartype' => [
                 'type' => PARAM_TEXT,
@@ -107,6 +136,10 @@ class user_persistent extends persistent {
                 'type' => PARAM_LANG,
                 'default' => core_user::get_property_default('lang')
             ],
+            'lastaccess' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ]
         ];
     }
 
@@ -234,12 +267,110 @@ class user_persistent extends persistent {
         return $this->raw_set('idnumber', $value);
     }
 
-    public function has_accessed() {}
-    public function has_accessed_courses() {}
-    public function has_enrolments() {}
-    protected function before_create() {}
-    protected function after_create() {}
-    protected function before_update() {}
-    protected function after_update($result) {}
+    /**
+     * Has user accessed Moodle.
+     *
+     * @return bool
+     * @throws coding_exception
+     */
+    public function has_accessed() {
+        return ($this->raw_get('lastaccessed')) ? true : false;
+    }
+
+    /**
+     * Has user accessed courses.
+     *
+     * @return bool
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function has_accessed_courses() {
+        global $DB;
+        if ($this->raw_get('id') <= 0) {
+            throw new coding_exception('Field id is required.');
+        }
+        $coursesaccessed = $DB->count_records('user_lastaccess', ['userid' => $this->raw_get('id')]);
+        return ($coursesaccessed) ? true : false;
+    }
+
+    /**
+     * Has user got any course enrolment be they hidden or disabled.
+     *
+     * @return bool
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function has_course_enrolments() {
+        global $DB;
+        if ($this->raw_get('id') <= 0) {
+            throw new coding_exception('Field id is required.');
+        }
+        $wheres = ["c.id <> :siteid"];
+        $params = ['siteid' => SITEID];
+        $ccselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
+        $ccjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = :contextlevel)";
+        $params['contextlevel'] = CONTEXT_COURSE;
+        $wheres = implode(" AND ", $wheres);
+        $sql = "SELECT COUNT(1)
+                  FROM {course} c
+                  JOIN (SELECT DISTINCT e.courseid
+                          FROM {enrol} e
+                          JOIN {user_enrolments} ue ON (ue.enrolid = e.id AND ue.userid = :userid)
+                       ) en ON (en.courseid = c.id)
+               $ccjoin
+                 WHERE $wheres";
+        $params['userid'] = $this->raw_get('id');
+        $params['active'] = ENROL_USER_ACTIVE;
+        $count = $DB->count_records_sql($sql, $params);
+        return ($count) ? true : false;
+    }
+
+    /**
+     * Make sure properties are set to coorect value before creation.
+     *
+     * @throws coding_exception
+     */
+    protected function before_create() {
+        $this->set('confirmed', 1);
+    }
+
+    /**
+     * Set user context, email and trigger new user event.
+     *
+     * @throws coding_exception
+     */
+    protected function after_create() {
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
+        $newuserid = $this->get('id');
+        // Create a context for this user.
+        $usercontext = context_user::instance($newuserid);
+        // Send email. TODO refactor messaging.
+        $manager = new manager();
+        if ($pluginconfig->get('emailsendnewaccountdetails')) {
+            if ($pluginconfig->get('emailsendimmediately')) {
+                $status = $manager->email_newaccountdetails(null, $this->to_record());
+                $deliverystatus = ($status) ? manager::EMAIL_STATUS_DELIVERED : manager::EMAIL_STATUS_FAILED;
+                $manager->add_email_to_queue(SITEID, $this->to_record()->id, manager::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
+            } else {
+                $manager->add_email_to_queue(SITEID, $this->to_record()->id, manager::EMAIL_TYPE_NEW_ACCOUNT);
+            }
+        }
+        // Trigger new user event.
+        \core\event\user_created::create_from_userid($newuserid)->trigger();
+    }
+
+    /**
+     * Fire update event.
+     *
+     * @param bool $result
+     * @throws coding_exception
+     */
+    protected function after_update($result) {
+        if ($result) {
+            $userid = $this->get('id');
+            // Trigger updated user event.
+            \core\event\user_updated::create_from_userid($userid)->trigger();
+        }
+    }
 
 }
