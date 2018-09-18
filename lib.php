@@ -89,6 +89,54 @@ class enrol_arlo_plugin extends enrol_plugin {
     }
 
     /**
+     * Wrapper for the parent enrol user method.
+     *
+     * @param stdClass $instance
+     * @param stdClass $user
+     * @throws coding_exception
+     */
+    public function enrol(stdClass $instance, stdClass $user) {
+        $pluginconfig = $this->get_plugin_config();
+        $timestart = time();
+        $timeend = 0;
+        if ($instance->enrolperiod) {
+            $timeend = $timestart + $instance->enrolperiod;
+        }
+        parent::enrol_user($instance,  $user->id, $instance->roleid, $timestart, $timeend, ENROL_USER_ACTIVE);
+        if (!empty($instance->customint2) && $instance->customint2 != self::CREATE_GROUP) {
+            groups_add_member($instance->customint2, $user->id, 'enrol_arlo');
+        }
+        $manager = new manager();
+        if ($instance->customint8) {
+            if ($pluginconfig->get('emailsendimmediately')) {
+                $status = $manager->email_newaccountdetails(null, $user);
+                $deliverystatus = ($status) ? manager::EMAIL_STATUS_DELIVERED : manager::EMAIL_STATUS_FAILED;
+                $manager->add_email_to_queue(SITEID, $user->id, manager::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
+            } else {
+                $manager->add_email_to_queue(SITEID, $user->id, manager::EMAIL_TYPE_NEW_ACCOUNT);
+            }
+        }
+    }
+
+    /**
+     * Wrapper to direct to appropriate parent method.
+     *
+     * @param stdClass $instance
+     * @param stdClass $user
+     * @throws coding_exception
+     */
+    public function unenrol(stdClass $instance, stdClass $user) {
+        $pluginconfig = $this->get_plugin_config();
+        $unenrolaction = $pluginconfig->get('unenrolaction');
+        if ($unenrolaction == ENROL_EXT_REMOVED_UNENROL) {
+            parent::unenrol_user($instance, $user->id);
+        }
+        if ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
+            parent::suspend_and_remove_roles($instance, $user->id);
+        }
+    }
+
+    /**
      * Get a Arlo instance enrolment record based on id.
      *
      * @param $id
