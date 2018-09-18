@@ -129,6 +129,10 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 0
             ],
+            'throttlerequests' => [
+                'type' => PARAM_INT,
+                'default' => 1
+            ],
             'respectallowaccountssameemail' => [
                 'type' => PARAM_INT,
                 'default' => 0
