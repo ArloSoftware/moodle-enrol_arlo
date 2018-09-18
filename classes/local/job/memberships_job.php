@@ -55,14 +55,23 @@ class memberships_job extends job {
         $trace = self::get_trace();
         try {
             $jobpersistent = $this->get_job_persistent();
-            $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'), MUST_EXIST);
+            $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
+            if (!$enrolmentinstance) {
+                $jobpersistent->set('disabled', 1);
+                $jobpersistent->save();
+                throw new moodle_exception('No matching enrolment instance');
+            }
             if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
+                $jobpersistent->set('timelastrequest', time());
+                $jobpersistent->save();
                 $this->add_reasons('Enrolment instance disabled.');
                 return false;
             }
             if (!$pluginconfig->get('allowhiddencourses')) {
                 $course = get_course($enrolmentinstance->courseid);
                 if (!$course->visible) {
+                    $jobpersistent->set('timelastrequest', time());
+                    $jobpersistent->save();
                     $this->add_reasons('Course is hidden. Allow hidden courses is not set.');
                     return false;
                 }
@@ -191,6 +200,9 @@ class memberships_job extends job {
             return false;
         } finally {
             $lock->release();
+            // Update scheduling information.
+            $jobpersistent->set('timelastrequest', time());
+            $jobpersistent->update();
         }
         return true;
     }
@@ -276,7 +288,6 @@ class memberships_job extends job {
             // Cleanup registration.
             $registration->delete();
         }
-
         return true;
     }
 
