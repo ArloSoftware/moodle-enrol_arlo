@@ -109,7 +109,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         $manager = new manager();
         if ($instance->customint8) {
             if ($pluginconfig->get('emailsendimmediately')) {
-                $status = $manager->email_newaccountdetails(null, $user);
+                $status = $manager->email_coursewelcome($instance, $user);
                 $deliverystatus = ($status) ? manager::EMAIL_STATUS_DELIVERED : manager::EMAIL_STATUS_FAILED;
                 $manager->add_email_to_queue(SITEID, $user->id, manager::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
             } else {
