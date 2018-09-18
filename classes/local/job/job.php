@@ -43,16 +43,26 @@ abstract class job {
     /** @var TIME_LOCK_TIMEOUT time in seconds to wait for a lock before giving up. */
     const TIME_LOCK_TIMEOUT = 5; // 5 Seconds.
 
+    /** @var array  */
     protected $errors = [];
 
+    /** @var string*/
     protected $lasterror;
 
+    /** @var persistent */
     protected $jobpersistent;
 
+    /** @var array  */
     protected $reasons = [];
 
+    /** @var null_progress_trace  */
     protected $trace;
 
+    /**
+     * job constructor.
+     *
+     * @param persistent $jobpersistent
+     */
     public function __construct(persistent $jobpersistent) {
         $this->jobpersistent = $jobpersistent;
         $this->trace = new null_progress_trace();
@@ -60,39 +70,81 @@ abstract class job {
 
     }
 
+    /**
+     * Return instance of trace class.
+     *
+     * @return null_progress_trace
+     */
     public function get_trace() {
         return $this->trace;
     }
 
-
+    /**
+     * Set type of trace to use.
+     *
+     * @param progress_trace $trace
+     */
     public function set_trace(progress_trace $trace) {
         $this->trace = $trace;
     }
 
+    /**
+     * Add error message to stack.
+     *
+     * @param $error
+     */
     public function add_error($error) {
         $this->errors[] = $this->lasterror = $error;
     }
 
+    /**
+     * Get all error meessages.
+     *
+     * @return array
+     */
     public function get_errors() {
         return $this->errors;
     }
 
+    /**
+     * Return last error added.
+     *
+     * @return mixed
+     */
     public function get_last_error() {
         return $this->lasterror;
     }
 
+    /**
+     * Check for any errors.
+     *
+     * @return bool
+     */
     public function has_errors() {
         return 0 !== count($this->errors);
     }
 
+    /**
+     * @param $reason
+     */
     public function add_reasons($reason) {
         $this->reasons[] = $reason;
     }
 
+    /**
+     * Add reason why did not run. Not an error, due to configuration.
+     *
+     * @return array
+     */
     public function get_reasons() {
         return $this->reasons;
     }
 
+    /**
+     * Are there reasons for now running.
+     *
+     * @return bool
+     */
     public function has_reasons() {
         return 0 !== count($this->reasons);
     }
@@ -124,10 +176,20 @@ abstract class job {
         return $area . '/'. $type . ':' . $instanceid;
     }
 
+    /**
+     * Return associated job persistent.
+     *
+     * @return persistent
+     */
     public function get_job_persistent() {
         return $this->jobpersistent;
     }
 
+    /**
+     * Method job types must implement.
+     *
+     * @return mixed
+     */
     abstract public function run();
 
     /**
@@ -221,5 +283,25 @@ abstract class job {
      */
     public function get_type() {
         return $this->jobpersistent->get('type');
+    }
+
+    /**
+     * Access persistent instanceid.
+     *
+     * @return mixed
+     * @throws \coding_exception
+     */
+    public function get_instanceid() {
+        return $this->jobpersistent->get('instanceid');
+    }
+
+    /**
+     * Job type string identifier.
+     *
+     * @return string
+     * @throws \coding_exception
+     */
+    public function get_job_run_identifier() {
+        return $this->get_area() . '/' . $this->get_type() . ':' . $this->get_instanceid();
     }
 }
