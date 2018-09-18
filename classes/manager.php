@@ -1080,6 +1080,7 @@ class manager {
         $newpassword = generate_password();
 
         update_internal_user_password($user, $newpassword);
+        set_user_preference('auth_forcepasswordchange', true, $user->id);
 
         $a = new \stdClass();
         $a->firstname   = fullname($user, true);
