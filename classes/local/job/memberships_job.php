@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Memberships job responsible for handling enrolments, user creation and matching based on
+ * registration.
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -26,7 +28,10 @@ namespace enrol_arlo\local\job;
 defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
+use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
+use enrol_arlo\local\generator\username_generator;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\local\user_matcher;
 use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
@@ -46,7 +51,7 @@ class memberships_job extends job {
         $plugin = api::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
-        //$lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
+        $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         $trace = self::get_trace();
         try {
             $jobpersistent = $this->get_job_persistent();
@@ -62,7 +67,6 @@ class memberships_job extends job {
                     return false;
                 }
             }
-            $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
             if ($lock) {
                 // We don't know how many records we will be retrieving it maybe 5 it maybe 5000,
                 // and the page size limit is 250. So we have to keep calling the endpoint and
@@ -98,6 +102,7 @@ class memberships_job extends job {
                                 /** @var $resource enrol_arlo\Arlo\AuthAPI\Resource\Registration */
                                 $sourceid = $resource->RegistrationID;
                                 $sourceguid = $resource->UniqueIdentifier;
+                                $sourcemodified = $resource->LastModifiedDateTime;
                                 $contactresource = $resource->getContact();
                                 if (empty($contactresource)) {
                                     throw new moodle_exception('Contact missing from Registration.');
@@ -159,6 +164,12 @@ class memberships_job extends job {
                                 // Time to process registration.
                                 $status = static::process_registration($registration);
 
+                                // Update scheduling information on persistent after successfull save.
+                                $jobpersistent->set('timelastrequest', time());
+                                $jobpersistent->set('lastsourceid', $sourceid);
+                                $jobpersistent->set('lastsourcetimemodified', $sourcemodified);
+                                $jobpersistent->update();
+
                             } catch (moodle_exception $exception) {
                                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 // Can't really do anythink but break out on these types of exceptions.
@@ -190,6 +201,7 @@ class memberships_job extends job {
      * @throws coding_exception
      */
     public static function process_registration(persistent $registration) {
+        /** @var $plugin \enrol_arlo_plugin */
         $plugin = api::get_enrolment_plugin();
         if ($registration->get('id') <= 0) {
             throw new coding_exception('Registration must be valid record.');
@@ -204,13 +216,68 @@ class memberships_job extends job {
         if (!$status) {
             throw new coding_exception('Merge requests fail');
         }
-        // Check for associated Moodle user account.
-        if ($contact->get('userid') <= 0) {
+        // Do have an associated user or do we need to match or create?
+        if ($destinationcontact->get('userid') <= 0) {
             $matches = user_matcher::get_matches_based_on_preference($contact);
-        } else {
+            $matchcount = count($matches);
+            if ($matchcount > 1) {
+                $destinationcontact->set('userassociationfailure', 1);
+                $destinationcontact->save();
+                throw new moodle_exception('More than one Moodle account matches');
+            }
+            // Associate to Moodle account.
+            if ($matchcount == 1) {
+                $match = reset($matches);
+                $destinationcontact->set('userid', $match->id);
+                $destinationcontact->save();
+                $registration->set('userid', $match->id);
+                $registration->save();
+            }
+            // Create new Moodle account and associate.
+            if ($matchcount == 0) {
+                $user = new user_persistent();
+                $username = username_generator::generate(
+                    $destinationcontact->get('firstname'),
+                    $destinationcontact->get('lastname'),
+                    $destinationcontact->get('email')
+                );
+                $user->set('username', $username);
+                $user->set('firstname', $destinationcontact->get('firstname'));
+                $user->set('lastname', $destinationcontact->get('lastname'));
+                $user->set('email', $destinationcontact->get('email'));
+                $user->set('phone1', $destinationcontact->get('phonemobile'));
+                $user->set('phone2', $destinationcontact->get('phonework'));
+                $user->save();
+                $destinationcontact->set('userid', $user->get('id'));
+                $destinationcontact->save();
+                $registration->set('userid', $user->get('id'));
+                $registration->save();
+            }
 
+        } else {
+            $user = user_persistent::create_from($destinationcontact->get('userid'));
+            $user->set('firstname', $destinationcontact->get('firstname'));
+            $user->set('lastname', $destinationcontact->get('lastname'));
+            $user->set('email', $destinationcontact->get('email'));
+            $user->set('phone1', $destinationcontact->get('phonemobile'));
+            $user->set('phone2', $destinationcontact->get('phonework'));
+            $user->save();
+
+            $registration->set('userid', $destinationcontact->get('userid'));
+            $registration->save();
+        }
+        // Process enrolment.
+        if (in_array($registration->get('sourcestatus'), [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])) {
+            $plugin->enrol($enrolmentinstance, $user->to_record());
+        }
+        // Process unenrolment.
+        if ($registration->get('sourcestatus') == RegistrationStatus::CANCELLED) {
+            $plugin->unenrol($enrolmentinstance, $user->to_record());
+            // Cleanup registration.
+            $registration->delete();
         }
 
+        return true;
     }
 
     public static function process_contact_merge_requests(persistent $contact, array $contactmergerequests) {
