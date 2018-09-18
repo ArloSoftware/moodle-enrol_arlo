@@ -70,6 +70,16 @@ class api {
         return $enrolmentplugin;
     }
 
+    /**
+     * Main method for running scheduled job that call the Arlo API.
+     *
+     * @param null $time
+     * @param int $limit
+     * @param progress_trace|null $trace
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws moodle_exception
+     */
     public static function run_scheduled_jobs($time = null, $limit = 1000, progress_trace $trace = null) {
         global $DB;
         if (is_null($time)) {
@@ -114,23 +124,38 @@ class api {
             'timerequestnow' => $time,
             'timenorequest' => $time
         ];
+        $timingdelaysql = "";
+        if (!$pluginconfig->get('throttlerequests')) {
+            $timingdelaysql = "AND (timelastrequest + timenextrequestdelay) < :timerequestnow";
+        }
         $sql = "SELECT *
                   FROM {enrol_arlo_scheduledjob}
                  WHERE disabled <> 1
-                   AND (timelastrequest + timenextrequestdelay) < :timerequestnow
+                   $timingdelaysql
                    AND (:timenorequest < (timenorequestsafter + timerequestsafterextension) OR timenorequestsafter = 0)";
         $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
         foreach ($rs as $record) {
             $jobpersistent = new job_persistent(0, $record);
             $scheduledjob = job_factory::create_from_persistent($jobpersistent);
-            $trace->output($scheduledjob->get_type());
+            $trace->output($scheduledjob->get_job_run_identifier());
             $status = $scheduledjob->run();
             if (!$status) {
-                $jobpersistent->set_errors($scheduledjob->get_errors());
-                $jobpersistent->save();
-                die;
+                if ($scheduledjob->has_errors()) {
+                    $trace->output('Failed with errors.', 1);
+                    $jobpersistent->set_errors($scheduledjob->get_errors());
+                    $jobpersistent->save();
+                }
+                if ($scheduledjob->has_reasons()) {
+                    $trace->output('Failed with reasons.', 1);
+                    foreach ($scheduledjob->get_reasons() as $reason) {
+                        $trace->output($reason, 2);
+                    }
+                }
+            } else {
+                $trace->output('Completed', 1);
             }
         }
+        $rs->close();
     }
 
     /**
