@@ -199,4 +199,14 @@ class registration_persistent extends persistent {
         );
     }
 
+    /**
+     * Round incoming float.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_progresspercent($value) {
+        return $this->raw_set('progresspercent', round($value, 0));
+    }
 }
