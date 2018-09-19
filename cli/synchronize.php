@@ -61,17 +61,30 @@ Example:
 // Ensure errors are well explained.
 set_debugging(DEBUG_DEVELOPER, true);
 
-$interactive = empty($options['non-interactive']);
-
 cron_setup_user();
 
-$manualoverride = $options['manual'];
 if (empty($options['verbose'])) {
     $trace = new null_progress_trace();
 } else {
     $trace = new text_progress_trace();
 }
 
-$manager = new enrol_arlo\manager($trace);
-$manager->process_all($manualoverride);
+// Trickery.
+$manualoverride = $options['manual'];
+$time = null;
+if ($manualoverride) {
+    $time = time() + 1800; // 30 minutes in the future.
+}
+$interactive = empty($options['non-interactive']);
+if ($interactive) {
+    cli_writeln('Run Arlo/Moodle synchronisation');
+    $prompt = get_string('cliyesnoprompt', 'admin');
+    $input = cli_input($prompt, '',
+        array(get_string('clianswerno', 'admin'), get_string('cliansweryes', 'admin')));
+    if ($input == get_string('clianswerno', 'admin')) {
+        exit(1);
+    }
+}
+enrol_arlo\api::run_scheduled_jobs(null, null, $trace);
+enrol_arlo\api::run_cleanup();
 exit(0);
