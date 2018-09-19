@@ -61,6 +61,10 @@ Example:
 // Ensure errors are well explained.
 set_debugging(DEBUG_DEVELOPER, true);
 
+if (!enrol_is_enabled('arlo')) {
+    cli_error(get_string('pluginnotenabled', 'enrol_arlo'), 2);
+}
+
 cron_setup_user();
 
 if (empty($options['verbose'])) {
