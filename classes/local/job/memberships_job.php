@@ -48,35 +48,37 @@ use coding_exception;
 class memberships_job extends job {
 
     public function run() {
+        $trace = self::get_trace();
         $plugin = api::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
         $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
-        $trace = self::get_trace();
-        try {
-            $jobpersistent = $this->get_job_persistent();
-            $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
-            if (!$enrolmentinstance) {
-                $jobpersistent->set('disabled', 1);
-                $jobpersistent->save();
-                throw new moodle_exception('No matching enrolment instance');
-            }
-            if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
-                $jobpersistent->set('timelastrequest', time());
-                $jobpersistent->save();
-                $this->add_reasons('Enrolment instance disabled.');
-                return false;
-            }
-            if (!$pluginconfig->get('allowhiddencourses')) {
-                $course = get_course($enrolmentinstance->courseid);
-                if (!$course->visible) {
+        if ($lock) {
+            try {
+                $jobpersistent = $this->get_job_persistent();
+                $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
+                if (!$enrolmentinstance) {
+                    $jobpersistent->set('disabled', 1);
+                    $jobpersistent->save();
+                    throw new moodle_exception('No matching enrolment instance');
+                }
+                if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
+                    $lock->release();
                     $jobpersistent->set('timelastrequest', time());
                     $jobpersistent->save();
-                    $this->add_reasons('Course is hidden. Allow hidden courses is not set.');
+                    $this->add_reasons('Enrolment instance disabled.');
                     return false;
                 }
-            }
-            if ($lock) {
+                if (!$pluginconfig->get('allowhiddencourses')) {
+                    $course = get_course($enrolmentinstance->courseid);
+                    if (!$course->visible) {
+                        $lock->release();
+                        $jobpersistent->set('timelastrequest', time());
+                        $jobpersistent->save();
+                        $this->add_reasons('Course is hidden. Allow hidden courses is not set.');
+                        return false;
+                    }
+                }
                 // We don't know how many records we will be retrieving it maybe 5 it maybe 5000,
                 // and the page size limit is 250. So we have to keep calling the endpoint and
                 // adjusting and the filter each call to so we get all records and don't end up
@@ -180,31 +182,34 @@ class memberships_job extends job {
                                 $jobpersistent->update();
 
                             } catch (moodle_exception $exception) {
-                                debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 // Can't really do anythink but break out on these types of exceptions.
                                 if ($exception instanceof invalid_persistent_exception || $exception instanceof coding_exception) {
-                                   throw $exception;
+                                    throw $exception;
                                 }
+                                debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 $this->add_error($exception->getMessage());
                             }
                         }
                         $hasnext = (bool) $collection->hasNext();
                     }
                 }
-            } else {
-                throw new moodle_exception('locktimeout');
+                return true;
+            } catch (moodle_exception $exception) {
+                if ($exception instanceof invalid_persistent_exception || $exception instanceof coding_exception) {
+                    throw $exception;
+                }
+                debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                $this->add_error($exception->getMessage());
+                return false;
+            } finally {
+                $lock->release();
+                // Update scheduling information.
+                $jobpersistent->set('timelastrequest', time());
+                $jobpersistent->update();
             }
-        } catch (moodle_exception $exception) {
-            debugging($exception->getMessage(), DEBUG_DEVELOPER);
-            $this->add_error($exception->getMessage());
-            return false;
-        } finally {
-            $lock->release();
-            // Update scheduling information.
-            $jobpersistent->set('timelastrequest', time());
-            $jobpersistent->update();
+        } else {
+            throw new moodle_exception('locktimeout');
         }
-        return true;
     }
 
     /**
@@ -244,6 +249,13 @@ class memberships_job extends job {
                 $destinationcontact->save();
                 $registration->set('userid', $match->id);
                 $registration->save();
+                $user = user_persistent::create_from($match->id);
+                $user->set('firstname', $destinationcontact->get('firstname'));
+                $user->set('lastname', $destinationcontact->get('lastname'));
+                $user->set('email', $destinationcontact->get('email'));
+                $user->set('phone1', $destinationcontact->get('phonemobile'));
+                $user->set('phone2', $destinationcontact->get('phonework'));
+                $user->save();
             }
             // Create new Moodle account and associate.
             if ($matchcount == 0) {
