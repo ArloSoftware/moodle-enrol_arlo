@@ -66,8 +66,6 @@ abstract class job {
     public function __construct(persistent $jobpersistent) {
         $this->jobpersistent = $jobpersistent;
         $this->trace = new null_progress_trace();
-
-
     }
 
     /**
