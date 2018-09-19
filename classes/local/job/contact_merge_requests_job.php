@@ -67,7 +67,7 @@ class contact_merge_requests_job extends job {
                         $sourcecreated          = $resource->CreatedDateTime;
                         try {
                             $contactmergerequest = contact_merge_request_persistent::get_record(
-                                ['sourceid' =>  $sourceid]
+                                ['sourceid' => $sourceid]
                             );
                             if (!$contactmergerequest) {
                                 $contactmergerequest = new contact_merge_request_persistent();
