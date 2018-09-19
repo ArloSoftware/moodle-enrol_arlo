@@ -27,14 +27,13 @@ namespace enrol_arlo\task;
 
 defined('MOODLE_INTERNAL') || die();
 
-use enrol_arlo\manager;
+use enrol_arlo\api;
 
 class synchronize extends \core\task\scheduled_task {
 
     /**
-     * Get a descriptive name for this task (shown to admins).
-     *
      * @return string
+     * @throws \coding_exception
      */
     public function get_name() {
         return get_string('synctask', 'enrol_arlo');
@@ -45,15 +44,13 @@ class synchronize extends \core\task\scheduled_task {
      */
     public function execute() {
         global $CFG;
-
         require_once($CFG->dirroot . '/enrol/arlo/lib.php');
         if (!enrol_is_enabled('arlo')) {
             return;
         }
-
-        $manager = new manager();
-        $result = $manager->process_all();
-        return $result;
+        api::run_scheduled_jobs();
+        api::run_cleanup();
+        return;
     }
 
 }
