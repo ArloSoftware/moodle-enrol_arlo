@@ -89,8 +89,8 @@ class user_matcher {
         if (empty($email)) {
             throw new coding_exception('Email parameter is empty after being cleaned.');
         }
-        $select = "LOWER(firstname) = LOWER(:firstname) AND 
-                   LOWER(lastname) = LOWER(:lastname) AND 
+        $select = "LOWER(firstname) = LOWER(:firstname) AND
+                   LOWER(lastname) = LOWER(:lastname) AND
                    LOWER(email) = LOWER(:email)";
         $conditions = [
             'firstname' => $firstname,
