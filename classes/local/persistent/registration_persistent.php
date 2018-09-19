@@ -151,6 +151,18 @@ class registration_persistent extends persistent {
     }
 
     /**
+     * Add error message and increment counter.
+     *
+     * @param $value
+     * @throws coding_exception
+     */
+    public function add_error_message($value) {
+        $counter = $this->raw_get('errorcounter');
+        $this->raw_set('errormessage', $value);
+        $this->raw_set('errormessage', ++$counter);
+    }
+
+    /**
      * Get associated contact persistent.
      *
      * @return \core\persistent|false
