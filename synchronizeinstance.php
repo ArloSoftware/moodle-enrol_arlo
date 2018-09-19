@@ -43,26 +43,46 @@ $PAGE->set_heading($course->fullname);
 $returnurl = new moodle_url('/enrol/instances.php', array('id' => $course->id));
 $returnstring = get_string('backtoenrolmentmethods', 'enrol_arlo');
 
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('synchronizeinstance', 'enrol_arlo'));
-
 if (confirm_sesskey() and $confirm == true) {
-    $trace = new html_list_progress_trace();
-    $manager = new enrol_arlo\manager($trace);
-    if (!$manager->process_instance_registrations($instance, true)) {
-        $returnurl = new moodle_url('/');
-        $returnstring = get_string('continue');
+    try {
+        // Run enrolment job.
+        $membershipsjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+            [
+                'area' => 'enrolment',
+                'type' => 'memberships',
+                'instanceid' => $instance->id
+            ]
+        );
+        $membershipsjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
+        $status = $membershipsjob->run();
+        // Run outcomes job.
+        $outcomesjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+            [
+                'area' => 'enrolment',
+                'type' => 'outcomes',
+                'instanceid' => $instance->id
+            ]
+        );
+        $outcomesjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($outcomesjobpersistent);
+        $status = $outcomesjob->run();
+    } catch (moodle_exception $exception) {
+        if ($exception->getMessage() == 'error/locktimeout') {
+            redirect($returnurl, get_string('synchroniseoperationiscurrentlylocked', 'enrol_arlo'), 1);
+        }
     }
-    if (!$manager->process_instance_results($instance, true)) {
-        $returnurl = new moodle_url('/');
-        $returnstring = get_string('continue');
-    }
-    echo $OUTPUT->single_button($returnurl, $returnstring);
+    redirect($returnurl);
 } else if (confirm_sesskey()) {
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading(get_string('synchroniseinstancefor', 'enrol_arlo', $instance->name));
     $params = array('confirm' => true, 'sesskey' => sesskey(), 'id' => $instance->id);
     $confirmurl = new moodle_url('/enrol/arlo/synchronizeinstance.php', $params);
-    echo $OUTPUT->confirm(get_string('longtime', 'enrol_arlo'), $confirmurl, $returnurl);
+    echo $OUTPUT->notification(
+        get_string('manualsynchronisenotice', 'enrol_arlo'),
+        'warning'
+    );
+    echo $OUTPUT->confirm('', $confirmurl, $returnurl);
 } else {
+    echo $OUTPUT->header();
     echo print_error('nopermissions', 'error', '', 'please ensure you are signed in and have permission');
 }
 echo $OUTPUT->footer();
