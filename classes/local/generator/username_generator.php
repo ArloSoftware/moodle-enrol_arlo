@@ -24,6 +24,8 @@
 
 namespace enrol_arlo\local\generator;
 
+defined('MOODLE_INTERNAL') || die();
+
 use coding_exception;
 use core_text;
 use enrol_arlo\local\persistent\contact_persistent;
