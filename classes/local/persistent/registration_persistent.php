@@ -126,28 +126,24 @@ class registration_persistent extends persistent {
                 'null' => NULL_ALLOWED,
                 'default' => null
             ),
-            'updateinternal' => array(
-                'type' => PARAM_INT,
-                'default' => 0
-            ),
             'updatesource' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),
-            'lastpulltime' => array(
+            'enrolmentfailure' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),
-            'lastpushtime' => array(
+            'timelastrequest' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),
-            'lasterror' => array(
+            'errormessage' => array(
                 'type' => PARAM_TEXT,
                 'null' => NULL_ALLOWED,
                 'default' => null
             ),
-            'errorcount' => array(
+            'errorcounter' => array(
                 'type' => PARAM_INT,
                 'default' => 0
             ),

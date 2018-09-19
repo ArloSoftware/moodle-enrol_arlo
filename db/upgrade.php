@@ -40,11 +40,11 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         return false;
     }
 
-    // Add required persistent columns.  @TODO change 2018051700
-    if ($oldversion < 2017051509) {
+    // Add required persistent columns.
+    if ($oldversion < 2018091900) {
         $admin = get_admin();
 
-        // Add information fields to contact table.
+        // Add information fields to enrol_arlo_contact table.
         $table = new xmldb_table('enrol_arlo_contact');
         // Conditionally launch add field firstname.
         $field = new xmldb_field('firstname', XMLDB_TYPE_CHAR, '64', null, null, null, null);
@@ -76,11 +76,6 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        // Conditionally launch drop field lastpulltime.
-        $field = new xmldb_field('lastpulltime');
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
         // Conditionally launch add field sourcestatus.
         $field = new xmldb_field('sourcestatus', XMLDB_TYPE_CHAR, '10', null, null, null, null);
         if (!$dbman->field_exists($table, $field)) {
@@ -105,6 +100,48 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             // Launch rename field errorcount.
             $dbman->rename_field($table, $field, 'errorcounter');
         }
+        // Conditionally launch drop field lastpulltime.
+        $field = new xmldb_field('lastpulltime');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Add/rename information fields on enrol_arlo_registration table.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('enrolmentfailure', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        // Conditionally launch add field enrolmentfailure.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally launch add field timelastrequest.
+        $field = new xmldb_field('timelastrequest', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Conditionally rename field lasterror.
+        $field = new xmldb_field('lasterror', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        if ($dbman->field_exists($table, $field)) {
+            // Launch rename field lasterror.
+            $dbman->rename_field($table, $field, 'errormessage');
+        }
+        // Conditionally rename field errorcount and change precision.
+        $field = new xmldb_field('errorcount', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        if ($dbman->field_exists($table, $field)) {
+            // Launch change of precision for field errorcount.
+            $dbman->change_field_precision($table, $field);
+            // Launch rename field errorcount.
+            $dbman->rename_field($table, $field, 'errorcounter');
+        }
+        // Conditionally launch drop field lastpulltime.
+        $field = new xmldb_field('lastpulltime');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        // Conditionally launch drop field lastpulltime.
+        $field = new xmldb_field('lastpushtime');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
 
         // Add required fields to appropriate tables for persistent support.
         $tablenames = [
@@ -115,7 +152,6 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             'enrol_arlo_template',
             'enrol_arlo_templateassociate'
         ];
-
         foreach ($tablenames as $tablename) {
             // Define field usermodified to be added to table.
             $table = new xmldb_table($tablename);
@@ -144,14 +180,6 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                 $record->timecreated = $record->timemodified;
                 $DB->update_record($tablename, $record);
             }
-        }
-
-        // Define field updateinternal to be added to enrol_arlo_registration.
-        $table = new xmldb_table('enrol_arlo_registration');
-        $field = new xmldb_field('updateinternal', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
-        // Conditionally launch add field updateinternal.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
         }
 
         // Conditionally add enrol_arlo_scheduled_job table.
@@ -302,7 +330,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->drop_table($instancetable);
         }
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2017051509, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2018091900, 'enrol', 'arlo');
     }
 
     return true;
