@@ -36,7 +36,7 @@ class registration_persistent extends persistent {
 
     /**
      * Return the definition of the properties of this model.
-     * 
+     *
      * @return array
      * @throws coding_exception
      */
