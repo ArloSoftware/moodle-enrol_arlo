@@ -37,24 +37,25 @@ class observer {
      * @param $courseid
      * @param $relateduserid
      */
-    private static function set_update_source($courseid, $relateduserid) {
+    private static function set_update_source($courseid, $userid) {
         global $DB;
         $sql = "SELECT ear.*
                   FROM {enrol} e
                   JOIN {enrol_arlo_registration} ear ON ear.enrolid = e.id
                   JOIN {course} c ON c.id = e.courseid
-                 WHERE e.enrol = :enrol AND e.status = :status
-                   AND c.id = :courseid AND ear.userid = :relateduserid";
+                 WHERE e.enrol = :enrol
+                   AND c.id = :courseid AND ear.userid = :userid";
         $conditions = array(
             'enrol' => 'arlo',
-            'status' => ENROL_INSTANCE_ENABLED,
             'courseid' => $courseid,
-            'relateduserid' => $relateduserid
+            'userid' => $userid
         );
-        $record = $DB->get_record_sql($sql, $conditions);
-        if ($record) {
-            $DB->set_field('enrol_arlo_registration',
-                'updatesource', 1, array('id' => $record->id));
+        $registrations = $DB->get_records_sql($sql, $conditions);
+        if ($registrations) {
+            foreach ($registrations as $registration) {
+                $result = $DB->set_field('enrol_arlo_registration',
+                    'updatesource', 1, array('id' => $registration->id));
+            }
         }
     }
 
@@ -73,7 +74,7 @@ class observer {
      * @param $event
      */
     public static function course_viewed($event) {
-        static::set_update_source($event->courseid, $event->relateduserid);
+        static::set_update_source($event->courseid, $event->userid);
     }
 
     /**
