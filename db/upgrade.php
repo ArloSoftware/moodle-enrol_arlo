@@ -41,7 +41,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     }
 
     // Add required persistent columns.
-    if ($oldversion < 2018092000) {
+    if ($oldversion < 2018092100) {
         $admin = get_admin();
 
         // Add information fields to enrol_arlo_contact table.
@@ -106,6 +106,20 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->drop_field($table, $field);
         }
 
+        // Add/rename information fields on enrol_arlo_emailqueue.
+        $table = new xmldb_table('enrol_arlo_emailqueue');
+        $field = new xmldb_field('area', XMLDB_TYPE_CHAR, '10', null, XMLDB_NOTNULL, null, null);
+        // Conditionally launch add field area.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Rename field enrolid on table enrol_arlo_emailqueue to instanceid.
+        $field = new xmldb_field('enrolid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        // Launch rename field enrolid.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'instanceid');
+        }
+
         // Add/rename information fields on enrol_arlo_registration table.
         $table = new xmldb_table('enrol_arlo_registration');
         $field = new xmldb_field('enrolmentfailure', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
@@ -151,6 +165,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Add required fields to appropriate tables for persistent support.
         $tablenames = [
             'enrol_arlo_contact',
+            'enrol_arlo_emailqueue',
             'enrol_arlo_event',
             'enrol_arlo_onlineactivity',
             'enrol_arlo_registration',
@@ -329,13 +344,28 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                 $contactsjob->set('timerequestsafterextension', enrol_arlo\local\job\contacts_job::TIME_PERIOD_EXTENSION);
                 $contactsjob->save();
             }
+
+            // Migrate email queue data.
+            $rs = $DB->get_recordset('enrol_arlo_emailqueue');
+            foreach ($rs as $record) {
+                if ($record->type == 'newaccount') {
+                    $record->area = 'site';
+                    $record->instanceid = SITEID;
+                } else {
+                    $record->area = 'enrolment';
+                }
+                $DB->update_record('enrol_arlo_emailqueue', $record);
+            }
+            $rs->close();
+
             // Drop schedule table.
             $dbman->drop_table($scheduletable);
             // Drop instance table.
             $dbman->drop_table($instancetable);
         }
+
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2018092000, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2018092100, 'enrol', 'arlo');
     }
 
     return true;
