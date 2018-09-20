@@ -28,10 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
+use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\result;
 use GuzzleHttp\Psr7\Request;
+use coding_exception;
 use moodle_exception;
 
 /**
@@ -43,6 +45,13 @@ use moodle_exception;
  */
 class outcomes_job extends job {
 
+    /**
+     * Run the Job.
+     *
+     * @return bool|mixed
+     * @throws \coding_exception
+     * @throws moodle_exception
+     */
     public function run() {
         $trace = self::get_trace();
         $plugin = api::get_enrolment_plugin();
@@ -58,22 +67,17 @@ class outcomes_job extends job {
             try {
                 $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
                 if (!$enrolmentinstance) {
-                    $jobpersistent->set('disabled', 1);
-                    $jobpersistent->save();
+                   $this->disable();
                     throw new moodle_exception(get_string('nomatchingenrolmentinstance', 'enrol_arlo'));
                 }
                 if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
-                    $jobpersistent->set('timelastrequest', time());
-                    $jobpersistent->save();
-                    $this->add_reasons('Enrolment instance disabled.');
+                    $this->add_reasons(get_string('enrolmentinstancedisabled', 'enrol_arlo'));
                     return false;
                 }
                 if (!$pluginconfig->get('allowhiddencourses')) {
                     $course = get_course($enrolmentinstance->courseid);
                     if (!$course->visible) {
-                        $jobpersistent->set('timelastrequest', time());
-                        $jobpersistent->save();
-                        $this->add_reasons('Course is hidden. Allow hidden courses is not set.');
+                        $this->add_reasons(get_string('allowhiddencoursesdiabled', 'enrol_arlo'));
                         return false;
                     }
                 }
@@ -124,9 +128,6 @@ class outcomes_job extends job {
                 return false;
             } finally {
                 $lock->release();
-                // Update scheduling information.
-                $jobpersistent->set('timelastrequest', time());
-                $jobpersistent->update();
             }
         } else {
             throw new moodle_exception('locktimeout');
