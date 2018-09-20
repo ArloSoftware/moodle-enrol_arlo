@@ -23,6 +23,7 @@
 
 namespace enrol_arlo\local\factory;
 
+use coding_exception;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\persistent;
 
@@ -41,6 +42,21 @@ class job_factory {
         $classname = $persistent->get('type') . '_job';
         $namespaceclassname = "enrol_arlo\\local\\job\\{$classname}";
         return new $namespaceclassname($persistent);
+    }
+
+    /**
+     * Get job based on persistent properties.
+     *
+     * @param array $parameters
+     * @return mixed
+     * @throws coding_exception
+     */
+    public static function get_job(array $parameters) {
+        $jobpersistent = job_persistent::get_record($parameters);
+        if (!$jobpersistent) {
+            throw new coding_exception('Job persistent not found.');
+        }
+        return static::create_from_persistent($jobpersistent);
     }
 
 }
