@@ -268,3 +268,11 @@ $string['httpstatus:503'] = 'Service Unavailable';
 $string['cleanup'] = 'Clean up';
 $string['requestlogcleanup'] = 'Request log clean up';
 $string['requestlogcleanup_help'] = 'Remove request log entries that are older than the selected time.';
+$string['outcomepushingdisabled'] = 'Outcome pushing is disabled at site configuration.';
+$string['nomatchingenrolmentinstance'] = 'No matching enrolment instance.';
+$string['enrolmentinstancedisabled'] = 'Enrolment instance disabled.';
+$string['allowhiddencoursesdiabled'] = 'Allow hidden courses is disabled at site configuration.';
+$string['contactresourcemissing'] = 'Contact resource missing from Registration.';
+$string['contactrecordmissing'] = 'Contact record missing.';
+$string['noassociateduser'] = 'No assocoated Moodle user account.';
+
