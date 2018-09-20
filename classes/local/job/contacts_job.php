@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
+use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\user_persistent;
@@ -45,7 +46,7 @@ use moodle_exception;
  */
 class contacts_job extends job {
 
-    /** @var TIME_PERIOD_DELAY time in seconds to delay next request. */
+    /** @const TIME_PERIOD_DELAY time in seconds to delay next request. */
     const TIME_PERIOD_DELAY = 86400; // 24 Hours.
 
     /**
@@ -121,7 +122,6 @@ class contacts_job extends job {
                                 $contact->set('sourcestatus', $contactresource->Status);
                                 $contact->set('sourcecreated', $contactresource->CreatedDateTime);
                                 $contact->set('sourcemodified', $contactresource->LastModifiedDateTime);
-                                $contact->save();
                                 // Update user record.
                                 $user = user_persistent::create_from($contact->get('userid'));
                                 if ($user->get('id') <= 0) {
@@ -135,15 +135,20 @@ class contacts_job extends job {
                                 $user->set('phone1', $contact->get('phonemobile'));
                                 $user->set('phone2', $contact->get('phonework'));
                                 $user->update();
+                                // Clear errors on contact and update.
+                                $contact->set('errormessage', '');
+                                $contact->set('errorcounter', 0);
+                                $contact->update();
                                 // Update scheduling information on persistent after successfull save.
                                 $jobpersistent->set('timelastrequest', time());
                                 $jobpersistent->set('lastsourceid', $contact->get('sourceid'));
+                                $jobpersistent->set('timenextrequestdelay', self::TIME_PERIOD_DELAY);
                                 $jobpersistent->set('lastsourcetimemodified', $contact->get('sourcemodified'));
                                 $jobpersistent->update();
                             } catch (moodle_exception $exception) {
                                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 $this->add_error($exception->getMessage());
-                                if ($exception instanceof coding_exception) {
+                                if ($exception instanceof coding_exception || $exception instanceof invalid_persistent_exception) {
                                    throw $exception;
                                 }
                             }
