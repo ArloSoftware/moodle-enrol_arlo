@@ -96,6 +96,30 @@ abstract class job {
     }
 
     /**
+     * Disable job.
+     *
+     * @return bool
+     * @throws \coding_exception
+     * @throws \enrol_arlo\invalid_persistent_exception
+     */
+    public function disable() {
+        $this->jobpersistent->set('disabled', 1);
+        return $this->jobpersistent->update();
+    }
+
+    /**
+     * Enable job.
+     *
+     * @return bool
+     * @throws \coding_exception
+     * @throws \enrol_arlo\invalid_persistent_exception
+     */
+    public function enable() {
+        $this->jobpersistent->set('disabled', 0);
+        return $this->jobpersistent->update();
+    }
+
+    /**
      * Get all error meessages.
      *
      * @return array
