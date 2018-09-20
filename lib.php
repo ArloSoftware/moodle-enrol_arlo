@@ -325,7 +325,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             $conditions
         );
         // Delete email queue information.
-        $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $instance->id));
+        $DB->delete_records('enrol_arlo_emailqueue', $conditions);
         // Time for the parent to do it's thang, yeow.
         parent::delete_instance($instance);
     }
