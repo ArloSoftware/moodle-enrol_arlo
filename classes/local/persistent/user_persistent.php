@@ -144,32 +144,59 @@ class user_persistent extends persistent {
     }
 
     /**
-     * Workaround method to load limited record. Want to take advantage of functionality
+     * Cheating the AR pattern here. Want to take advantage of functionality
      * in persistent but no easy way import all of core_user property definition.
      *
+     * user_persistent constructor.
      * @param int $id
      * @param stdClass|null $record
-     * @return static
      * @throws \dml_exception
      * @throws coding_exception
      */
-    public static function create_from($id = 0, stdClass $record = null) {
+    public function __construct($id = 0, stdClass $record = null) {
         global $DB;
+
         if ($id > 0) {
             $record = $DB->get_record(static::TABLE, ['id' => $id]);
         }
         if (!empty($record)) {
-            $compactedrecord = new stdClass();
-            $properties = array_keys(static::properties_definition());
-            foreach (get_object_vars($record) as $property => $value) {
-                if (in_array($property, $properties)) {
-                    $compactedrecord->{$property} = $value;
-                }
-            }
-            return new static(0, $compactedrecord);
-
+            static::unset_unused_properties($record);
         }
-        return new static();
+        parent::__construct(0, $record);
+    }
+
+    /**
+     * Unset unused user properties.
+     *
+     * @param stdClass $record
+     * @throws coding_exception
+     */
+    protected static function unset_unused_properties(stdClass $record) {
+        $properties = array_keys(static::properties_definition());
+        foreach (get_object_vars($record) as $property => $value) {
+            if (!in_array($property, $properties)) {
+                unset($record->{$property});
+            }
+        }
+    }
+
+    /**
+     * Cheating the AR pattern here. Want to take advantage of functionality
+     * in persistent but no easy way import all of core_user property definition.
+     *
+     * @param array $filters
+     * @return bool|user_persistent
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public static function get_record_and_unset($filters = array()) {
+        global $DB;
+
+        $record = $DB->get_record(static::TABLE, $filters);
+        if (!empty($record)) {
+            static::unset_unused_properties($record);
+        }
+        return $record ? new static(0, $record) : false;
     }
 
     /**
