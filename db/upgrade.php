@@ -41,7 +41,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     }
 
     // Add required persistent columns.
-    if ($oldversion < 2018091900) {
+    if ($oldversion < 2018092000) {
         $admin = get_admin();
 
         // Add information fields to enrol_arlo_contact table.
@@ -131,6 +131,11 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->change_field_precision($table, $field);
             // Launch rename field errorcount.
             $dbman->rename_field($table, $field, 'errorcounter');
+        }
+        // Conditionally launch drop field updateinternal.
+        $field = new xmldb_field('updateinternal');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
         }
         // Conditionally launch drop field lastpulltime.
         $field = new xmldb_field('lastpulltime');
@@ -330,7 +335,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->drop_table($instancetable);
         }
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2018091900, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2018092000, 'enrol', 'arlo');
     }
 
     return true;
