@@ -124,9 +124,7 @@ class contact_persistent extends persistent {
      * @throws coding_exception
      */
     public function get_associated_user() {
-        return user_persistent::get_record(
-            ['id' => $this->raw_get('userid')]
-        );
+        return user_persistent::get_record_and_unset(['id' => $this->raw_get('userid')]);
     }
 
 }
