@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Job using to update contact merge requests information.
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -38,8 +39,21 @@ use Exception;
 use coding_exception;
 use moodle_exception;
 
+/**
+ * Job using to update contact merge requests information.
+ *
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class contact_merge_requests_job extends job {
 
+    /**
+     * Run the job.
+     *
+     * @return bool|mixed
+     * @throws Exception
+     */
     public function run() {
         $pluginconfig = new arlo_plugin_config();
         $jobpersistent = $this->get_job_persistent();
