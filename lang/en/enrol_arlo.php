@@ -157,7 +157,7 @@ $string['longtime'] = 'This process can take a long time';
 $string['manualsynchronisenotice'] = 'This process can take a long time. Do not close you browser window. You will be redirected to enrolment methods page once the process has completed.';
 $string['locktimeout'] = 'The operation timed out while waiting for a lock';
 $string['messagenotsent'] = 'Message not sent';
-$string['messageprovider:alerts'] = 'Alert Arlo integration problems';
+$string['messageprovider:administratormessage'] = 'Admistrator notification of integration issues';
 $string['messagesent'] = 'Message sent';
 $string['managearlo'] = 'Manage Arlo';
 $string['matchbyarlocodeprimary'] = 'Arlo Contact CodePrimary';
@@ -189,6 +189,28 @@ If no match is found using any of the Methods a Moodle user account will be crea
 $string['newaccountdetails'] = 'New account details';
 $string['newuserdefaultemail'] = 'New user default email';
 $string['newuserdefaultemail_help'] = 'New user default email';
+$string['newaccountsubject'] = 'New user account';
+$string['newaccountfullmessage'] = 'Hi {$a->firstname},
+
+A new account has been created for you at \'{$a->sitename}\'
+and you have been issued with a new temporary password.
+
+Your current login information is now:
+   username: {$a->username}
+   password: {$a->newpassword}
+             (you will have to change your password
+              when you login for the first time)
+
+To start using \'{$a->sitename}\', login at
+   {$a->link}
+
+In most mail programs, this should appear as a blue link
+which you can just click on.  If that doesn\'t work,
+then cut and paste the address into the address
+line at the top of your web browser window.
+
+Cheers from the \'{$a->sitename}\' administrator,
+{$a->signoff}';
 $string['notifyexpiry'] = 'Notify expiry';
 $string['notok'] = 'Not OK';
 $string['notstarted'] = 'Not started';
@@ -275,4 +297,6 @@ $string['allowhiddencoursesdiabled'] = 'Allow hidden courses is disabled at site
 $string['contactresourcemissing'] = 'Contact resource missing from Registration.';
 $string['contactrecordmissing'] = 'Contact record missing.';
 $string['noassociateduser'] = 'No assocoated Moodle user account.';
+
+
 
