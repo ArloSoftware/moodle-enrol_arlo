@@ -41,7 +41,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     }
 
     // Add required persistent columns.
-    if ($oldversion < 2018092100) {
+    if ($oldversion < 2018092106) {
         $admin = get_admin();
 
         // Add information fields to enrol_arlo_contact table.
@@ -345,32 +345,34 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                 $contactsjob->save();
             }
 
-            // Migrate email queue data.
-            $rs = $DB->get_recordset('enrol_arlo_emailqueue');
-            foreach ($rs as $record) {
-                if ($record->type == 'newaccount') {
-                    $record->area = 'site';
-                    $record->instanceid = SITEID;
-                } else {
-                    $record->area = 'enrolment';
-                }
-                $DB->update_record('enrol_arlo_emailqueue', $record);
-            }
-            $rs->close();
-
             // Drop schedule table.
             $dbman->drop_table($scheduletable);
+
             // Drop instance table.
             $dbman->drop_table($instancetable);
-            // Conditionally drop templatelink table.
-            $templatelinktable = new xmldb_table('enrol_arlo_templatelink');
-            if ($dbman->table_exists($templatelinktable)) {
-                $dbman->drop_table($templatelinktable );
+        }
+
+        // Migrate email queue data.
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue');
+        foreach ($rs as $record) {
+            if ($record->type == "newaccount") {
+                $record->area = 'site';
+                $record->instanceid = SITEID;
+            } else {
+                $record->area = 'enrolment';
             }
+            $DB->update_record('enrol_arlo_emailqueue', $record, true);
+        }
+        $rs->close();
+
+        // Conditionally drop templatelink table.
+        $templatelinktable = new xmldb_table('enrol_arlo_templatelink');
+        if ($dbman->table_exists($templatelinktable)) {
+            $dbman->drop_table($templatelinktable );
         }
 
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2018092100, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2018092106, 'enrol', 'arlo');
     }
 
     return true;
