@@ -362,6 +362,11 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->drop_table($scheduletable);
             // Drop instance table.
             $dbman->drop_table($instancetable);
+            // Conditionally drop templatelink table.
+            $templatelinktable = new xmldb_table('enrol_arlo_templatelink');
+            if ($dbman->table_exists($templatelinktable)) {
+                $dbman->drop_table($templatelinktable );
+            }
         }
 
         // Arlo savepoint reached.
