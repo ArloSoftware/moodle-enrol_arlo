@@ -108,6 +108,10 @@ class user_persistent extends persistent {
                 'type' => PARAM_INT,
                 'default' => 1
             ],
+            'suspended' => [
+                'type' => PARAM_INT,
+                'default' => 1
+            ],
             'calendartype' => [
                 'type' => PARAM_TEXT,
                 'default' => core_user::get_property_default('calendartype')
