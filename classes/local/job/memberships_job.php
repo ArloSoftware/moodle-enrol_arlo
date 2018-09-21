@@ -29,13 +29,14 @@ defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
+use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\generator\username_generator;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\local\user_matcher;
 use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
-use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\local\persistent\contact_persistent;
@@ -45,8 +46,24 @@ use GuzzleHttp\Psr7\Request;
 use moodle_exception;
 use coding_exception;
 
+/**
+ * Memberships job responsible for handling enrolments, user creation and matching based on
+ * registration.
+ *
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class memberships_job extends job {
 
+    /**
+     * Run the Job.
+     *
+     * @return bool|mixed
+     * @throws coding_exception
+     * @throws invalid_persistent_exception
+     * @throws moodle_exception
+     */
     public function run() {
         $trace = self::get_trace();
         $plugin = api::get_enrolment_plugin();
@@ -54,28 +71,22 @@ class memberships_job extends job {
         $lockfactory = static::get_lock_factory();
         $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         if ($lock) {
+            $jobpersistent = $this->get_job_persistent();
             try {
-                $jobpersistent = $this->get_job_persistent();
                 $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
                 if (!$enrolmentinstance) {
                     $jobpersistent->set('disabled', 1);
                     $jobpersistent->save();
-                    throw new moodle_exception('No matching enrolment instance');
+                    throw new moodle_exception(get_string('nomatchingenrolmentinstance', 'enrol_arlo'));
                 }
                 if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
-                    $lock->release();
-                    $jobpersistent->set('timelastrequest', time());
-                    $jobpersistent->save();
-                    $this->add_reasons('Enrolment instance disabled.');
+                    $this->add_reasons(get_string('enrolmentinstancedisabled', 'enrol_arlo'));
                     return false;
                 }
                 if (!$pluginconfig->get('allowhiddencourses')) {
                     $course = get_course($enrolmentinstance->courseid);
                     if (!$course->visible) {
-                        $lock->release();
-                        $jobpersistent->set('timelastrequest', time());
-                        $jobpersistent->save();
-                        $this->add_reasons('Course is hidden. Allow hidden courses is not set.');
+                        $this->add_reasons(get_string('allowhiddencoursesdiabled', 'enrol_arlo'));
                         return false;
                     }
                 }
@@ -86,6 +97,7 @@ class memberships_job extends job {
                 $hasnext = true;
                 while ($hasnext) {
                     $hasnext = false; // Break paging by default.
+                    job_factory::get_job(['type' => 'contact_merge_requests'])->run(); // Update contact merge requests records every page.
                     $uri = new RequestUri();
                     $uri->setHost($pluginconfig->get('platform'));
                     $uri->setResourcePath($jobpersistent->get('endpoint'));
@@ -110,7 +122,6 @@ class memberships_job extends job {
                     if ($collection->count() > 0) {
                         foreach ($collection as $resource) {
                             try {
-                                /** @var $resource enrol_arlo\Arlo\AuthAPI\Resource\Registration */
                                 $sourceid = $resource->RegistrationID;
                                 $sourceguid = $resource->UniqueIdentifier;
                                 $sourcemodified = $resource->LastModifiedDateTime;
@@ -172,13 +183,20 @@ class memberships_job extends job {
                                 $contact->set('sourcemodified', $contactresource->LastModifiedDateTime);
                                 $contact->save();
 
+                                $user = static::get_user_from_registration($registration);
+                                print_object($user);
+                                continue;
+
+
+
                                 // Time to process registration.
-                                $status = static::process_registration($registration);
+                                //$status = static::process_registration($registration);
 
                                 // Update scheduling information on persistent after successfull save.
                                 $jobpersistent->set('timelastrequest', time());
                                 $jobpersistent->set('lastsourceid', $sourceid);
                                 $jobpersistent->set('lastsourcetimemodified', $sourcemodified);
+
                                 $jobpersistent->update();
 
                             } catch (moodle_exception $exception) {
@@ -195,30 +213,44 @@ class memberships_job extends job {
                 }
                 return true;
             } catch (moodle_exception $exception) {
+                debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                $this->add_error($exception->getMessage());
                 if ($exception instanceof invalid_persistent_exception || $exception instanceof coding_exception) {
                     throw $exception;
                 }
-                debugging($exception->getMessage(), DEBUG_DEVELOPER);
-                $this->add_error($exception->getMessage());
                 return false;
             } finally {
                 $lock->release();
-                // Update scheduling information.
-                $jobpersistent->set('timelastrequest', time());
-                $jobpersistent->update();
             }
         } else {
             throw new moodle_exception('locktimeout');
         }
     }
 
+    public static function get_user_from_registration(persistent $registration) {
+        $plugin = api::get_enrolment_plugin();
+        if ($registration->get('id') <= 0) {
+            throw new coding_exception('Registration must be valid record.');
+        }
+        $contact = $registration->get_contact();
+        if (!$contact) {
+            throw new coding_exception(get_string('contactrecordmissing', 'enrol_arlo'));
+        }
+        $contactmergerequests = contact_merge_request_persistent::find_active_requests_for_contact($contact->get('sourceguid'));
+        if ($contactmergerequests) {
+            static::process_contact_merge_requests($contact, $contactmergerequests);
+        }
+        return $contact;
+    }
+
     /**
      * @param persistent $registration
+     * @return bool
      * @throws \dml_exception
      * @throws coding_exception
+     * @throws moodle_exception
      */
     public static function process_registration(persistent $registration) {
-        /** @var $plugin \enrol_arlo_plugin */
         $plugin = api::get_enrolment_plugin();
         if ($registration->get('id') <= 0) {
             throw new coding_exception('Registration must be valid record.');
@@ -305,20 +337,109 @@ class memberships_job extends job {
 
     public static function process_contact_merge_requests(persistent $contact, array $contactmergerequests) {
         $status = true;
-        $destinationcontact = $contact;
+        $updatedcontact = $contact;
         foreach ($contactmergerequests as $contactmergerequest) {
-            /** @var $contactmergerequest contact_merge_request_persistent */
             $sourcecontact = $contactmergerequest->get_source_contact();
             $destinationcontact = $contactmergerequest->get_destination_contact();
-            // First stage: No source contact, a destination contact with no associated user.
-            if (!$sourcecontact && ($contact->get('sourceguid') == $destinationcontact->get('sourceguid'))) {
-                $contactmergerequest->set('active', 0);
-                $contactmergerequest->update();
-                $destinationcontact = $contact;
+            $sourceuser = $sourcecontact->get_associated_user();
+            $destinationuser = $destinationcontact->get_associated_user();
+            $sourceuserhasaccessed = ($sourceuser) ? $sourceuser->has_accessed_courses() : false;
+            $destinationuserhasaccessed = ($destinationuser) ? $destinationuser->has_accessed_courses() : false;
+            // No matching contacts, shouldn't happen.
+            if (!$sourcecontact && !$destinationcontact) {
                 continue;
             }
-            throw new coding_exception('TODO handler other scenerios');
+            // No source contact, a destination contact.
+            if (!$sourcecontact && $destinationcontact) {
+                if ($destinationuser) {
+                    $contactmergerequest->set('active', 0);
+                    $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
+                    $contactmergerequest->update();
+                }
+                $updatedcontact = $destinationcontact;
+                continue;
+            }
+            // Source contact, no destination contact.
+            if ($sourcecontact && !$destinationcontact) {
+                $updatedcontact = $sourcecontact;
+                continue;
+            }
+            // Both a source and a destination contacts.
+            if ($sourcecontact && $destinationcontact) {
+                // No source Moodle user, a destination Moodle user.
+                // Don't need to do anything as destination.
+                if (!$sourceuser && $destinationuser) {
+                    $contactmergerequest->set('active', 0);
+                    $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
+                    $contactmergerequest->update();
+                    $updatedcontact = $destinationcontact;
+                    continue;
+                }
+                // Source Moodle user, no destination Moodle user.
+                // Set the destination contact to be assoicated with source Moodle user.
+                if ($sourceuser && !$destinationuser) {
+                    $destinationcontact->set('userid', $sourceuser->get('id'));
+                    $destinationcontact->update();
+                    $contactmergerequest->set('active', 0);
+                    $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
+                    $contactmergerequest->update();
+                    $updatedcontact = $destinationcontact;
+                    continue;
+                }
+                // Both contacts have associated Moodle user accounts.
+                if ($sourceuser && $destinationuser) {
+                    // Both source and destination have never accessed.
+                    if (!$sourceuserhasaccessed && !$destinationuserhasaccessed) {
+                        $destinationcontact->set('userid', $destinationuser->get('id'));
+                        $destinationcontact->update();
+                        $sourceuser->set('suspended');
+                        $sourceuser->update();
+                        $sourcecontact->delete();
+                        $contactmergerequest->set('active', 0);
+                        $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
+                        $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
+                        $contactmergerequest->update();
+                        $updatedcontact = $destinationcontact;
+                        continue;
+                    }
+                    // Check users course access.
+                    if (!$sourceuserhasaccessed && $destinationuserhasaccessed) {
+                        // Source hasn't logged in but they have enrolments, break out. This need to be manually resolved.
+                        if ($sourceuser->has_enrolments()) {
+                            throw new moodle_exception('break out');
+                        }
+                        $sourceuser->set('suspended');
+                        $sourceuser->update();
+                        $sourcecontact->delete();
+                        $contactmergerequest->set('active', 0);
+                        $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
+                        $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
+                        $contactmergerequest->update();
+                        $updatedcontact = $destinationcontact;
+                        continue;
+                    }
+                    //
+                    if ($sourceuserhasaccessed && !$destinationuserhasaccessed) {
+                        // Source hasn't logged in but they have enrolments, break out. This need to be manually resolved.
+                        if ($sourceuser->has_enrolments()) {
+                            throw new moodle_exception('break out');
+                        }
+                    }
+                    //
+                    if ($sourceuserhasaccessed && $destinationuserhasaccessed) {
+                        throw new coding_exception('Need to handle');
+                    }
+                    mtrace('SOURCE');
+                    var_dump($sourceuser->has_accessed_courses());
+                    mtrace('DESTINATION');
+                    var_dump($destinationuser->has_accessed_courses());
+                    return;
+                } else {
+                    throw new coding_exception('Need to handle');
+                }
+            }
+            throw new coding_exception('Need to handle');
         }
-        return [$status, $destinationcontact];
+        return [$status, $updatedcontact];
     }
 }
