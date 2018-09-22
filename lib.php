@@ -111,9 +111,10 @@ class enrol_arlo_plugin extends enrol_plugin {
             if ($pluginconfig->get('emailsendimmediately')) {
                 $status = $manager->email_coursewelcome($instance, $user);
                 $deliverystatus = ($status) ? manager::EMAIL_STATUS_DELIVERED : manager::EMAIL_STATUS_FAILED;
-                $manager->add_email_to_queue(SITEID, $user->id, manager::EMAIL_TYPE_COURSE_WELCOME, $deliverystatus);
+                $manager->add_email_to_queue('enrolment', $instance->id, $user->id,
+                    manager::EMAIL_TYPE_COURSE_WELCOME, $deliverystatus);
             } else {
-                $manager->add_email_to_queue(SITEID, $user->id, manager::EMAIL_TYPE_COURSE_WELCOME);
+                $manager->add_email_to_queue('enrolment', $instance->id, manager::EMAIL_TYPE_COURSE_WELCOME);
             }
         }
     }

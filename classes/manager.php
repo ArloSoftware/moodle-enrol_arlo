@@ -27,8 +27,8 @@ use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\exception\instance_exception;
 use enrol_arlo\exception\invalidcontent_exception;
 use enrol_arlo\exception\lock_exception;
-use enrol_arlo\request\collection;
 use GuzzleHttp\Psr7\Response;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -911,13 +911,15 @@ class manager {
     /**
      * Queue a email type for later processing.
      *
-     * @param $enrolid
+     * @param $area
+     * @param $instanceid
      * @param $userid
      * @param $type
      * @param int $status
      * @return bool|int
+     * @throws \dml_exception
      */
-    public function add_email_to_queue($enrolid, $userid, $type, $status = self::EMAIL_STATUS_QUEUED) {
+    public function add_email_to_queue($area, $instanceid, $userid, $type, $status = self::EMAIL_STATUS_QUEUED) {
         global $DB;
 
         switch ($type) {
@@ -928,13 +930,15 @@ class manager {
             default: // Type not supported.
                 return false;
         }
-        $record             = new \stdClass();
-        $record->enrolid    = $enrolid;
-        $record->userid     = $userid;
-        $record->type       = $type;
-        $record->status     = $status;
-        $record->modified   = time();
-        $record->id         = $DB->insert_record('enrol_arlo_emailqueue', $record);
+        $record               = new \stdClass();
+        $record->area         = $area;
+        $record->instanceid   = $instanceid;
+        $record->userid       = $userid;
+        $record->type         = $type;
+        $record->status       = $status;
+        $record->timecreated  = time();
+        $record->timemodified = time();
+        $record->id           = $DB->insert_record('enrol_arlo_emailqueue', $record);
         return $record->id;
     }
 
@@ -1404,6 +1408,7 @@ class manager {
      * @param $userenrolment
      */
     public function process_expiration($instance, $userenrolment) {
+        global $DB;
         // Deal with expired accounts.
         $action = self::$plugin->get_config('expiredaction', ENROL_EXT_REMOVED_KEEP);
         if ($action == ENROL_EXT_REMOVED_SUSPENDNOROLES or $action == ENROL_EXT_REMOVED_SUSPEND) {
@@ -1425,7 +1430,7 @@ class manager {
                 // In any case remove all roles that belong to this instance and user.
                 role_unassign_all(array('userid' => $userenrolment->userid,
                     'contextid' => $userenrolment->contextid,
-                    'component' => 'enrol_'.$name,
+                    'component' => 'enrol_arlo',
                     'itemid' => $instance->id), true);
                 // Final cleanup of subcontexts if there are no more course roles.
                 if (0 == $DB->count_records('role_assignments', ['userid' => $userenrolment->userid, 'contextid' => $userenrolment->contextid])) {
@@ -1437,7 +1442,7 @@ class manager {
             }
             // Update the users enrolment status.
             self::$plugin->update_user_enrol($instance, $userenrolment->userid, ENROL_USER_SUSPENDED);
-            self::add_email_to_queue($instance->id, $userenrolment->userid, self::EMAIL_TYPE_NOTIFY_EXPIRY);
+            self::add_email_to_queue('enrolment', $instance->id, $userenrolment->userid, self::EMAIL_TYPE_NOTIFY_EXPIRY);
         }
     }
     /**

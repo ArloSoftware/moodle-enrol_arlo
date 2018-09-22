@@ -368,22 +368,25 @@ class user_persistent extends persistent {
     /**
      * Set user context, email and trigger new user event.
      *
+     * @throws \dml_exception
      * @throws coding_exception
      */
     protected function after_create() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $newuserid = $this->get('id');
         // Create a context for this user.
-        $usercontext = context_user::instance($newuserid);
+        context_user::instance($newuserid);
         // Send email. TODO refactor messaging.
         $manager = new manager();
         if ($pluginconfig->get('emailsendnewaccountdetails')) {
             if ($pluginconfig->get('emailsendimmediately')) {
                 $status = $manager->email_newaccountdetails(null, $this->to_record());
                 $deliverystatus = ($status) ? manager::EMAIL_STATUS_DELIVERED : manager::EMAIL_STATUS_FAILED;
-                $manager->add_email_to_queue(SITEID, $this->to_record()->id, manager::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
+                $manager->add_email_to_queue('site', SITEID, $this->to_record()->id,
+                    manager::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
             } else {
-                $manager->add_email_to_queue(SITEID, $this->to_record()->id, manager::EMAIL_TYPE_NEW_ACCOUNT);
+                $manager->add_email_to_queue('site', SITEID, $this->to_record()->id,
+                    manager::EMAIL_TYPE_NEW_ACCOUNT);
             }
         }
         // Trigger new user event.
