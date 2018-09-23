@@ -463,4 +463,14 @@ class manager {
         $rs->close();
     }
 
+    /**
+     * Output a progress message.
+     *
+     * @param $message the message to output.
+     * @param int $depth indent depth for this message.
+     */
+    private function trace($message, $depth = 0) {
+        self::$trace->output($message, $depth);
+    }
+
 }
