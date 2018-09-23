@@ -30,7 +30,6 @@ use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\local\client;
 use enrol_arlo\local\response_processor;
-use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\persistent\online_activity_persistent;
 use GuzzleHttp\Psr7\Request;
 use moodle_exception;
@@ -38,7 +37,7 @@ use moodle_exception;
 class online_activities_job extends job {
 
     public function run() {
-        $pluginconfig = new arlo_plugin_config();
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $jobpersistent = $this->get_job_persistent();
         try {
             $hasnext = true;
