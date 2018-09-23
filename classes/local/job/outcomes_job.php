@@ -97,7 +97,7 @@ class outcomes_job extends job {
                         $response = client::get_instance()->send_request($request);
                         // Failed, likely to be 400 or 409. TODO pull in values from new request.
                         if ($response->getStatusCode() != 200) {
-                            $jobpersistent->add_error($response->getReasonPhrase());
+                            $this->add_error($response->getReasonPhrase());
                             $registrationpersistent->add_error_message($response->getReasonPhrase());
                             $registrationpersistent->save();
                             // Don't want to break whole job, so moving along.
