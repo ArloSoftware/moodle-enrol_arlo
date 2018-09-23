@@ -54,7 +54,7 @@ use DateTime;
 
 class api {
 
-    /** @var MAXIMUM_ERROR_COUNT */
+    /** @var int MAXIMUM_ERROR_COUNT */
     const MAXIMUM_ERROR_COUNT = 20;
 
     /**
@@ -134,25 +134,36 @@ class api {
                    $timingdelaysql
                    AND (:timenorequest < (timenorequestsafter + timerequestsafterextension) OR timenorequestsafter = 0)";
         $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
-        foreach ($rs as $record) {
-            $jobpersistent = new job_persistent(0, $record);
-            $scheduledjob = job_factory::create_from_persistent($jobpersistent);
-            $trace->output($scheduledjob->get_job_run_identifier());
-            $status = $scheduledjob->run();
-            if (!$status) {
-                if ($scheduledjob->has_errors()) {
-                    $trace->output('Failed with errors.', 1);
-                    $jobpersistent->set_errors($scheduledjob->get_errors());
-                    $jobpersistent->save();
-                }
-                if ($scheduledjob->has_reasons()) {
-                    $trace->output('Failed with reasons.', 1);
-                    foreach ($scheduledjob->get_reasons() as $reason) {
-                        $trace->output($reason, 2);
+        if ($rs->valid()) {
+            foreach ($rs as $record) {
+                try {
+                    $jobpersistent = new job_persistent(0, $record);
+                    $scheduledjob = job_factory::create_from_persistent($jobpersistent);
+                    $trace->output($scheduledjob->get_job_run_identifier());
+                    $scheduledjob->set_trace($trace);
+                    $status = $scheduledjob->run();
+                    if (!$status) {
+                        if ($scheduledjob->has_errors()) {
+                            $trace->output('Failed with errors.', 1);
+                            $jobpersistent->set_errors($scheduledjob->get_errors());
+                            $jobpersistent->save();
+                        }
+                        if ($scheduledjob->has_reasons()) {
+                            $trace->output('Failed with reasons.', 1);
+                            foreach ($scheduledjob->get_reasons() as $reason) {
+                                $trace->output($reason, 2);
+                            }
+                        }
+                    } else {
+                        $trace->output('Completed', 1);
+                    }
+                } catch (moodle_exception $exception) {
+                    if ($exception->getMessage() == 'error/locktimeout') {
+                        $trace->output('Operation is currently locked by another process.');
+                    } else {
+                        throw $exception;
                     }
                 }
-            } else {
-                $trace->output('Completed', 1);
             }
         }
         $rs->close();
