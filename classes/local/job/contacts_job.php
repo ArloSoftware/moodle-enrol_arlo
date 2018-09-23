@@ -123,7 +123,7 @@ class contacts_job extends job {
                                 $contact->set('sourcecreated', $contactresource->CreatedDateTime);
                                 $contact->set('sourcemodified', $contactresource->LastModifiedDateTime);
                                 // Update user record.
-                                $user = user_persistent::create_from($contact->get('userid'));
+                                $user = user_persistent::get_record_and_unset(['id' => $contact->get('userid')]);
                                 if ($user->get('id') <= 0) {
                                     $contact->set('userassociationfailure', 1);
                                     $contact->update();
