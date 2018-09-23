@@ -115,20 +115,4 @@ class contact_merge_request_persistent extends persistent {
         );
     }
 
-    /**
-     * Get active Contact Merge Requests where contact is a source or destination.
-     *
-     * @param $contactguid
-     * @return \core\persistent[]
-     */
-    public static function find_active_requests_for_contact($contactguid) {
-        $conditions = [
-            'sourcecontactguid' => $contactguid,
-            'destinationcontactguid' => $contactguid,
-            'active' => 1
-        ];
-        $select = "sourcecontactguid = :sourcecontactguid OR destinationcontactguid = :destinationcontactguid AND active = :active";
-        return static::get_records_select($select, $conditions, 'sourceid');
-    }
-
 }
