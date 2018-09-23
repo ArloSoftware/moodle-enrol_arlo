@@ -80,7 +80,7 @@ class username_generator {
                     $username = static::create_from_email_address($email, $randmax);
                     break;
                 default:
-                    throw new moodle_exception('Failed to generate username');
+                    throw new moodle_exception('failedtogenerateusername');
             }
             $username = core_text::strtolower($username);
             $exists = $DB->get_record('user', ['username' => $username]);
