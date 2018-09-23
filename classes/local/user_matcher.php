@@ -95,7 +95,8 @@ class user_matcher {
         $conditions = [
             'firstname' => $firstname,
             'lastname' => $lastname,
-            'email' => $email
+            'email' => $email,
+            'deleted' => 0
         ];
         return $DB->get_records_select('user', $select, $conditions);
     }
@@ -114,7 +115,7 @@ class user_matcher {
         if (empty($idnumber)) {
             throw new coding_exception('IDNumber parameter is empty after being cleaned.');
         }
-        return $DB->get_records('user', ['idnumber' => $idnumber]);
+        return $DB->get_records('user', ['idnumber' => $idnumber, 'deleted' => 0]);
     }
 
 }
