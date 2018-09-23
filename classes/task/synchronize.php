@@ -25,9 +25,11 @@
 
 namespace enrol_arlo\task;
 
+use enrol_arlo\api;
+use enrol_arlo\manager;
+
 defined('MOODLE_INTERNAL') || die();
 
-use enrol_arlo\api;
 
 class synchronize extends \core\task\scheduled_task {
 
@@ -50,6 +52,9 @@ class synchronize extends \core\task\scheduled_task {
         }
         api::run_scheduled_jobs();
         api::run_cleanup();
+        $manager = new manager();
+        $manager->process_expirations();
+        $manager->process_email_queue();
         return;
     }
 

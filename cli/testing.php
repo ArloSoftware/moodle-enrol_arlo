@@ -58,39 +58,39 @@ Example:
     die;
 }
 
+use enrol_arlo\api;
+use enrol_arlo\local\factory\job_factory;
+use enrol_arlo\local\persistent\job_persistent;
+use enrol_arlo\local\generator\username_generator;
+
 // Ensure errors are well explained.
 set_debugging(DEBUG_DEVELOPER, true);
 
-if (!enrol_is_enabled('arlo')) {
-    cli_error(get_string('pluginnotenabled', 'enrol_arlo'), 2);
-}
+$interactive = empty($options['non-interactive']);
 
 cron_setup_user();
 
+$manualoverride = $options['manual'];
 if (empty($options['verbose'])) {
     $trace = new null_progress_trace();
 } else {
     $trace = new text_progress_trace();
 }
 
-$manualoverride = $options['manual'];
-$time = null;
-if ($manualoverride) {
-    $time = time() + 1800; // 30 minutes in the future.
-}
-$interactive = empty($options['non-interactive']);
-if ($interactive) {
-    cli_writeln('Run Arlo/Moodle synchronisation');
-    $prompt = get_string('cliyesnoprompt', 'admin');
-    $input = cli_input($prompt, '',
-        array(get_string('clianswerno', 'admin'), get_string('cliansweryes', 'admin')));
-    if ($input == get_string('clianswerno', 'admin')) {
-        exit(1);
+//api::run_scheduled_jobs(null, null, $trace);
+//die;
+$jps = job_persistent::get_records(['type' => 'memberships']);//, 'instanceid' => 24
+foreach ($jps as $jp) {
+    $job = job_factory::create_from_persistent($jp);
+    $job->set_trace($trace);
+    $status = $job->run();
+    $trace->output($job->get_job_run_identifier());
+    if (!$status) {
+        mtrace('sup dawg, you died');
+        print_object($job->get_errors());
+        print_object($job->get_reasons());
+    } else {
+        mtrace('sup dawg, allgood');
     }
+
 }
-enrol_arlo\api::run_scheduled_jobs(null, null, $trace);
-enrol_arlo\api::run_cleanup();
-$manager = new enrol_arlo\manager();
-$manager->process_expirations();
-$manager->process_email_queue();
-exit(0);
