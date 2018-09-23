@@ -101,6 +101,10 @@ class contact_persistent extends persistent {
                 'type' => PARAM_TEXT,
                 'null' => NULL_ALLOWED
             ],
+            'usercreationfailure' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
             'userassociationfailure' => [
                 'type' => PARAM_INT,
                 'default' => 0
