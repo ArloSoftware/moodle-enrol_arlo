@@ -305,7 +305,7 @@ class user_persistent extends persistent {
      * @throws coding_exception
      */
     public function has_accessed() {
-        return ($this->raw_get('lastaccessed')) ? true : false;
+        return ($this->raw_get('lastaccess')) ? true : false;
     }
 
     /**
