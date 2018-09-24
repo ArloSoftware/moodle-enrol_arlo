@@ -46,7 +46,7 @@ class contact_merge_requests_coordinator {
     /** @var contact_persistent $contact */
     protected $contact;
 
-    /** @var \core\persistent[] @var */
+    /** @var array $contactmergerequests */
     protected $contactmergerequests;
 
     /** @var bool $status */
@@ -80,7 +80,7 @@ class contact_merge_requests_coordinator {
      * Get active Contact Merge Requests where contact is a source or destination in order of sourceid ASC.
      *
      * @param contact_persistent $contact
-     * @return \core\persistent[]
+     * @return array
      * @throws coding_exception
      */
     public static function get_active_requests_for_contact(contact_persistent $contact) {
