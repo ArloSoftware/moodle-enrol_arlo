@@ -50,6 +50,7 @@ $string['associatetemplatewithcourse'] = 'Associate Arlo Template with Moodle co
 $string['backtoenrolmentmethods'] = 'Back to enrolment methods';
 $string['configuration'] = 'Configuration';
 $string['changessaved'] = 'Changes saved';
+$string['codeprimary'] = 'Code primary';
 $string['communications'] = 'Communications';
 $string['completed'] = 'Completed';
 $string['coursewelcome'] = 'Course welcome';
@@ -86,7 +87,7 @@ Moodle cannot connect to Arlo API: 401 Unauthorized
 There is something wrong with your connection settings. Please check that the api username and api password are correct.
 Moodle Arlo connection settings: {$a->url}
 ';
-
+$string['failures'] = 'Failures';
 $string['error_duplicateusers_subject'] = 'Duplicate users found in Moodle when matching Arlo Contact';
 $string['error_duplicateusers_smallmessage'] = 'Duplicate users found in Moodle when matching Arlo Contact';
 $string['error_duplicateusers_full'] = '
@@ -254,6 +255,7 @@ $string['synchroniseinstancefor'] = 'Manually synchronise Arlo enrolments and ou
 $string['synctask'] = 'Synchronization of Arlo data';
 $string['template'] = 'Template';
 $string['timelogged'] = 'Time logged';
+$string['timemodified'] = 'Time modified';
 $string['type'] = 'Type';
 $string['typeofevent'] = 'Type of Event';
 $string['unknown'] = 'Unknown';
@@ -296,7 +298,15 @@ $string['enrolmentinstancedisabled'] = 'Enrolment instance disabled.';
 $string['allowhiddencoursesdiabled'] = 'Allow hidden courses is disabled at site configuration.';
 $string['contactresourcemissing'] = 'Contact resource missing from Registration.';
 $string['contactrecordmissing'] = 'Contact record missing.';
-$string['noassociateduser'] = 'No assocoated Moodle user account.';
-
+$string['noassociateduser'] = 'No associated Moodle user account.';
+$string['unsuccessfulenrolment'] = 'Unsuccessful enrolment';
+$string['unsuccessfulenrolments'] = 'Unsuccessful enrolments';
+$string['unsuccessfulenrolmentof'] = 'Unsuccessful enrolment of {$a->fullname} into {$a->code}';
+$string['report'] = 'Report';
+$string['viewreport'] = 'View report';
+$string['sourcecontact'] = 'Source contact';
+$string['destinationcontact'] = 'Destination contact';
+$string['browseassociateduser'] = 'Browse associated user account';
+$string['returntounsucessfulenrolments'] = 'Return to unsucessful enrolments';
 
 

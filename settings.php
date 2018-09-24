@@ -85,6 +85,17 @@ if ($hassiteconfig) {
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlocommunications',
             $name = get_string('communications', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/communications.php')));
+
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlounsuccessfulenrolments',
+            get_string('unsuccessfulenrolments', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'))
+        );
+
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlounsuccessfulenrolment',
+            get_string('unsuccessfulenrolment', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/unsuccessfulenrolment.php'),
+            'moodle/site:config', true)
+        );
     }
 
 }
