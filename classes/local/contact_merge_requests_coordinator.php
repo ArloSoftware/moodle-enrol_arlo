@@ -72,7 +72,7 @@ class contact_merge_requests_coordinator {
             'destinationcontactguid' => $contactguid,
             'active' => 1
         ];
-        $select = "(sourcecontactguid = :sourcecontactguid OR destinationcontactguid = :destinationcontactguid) OR active = :active";
+        $select = "(sourcecontactguid = :sourcecontactguid OR destinationcontactguid = :destinationcontactguid) AND active = :active";
         return contact_merge_request_persistent::count_records_select($select, $conditions) ? true : false;
     }
 
@@ -93,7 +93,7 @@ class contact_merge_requests_coordinator {
             'destinationcontactguid' => $contactguid,
             'active' => 1
         ];
-        $select = "(sourcecontactguid = :sourcecontactguid OR destinationcontactguid = :destinationcontactguid) OR active = :active";
+        $select = "(sourcecontactguid = :sourcecontactguid OR destinationcontactguid = :destinationcontactguid) AND active = :active";
         return contact_merge_request_persistent::get_records_select($select, $conditions, 'sourcecreated ASC');
     }
 
