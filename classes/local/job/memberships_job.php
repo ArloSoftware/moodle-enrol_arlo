@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
+use enrol_arlo\local\administrator_notification;
 use enrol_arlo\local\contact_merge_requests_coordinator;
 use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\generator\username_generator;
@@ -196,6 +197,7 @@ class memberships_job extends job {
                                     $registration->update();
                                     $contact->set('userassociationfailure', 1);
                                     $contact->update();
+                                    administrator_notification::send_unsuccessful_enrolment_message();
                                     throw new moodle_exception('enrolmentfailure');
                                 }
                                 // Get associated user.
@@ -212,6 +214,7 @@ class memberships_job extends job {
                                         $registration->update();
                                         $contact->set('userassociationfailure', 1);
                                         $contact->save();
+                                        administrator_notification::send_unsuccessful_enrolment_message();
                                         throw new moodle_exception('morethanoneusermatches');
                                     }
                                     // Associate to Moodle account.
