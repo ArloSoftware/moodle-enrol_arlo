@@ -127,16 +127,7 @@ $string['error_invalidcredentials_fullhtml'] = '
 <br>
 <p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
 <p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
-$string['error_incorrectcontenttype_subject'] = '[enrol/arlo] Incorrect Content-Type';
-$string['error_incorrectcontenttype_smallmessage'] = '[enrol/arlo] Incorrect Content-Type';
-$string['error_incorrectcontenttype_full'] = '
-Plugin detected Incorrect Content-Type in Response from Arlo API.
 
-Response Content-type: {$a->contenttype}';
-$string['error_incorrectcontenttype_fullhtml'] = '
-<p>Plugin detected Incorrect Content-Type in Response from Arlo API.<p>
-<br>
-<p>Response Content-type: {$a->contenttype}</p>';
 $string['expiredaction'] = 'Enrolment expiration action';
 $string['expirynotify'] = 'Notify user of enrolment expiration';
 $string['expirynotify_help'] = 'This setting determines whether enrolment expiry notification messages are sent.';
@@ -158,7 +149,7 @@ $string['longtime'] = 'This process can take a long time';
 $string['manualsynchronisenotice'] = 'This process can take a long time. Do not close you browser window. You will be redirected to enrolment methods page once the process has completed.';
 $string['locktimeout'] = 'The operation timed out while waiting for a lock';
 $string['messagenotsent'] = 'Message not sent';
-$string['messageprovider:administratormessage'] = 'Admistrator notification of integration issues';
+$string['messageprovider:administratornotification'] = 'Admistrator notification of integration issues';
 $string['messagesent'] = 'Message sent';
 $string['managearlo'] = 'Manage Arlo';
 $string['matchbyarlocodeprimary'] = 'Arlo Contact CodePrimary';
@@ -309,4 +300,9 @@ $string['destinationcontact'] = 'Destination contact';
 $string['browseassociateduser'] = 'Browse associated user account';
 $string['returntounsucessfulenrolments'] = 'Return to unsucessful enrolments';
 
+$string['unsuccessfulenrolment_subject'] = 'Unsuccessful enrolment of Arlo contact';
+$string['unsuccessfulenrolment_fullmessage'] = '
+Unsuccessful enrolment of Arlo contact, this may be due to duplicate matching Moodle user accounts or Moodle account could not be created due to site configuration settings.
 
+Please check report {$a->report} for more information.';
+$string['unsuccessfulenrolment_smallmessage'] = 'Unsuccessful enrolment of Arlo contact, please check report {$a->report}';
