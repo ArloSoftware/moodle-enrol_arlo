@@ -27,30 +27,16 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
-use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
-use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
-use enrol_arlo\Arlo\AuthAPI\RequestUri;
-use enrol_arlo\local\client;
+use enrol_arlo\local\administrator_notification;
 use enrol_arlo\local\factory\job_factory;
-use enrol_arlo\local\job\job;
 use enrol_arlo\local\persistent\job_persistent;
-use enrol_arlo\local\persistent\contact_merge_request_persistent;
-use enrol_arlo\local\persistent\event_persistent;
-use enrol_arlo\local\persistent\online_activity_persistent;
 use enrol_arlo_plugin;
-use enrol_arlo\local\config\arlo_plugin_config;
-use Exception;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
-use stdClass;
-use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
 use moodle_exception;
 use moodle_url;
 use progress_trace;
 use null_progress_trace;
-use core_date;
 use core_user;
-use DateTime;
+
 
 class api {
 
@@ -98,20 +84,8 @@ class api {
             $apitimelastrequest = $pluginconfig->get('apitimelastrequest');
             $apierrorcountresetdelay = $pluginconfig->get('apierrorcountresetdelay');
             if (time() < ($apitimelastrequest + $apierrorcountresetdelay)) {
-                $url = new moodle_url('/admin/settings.php', ['section' => 'enrolsettingsarlo']);
-                $noreplyuser = core_user::get_noreply_user();
-                $subject = get_string(
-                    "httpstatuserror_{$apistatus}_subject",
-                    'enrol_arlo',
-                    ['url' => $url->out()]
-                );
-                $messagetext = get_string(
-                    "httpstatuserror_{$apistatus}_fullmessage",
-                    'enrol_arlo',
-                    ['url' => $url->out()]
-                );
-                foreach (get_admins() as $admin) {
-                    email_to_user($admin, $noreplyuser, $subject, $messagetext);
+                if ($apistatus == 401 || $apistatus == 403) {
+                    administrator_notification::send_invalid_credentials_message();
                 }
                 return false;
             } else {
