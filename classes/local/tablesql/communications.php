@@ -32,7 +32,7 @@ class communications extends table_sql {
         $headers[] = get_string('type', 'enrol_arlo');
         $columns[] = 'status';
         $headers[] = get_string('status');
-        $columns[] = 'modified';
+        $columns[] = 'timemodified';
         $headers[] = get_string('modified');
 
         $this->define_columns($columns);
@@ -40,21 +40,21 @@ class communications extends table_sql {
         $this->useridfield = 'userid';
         $this->define_baseurl("/enrol/arlo/admin/communications.php");
         $this->is_collapsible = false;
-        $this->sort_default_column = 'modified';
+        $this->sort_default_column = 'timemodified';
         $this->sort_default_order  = SORT_DESC;
         $this->set_count_sql('SELECT COUNT(*) FROM {enrol_arlo_emailqueue}', array());
         $fields = 'eq.id,';
         $fields .= get_all_user_name_fields(true, 'u');
-        $fields .= ',eq.userid,eq.type,eq.status,eq.modified';
+        $fields .= ',eq.userid,eq.type,eq.status,eq.timemodified';
         $from = "{enrol_arlo_emailqueue} eq JOIN {user} u ON u.id = eq.userid";
-        $this->set_sql($fields, $from, 'modified <> 0');
+        $this->set_sql($fields, $from, 'eq.id <> 0');
         $this->no_sorting('enrolid');
         $this->no_sorting('userid');
         $this->pageable(true);
 
     }
-    public function col_modified($values) {
-        return userdate($values->modified);
+    public function col_timemodified($values) {
+        return userdate($values->timemodified);
     }
     public function col_status($values) {
         switch ($values->status) {
