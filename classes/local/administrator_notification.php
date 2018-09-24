@@ -48,6 +48,7 @@ class administrator_notification {
             $extendedproperties = false;
         }
         $url = new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php');
+        $params = ['report' => $url->out()];
         foreach ($admins as $admin) {
             $message                    = new message();
             $message->component         = 'enrol_arlo';
@@ -55,15 +56,53 @@ class administrator_notification {
             $message->userfrom          = core_user::get_noreply_user();
             $message->userto            = $admin;
             $message->subject           = get_string('unsuccessfulenrolment_subject', 'enrol_arlo');
-            $message->fullmessage       = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', ['report' => $url->out()]);
+            $message->fullmessage       = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', $params);
             $message->fullmessageformat = FORMAT_PLAIN;
-            $message->fullmessagehtml   = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', ['report' => $url->out()]);
-            $message->smallmessage      = get_string('unsuccessfulenrolment_smallmessage', 'enrol_arlo', ['report' => $url->out()]);
+            $message->fullmessagehtml   = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', $params);
+            $message->smallmessage      = get_string('unsuccessfulenrolment_smallmessage', 'enrol_arlo', $params);
             $message->notification      = 1;
             if ($extendedproperties) {
                 $message->courseid          = SITEID;
                 $message->contexturl        = $url;
                 $message->contexturlname    = 'Report';
+            }
+            message_send($message);
+        }
+    }
+
+    /**
+     * Invalid credentials adminstrator notification.
+     *
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    public static function send_invalid_credentials_message() {
+        $admins = get_admins();
+        if (empty($admins)) {
+            return;
+        }
+        $extendedproperties = true;
+        if (moodle_major_version() < 3.5) {
+            $extendedproperties = false;
+        }
+        $url = new moodle_url('/admin/settings.php', ['section' => 'enrolsettingsarlo']);
+        $params = ['url' => $url->out()];
+        foreach ($admins as $admin) {
+            $message                    = new message();
+            $message->component         = 'enrol_arlo';
+            $message->name              = 'administratornotification';
+            $message->userfrom          = core_user::get_noreply_user();
+            $message->userto            = $admin;
+            $message->subject           = get_string('invalidcredentials_subject', 'enrol_arlo');
+            $message->fullmessage       = get_string('invalidcredentials_fullmessage', 'enrol_arlo', $params);
+            $message->fullmessageformat = FORMAT_PLAIN;
+            $message->fullmessagehtml   = get_string('invalidcredentials_fullmessagehtml', 'enrol_arlo', $params);
+            $message->smallmessage      = get_string('invalidcredentials_smallmessage', 'enrol_arlo', $params);
+            $message->notification      = 1;
+            if ($extendedproperties) {
+                $message->courseid          = SITEID;
+                $message->contexturl        = $url;
+                $message->contexturlname    = 'Connection';
             }
             message_send($message);
         }

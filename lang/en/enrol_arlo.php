@@ -79,14 +79,6 @@ $string['errorselecttype'] = 'You must select an Type';
 $string['errorselectevent'] = 'You must select an Event';
 $string['errorselectonlineactvity'] = 'You must select an Online Activity';
 $string['errorselecttemplate'] = 'Please select a Event Template';
-
-$string['httpstatuserror_401_subject'] = 'Moodle cannot connect to Arlo API';
-$string['httpstatuserror_401_fullmessage'] = '
-Moodle cannot connect to Arlo API: 401 Unauthorized
-
-There is something wrong with your connection settings. Please check that the api username and api password are correct.
-Moodle Arlo connection settings: {$a->url}
-';
 $string['failures'] = 'Failures';
 $string['error_duplicateusers_subject'] = 'Duplicate users found in Moodle when matching Arlo Contact';
 $string['error_duplicateusers_smallmessage'] = 'Duplicate users found in Moodle when matching Arlo Contact';
@@ -114,19 +106,6 @@ IDNumber:   {$a->idnumber}
 </pre>
 <br>
 <p>A new account has been created for this user.</p>';
-$string['error_invalidcredentials_subject'] = 'Moodle cannot connect to Arlo API';
-$string['error_invalidcredentials_smallmessage'] = 'Moodle cannot connect to Arlo API. Please check connection settings: {$a->url}';
-$string['error_invalidcredentials_full'] = '
-Moodle cannot connect to Arlo API
-
-There is something wrong with your connection settings. Please check that the api username and api password are correct.
-Moodle Arlo connection settings: {$a->url}
-';
-$string['error_invalidcredentials_fullhtml'] = '
-<h3>Moodle cannot connect to Arlo API</h3>
-<br>
-<p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
-<p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
 
 $string['expiredaction'] = 'Enrolment expiration action';
 $string['expirynotify'] = 'Notify user of enrolment expiration';
@@ -274,7 +253,7 @@ $string['httpstatus:302'] = 'Found';
 $string['httpstatus:400'] = 'Bad Request';
 $string['httpstatus:401'] = 'Unauthorized';
 $string['httpstatus:403'] = 'Forbidden';
-$string['httpstatus:403'] = 'Not Found';
+$string['httpstatus:404'] = 'Not Found';
 $string['httpstatus:406'] = 'Unacceptable';
 $string['httpstatus:409'] = 'Conflict';
 $string['httpstatus:415'] = 'Unsupported Media Type';
@@ -306,3 +285,16 @@ Unsuccessful enrolment of Arlo contact, this may be due to duplicate matching Mo
 
 Please check report {$a->report} for more information.';
 $string['unsuccessfulenrolment_smallmessage'] = 'Unsuccessful enrolment of Arlo contact, please check report {$a->report}';
+$string['invalidcredentials_subject'] = 'Moodle cannot connect to Arlo API';
+$string['invalidcredentials_smallmessage'] = 'Moodle cannot connect to Arlo API. Please check connection settings: {$a->url}';
+$string['invalidcredentials_fullmessage'] = '
+Moodle cannot connect to Arlo API
+
+There is something wrong with your connection settings. Please check that the api username and api password are correct.
+Moodle Arlo connection settings: {$a->url}
+';
+$string['invalidcredentials_fullmessagehtml'] = '
+<h3>Moodle cannot connect to Arlo API</h3>
+<br>
+<p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
+<p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
