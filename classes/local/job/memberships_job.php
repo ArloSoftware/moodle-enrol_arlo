@@ -164,6 +164,8 @@ class memberships_job extends job {
                                     $registration->set('sourceonlineactivityid', $onlineactivityresource->OnlineActivityID);
                                     $registration->set('sourceonlineactivityguid', $onlineactivityresource->UniqueIdentifier);
                                 }
+                                // Reset registration failure flag.
+                                $registration->set('enrolmentfailure', 0);
                                 $registration->save();
 
                                 // Check for existing contact record.
@@ -182,8 +184,10 @@ class memberships_job extends job {
                                 $contact->set('sourcestatus', $contactresource->Status);
                                 $contact->set('sourcecreated', $contactresource->CreatedDateTime);
                                 $contact->set('sourcemodified', $contactresource->LastModifiedDateTime);
+                                // Reset contact failure flags.
+                                $contact->set('usercreationfailure', 0);
+                                $contact->set('userassociationfailure', 0);
                                 $contact->save();
-
                                 // Apply any contact merge requests.
                                 $coordinator = new contact_merge_requests_coordinator($contact);
                                 $status = $coordinator->apply_merge_requests();
@@ -192,7 +196,6 @@ class memberships_job extends job {
                                     $registration->update();
                                     $contact->set('userassociationfailure', 1);
                                     $contact->update();
-                                    // TODO send message.
                                     throw new moodle_exception('enrolmentfailure');
                                 }
                                 // Get associated user.
@@ -205,6 +208,8 @@ class memberships_job extends job {
                                     $matches = user_matcher::get_matches_based_on_preference($contact);
                                     $matchcount = count($matches);
                                     if ($matchcount > 1) {
+                                        $registration->set('enrolmentfailure', 1);
+                                        $registration->update();
                                         $contact->set('userassociationfailure', 1);
                                         $contact->save();
                                         throw new moodle_exception('morethanoneusermatches');
@@ -219,7 +224,8 @@ class memberships_job extends job {
                                         $user = user_persistent::get_record_and_unset(
                                             ['id' => $match->id, 'deleted' => 0]
                                         );
-                                    }// Create new user.
+                                    }
+                                    // Create new user.
                                     if ($matchcount == 0) {
                                         $user = new user_persistent();
                                         $username = username_generator::generate(
@@ -233,13 +239,15 @@ class memberships_job extends job {
                                 $user->set('firstname', $contact->get('firstname'));
                                 $user->set('lastname', $contact->get('lastname'));
                                 $user->set('email', $contact->get('email'));
+                                // Conditionally add codeprimary as idnumber.
                                 if (empty($user->get('idnumber'))) {
                                     $user->set('idnumber', 'codeprimary');
                                 }
                                 $user->set('phone1', $contact->get('phonemobile'));
                                 $user->set('phone2', $contact->get('phonework'));
+                                // Save contact information onto user account.
                                 $user->save();
-
+                                // Associate user account with registration.
                                 $registration->set('userid', $contact->get('userid'));
                                 $registration->save();
 
@@ -253,7 +261,6 @@ class memberships_job extends job {
                                     // Cleanup registration.
                                     $registration->delete();
                                 }
-
                                 // Update scheduling information on persistent after successfull save.
                                 $jobpersistent->set('timelastrequest', time());
                                 $jobpersistent->set('lastsourceid', $sourceid);
