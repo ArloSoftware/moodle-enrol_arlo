@@ -105,7 +105,7 @@ class contact_merge_request_persistent extends persistent {
         }
         $accessedcourses = $sourceuser->has_accessed_courses();
         if (!$accessedcourses) {
-            return false;
+            return true;
         }
         return false;
     }
