@@ -148,6 +148,7 @@ class contact_merge_requests_coordinator {
             return $this->status = true;
         }
         foreach ($this->contactmergerequests as $contactmergerequest) {
+
             $sourcecontact = $contactmergerequest->get_source_contact();
             $destinationcontact = $contactmergerequest->get_destination_contact();
             $sourceuser = false;
@@ -189,6 +190,19 @@ class contact_merge_requests_coordinator {
             }
             // Both source and destination have associated user accounts.
             if ($sourceuser && $destinationuser) {
+                if (!$sourceuser->has_course_enrolments() && !$destinationuser->has_course_enrolments()) {
+                    $sourceuser->set('suspended', 1);
+                    $sourceuser->update();
+                    // Remove source contact.
+                    $sourcecontact->delete();
+                    $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
+                    $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
+                    $contactmergerequest->set('active', 0);
+                    $contactmergerequest->update();
+                    $this->contact = $destinationcontact;
+                    $this->status = true;
+                    continue;
+                }
                 // No course enrolments for source user.
                 if (!$sourceuser->has_course_enrolments() && $destinationuser->has_course_enrolments()) {
                     // Suspend source user account.
