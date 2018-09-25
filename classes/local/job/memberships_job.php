@@ -199,6 +199,8 @@ class memberships_job extends job {
                                     $contact->update();
                                     administrator_notification::send_unsuccessful_enrolment_message();
                                     throw new moodle_exception('enrolmentfailure');
+                                } else {
+                                    $contact = $coordinator->get_contact();
                                 }
                                 // Get associated user.
                                 $user = user_persistent::get_record_and_unset(
@@ -250,10 +252,6 @@ class memberships_job extends job {
                                 $user->set('phone2', $contact->get('phonework'));
                                 // Save contact information onto user account.
                                 $user->save();
-                                // Associate user account with registration.
-                                $registration->set('userid', $contact->get('userid'));
-                                $registration->save();
-
                                 // Process enrolment.
                                 if (in_array($registration->get('sourcestatus'), [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])) {
                                     $plugin->enrol($enrolmentinstance, $user->to_record());
@@ -264,6 +262,11 @@ class memberships_job extends job {
                                     // Cleanup registration.
                                     $registration->delete();
                                 }
+                                // Associate user account with registration. Reset flags.
+                                $registration->set('userid', $contact->get('userid'));
+                                $registration->set('errormessage', '');
+                                $registration->set('enrolmentfailure', 0);
+                                $registration->save();
                                 // Update scheduling information on persistent after successfull save.
                                 $jobpersistent->set('timelastrequest', time());
                                 $jobpersistent->set('lastsourceid', $sourceid);
