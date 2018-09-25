@@ -86,14 +86,39 @@ class contact_merge_request_persistent extends persistent {
     }
 
     /**
+     * Can destination can merged on to source.
+     *
+     * @return bool
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function can_merge() {
+        /** @var contact_persistent $sourcecontact */
+        $sourcecontact = $this->get_source_contact();
+        if (!$sourcecontact) {
+            return true;
+        }
+        /** @var user_persistent $sourceuser*/
+        $sourceuser = $sourcecontact->get_associated_user();
+        if (!$sourceuser) {
+            return true;
+        }
+        $accessedcourses = $sourceuser->has_accessed_courses();
+        if (!$accessedcourses) {
+            return false;
+        }
+        return false;
+    }
+
+    /**
      * Get source contact persistent.
      *
-     * @return \core\persistent|false
+     * @return contact_persistent|false
      * @throws coding_exception
      */
     public function get_source_contact() {
         if (is_null($this->raw_get('sourcecontactguid'))) {
-            throw new coding_exception('Property sourcecontactguid not set');
+            throw new coding_exception('nosourcecontactguid');
         }
         return contact_persistent::get_record(
             ['sourceguid' => $this->raw_get('sourcecontactguid')]
@@ -103,7 +128,7 @@ class contact_merge_request_persistent extends persistent {
     /**
      * Get destination contact persistent.
      *
-     * @return \core\persistent|false
+     * @return contact_persistent|false
      * @throws coding_exception
      */
     public function get_destination_contact() {
