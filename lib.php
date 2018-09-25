@@ -32,7 +32,6 @@ require_once($CFG->dirroot . '/group/lib.php');
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
-use enrol_arlo\user;
 use enrol_arlo\manager;
 use enrol_arlo\api;
 use enrol_arlo\local\config\arlo_plugin_config;
@@ -94,6 +93,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @param stdClass $instance
      * @param stdClass $user
      * @throws coding_exception
+     * @throws dml_exception
      */
     public function enrol(stdClass $instance, stdClass $user) {
         $pluginconfig = $this->get_plugin_config();
@@ -309,8 +309,9 @@ class enrol_arlo_plugin extends enrol_plugin {
     /**
      * Delete plugin specific information.
      *
-     * @param stdClass $instance
-     * @return void
+     * @param object $instance
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function delete_instance($instance) {
         global $DB;
