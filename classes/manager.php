@@ -47,54 +47,6 @@ class manager {
     }
 
     /**
-     * Clean orphaned records.
-     *
-     * This is used to clean up stale records that can be left behind
-     * when a course or enrolment instance is deleted during a sync.
-     */
-    public function cleanup_orphaned_instances() {
-        global $DB;
-        // Get orphaned Arlo instance records.
-        $sql = "SELECT DISTINCT (eai.enrolid)
-                           FROM {enrol_arlo_instance} eai
-                      LEFT JOIN {enrol} e
-                             ON e.id = eai.enrolid
-                          WHERE e.id IS NULL";
-        $instances = $DB->get_records_sql($sql);
-        $instances = array_keys($instances);
-        // Get orphaned Arlo schedule records.
-        $sql = "SELECT DISTINCT (eas.enrolid)
-                           FROM {enrol_arlo_schedule} eas
-                      LEFT JOIN {enrol} e
-                             ON e.id = eas.enrolid
-                          WHERE eas.enrolid <> 0 AND e.id IS NULL;";
-        $schedules = $DB->get_records_sql($sql);
-        $schedules = array_keys($schedules);
-        // Get orphaned Arlo registration records.
-        $sql = "SELECT DISTINCT (ear.enrolid)
-                           FROM {enrol_arlo_registration} ear
-                      LEFT JOIN {enrol} e
-                             ON e.id = ear.enrolid
-                          WHERE e.id IS NULL";
-        $registrations = $DB->get_records_sql($sql);
-        $registrations = array_keys($registrations);
-        // Unique orphans, no associated Moodle enrolment instance.
-        $orphans = array_unique(array_merge($instances, $registrations));
-        foreach ($orphans as $orphan) {
-            if ($orphan) {
-                // Delete Arlo instance information.
-                $DB->delete_records('enrol_arlo_instance', array('enrolid' => $orphan));
-                // Delete scheduling information.
-                $DB->delete_records('enrol_arlo_schedule', array('enrolid' => $orphan));
-                // Delete associated registrations.
-                $DB->delete_records('enrol_arlo_registration', array('enrolid' => $orphan));
-                // Delete email queue information.
-                $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $orphan));
-            }
-        }
-    }
-
-    /**
      * Queue a email type for later processing.
      *
      * @param $area
