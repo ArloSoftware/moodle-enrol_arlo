@@ -50,8 +50,8 @@ class synchronize extends \core\task\scheduled_task {
         if (!enrol_is_enabled('arlo')) {
             return;
         }
-        api::run_scheduled_jobs();
         api::run_cleanup();
+        api::run_scheduled_jobs();
         $manager = new manager();
         $manager->process_expirations();
         $manager->process_email_queue();
