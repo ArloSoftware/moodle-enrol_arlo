@@ -151,11 +151,35 @@ class api {
      */
     public static function run_cleanup() {
         global $DB;
-        $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
+        $plugin = static::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        // Clean up stale request log entries.
         $period = $pluginconfig->get('requestlogcleanup');
         if ($period) {
             $time = time() - (86400 * $period);
             $DB->delete_records_select('enrol_arlo_requestlog', "timelogged < ?", [$time]);
+        }
+
+        // Clean up orphaned registrations.
+        $sql = "SELECT DISTINCT ear.enrolid
+                  FROM {enrol_arlo_registration} ear
+             LEFT JOIN {enrol} e ON e.id = ear.enrolid
+                 WHERE ear.enrolid <> 0 AND e.id IS NULL";
+        foreach($DB->get_records_sql($sql) as $record) {
+            $enrolid = $record->enrolid;
+            // Delete associated registrations.
+            $DB->delete_records('enrol_arlo_registration', ['enrolid' => $enrolid]);
+            // Delete job scheduling information.
+            $conditions = [
+                'area' => 'enrolment',
+                'instanceid' => $enrolid
+            ];
+            $DB->delete_records(
+                'enrol_arlo_scheduledjob',
+                $conditions
+            );
+            // Delete email queue information.
+            $DB->delete_records('enrol_arlo_emailqueue', $conditions);
         }
     }
 
