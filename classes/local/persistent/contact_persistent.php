@@ -124,7 +124,8 @@ class contact_persistent extends persistent {
     /**
      * Return the associated Moodle user account linked to this Arlo contact.
      *
-     * @return \core\persistent|false
+     * @return bool|user_persistent
+     * @throws \dml_exception
      * @throws coding_exception
      */
     public function get_associated_user() {
