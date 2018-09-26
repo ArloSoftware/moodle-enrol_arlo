@@ -34,13 +34,13 @@ defined('MOODLE_INTERNAL') || die();
 
 abstract class job {
 
-    /** @var TIME_PERIOD_DELAY time in seconds to delay next request. */
+    /** @var int TIME_PERIOD_DELAY time in seconds to delay next request. */
     const TIME_PERIOD_DELAY = 900; // 15 Minutes.
 
-    /** @var TIME_PERIOD_EXTENSION time in seconds to extend pass no more requests time. */
+    /** @var int TIME_PERIOD_EXTENSION time in seconds to extend pass no more requests time. */
     const TIME_PERIOD_EXTENSION = 259200; // 72 Hours.
 
-    /** @var TIME_LOCK_TIMEOUT time in seconds to wait for a lock before giving up. */
+    /** @var int TIME_LOCK_TIMEOUT time in seconds to wait for a lock before giving up. */
     const TIME_LOCK_TIMEOUT = 5; // 5 Seconds.
 
     /** @var array  */
