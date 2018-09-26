@@ -93,21 +93,21 @@ class contact_merge_request_persistent extends persistent {
      * @throws coding_exception
      */
     public function can_merge() {
-        /** @var contact_persistent $sourcecontact */
         $sourcecontact = $this->get_source_contact();
-        if (!$sourcecontact) {
-            return true;
+        $destinationcontact = $this->get_destination_contact();
+        if ($sourcecontact && $destinationcontact) {
+            $sourceuser = $sourcecontact->get_associated_user();
+            $destinationuser = $destinationcontact->get_associated_user();
+            if ($sourceuser && $destinationuser) {
+                if ($sourceuser->has_course_enrolments() && $destinationuser->has_course_enrolments()) {
+                    return false;
+                }
+                if ($sourceuser->has_accessed_courses() && $destinationuser->has_accessed_courses()) {
+                    return false;
+                }
+            }
         }
-        /** @var user_persistent $sourceuser*/
-        $sourceuser = $sourcecontact->get_associated_user();
-        if (!$sourceuser) {
-            return true;
-        }
-        $accessedcourses = $sourceuser->has_accessed_courses();
-        if (!$accessedcourses) {
-            return true;
-        }
-        return false;
+       return true;
     }
 
     /**
