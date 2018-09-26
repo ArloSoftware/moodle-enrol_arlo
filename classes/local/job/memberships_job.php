@@ -280,11 +280,6 @@ class memberships_job extends job {
                                     // Cleanup registration.
                                     $registration->delete();
                                 }
-                                // Associate user account with registration. Reset flags.
-                                $registration->set('userid', $contact->get('userid'));
-                                $registration->set('errormessage', '');
-                                $registration->set('enrolmentfailure', 0);
-                                $registration->save();
                                 // Update scheduling information on persistent after successfull save.
                                 $jobpersistent->set('timelastrequest', time());
                                 $jobpersistent->set('lastsourceid', $sourceid);
