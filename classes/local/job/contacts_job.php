@@ -108,8 +108,6 @@ class contacts_job extends job {
                                     throw new coding_exception(get_string('contactrecordmissing', 'enrol_arlo'));
                                 }
                                 if ($contact->get('userid') <= 0) {
-                                    $contact->set('userassociationfailure', 1);
-                                    $contact->update();
                                     throw new moodle_exception(get_string('noassociateduser', 'enrol_arlo'));
                                 }
                                 // Update contact record.
@@ -125,8 +123,6 @@ class contacts_job extends job {
                                 // Update user record.
                                 $user = user_persistent::get_record_and_unset(['id' => $contact->get('userid')]);
                                 if ($user->get('id') <= 0) {
-                                    $contact->set('userassociationfailure', 1);
-                                    $contact->update();
                                     throw new moodle_exception(get_string('noassociateduser', 'enrol_arlo'));
                                 }
                                 $user->set('firstname', $contact->get('firstname'));
