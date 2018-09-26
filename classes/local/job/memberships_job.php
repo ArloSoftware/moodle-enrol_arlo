@@ -33,6 +33,7 @@ use enrol_arlo\local\administrator_notification;
 use enrol_arlo\local\contact_merge_requests_coordinator;
 use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\generator\username_generator;
+use enrol_arlo\local\handler\contact_merge_requests_handler;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\local\persistent\user_persistent;
@@ -165,16 +166,19 @@ class memberships_job extends job {
                                     $registration->set('sourceonlineactivityid', $onlineactivityresource->OnlineActivityID);
                                     $registration->set('sourceonlineactivityguid', $onlineactivityresource->UniqueIdentifier);
                                 }
-                                // Reset registration failure flag.
-                                $registration->set('enrolmentfailure', 0);
-                                $registration->save();
-
                                 // Check for existing contact record.
                                 $contact = $registration->get_contact();
+                                // Create new contact.
                                 if (!$contact) {
                                     $contact = new contact_persistent();
                                     $contact->set('sourceid', $contactresource->ContactID);
                                     $contact->set('sourceguid', $contactresource->UniqueIdentifier);
+                                // Existing contact.
+                                } else {
+                                    // Set userid on registration.
+                                    if ($contact->get('userid') > 0) {
+                                        $registration->set('userid', $contact->get('userid'));
+                                    }
                                 }
                                 $contact->set('firstname', $contactresource->FirstName);
                                 $contact->set('lastname', $contactresource->LastName);
@@ -185,30 +189,29 @@ class memberships_job extends job {
                                 $contact->set('sourcestatus', $contactresource->Status);
                                 $contact->set('sourcecreated', $contactresource->CreatedDateTime);
                                 $contact->set('sourcemodified', $contactresource->LastModifiedDateTime);
-                                // Reset contact failure flags.
+                                // Reset contact failure flags and save contact record.
                                 $contact->set('usercreationfailure', 0);
                                 $contact->set('userassociationfailure', 0);
                                 $contact->save();
-                                // Apply any contact merge requests.
-                                $coordinator = new contact_merge_requests_coordinator($contact);
-                                $status = $coordinator->apply_merge_requests();
-                                if (!$status) {
+                                // Reset contact failure flags and save registration record.
+                                $registration->set('errormessage', '');
+                                $registration->set('enrolmentfailure', 0);
+                                $registration->save();
+
+                                // Load contact merge request handler.
+                                $handler = new contact_merge_requests_handler($contact);
+                                if ($handler->has_active_requests()) {
                                     $registration->set('enrolmentfailure', 1);
                                     $registration->update();
-                                    $contact->set('userassociationfailure', 1);
-                                    $contact->update();
                                     administrator_notification::send_unsuccessful_enrolment_message();
                                     throw new moodle_exception('enrolmentfailure');
-                                } else {
-                                    $contact = $coordinator->get_contact();
                                 }
-                                // Get associated user.
-                                $user = user_persistent::get_record_and_unset(
-                                    ['id' => $contact->get('userid'), 'deleted' => 0]
-                                );
-                                // Attempt to match or create.
-                                if (!$user) {
-                                    // Match.
+                                // Reload contact
+                                $contact = $registration->get_contact();
+                                // Fresh user.
+                                $user = new user_persistent();
+                                // No associated Moodle account. We need to match.
+                                if ($contact->get('userid') <= 0) {
                                     $matches = user_matcher::get_matches_based_on_preference($contact);
                                     $matchcount = count($matches);
                                     if ($matchcount > 1) {
@@ -232,7 +235,6 @@ class memberships_job extends job {
                                     }
                                     // Create new user.
                                     if ($matchcount == 0) {
-                                        $user = new user_persistent();
                                         $username = username_generator::generate(
                                             $contact->get('firstname'),
                                             $contact->get('lastname'),
@@ -240,7 +242,22 @@ class memberships_job extends job {
                                         );
                                         $user->set('username', $username);
                                     }
+                                // Associated Moodle user.
+                                } else {
+                                    // Load from contacts associated user.
+                                    $user = user_persistent::get_record_and_unset(
+                                        ['id' => $contact->get('userid'), 'deleted' => 0]
+                                    );
+                                    if (!$user) {
+                                        $registration->set('enrolmentfailure', 1);
+                                        $registration->update();
+                                        $contact->set('userassociationfailure', 1);
+                                        $contact->save();
+                                        administrator_notification::send_unsuccessful_enrolment_message();
+                                        throw new moodle_exception('userassociationfailure');
+                                    }
                                 }
+                                // Set properties on user.
                                 $user->set('firstname', $contact->get('firstname'));
                                 $user->set('lastname', $contact->get('lastname'));
                                 $user->set('email', $contact->get('email'));
@@ -252,6 +269,7 @@ class memberships_job extends job {
                                 $user->set('phone2', $contact->get('phonework'));
                                 // Save contact information onto user account.
                                 $user->save();
+
                                 // Process enrolment.
                                 if (in_array($registration->get('sourcestatus'), [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])) {
                                     $plugin->enrol($enrolmentinstance, $user->to_record());
