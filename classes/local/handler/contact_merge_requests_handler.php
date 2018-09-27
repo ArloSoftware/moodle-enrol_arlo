@@ -52,6 +52,9 @@ class contact_merge_requests_handler {
     /** @var contact_persistent[] $removecontacts */
     protected $removecontacts;
 
+    /** @var array $stack */
+    protected $stack;
+
     /**
      * Constructor.
      *
@@ -62,6 +65,24 @@ class contact_merge_requests_handler {
         $this->initialcontact = $contact;
         $this->currentdestinationcontact = $contact;
         $this->removecontacts = [];
+        $this->stack = [];
+    }
+
+    /**
+     * Add contact merge requests to processing stack.
+     *
+     * @param array $contactmergerequests
+     * @return array
+     */
+    protected function add_to_stack($contactmergerequests) {
+        if (is_array($contactmergerequests)) {
+            foreach ($contactmergerequests as $contactmergerequest) {
+                if ($contactmergerequest instanceof contact_merge_request_persistent) {
+                    $this->stack[] = $contactmergerequest;
+                }
+            }
+        }
+        return $this->stack;
     }
 
     /**
@@ -126,20 +147,21 @@ class contact_merge_requests_handler {
         return $this->initialcontact;
     }
 
-
     /**
      * @return bool
      * @throws coding_exception
      */
     public function apply_all_merge_requests() {
-        $contactmergerequests = $this->get_active_requests($this->initialcontact);
-        while ($contactmergerequests) {
-            $contactmergerequest = array_shift($contactmergerequests);
-
+        // Load active merge requests into stack for initial contact.
+        $this->add_to_stack($this->get_active_requests($this->initialcontact));
+        while ($this->stack) {
+            // Get first contact merge request of top for processing.
+            $contactmergerequest = array_shift($this->stack);
             // Set up required destination variables for checking against.
-            $destinationcontact= $contactmergerequest->get_destination_contact();
+            $destinationcontact = $contactmergerequest->get_destination_contact();
             if ($destinationcontact) {
                 $destinationuser = $destinationcontact->get_associated_user();
+                $this->currentdestinationcontact = $destinationcontact;
                 if ($destinationuser) {
                     $destinationuserhasenrolments = $destinationuser->has_course_enrolments();
                 } else {
@@ -162,8 +184,8 @@ class contact_merge_requests_handler {
                 $sourceuser = false;
                 $sourceuserhasenrolments = false;
             }
-            // Start evaluation.
-            switch(true) {
+            // Start evaluation. Using switch to take advantage of break.
+            switch (true) {
                 case ($sourceuserhasenrolments && $destinationuserhasenrolments):
                     return false;
                 case (!$sourceuserhasenrolments && $destinationuserhasenrolments):
@@ -173,7 +195,6 @@ class contact_merge_requests_handler {
                     }
                     if ($sourcecontact) {
                         // Source contacts to delete.
-                        //$sourcecontact->delete();
                         $this->removecontacts[] = $sourcecontact;
                     }
                     // Set active flag to done.
@@ -182,7 +203,7 @@ class contact_merge_requests_handler {
                     break;
                 case ($sourceuserhasenrolments && !$destinationuserhasenrolments):
                     if ($destinationcontact) {
-                        // Associated source user on destinaction contact.
+                        // Associated source user on destination contact.
                         $destinationcontact->set('userid', $sourceuser->get('id'));
                         $destinationcontact->update();
 
@@ -204,11 +225,12 @@ class contact_merge_requests_handler {
                 default:
                     throw new coding_exception('exceptiontime');
             }
+            $this->add_to_stack($sourcecontact);
         }
         // No active requests for current destination contact so exit.
         if ($this->removecontacts) {
-        foreach ($this->removecontacts as $contact) {
-            $contact->delete();
+            foreach ($this->removecontacts as $contact) {
+                $contact->delete();
             }
         }
         return true;
