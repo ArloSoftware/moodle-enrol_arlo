@@ -195,7 +195,7 @@ class contact_merge_requests_handler {
                     }
                     if ($sourcecontact) {
                         // Source contacts to delete.
-                        $this->removecontacts[] = $sourcecontact;
+                        $this->removecontacts[$sourcecontact->get('id')] = $sourcecontact;
                     }
                     // Set active flag to done.
                     $contactmergerequest->set('active', 0);
@@ -207,7 +207,7 @@ class contact_merge_requests_handler {
                         $destinationcontact->set('userid', $sourceuser->get('id'));
                         $destinationcontact->update();
 
-                        $this->removecontacts[] = $sourcecontact;
+                        $this->removecontacts[$sourcecontact->get('id')] = $sourcecontact;
 
                         // Suspend destination user.
                         $destinationuser->set('suspended', 1);
