@@ -24,11 +24,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+defined('MOODLE_INTERNAL') || die();
 
 function xmldb_enrol_arlo_install() {
-    global $CFG, $DB;
+    global $CFG;
     // Install configuration defaults.
     \enrol_arlo\local\config\arlo_plugin_config::install_defaults();
     // Enable plugin.
