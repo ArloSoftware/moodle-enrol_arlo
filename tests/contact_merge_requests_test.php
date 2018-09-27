@@ -236,4 +236,61 @@ class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
         $this->assertEquals(true,  $result);
     }
 
+    public function test_multple_matching_requests() {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        /** @var enrol_arlo_generator $plugingenerator */
+        $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
+        $this->resetAfterTest();
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $contact1 = $plugingenerator->create_contact($user1);
+        // Associate contact and user.
+        //$contact1->set('userid', $user1->id);
+        //$contact1->update();
+
+        $user2 = $this->getDataGenerator()->create_user();
+        $contact2 = $plugingenerator->create_contact($user2);
+        // Associate contact and user.
+        //$contact2->set('userid', $user2->id);
+        //$contact2->update();
+
+        $user3 = $this->getDataGenerator()->create_user();
+        $contact3 = $plugingenerator->create_contact($user3);
+        // Associate contact and user.
+        $contact3->set('userid', $user3->id);
+        $contact3->update();
+
+        $user4 = $this->getDataGenerator()->create_user();
+        $contact4 = $plugingenerator->create_contact($user4);
+        // Associate contact and user.
+        $contact4->set('userid', $user4->id);
+        $contact4->update();
+
+        // Create a contact merge request.
+        $contactmergerequest1 = $plugingenerator->create_contact_merge_request($contact3, $contact4);
+        $contactmergerequest2 = $plugingenerator->create_contact_merge_request($contact2, $contact3);
+        //$contactmergerequest2 = $plugingenerator->create_contact_merge_request($contact1, $contact2);
+
+        // Set up course enrolments.
+        $manualplugin = enrol_get_plugin('manual');
+
+        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+        $this->assertNotEmpty($studentrole);
+
+        $category = $this->getDataGenerator()->create_category();
+        $course1 = $this->getDataGenerator()->create_course(['category' => $category->id]);
+        $course2 = $this->getDataGenerator()->create_course(['category' => $category->id]);
+        $manualinstance1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'manual'], '*', MUST_EXIST);
+        $manualinstance2 = $DB->get_record('enrol', ['courseid' => $course2->id, 'enrol' => 'manual'], '*', MUST_EXIST);
+
+        $manualplugin->enrol_user($manualinstance1, $user3->id, $studentrole->id);
+
+
+        $handler = new contact_merge_requests_handler($contact4);
+        $result = $handler->apply_all_merge_requests();
+        $this->assertEquals(true,  $result);
+
+    }
+
 }
