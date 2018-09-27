@@ -30,6 +30,7 @@ use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
+use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\result;
 use GuzzleHttp\Psr7\Request;
@@ -67,11 +68,19 @@ class outcomes_job extends job {
             try {
                 $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
                 if (!$enrolmentinstance) {
-                   $this->disable();
+                    $this->disable();
                     throw new moodle_exception(get_string('nomatchingenrolmentinstance', 'enrol_arlo'));
                 }
                 if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
                     $this->add_reasons(get_string('enrolmentinstancedisabled', 'enrol_arlo'));
+                    return false;
+                }
+                if ($enrolmentinstance->customchar2 == arlo_type::EVENT && !$pluginconfig->get('pusheventresults')) {
+                    $this->add_reasons(get_string('eventresultpushingdisabled', 'enrol_arlo'));
+                    return false;
+                }
+                if ($enrolmentinstance->customchar2 == arlo_type::ONLINEACTIVITY && !$pluginconfig->get('pushonlineactivityresults')) {
+                    $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
                     return false;
                 }
                 if (!$pluginconfig->get('allowhiddencourses')) {
