@@ -140,8 +140,6 @@ class contact_merge_requests_handler {
             if (!$contactmergerequest) {
                 if ($this->removecontacts) {
                     foreach ($this->removecontacts as $contact) {
-                        //mtrace('deleting');
-                        //print_object($contact);
                         $contact->delete();
                     }
                 }
