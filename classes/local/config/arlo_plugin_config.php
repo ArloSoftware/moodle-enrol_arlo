@@ -22,7 +22,8 @@ use enrol_arlo\local\enum\user_matching;
 
 class arlo_plugin_config extends plugin_config {
 
-    const FRANKEN_NAME = 'enrol_arlo'; // Arlo enrolment component.
+    /** @var string FRANKEN_NAME Arlo enrolment component */
+    const FRANKEN_NAME = 'enrol_arlo';
 
     /**
      * Plugin settings definition.
@@ -30,7 +31,6 @@ class arlo_plugin_config extends plugin_config {
      * @return array
      */
     protected static function define_properties() {
-        global $CFG;
         return [
             'platform' => [
                 'type' => PARAM_RAW
