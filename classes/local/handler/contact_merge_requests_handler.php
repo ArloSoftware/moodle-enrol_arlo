@@ -46,24 +46,40 @@ class contact_merge_requests_handler {
     /** @var contact_persistent $initialcontact */
     protected $initialcontact;
 
-    /** @var int $initialcount */
-    protected $initialcount;
+    /** @var contact_persistent $currentdestinationcontact */
+    protected $currentdestinationcontact;
 
-    /** @var contact_merge_request_persistent[] $contactmergerequests */
-    protected $contactmergerequests;
-
-    protected $lastmergedestinationcontact;
+    /** @var contact_persistent[] $removecontacts */
+    protected $removecontacts;
 
     /**
      * Constructor.
      *
      * @param contact_persistent $contact
-     * @throws coding_exception
      */
     public function __construct(contact_persistent $contact) {
-        $this->initialcontact = $contact;
-        $this->initialcount = $this->count_active_requests();
         $this->appliedcount = 0;
+        $this->initialcontact = $contact;
+        $this->currentdestinationcontact = $contact;
+        $this->removecontacts = [];
+    }
+
+    /**
+     * Get active merge request where contact is destination
+     *
+     * @param contact_persistent $contact
+     * @return contact_merge_request_persistent|false
+     * @throws coding_exception
+     */
+    public function get_active_request(contact_persistent $contact) {
+        if ($contact->get('id') <= 0) {
+            throw new coding_exception('invalidcontact');
+        }
+        $conditions = [
+            'destinationcontactguid' => $contact->get('sourceguid'),
+            'active' => 1
+        ];
+        return contact_merge_request_persistent::get_record($conditions);
     }
 
     /**
@@ -88,154 +104,114 @@ class contact_merge_requests_handler {
         return contact_merge_request_persistent::get_records_select(
             $select,
             $conditions,
-            'sourcecreated ASC'
+            'sourcecreated DESC, id DESC'
         );
     }
 
     /**
-     * Count of active contact merge requests.
+     * The current contact persistent.
      *
-     * @return int
-     * @throws coding_exception
+     * @return contact_persistent
      */
-    public function count_active_requests() {
-        $contact = $this->initialcontact;
-        if ($contact->get('id') <= 0) {
-            throw new coding_exception('invalidcontact');
-        }
-        $contactguid = $contact->get('sourceguid');
-        $conditions = [
-            'sourcecontactguid' => $contactguid,
-            'destinationcontactguid' => $contactguid,
-            'active' => 1
-        ];
-        $select = "(sourcecontactguid = :sourcecontactguid OR
-                    destinationcontactguid = :destinationcontactguid) AND
-                    active = :active";
-        return contact_merge_request_persistent::count_records_select(
-            $select,
-            $conditions,
-            'sourcecreated ASC'
-        );
+    public function get_current_destination_contact() {
+        return $this->currentdestinationcontact;
     }
 
     /**
-     * Has active requests.
+     * The initial contact set on constructor.
      *
-     * @return bool
-     * @throws coding_exception
+     * @return contact_persistent
      */
-    public function has_active_requests() {
-        return ($this->count_active_requests()) ? true : false;
+    public function get_initial_contact() {
+        return $this->initialcontact;
     }
 
     /**
-     * Can all active contact merge requests be merged.
-     *
      * @return bool
+     * @throws \dml_exception
+     * @throws \enrol_arlo\invalid_persistent_exception
      * @throws coding_exception
      */
-    public function can_merge_all_requests() {
-        if (!$this->has_active_requests()) {
-            return true;
-        }
-        foreach ($this->get_active_requests() as $contactmergerequest) {
-            if (!$contactmergerequest->can_merge()) {
-                return false;
-            }
-        }
-        return true;
-    }
+    public function apply_all_merge_requests() {
+        while(true) {
+            $contactmergerequest = $this->get_active_request($this->currentdestinationcontact);
 
-    protected function apply_merge_request(contact_merge_request_persistent $contactmergerequest) {
-        if (!$contactmergerequest->can_merge()) {
-            return false;
-        }
-        $sourcecontact = $contactmergerequest->get_source_contact();
-        $destinationcontact = $contactmergerequest->get_destination_contact();
-        // Require both source and destination contacts to apply merge.
-        if ($sourcecontact && $destinationcontact) {
-            $sourceuser = $sourcecontact->get_associated_user();
-            if ($sourceuser) {
-                $destinationuser = $destinationcontact->get_associated_user();
-                if ($destinationuser) {
-                    // Shouldn't get here, but double checking.
-                    if ($sourceuser->has_course_enrolments() && $destinationuser->has_course_enrolments()) {
-                        return false;
-                    } else if (!$sourceuser->has_course_enrolments() && !$destinationuser->has_course_enrolments()) {
-                        mtrace('Source no enrolments and destination no enrolments');
-                        $sourceuser->set('suspended', 1);
-                        $sourceuser->update();
-                        //$sourcecontact->delete();
-                        $contactmergerequest->set('active', 0);
-                        $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
-                        $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
-                        $contactmergerequest->update();
-                        ++$this->appliedcount;
-                        return true;
-                    } else {
-                        if ($sourceuser->has_course_enrolments() && !$destinationuser->has_course_enrolments()) {
-                            mtrace('Source has enrolments and destination no enrolments');
-                            $destinationcontact->set('userid', $sourceuser->get('id'));
-                            $destinationcontact->update();
-                            $this->initialcontact->set('userid', $sourceuser->get('id'));
-                            $destinationcontact->update();
-                            //$sourcecontact->delete();
-                            $contactmergerequest->set('active', 0);
-                            $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
-                            $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
-                            $contactmergerequest->update();
-                            ++$this->appliedcount;
-                            return true;
-
-                        } else if (!$sourceuser->has_course_enrolments() && $destinationuser->has_course_enrolments()) {
-                            mtrace('Source no enrolments and destination nhas enrolments');
-                            $sourceuser->set('suspended', 1);
-                            $sourceuser->update();
-                            //$sourcecontact->delete();
-                            $contactmergerequest->set('active', 0);
-                            $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
-                            $contactmergerequest->set('destinationuserid', $destinationuser->get('id'));
-                            $contactmergerequest->update();
-                            ++$this->appliedcount;
-                            return true;
-                        }
+            // No active requests for current destination contact so exit.
+            if (!$contactmergerequest) {
+                if ($this->removecontacts) {
+                    foreach ($this->removecontacts as $contact) {
+                        $contact->delete();
                     }
-                } else {
-                    $destinationcontact->set('userid', $sourceuser->get('id'));
-                    $destinationcontact->update();
-                    $sourceuser->set('suspended', 1);
-                    $sourceuser->update();
-                    $sourcecontact->delete();
-                    $contactmergerequest->set('active', 0);
-                    $contactmergerequest->set('sourceuserid', $sourceuser->get('id'));
-                    $contactmergerequest->update();
-                    ++$this->appliedcount;
-                    return true;
                 }
-            } else {
-                // No associated source user, remove source contact.
-                //$sourcecontact->delete();
-                $contactmergerequest->set('active', 0);
-                $contactmergerequest->update();
-                ++$this->appliedcount;
                 return true;
             }
-        }
-        return false;
-    }
+            // Set up required destination variables for checking against.
+            $destinationcontact= $contactmergerequest->get_destination_contact();
+            if ($destinationcontact) {
+                $destinationuser = $destinationcontact->get_associated_user();
+                if ($destinationuser) {
+                    $destinationuserhasenrolments = $destinationuser->has_course_enrolments();
+                } else {
+                    $destinationuserhasenrolments = false;
+                }
+            } else {
+                $destinationuser = false;
+                $destinationuserhasenrolments = false;
+            }
+            // Set up required source variables for checking against.
+            $sourcecontact = $contactmergerequest->get_source_contact();
+            if ($sourcecontact) {
+                $sourceuser = $sourcecontact->get_associated_user();
+                if ($sourceuser) {
+                    $sourceuserhasenrolments = $sourceuser->has_course_enrolments();
+                } else {
+                    $sourceuserhasenrolments = false;
+                }
+            } else {
+                $sourceuser = false;
+                $sourceuserhasenrolments = false;
+            }
+            // Start evaluation.
 
-    public function apply_all_merge_requests() {
-        if (!$this->can_merge_all_requests()) {
-            return false;
-        }
-        foreach ($this->get_active_requests() as $contactmergerequest) {
-            $result = $this->apply_merge_request($contactmergerequest);
-            if (!$result) {
+            // Both source and destination have enrolments.
+            if ($sourceuserhasenrolments && $destinationuserhasenrolments) {
                 return false;
             }
+            // No source enrolments, destination has enrolments.
+            if (!$sourceuserhasenrolments && $destinationuserhasenrolments) {
+                if ($sourceuser) {
+                    $sourceuser->set('suspended', 1);
+                    $sourceuser->update();
+                }
+                if ($sourcecontact) {
+                    // Source contacts to delete.
+                    //$sourcecontact->delete();
+                    $this->removecontacts[] = $sourcecontact;
+                }
+                // Set active flag to done.
+                $contactmergerequest->set('active', 0);
+                $contactmergerequest->update();
+            }
+            // Source has enrolments, no destination enrolments.
+            if ($sourceuserhasenrolments && !$destinationuserhasenrolments) {
+                if ($destinationcontact) {
+                    // Associated source user on destinaction contact.
+                    $destinationcontact->set('userid', $sourceuser->get('id'));
+                    $destinationcontact->update();
+
+                    $this->removecontacts[] = $sourcecontact;
+
+                    // Suspend destination user.
+                    $destinationuser->set('suspended', 1);
+                    $destinationuser->update();
+                    // Set active flag to done.
+                    $contactmergerequest->set('active', 0);
+                    $contactmergerequest->update();
+                } else {
+                    throw new coding_exception('nodestinationcontact');
+                }
+            }
         }
-        return true;
     }
 
 }
