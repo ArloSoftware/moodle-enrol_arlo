@@ -126,25 +126,16 @@ class contact_merge_requests_handler {
         return $this->initialcontact;
     }
 
+
     /**
      * @return bool
-     * @throws \dml_exception
-     * @throws \enrol_arlo\invalid_persistent_exception
      * @throws coding_exception
      */
     public function apply_all_merge_requests() {
-        while(true) {
-            $contactmergerequest = $this->get_active_request($this->currentdestinationcontact);
+        $contactmergerequests = $this->get_active_requests($this->initialcontact);
+        while ($contactmergerequests) {
+            $contactmergerequest = array_shift($contactmergerequests);
 
-            // No active requests for current destination contact so exit.
-            if (!$contactmergerequest) {
-                if ($this->removecontacts) {
-                    foreach ($this->removecontacts as $contact) {
-                        $contact->delete();
-                    }
-                }
-                return true;
-            }
             // Set up required destination variables for checking against.
             $destinationcontact= $contactmergerequest->get_destination_contact();
             if ($destinationcontact) {
@@ -172,46 +163,55 @@ class contact_merge_requests_handler {
                 $sourceuserhasenrolments = false;
             }
             // Start evaluation.
-
-            // Both source and destination have enrolments.
-            if ($sourceuserhasenrolments && $destinationuserhasenrolments) {
-                return false;
-            }
-            // No source enrolments, destination has enrolments.
-            if (!$sourceuserhasenrolments && $destinationuserhasenrolments) {
-                if ($sourceuser) {
-                    $sourceuser->set('suspended', 1);
-                    $sourceuser->update();
-                }
-                if ($sourcecontact) {
-                    // Source contacts to delete.
-                    //$sourcecontact->delete();
-                    $this->removecontacts[] = $sourcecontact;
-                }
-                // Set active flag to done.
-                $contactmergerequest->set('active', 0);
-                $contactmergerequest->update();
-            }
-            // Source has enrolments, no destination enrolments.
-            if ($sourceuserhasenrolments && !$destinationuserhasenrolments) {
-                if ($destinationcontact) {
-                    // Associated source user on destinaction contact.
-                    $destinationcontact->set('userid', $sourceuser->get('id'));
-                    $destinationcontact->update();
-
-                    $this->removecontacts[] = $sourcecontact;
-
-                    // Suspend destination user.
-                    $destinationuser->set('suspended', 1);
-                    $destinationuser->update();
+            switch(true) {
+                case ($sourceuserhasenrolments && $destinationuserhasenrolments):
+                    return false;
+                case (!$sourceuserhasenrolments && $destinationuserhasenrolments):
+                    if ($sourceuser) {
+                        $sourceuser->set('suspended', 1);
+                        $sourceuser->update();
+                    }
+                    if ($sourcecontact) {
+                        // Source contacts to delete.
+                        //$sourcecontact->delete();
+                        $this->removecontacts[] = $sourcecontact;
+                    }
                     // Set active flag to done.
                     $contactmergerequest->set('active', 0);
                     $contactmergerequest->update();
-                } else {
-                    throw new coding_exception('nodestinationcontact');
-                }
+                    break;
+                case ($sourceuserhasenrolments && !$destinationuserhasenrolments):
+                    if ($destinationcontact) {
+                        // Associated source user on destinaction contact.
+                        $destinationcontact->set('userid', $sourceuser->get('id'));
+                        $destinationcontact->update();
+
+                        $this->removecontacts[] = $sourcecontact;
+
+                        // Suspend destination user.
+                        $destinationuser->set('suspended', 1);
+                        $destinationuser->update();
+                        // Set active flag to done.
+                        $contactmergerequest->set('active', 0);
+                        $contactmergerequest->update();
+                        break;
+                    } else {
+                        throw new coding_exception('nodestinationcontact');
+                    }
+                case (!$sourceuserhasenrolments && !$destinationuserhasenrolments):
+                    // TODO handle.
+                    break;
+                default:
+                    throw new coding_exception('exceptiontime');
             }
         }
+        // No active requests for current destination contact so exit.
+        if ($this->removecontacts) {
+        foreach ($this->removecontacts as $contact) {
+            $contact->delete();
+            }
+        }
+        return true;
     }
 
 }
