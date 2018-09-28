@@ -67,10 +67,6 @@ class enrol_arlo_generator extends testing_module_generator {
         $contact->set('sourcecreated', $datetime);
         $contact->set('sourcemodified', $datetime);
         $contact = $contact->create();
-        $id = $contact->get('id');
-        $guid = str_pad($id, 36, '0', STR_PAD_LEFT);
-        $contact->set('sourceid', $id);
-        $contact->set('sourceguid', $guid);
         if (!is_null($data)) {
             foreach (get_object_vars($data) as $property => $value) {
                 if ($contact::has_property($property)) {
@@ -103,9 +99,6 @@ class enrol_arlo_generator extends testing_module_generator {
         $contactmergerequest->set('destinationcontactguid', $destinationcontact->get('sourceguid'));
         $contactmergerequest->set('sourcecreated', $datetime);
         $contactmergerequest = $contactmergerequest->create();
-        $id = $contactmergerequest->get('id');
-        $guid = str_pad($id, 36, '0', STR_PAD_LEFT);
-        $contactmergerequest->set('sourceid', $guid);
         return $contactmergerequest;
     }
 }
