@@ -221,7 +221,7 @@ class user_persistent extends persistent {
     protected function set_username($value) {
         $cleanedvalue = clean_param($value, PARAM_USERNAME);
         if (core_text::strlen($cleanedvalue) > 100) {
-            throw new coding_exception('Username exceeds length of 100.');
+            throw new coding_exception('invalidpropertyprecision', 'user_persistent:username');
         }
         return $this->raw_set('username', $cleanedvalue);
     }
@@ -235,7 +235,7 @@ class user_persistent extends persistent {
      */
     protected function set_firstname($value) {
         if (core_text::strlen($value) > 100) {
-            throw new coding_exception('Firstname exceeds length of 100.');
+            throw new coding_exception('invalidpropertyprecision', 'user_persistent:firstname');
         }
         return $this->raw_set('firstname', $value);
     }
@@ -249,7 +249,7 @@ class user_persistent extends persistent {
      */
     protected function set_lastname($value) {
         if (core_text::strlen($value) > 100) {
-            throw new coding_exception('Lastname exceeds length of 100.');
+            throw new coding_exception('invalidpropertyprecision', 'user_persistent:lastname');
         }
         return $this->raw_set('lastname', $value);
     }
@@ -263,7 +263,7 @@ class user_persistent extends persistent {
      */
     protected function set_email($value) {
         if (core_text::strlen($value) > 100) {
-            throw new coding_exception('Email exceeds length of 100.');
+            throw new coding_exception('invalidpropertyprecision', 'user_persistent:email');
         }
         return $this->raw_set('email', $value);
     }
@@ -301,7 +301,7 @@ class user_persistent extends persistent {
      */
     protected function set_idnumber($value) {
         if (core_text::strlen($value) > 255) {
-            throw new coding_exception('ID number exceeds length of 255.');
+            throw new coding_exception('invalidpropertyprecision', 'user_persistent:idnumber');
         }
         return $this->raw_set('idnumber', $value);
     }
@@ -326,7 +326,7 @@ class user_persistent extends persistent {
     public function has_accessed_courses() {
         global $DB;
         if ($this->raw_get('id') <= 0) {
-            throw new coding_exception('Field id is required.');
+            throw new coding_exception('reguiredfieldmissing', 'user_persistent:id');
         }
         $coursesaccessed = $DB->count_records('user_lastaccess', ['userid' => $this->raw_get('id')]);
         return ($coursesaccessed) ? true : false;
@@ -342,11 +342,10 @@ class user_persistent extends persistent {
     public function has_course_enrolments() {
         global $DB;
         if ($this->raw_get('id') <= 0) {
-            throw new coding_exception('Field id is required.');
+            throw new coding_exception('reguiredfieldmissing', 'user_persistent:id');
         }
         $wheres = ["c.id <> :siteid"];
         $params = ['siteid' => SITEID];
-        $ccselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
         $ccjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = :contextlevel)";
         $params['contextlevel'] = CONTEXT_COURSE;
         $wheres = implode(" AND ", $wheres);
