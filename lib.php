@@ -15,12 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Arlo enrolment plugin.
+ * Arlo enrolment plugin class.
  *
- * @author      Troy Williams
- * @author      Corey Davis
- * @package     local_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
- * @copyright   2015 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @package     enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright   2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -33,7 +31,6 @@ use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
 use enrol_arlo\manager;
-use enrol_arlo\api;
 use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\persistent\job_persistent;
@@ -41,10 +38,16 @@ use enrol_arlo\local\persistent\event_persistent;
 use enrol_arlo\local\persistent\online_activity_persistent;
 use enrol_arlo\local\job\job;
 
-
+/**
+ * Arlo enrolment plugin class.
+ *
+ * @package     enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright   2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class enrol_arlo_plugin extends enrol_plugin {
 
-    /** @var  */
+    /** @var int CREATE_GROUP */
     const CREATE_GROUP = -1;
 
     /**
@@ -169,8 +172,11 @@ class enrol_arlo_plugin extends enrol_plugin {
 
     /**
      * Add new instance of enrol plugin with default settings.
-     * @param stdClass $course
-     * @return int id of new instance
+     *
+     * @param object $course
+     * @return int
+     * @throws coding_exception
+     * @throws moodle_exception
      */
     public function add_default_instance($course) {
         $fields = $this->get_instance_defaults();
@@ -181,12 +187,14 @@ class enrol_arlo_plugin extends enrol_plugin {
      * Add new instance of enrol plugin.
      *
      * @param object $course
-     * @param array $fields instance fields
-     * @return int id of new instance, null if can not be created
+     * @param array|null $fields
+     * @return int
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
+     * @throws required_capability_exception
      */
     public function add_instance($course, array $fields = null) {
-        global $DB;
-
         $pluginconfig = new arlo_plugin_config();
         $fields['roleid'] = $pluginconfig->get('roleid');
         $fields['customchar1'] = $pluginconfig->get('platform');
@@ -276,13 +284,16 @@ class enrol_arlo_plugin extends enrol_plugin {
 
         return $instanceid;
     }
-
+    
     /**
      * Create course group based on Arlo Code.
      *
      * @param $courseid
      * @param $code
-     * @return id
+     * @return int
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
      */
     public static function create_course_group($courseid, $code) {
         global $DB;
@@ -336,8 +347,11 @@ class enrol_arlo_plugin extends enrol_plugin {
      * Update instance of enrol plugin.
      *
      * @param stdClass $instance
-     * @param stdClass $data modified instance fields
-     * @return boolean
+     * @param stdClass $data
+     * @return bool
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws required_capability_exception
      */
     public function update_instance($instance, $data) {
 
@@ -421,11 +435,12 @@ class enrol_arlo_plugin extends enrol_plugin {
      * Return true if we can add a new instance to this course.
      *
      * @param int $courseid
-     * @return boolean
+     * @return bool
+     * @throws coding_exception
      */
     public function can_add_instance($courseid) {
         $context = context_course::instance($courseid);
-        if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/arlo:config', $context)) {
+        if (!has_capability('moodle/course:enrolconfig', $context) || !has_capability('enrol/arlo:config', $context)) {
             return false;
         }
         return true;
@@ -434,8 +449,9 @@ class enrol_arlo_plugin extends enrol_plugin {
     /**
      * Is it possible to delete enrol instance via standard UI?
      *
-     * @param object $instance
+     * @param stdClass $instance
      * @return bool
+     * @throws coding_exception
      */
     public function can_delete_instance($instance) {
         $context = context_course::instance($instance->courseid);
@@ -447,6 +463,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      *
      * @param stdClass $instance
      * @return bool
+     * @throws coding_exception
      */
     public function can_hide_show_instance($instance) {
         $context = context_course::instance($instance->courseid);
@@ -456,7 +473,9 @@ class enrol_arlo_plugin extends enrol_plugin {
     /**
      * Get Event Templates options for form select.
      *
+     * @param $courseid
      * @return array
+     * @throws dml_exception
      */
     public function get_template_options($courseid) {
         global $DB;
@@ -484,6 +503,8 @@ class enrol_arlo_plugin extends enrol_plugin {
      * Get Event options for form select.
      *
      * @return array
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function get_event_options() {
         global $DB;
@@ -731,6 +752,8 @@ class enrol_arlo_plugin extends enrol_plugin {
      *
      * @param stdClass $instance
      * @return array
+     * @throws coding_exception
+     * @throws moodle_exception
      */
     public function get_action_icons(stdClass $instance) {
         global $OUTPUT;
@@ -791,7 +814,9 @@ class enrol_arlo_plugin extends enrol_plugin {
      * Returns link to page which may be used to add new instance of enrolment plugin in course.
      *
      * @param int $courseid
-     * @return moodle_url page url
+     * @return moodle_url|null
+     * @throws coding_exception
+     * @throws moodle_exception
      */
     public function get_newinstance_link($courseid) {
         $context = context_course::instance($courseid, MUST_EXIST);
@@ -806,8 +831,10 @@ class enrol_arlo_plugin extends enrol_plugin {
      * Gets an array of the user enrolment actions
      *
      * @param course_enrolment_manager $manager
-     * @param stdClass $ue A user enrolment object
-     * @return array An array of user_enrolment_actions
+     * @param stdClass $ue
+     * @return array
+     * @throws coding_exception
+     * @throws moodle_exception
      */
     public function get_user_enrolment_actions(course_enrolment_manager $manager, $ue) {
         $actions = array();
@@ -838,6 +865,8 @@ class enrol_arlo_plugin extends enrol_plugin {
      *
      * @param stdClass $instance
      * @param $userid
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function suspend_and_remove_roles(stdClass $instance, $userid) {
         global $DB;
@@ -865,9 +894,11 @@ class enrol_arlo_plugin extends enrol_plugin {
 /**
  * Display the associate Arlo template link in the course administration menu.
  *
- * @param settings_navigation $navigation The settings navigation object
- * @param stdClass $course The course
- * @param stdclass $context Course context
+ * @param $navigation
+ * @param $course
+ * @param $context
+ * @throws coding_exception
+ * @throws moodle_exception
  */
 function enrol_arlo_extend_navigation_course($navigation, $course, $context) {
     // Check that the Arlo plugin is enabled.
