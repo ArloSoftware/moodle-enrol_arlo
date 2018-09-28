@@ -55,6 +55,8 @@ class contact_merge_requests_handler {
     /** @var array $stack */
     protected $stack;
 
+    public $processedcounter;
+
     /**
      * Constructor.
      *
@@ -63,7 +65,6 @@ class contact_merge_requests_handler {
     public function __construct(contact_persistent $contact) {
         $this->appliedcount = 0;
         $this->initialcontact = $contact;
-        $this->currentdestinationcontact = $contact;
         $this->removecontacts = [];
         $this->stack = [];
     }
@@ -86,30 +87,13 @@ class contact_merge_requests_handler {
     }
 
     /**
-     * Get active merge request where contact is destination
+     * Get active contact merge requests for a contact.
      *
      * @param contact_persistent $contact
-     * @return contact_merge_request_persistent|false
+     * @return contact_merge_request_persistent[]|false
      * @throws coding_exception
      */
-    public function get_active_request(contact_persistent $contact) {
-        if ($contact->get('id') <= 0) {
-            throw new coding_exception('invalidcontact');
-        }
-        $conditions = [
-            'destinationcontactguid' => $contact->get('sourceguid'),
-            'active' => 1
-        ];
-        return contact_merge_request_persistent::get_record($conditions);
-    }
-
-    /**
-     * Active contact merge requests for a contact.
-     *
-     * @throws coding_exception
-     */
-    public function get_active_requests() {
-        $contact = $this->initialcontact;
+    public function get_active_requests(contact_persistent $contact) {
         if ($contact->get('id') <= 0) {
             throw new coding_exception('invalidcontact');
         }
@@ -148,20 +132,25 @@ class contact_merge_requests_handler {
     }
 
     /**
+     * Main class for appling contact merge requests.
+     *
      * @return bool
+     * @throws \enrol_arlo\invalid_persistent_exception
      * @throws coding_exception
      */
     public function apply_all_merge_requests() {
+        $this->processedcounter = 0;
         // Load active merge requests into stack for initial contact.
         $this->add_to_stack($this->get_active_requests($this->initialcontact));
+        // Process the stack of contact merge requests until none are left.
         while ($this->stack) {
             // Get first contact merge request of top for processing.
             $contactmergerequest = array_shift($this->stack);
             // Set up required destination variables for checking against.
             $destinationcontact = $contactmergerequest->get_destination_contact();
             if ($destinationcontact) {
+                //$this->currentdestinationcontact = $destinationcontact;
                 $destinationuser = $destinationcontact->get_associated_user();
-                $this->currentdestinationcontact = $destinationcontact;
                 if ($destinationuser) {
                     $destinationuserhasenrolments = $destinationuser->has_course_enrolments();
                 } else {
@@ -186,53 +175,82 @@ class contact_merge_requests_handler {
             }
             // Start evaluation. Using switch to take advantage of break.
             switch (true) {
+                // Both source and destination hav enrolments.
                 case ($sourceuserhasenrolments && $destinationuserhasenrolments):
-                    return false;
-                case (!$sourceuserhasenrolments && $destinationuserhasenrolments):
-                    if ($sourceuser) {
-                        $sourceuser->set('suspended', 1);
-                        $sourceuser->update();
-                    }
-                    if ($sourcecontact) {
-                        // Source contacts to delete.
-                        $this->removecontacts[$sourcecontact->get('id')] = $sourcecontact;
-                    }
-                    // Set active flag to done.
-                    $contactmergerequest->set('active', 0);
+                    $contactmergerequest->set('mergefailed', 1);
                     $contactmergerequest->update();
-                    break;
-                case ($sourceuserhasenrolments && !$destinationuserhasenrolments):
-                    if ($destinationcontact) {
-                        // Associated source user on destination contact.
-                        $destinationcontact->set('userid', $sourceuser->get('id'));
-                        $destinationcontact->update();
-
+                    return false;
+                // Source doesn't have enrolments, destination does have enrolments.
+                case (!$sourceuserhasenrolments && $destinationuserhasenrolments):
+                    if ($sourcecontact) {
+                        // Add source contact to remove list.
                         $this->removecontacts[$sourcecontact->get('id')] = $sourcecontact;
-
-                        // Suspend destination user.
-                        $destinationuser->set('suspended', 1);
-                        $destinationuser->update();
-                        // Set active flag to done.
-                        $contactmergerequest->set('active', 0);
-                        $contactmergerequest->update();
-                        break;
-                    } else {
-                        throw new coding_exception('nodestinationcontact');
+                        // Suspend source user.
+                        if ($sourceuser) {
+                            $sourceuser->set('suspended', 1);
+                            $sourceuser->update();
+                        }
                     }
+                    break;
+                // Source has enrolments and destination does not.
+                case ($sourceuserhasenrolments && !$destinationuserhasenrolments):
+                    // Associated source user on initial destination contact.
+                    $this->initialcontact->set('userid', $sourceuser->get('id'));
+                    $this->initialcontact->update();
+                    // Add source contact to remove list.
+                    $this->removecontacts[$sourcecontact->get('id')] = $sourcecontact;
+                    if ($destinationcontact) {
+                        if ($destinationuser) {
+                            // Suspend destination user.
+                            $destinationuser->set('suspended', 1);
+                            $destinationuser->update();
+                        }
+                    }
+                    break;
+                // No source or destination user has enrolments.
                 case (!$sourceuserhasenrolments && !$destinationuserhasenrolments):
-                    // TODO handle.
+                    if ($sourcecontact) {
+                        // Add source contact to remove list.
+                        $this->removecontacts[$sourcecontact->get('id')] = $sourcecontact;
+                        // Suspend source user.
+                        if ($sourceuser) {
+                            $sourceuser->set('suspended', 1);
+                            $sourceuser->update();
+                        }
+                    }
+                    if ($destinationcontact) {
+                        if ($destinationuser) {
+                            // Suspend destination user.
+                            $destinationuser->set('suspended', 1);
+                            $destinationuser->update();
+                        }
+                    }
                     break;
                 default:
-                    throw new coding_exception('exceptiontime');
+                    throw new coding_exception('lolshouldnothappen');
             }
-            $this->add_to_stack($sourcecontact);
+            // Set active flag to done.
+            $contactmergerequest->set('active', 0);
+            $contactmergerequest->update();
+            $this->processedcounter++;
+            // We previous contact merge request may have related contacts in current merge request.
+            if ($destinationcontact) {
+                if ($destinationcontact->get('sourceguid') != $this->initialcontact->get('sourceguid')) {
+                    $this->add_to_stack($this->get_active_requests($destinationcontact));
+                }
+            }
         }
-        // No active requests for current destination contact so exit.
+        // Finally remove contacts.
         if ($this->removecontacts) {
             foreach ($this->removecontacts as $contact) {
+                // Important saftey check, never remove the initial contact.
+                if ($contact->get('sourceguid') == $this->initialcontact->get('sourceguid')) {
+                    continue;
+                }
                 $contact->delete();
             }
         }
+        // No active requests for current destination contact so exit.
         return true;
     }
 
