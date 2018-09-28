@@ -178,36 +178,29 @@ class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
         $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
         $this->resetAfterTest();
 
-        $sourceinfo = new stdClass();
-        $sourceinfo->firstname = 'Source';
-        $sourceinfo->lastname = 'Contact';
-        $sourceinfo->email = 'source@example.com';
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        /** @var enrol_arlo_generator $plugingenerator */
+        $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
+        $this->resetAfterTest();
 
-        $sourcecontact = $plugingenerator->create_contact($sourceinfo);
+        $initialuser = $this->getDataGenerator()->create_user();
+        $initialcontact = $plugingenerator->create_contact();
+        $initialcontact->set('firstname', 'INITIAL');
+        $initialcontact->set('lastname', $initialuser->lastname);
+        $initialcontact->set('email', $initialuser->email);
+        $initialcontact->set('userid', $initialuser->id);
+        $initialcontact->save();
 
-        $sourceinfo->lastname = 'User';
-        $sourceuser = $this->getDataGenerator()->create_user($sourceinfo);
-
-        // Associate contact and user.
-        $sourcecontact->set('userid', $sourceuser->id);
-        $sourcecontact->update();
-
-        $destinationinfo = new stdClass();
-        $destinationinfo->firstname = 'Destination';
-        $destinationinfo->lastname = 'Contact';
-        $destinationinfo->email = 'destination@example.com';
-
-        $destinationcontact = $plugingenerator->create_contact($destinationinfo);
-
-        $destinationinfo->lastname = 'User';
-        $destinationuser = $this->getDataGenerator()->create_user($destinationinfo);
-
-        // Associate contact and user.
-        $destinationcontact->set('userid', $destinationuser->id);
-        $destinationcontact->update();
+        $user1 = $this->getDataGenerator()->create_user();
+        $contact1 = $plugingenerator->create_contact();
+        $contact1->set('firstname', 'SOURCE');
+        $contact1->set('lastname', $user1->lastname);
+        $contact1->set('email', $user1->email);
+        $contact1->set('userid', $user1->id);
+        $contact1->save();
 
         // Create a contact merge request.
-        $contactmergerequest = $plugingenerator->create_contact_merge_request($sourcecontact, $destinationcontact);
+        $contactmergerequest1 = $plugingenerator->create_contact_merge_request($contact1, $initialcontact);
 
         // Set up course enrolments.
         $manualplugin = enrol_get_plugin('manual');
@@ -219,20 +212,56 @@ class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course(['category' => $category->id]);
         $manualinstance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual'], '*', MUST_EXIST);
 
-        $manualplugin->enrol_user($manualinstance, $sourceuser->id, $studentrole->id);
+        $manualplugin->enrol_user($manualinstance, $user1->id, $studentrole->id);
 
-        $handler = new contact_merge_requests_handler($destinationcontact);
+        $handler = new contact_merge_requests_handler($initialcontact);
         $result = $handler->apply_all_merge_requests();
 
-        $sourcecontact = contact_persistent::get_record(['id' => $sourcecontact->get('id')]);
-        $destinationuser = new user_persistent($destinationuser->id);
-        $destinationcontact->read();
-        $contactmergerequest->read();
+        // Reload.
+        $initialcontact->read();
+        $contactmergerequest1->read();
+        $initialuser = new user_persistent($initialuser->id);
 
-        $this->assertEquals($sourceuser->id, $destinationcontact->get('userid'));
-        $this->assertEquals(1, $destinationuser->get('suspended'));
-        $this->assertEquals(false, $sourcecontact);
-        $this->assertEquals(0, $contactmergerequest->get('active'));
+        $this->assertEquals($user1->id, $initialcontact->get('userid'));
+        $this->assertEquals(1, $initialuser->get('suspended'));
+        $this->assertEquals(false,  contact_persistent::record_exists($contact1->get('id')));
+        $this->assertEquals(0, $contactmergerequest1->get('active'));
+        $this->assertEquals(true,  $result);
+    }
+
+    public function test_both_source_and_destination_no_enrolments() {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        /** @var enrol_arlo_generator $plugingenerator */
+        $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
+        $this->resetAfterTest();
+
+        $initialuser = $this->getDataGenerator()->create_user();
+        $initialcontact = $plugingenerator->create_contact();
+        $initialcontact->set('firstname', $initialuser->firstname);
+        $initialcontact->set('lastname', $initialuser->lastname);
+        $initialcontact->set('email', $initialuser->email);
+        $initialcontact->set('userid', $initialuser->id);
+        $initialcontact->save();
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $contact1 = $plugingenerator->create_contact();
+        $contact1->set('firstname', $user1->firstname);
+        $contact1->set('lastname', $user1->lastname);
+        $contact1->set('email', $user1->email);
+        $contact1->set('userid', $user1->id);
+        $contact1->save();
+
+        // Create a contact merge request.
+        $contactmergerequest1 = $plugingenerator->create_contact_merge_request($contact1, $initialcontact);
+
+        $handler = new contact_merge_requests_handler($initialcontact);
+        $result = $handler->apply_all_merge_requests();
+        $contactmergerequest1->read();
+
+        $this->assertEquals(true,  contact_persistent::record_exists($initialcontact->get('id')));
+        $this->assertEquals(false,  contact_persistent::record_exists($contact1->get('id')));
+        $this->assertEquals(0, $contactmergerequest1->get('active'));
         $this->assertEquals(true,  $result);
     }
 
@@ -243,34 +272,47 @@ class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
         $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
         $this->resetAfterTest();
 
-        $user1 = $this->getDataGenerator()->create_user();
-        $contact1 = $plugingenerator->create_contact($user1);
+        $initialuser = $this->getDataGenerator()->create_user();
+        $initialcontact = $plugingenerator->create_contact();
         // Associate contact and user.
-        //$contact1->set('userid', $user1->id);
-        //$contact1->update();
+        $initialcontact->set('firstname', $initialuser->firstname);
+        $initialcontact->set('lastname', $initialuser->lastname);
+        $initialcontact->set('email', $initialuser->email);
+        $initialcontact->set('userid', $initialuser->id);
+        $initialcontact->save();
+
+        $user1 = $this->getDataGenerator()->create_user();
+        $contact1 = $plugingenerator->create_contact();
+        // Associate contact and user.
+        $contact1->set('firstname', $user1->firstname);
+        $contact1->set('lastname', $user1->lastname);
+        $contact1->set('email', $user1->email);
+        $contact1->set('userid', $user1->id);
+        $contact1->save();
 
         $user2 = $this->getDataGenerator()->create_user();
-        $contact2 = $plugingenerator->create_contact($user2);
+        $contact2 = $plugingenerator->create_contact();
         // Associate contact and user.
-        //$contact2->set('userid', $user2->id);
-        //$contact2->update();
+        $contact2->set('firstname', $user2->firstname);
+        $contact2->set('lastname', $user2->lastname);
+        $contact2->set('email', $user2->email);
+        $contact2->set('userid', $user2->id);
+        $contact2->save();
 
         $user3 = $this->getDataGenerator()->create_user();
-        $contact3 = $plugingenerator->create_contact($user3);
+        $contact3 = $plugingenerator->create_contact();
         // Associate contact and user.
+        $contact3->set('firstname', $user3->firstname);
+        $contact3->set('lastname', $user3->lastname);
+        $contact3->set('email', $user3->email);
         $contact3->set('userid', $user3->id);
-        $contact3->update();
-
-        $user4 = $this->getDataGenerator()->create_user();
-        $contact4 = $plugingenerator->create_contact($user4);
-        // Associate contact and user.
-        $contact4->set('userid', $user4->id);
-        $contact4->update();
+        $contact3->save();
 
         // Create a contact merge request.
-        $contactmergerequest1 = $plugingenerator->create_contact_merge_request($contact3, $contact4);
-        $contactmergerequest2 = $plugingenerator->create_contact_merge_request($contact2, $contact3);
-        //$contactmergerequest2 = $plugingenerator->create_contact_merge_request($contact1, $contact2);
+        $contactmergerequest1 = $plugingenerator->create_contact_merge_request($contact1, $initialcontact);
+        $contactmergerequest2 = $plugingenerator->create_contact_merge_request($initialcontact, $contact2);
+        $contactmergerequest3 = $plugingenerator->create_contact_merge_request($contact2, $contact3);
+        $contactmergerequest4 = $plugingenerator->create_contact_merge_request($contact1, $contact2);
 
         // Set up course enrolments.
         $manualplugin = enrol_get_plugin('manual');
@@ -284,11 +326,16 @@ class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
         $manualinstance1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'manual'], '*', MUST_EXIST);
         $manualinstance2 = $DB->get_record('enrol', ['courseid' => $course2->id, 'enrol' => 'manual'], '*', MUST_EXIST);
 
-        $manualplugin->enrol_user($manualinstance1, $user3->id, $studentrole->id);
+        //$manualplugin->enrol_user($manualinstance1, $initialuser->id, $studentrole->id);
+        $manualplugin->enrol_user($manualinstance2, $user1->id, $studentrole->id);
 
-
-        $handler = new contact_merge_requests_handler($contact4);
+        $handler = new contact_merge_requests_handler($initialcontact);
         $result = $handler->apply_all_merge_requests();
+
+        $contactmergerequest4->read();
+
+        $this->assertEquals(true,  contact_persistent::record_exists($initialcontact->get('id')));
+        $this->assertEquals(0, $contactmergerequest4->get('active'));
         $this->assertEquals(true,  $result);
 
     }
