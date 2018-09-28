@@ -86,31 +86,6 @@ class contact_merge_request_persistent extends persistent {
     }
 
     /**
-     * Can destination can merged on to source.
-     *
-     * @return bool
-     * @throws \dml_exception
-     * @throws coding_exception
-     */
-    public function can_merge() {
-        $sourcecontact = $this->get_source_contact();
-        $destinationcontact = $this->get_destination_contact();
-        if ($sourcecontact && $destinationcontact) {
-            $sourceuser = $sourcecontact->get_associated_user();
-            $destinationuser = $destinationcontact->get_associated_user();
-            if ($sourceuser && $destinationuser) {
-                if ($sourceuser->has_course_enrolments() && $destinationuser->has_course_enrolments()) {
-                    return false;
-                }
-                if ($sourceuser->has_accessed_courses() && $destinationuser->has_accessed_courses()) {
-                    return false;
-                }
-            }
-        }
-       return true;
-    }
-
-    /**
      * Get source contact persistent.
      *
      * @return contact_persistent|false
