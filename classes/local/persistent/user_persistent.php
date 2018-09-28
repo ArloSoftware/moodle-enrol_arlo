@@ -36,7 +36,15 @@ use enrol_arlo\manager;
 use enrol_arlo\persistent;
 use stdClass;
 
+/**
+ * User persistent.
+ *
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class user_persistent extends persistent {
+
     /** Table name. */
     const TABLE = 'user';
 
@@ -110,7 +118,7 @@ class user_persistent extends persistent {
             ],
             'suspended' => [
                 'type' => PARAM_INT,
-                'default' => 1
+                'default' => 0
             ],
             'calendartype' => [
                 'type' => PARAM_TEXT,
