@@ -30,6 +30,7 @@ use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
+use enrol_arlo\persistent;
 use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\local\response_processor;
@@ -49,6 +50,54 @@ class contacts_job extends job {
     /** @const TIME_PERIOD_DELAY time in seconds to delay next request. */
     const TIME_PERIOD_DELAY = 86400; // 24 Hours.
 
+    /** @var mixed $enrolmentinstance */
+    protected $enrolmentinstance;
+
+    /**
+     * Override to load enrolment instance.
+     *
+     * @param persistent $jobpersistent
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function __construct(persistent $jobpersistent) {
+        parent::__construct($jobpersistent);
+        $plugin = api::get_enrolment_plugin();
+        $this->enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
+    }
+
+    /**
+     * Check if config allows this job to be processed.
+     *
+     * @return bool
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function can_run() {
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $jobpersistent = $this->get_job_persistent();
+        $enrolmentinstance = $this->enrolmentinstance;
+        if (!$enrolmentinstance) {
+            $jobpersistent->set('disabled', 1);
+            $jobpersistent->save();
+            $this->add_reasons(get_string('nomatchingenrolmentinstance', 'enrol_arlo'));
+            return false;
+        }
+        if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
+            $this->add_reasons(get_string('enrolmentinstancedisabled', 'enrol_arlo'));
+            return false;
+        }
+        if (!$pluginconfig->get('allowhiddencourses')) {
+            $course = get_course($enrolmentinstance->courseid);
+            if (!$course->visible) {
+                $this->add_reasons(get_string('allowhiddencoursesdiabled', 'enrol_arlo'));
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Run the Job.
      *
@@ -57,30 +106,17 @@ class contacts_job extends job {
      * @throws moodle_exception
      */
     public function run() {
+        if (!$this->can_run()) {
+            return false;
+        }
         $trace = self::get_trace();
+        $jobpersistent = $this->get_job_persistent();
         $plugin = api::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
         $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         if ($lock) {
-            $jobpersistent = $this->get_job_persistent();
             try {
-                $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
-                if (!$enrolmentinstance) {
-                    $this->disable();
-                    throw new moodle_exception(get_string('nomatchingenrolmentinstance', 'enrol_arlo'));
-                }
-                if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
-                    $this->add_reasons(get_string('enrolmentinstancedisabled', 'enrol_arlo'));
-                    return false;
-                }
-                if (!$pluginconfig->get('allowhiddencourses')) {
-                    $course = get_course($enrolmentinstance->courseid);
-                    if (!$course->visible) {
-                        $this->add_reasons(get_string('allowhiddencoursesdiabled', 'enrol_arlo'));
-                        return false;
-                    }
-                }
                 $hasnext = true;
                 while ($hasnext) {
                     $hasnext = false; // Break paging by default.
@@ -144,9 +180,7 @@ class contacts_job extends job {
                             } catch (moodle_exception $exception) {
                                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 $this->add_error($exception->getMessage());
-                                if ($exception instanceof coding_exception || $exception instanceof invalid_persistent_exception) {
-                                   throw $exception;
-                                }
+                                continue;
                             }
                         }
                         // See if need to get another page of records.
