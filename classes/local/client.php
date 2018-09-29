@@ -86,11 +86,10 @@ class client {
      * @throws \coding_exception
      */
     public function send_request(Request $request) {
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         try {
             $time = time();
-            $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
             $pluginconfig->set('apitimelastrequest', $time);
-            /** @var $client \GuzzleHttp\Client */
             $response = $this->httpclient->send($request);
             $statuscode = $response->getStatusCode();
             return $response;

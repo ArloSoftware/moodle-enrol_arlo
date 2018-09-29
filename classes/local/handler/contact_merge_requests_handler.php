@@ -55,6 +55,7 @@ class contact_merge_requests_handler {
     /** @var array $stack */
     protected $stack;
 
+    /** @var int $processedcounter */
     public $processedcounter;
 
     /**
@@ -148,8 +149,9 @@ class contact_merge_requests_handler {
             $contactmergerequest = array_shift($this->stack);
             // Set up required destination variables for checking against.
             $destinationcontact = $contactmergerequest->get_destination_contact();
+            // Set current destination contact.
+            $this->currentdestinationcontact = $destinationcontact;
             if ($destinationcontact) {
-                //$this->currentdestinationcontact = $destinationcontact;
                 $destinationuser = $destinationcontact->get_associated_user();
                 if ($destinationuser) {
                     $destinationuserhasenrolments = $destinationuser->has_course_enrolments();

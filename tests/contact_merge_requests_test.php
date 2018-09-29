@@ -34,7 +34,7 @@ class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
     public function test_no_merge_requests() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/enrol/arlo/lib.php');
-        /** @var enrol_arlo_generator $generator */
+
         $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
         $this->resetAfterTest();
 
@@ -326,7 +326,6 @@ class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
         $manualinstance1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'manual'], '*', MUST_EXIST);
         $manualinstance2 = $DB->get_record('enrol', ['courseid' => $course2->id, 'enrol' => 'manual'], '*', MUST_EXIST);
 
-        //$manualplugin->enrol_user($manualinstance1, $initialuser->id, $studentrole->id);
         $manualplugin->enrol_user($manualinstance2, $user1->id, $studentrole->id);
 
         $handler = new contact_merge_requests_handler($initialcontact);

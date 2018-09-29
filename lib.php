@@ -284,7 +284,7 @@ class enrol_arlo_plugin extends enrol_plugin {
 
         return $instanceid;
     }
-    
+
     /**
      * Create course group based on Arlo Code.
      *

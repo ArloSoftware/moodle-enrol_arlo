@@ -84,8 +84,8 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                   FROM {enrol_arlo_contact} eac
                   JOIN {enrol_arlo_registration} ear
                     ON ear.sourcecontactguid = eac.sourceguid
-                  JOIN {enrol} e ON e.id = ear.enrolid  
-                 WHERE ear.enrolmentfailure = :enrolmentfailure 
+                  JOIN {enrol} e ON e.id = ear.enrolid
+                 WHERE ear.enrolmentfailure = :enrolmentfailure
                    AND (eac.usercreationfailure = :usercreationfailure OR eac.userassociationfailure = :userassociationfailure)";
         $params = [
             'usercreationfailure' => 1,

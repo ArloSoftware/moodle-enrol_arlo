@@ -46,7 +46,7 @@ $params = [
     'fullname' => $contact->get('firstname') . ' ' . $contact->get('lastname'),
     'code' => $code
 ];
-$heading = get_string('unsuccessfulenrolmentof','enrol_arlo', $params);
+$heading = get_string('unsuccessfulenrolmentof', 'enrol_arlo', $params);
 echo $OUTPUT->heading(format_string($heading), 2);
 if ($contact->get('userassociationfailure')) {
     $contactmergerequests = \enrol_arlo\local\contact_merge_requests_coordinator::get_active_requests_for_contact($contact);
@@ -69,7 +69,7 @@ if ($contact->get('userassociationfailure')) {
             }
             $destination = '';
             foreach ($renderfields as $renderfield) {
-                $destination.= $destinationcontact->get($renderfield) . '<br>';
+                $destination .= $destinationcontact->get($renderfield) . '<br>';
             }
             $row = new html_table_row(['source' => $source, 'destination' => $destination]);
             $table->data[] = $row;
@@ -99,9 +99,6 @@ if ($contact->get('userassociationfailure')) {
             echo html_writer::table($table);
         }
     }
-}
-if ($contact->get('usercreationfailure')) {
-    // TODO implement user creation failure report.
 }
 
 echo $OUTPUT->single_button(new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'),
