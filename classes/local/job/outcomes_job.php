@@ -17,6 +17,7 @@
 /**
  * Job class for sending outcome data to individual registrations.
  *
+ * @author    Troy Williams
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -27,12 +28,13 @@ namespace enrol_arlo\local\job;
 defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
+use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
-use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\result;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
 use coding_exception;
 use moodle_exception;
@@ -40,11 +42,72 @@ use moodle_exception;
 /**
  * Job class for sending outcome data to individual registrations.
  *
+ * @author    Troy Williams
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class outcomes_job extends job {
+
+    /** @var mixed $enrolmentinstance */
+    protected $enrolmentinstance;
+
+    /**
+     * Override to load enrolment instance.
+     *
+     * @param persistent $jobpersistent
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function __construct(persistent $jobpersistent) {
+        parent::__construct($jobpersistent);
+        $plugin = api::get_enrolment_plugin();
+        $this->enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
+    }
+
+    /**
+     * Check if config allows this job to be processed.
+     *
+     * @return bool
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function can_run() {
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $jobpersistent = $this->get_job_persistent();
+        $enrolmentinstance = $this->enrolmentinstance;
+        if (!$enrolmentinstance) {
+            $jobpersistent->set('disabled', 1);
+            $jobpersistent->save();
+            $this->add_reasons(get_string('nomatchingenrolmentinstance', 'enrol_arlo'));
+            return false;
+        }
+        if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
+            $this->add_reasons(get_string('enrolmentinstancedisabled', 'enrol_arlo'));
+            return false;
+        }
+        if (!$pluginconfig->get('allowhiddencourses')) {
+            $course = get_course($enrolmentinstance->courseid);
+            if (!$course->visible) {
+                $this->add_reasons(get_string('allowhiddencoursesdiabled', 'enrol_arlo'));
+                return false;
+            }
+        }
+        if (!$pluginconfig->get('allowoutcomespushing')) {
+            $this->add_reasons(get_string('outcomespushingdisabled', 'enrol_arlo'));
+            return false;
+        }
+        if ($enrolmentinstance->customchar2 == arlo_type::EVENT && !$pluginconfig->get('pusheventresults')) {
+            $this->add_reasons(get_string('eventresultpushingdisabled', 'enrol_arlo'));
+            return false;
+        }
+        if ($enrolmentinstance->customchar2 == arlo_type::ONLINEACTIVITY && !$pluginconfig->get('pushonlineactivityresults')) {
+            $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Run the Job.
@@ -54,90 +117,57 @@ class outcomes_job extends job {
      * @throws moodle_exception
      */
     public function run() {
-        $trace = self::get_trace();
-        $plugin = api::get_enrolment_plugin();
-        $pluginconfig = $plugin->get_plugin_config();
-        if (!$pluginconfig->get('allowoutcomespushing')) {
-            $this->add_reasons(get_string('outcomespushingdisabled', 'enrol_arlo'));
+        if (!$this->can_run()) {
             return false;
         }
+        $jobpersistent = $this->get_job_persistent();
+        $enrolmentinstance = $this->enrolmentinstance;
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
         $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         if ($lock) {
-            $jobpersistent = $this->get_job_persistent();
-            try {
-                $enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
-                if (!$enrolmentinstance) {
-                    $this->disable();
-                    throw new moodle_exception(get_string('nomatchingenrolmentinstance', 'enrol_arlo'));
-                }
-                if ($enrolmentinstance->status == ENROL_INSTANCE_DISABLED) {
-                    $this->add_reasons(get_string('enrolmentinstancedisabled', 'enrol_arlo'));
-                    return false;
-                }
-                if ($enrolmentinstance->customchar2 == arlo_type::EVENT && !$pluginconfig->get('pusheventresults')) {
-                    $this->add_reasons(get_string('eventresultpushingdisabled', 'enrol_arlo'));
-                    return false;
-                }
-                if ($enrolmentinstance->customchar2 == arlo_type::ONLINEACTIVITY && !$pluginconfig->get('pushonlineactivityresults')) {
-                    $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
-                    return false;
-                }
-                if (!$pluginconfig->get('allowhiddencourses')) {
-                    $course = get_course($enrolmentinstance->courseid);
-                    if (!$course->visible) {
-                        $this->add_reasons(get_string('allowhiddencoursesdiabled', 'enrol_arlo'));
-                        return false;
+            $registrations = registration_persistent::get_records(
+                ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1]
+            );
+            foreach ($registrations as $registrationpersistent) {
+                try {
+                    $result = new result($enrolmentinstance->courseid, $registrationpersistent->to_record());
+                    $uri = new RequestUri();
+                    $uri->setHost($pluginconfig->get('platform'));
+                    $endpoint = $jobpersistent->get('endpoint') . $registrationpersistent->get('sourceid') .'/';
+                    $uri->setResourcePath($endpoint);
+                    $request = new Request(
+                        'PATCH',
+                        $uri->output(true),
+                        ['Content-type' => 'application/xml; charset=utf-8'],
+                        $result->export_to_xml());
+                    $response = client::get_instance()->send_request($request);
+                    if ($response->getStatusCode() != 200) {
+                        throw new moodle_exception($response->getReasonPhrase());
                     }
-                }
-                $registrations = registration_persistent::get_records(['enrolid' => $enrolmentinstance->id]);
-                if ($registrations) {
-                    foreach ($registrations as $registrationpersistent) {
-                        $result = new result($enrolmentinstance->courseid, $registrationpersistent->to_record());
-                        $uri = new RequestUri();
-                        $uri->setHost($pluginconfig->get('platform'));
-                        $endpoint = $jobpersistent->get('endpoint') . $registrationpersistent->get('id') .'/';
-                        $uri->setResourcePath($endpoint);
-                        $request = new Request(
-                            'PATCH',
-                            $uri->output(true),
-                            ['Content-type' => 'application/xml; charset=utf-8'],
-                            $result->export_to_xml());
-                        $response = client::get_instance()->send_request($request);
-                        // Failed, likely to be 400 or 409. TODO pull in values from new request.
-                        if ($response->getStatusCode() != 200) {
-                            $this->add_error($response->getReasonPhrase());
-                            $registrationpersistent->add_error_message($response->getReasonPhrase());
-                            $registrationpersistent->save();
-                            // Don't want to break whole job, so moving along.
-                            continue;
-                        }
-                        // We need to set changed properties back on registration record. This is
-                        // important as required when determining the use of add or replace in the
-                        // patch request.
-                        $changed = $result->get_changed();
-                        foreach (get_object_vars($changed) as $field => $value) {
-                            $registrationpersistent->set($field, $value);
-                        }
-                        // Reset update flag.
-                        $registrationpersistent->set('updatesource', 0);
-                        $registrationpersistent->save();
-                        // Update scheduling information on persistent after successfull save.
-                        $jobpersistent->set('timelastrequest', time());
-                        $jobpersistent->save();
+                    // We need to set changed properties back on registration record. This is
+                    // important as required when determining the use of add or replace in the
+                    // patch request.
+                    $changed = $result->get_changed();
+                    foreach (get_object_vars($changed) as $field => $value) {
+                        $registrationpersistent->set($field, $value);
                     }
+                    // Reset update flag.
+                    $registrationpersistent->set('updatesource', 0);
+                    $registrationpersistent->save();
+                } catch (moodle_exception $exception) {
+                    debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                    $this->add_error($exception->getMessage());
+                    $registrationpersistent->set('errormessage', $exception->getMessage());
+                } finally {
+                    // Update scheduling information on persistent after successfull save.
+                    $jobpersistent->set('timelastrequest', time());
+                    $jobpersistent->save();
                 }
-                return true;
-            } catch (moodle_exception $exception) {
-                debugging($exception->getMessage(), DEBUG_DEVELOPER);
-                $this->add_error($exception->getMessage());
-                if ($exception instanceof invalid_persistent_exception || $exception instanceof coding_exception) {
-                    throw $exception;
-                }
-                return false;
-            } finally {
-                $lock->release();
             }
+            $lock->release();
+            return true;
         } else {
             throw new moodle_exception('locktimeout');
         }
