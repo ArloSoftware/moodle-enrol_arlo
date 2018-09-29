@@ -154,6 +154,14 @@ abstract class job {
     }
 
     /**
+     * Can be overridden by to add extra checks.
+     *
+     */
+    public function can_run() {
+        return true;
+    }
+
+    /**
      * Add reason why did not run. Not an error, due to configuration.
      *
      * @return array
