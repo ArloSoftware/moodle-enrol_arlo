@@ -33,10 +33,8 @@ use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo_plugin;
 use moodle_exception;
-use moodle_url;
 use progress_trace;
 use null_progress_trace;
-use core_user;
 
 /**
  * API Class
@@ -49,6 +47,40 @@ class api {
 
     /** @var int MAXIMUM_ERROR_COUNT */
     const MAXIMUM_ERROR_COUNT = 20;
+
+    /**
+     * Check if Arlo API can be called based on previous responses. Sets a wait period if
+     * reaches maximum error count, resets after certain time period.
+     *
+     * @param progress_trace|null $trace
+     * @return bool
+     * @throws \coding_exception
+     * @throws moodle_exception
+     */
+    public static function api_callable(progress_trace $trace = null) {
+        if (is_null($trace)) {
+            $trace = new null_progress_trace();
+        }
+        $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
+        $apierrorcounter = $pluginconfig->get('apierrorcounter');
+        if ($apierrorcounter >= self::MAXIMUM_ERROR_COUNT) {
+            $apistatus = $pluginconfig->get('apistatus');
+            $apitimelastrequest = $pluginconfig->get('apitimelastrequest');
+            $apierrorcountresetdelay = $pluginconfig->get('apierrorcountresetdelay');
+            if (time() < ($apitimelastrequest + $apierrorcountresetdelay)) {
+                if ($apistatus == 401 || $apistatus == 403) {
+                    administrator_notification::send_invalid_credentials_message();
+                }
+                $trace->output('Arlo API not callable');
+                return false;
+            } else {
+                $pluginconfig->set('apistatus', -1);
+                $pluginconfig->set('apierrorcounter', 0);
+            }
+        }
+        $trace->output('Arlo API ok to be called');
+        return true;
+    }
 
     /**
      * Get an instance on Arlo enrolment plugin.
@@ -64,17 +96,21 @@ class api {
     }
 
     /**
-     * Main method for running scheduled job that call the Arlo API.
+     * Main method for running scheduled type jobs that call the Arlo API.
      *
      * @param null $time
      * @param int $limit
      * @param progress_trace|null $trace
+     * @return bool
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws moodle_exception
      */
     public static function run_scheduled_jobs($time = null, $limit = 1000, progress_trace $trace = null) {
         global $DB;
+        if (!static::api_callable($trace)) {
+            return false;
+        }
         if (is_null($time)) {
             $time = time();
         }
@@ -84,23 +120,13 @@ class api {
         if (is_null($trace)) {
             $trace = new null_progress_trace();
         }
-        $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
-        $apierrorcounter = $pluginconfig->get('apierrorcounter');
-        if ($apierrorcounter >= self::MAXIMUM_ERROR_COUNT) {
-            $apistatus = $pluginconfig->get('apistatus');
-            $apitimelastrequest = $pluginconfig->get('apitimelastrequest');
-            $apierrorcountresetdelay = $pluginconfig->get('apierrorcountresetdelay');
-            if (time() < ($apitimelastrequest + $apierrorcountresetdelay)) {
-                if ($apistatus == 401 || $apistatus == 403) {
-                    administrator_notification::send_invalid_credentials_message();
-                }
-                return false;
-            } else {
-                $pluginconfig->set('apistatus', -1);
-                $pluginconfig->set('apierrorcounter', 0);
-            }
+        // Register site level jobs if not present.
+        if (!job_persistent::count_records(['area' => 'site'])) {
+            local\job\job::register_site_level_scheduled_jobs();
         }
+        $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
         $conditions = [
+            'area' => 'site',
             'disabled' => 1,
             'timerequestnow' => $time,
             'timenorequest' => $time
@@ -111,7 +137,8 @@ class api {
         }
         $sql = "SELECT *
                   FROM {enrol_arlo_scheduledjob}
-                 WHERE disabled <> 1
+                 WHERE area <> :area
+                   AND disabled <> 1
                    $timingdelaysql
                    AND (:timenorequest < (timenorequestsafter + timerequestsafterextension) OR timenorequestsafter = 0)";
         $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
@@ -122,21 +149,25 @@ class api {
                     $scheduledjob = job_factory::create_from_persistent($jobpersistent);
                     $trace->output($scheduledjob->get_job_run_identifier());
                     $scheduledjob->set_trace($trace);
-                    $status = $scheduledjob->run();
-                    if (!$status) {
-                        if ($scheduledjob->has_errors()) {
-                            $trace->output('Failed with errors.', 1);
-                            $jobpersistent->set_errors($scheduledjob->get_errors());
-                            $jobpersistent->save();
-                        }
+                    if (!$scheduledjob->can_run()) {
                         if ($scheduledjob->has_reasons()) {
-                            $trace->output('Failed with reasons.', 1);
+                            $trace->output('Cannot run for following reasons:', 1);
                             foreach ($scheduledjob->get_reasons() as $reason) {
                                 $trace->output($reason, 2);
                             }
                         }
                     } else {
-                        $trace->output('Completed', 1);
+                        $status = $scheduledjob->run();
+                        if (!$status) {
+                            if ($scheduledjob->has_errors()) {
+                                $trace->output('Failed with errors.', 1);
+                                $jobpersistent->set_errors($scheduledjob->get_errors());
+                                $jobpersistent->save();
+                            }
+
+                        } else {
+                            $trace->output('Completed', 1);
+                        }
                     }
                 } catch (moodle_exception $exception) {
                     if ($exception->getMessage() == 'error/locktimeout') {
@@ -148,6 +179,54 @@ class api {
             }
         }
         $rs->close();
+    }
+
+    /**
+     * Site jobs must be called all the time as information they provided is used for linking enrolment
+     * instances to Arlo Events and Online Activities along with Contact Merge Requests.
+     *
+     * @param progress_trace|null $trace
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws moodle_exception
+     */
+    public static function run_site_jobs(progress_trace $trace = null) {
+        global $DB;
+        if (!static::api_callable($trace)) {
+            return false;
+        }
+        if (is_null($trace)) {
+            $trace = new null_progress_trace();
+        }
+        $records = $DB->get_records('enrol_arlo_scheduledjob', ['area' => 'site']);
+        foreach ($records as $record) {
+            $jobpersistent = new job_persistent(0, $record);
+            $sitejob = job_factory::create_from_persistent($jobpersistent);
+            $trace->output($sitejob->get_job_run_identifier());
+            $sitejob->set_trace($trace);
+            if (!$sitejob->can_run()) {
+                if ($sitejob->has_reasons()) {
+                    $trace->output('Site job cannot run for following reasons:', 1);
+                    foreach ($sitejob->get_reasons() as $reason) {
+                        $trace->output($reason, 2);
+                    }
+                }
+            } else {
+                $status = $sitejob->run();
+                if (!$status) {
+                    if ($sitejob->has_errors()) {
+                        $trace->output('Failed with errors.', 1);
+                        $jobpersistent->set_errors($sitejob->get_errors());
+                        $jobpersistent->save();
+                    }
+
+                } else {
+                    $trace->output('Completed', 1);
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -172,7 +251,7 @@ class api {
                   FROM {enrol_arlo_registration} ear
              LEFT JOIN {enrol} e ON e.id = ear.enrolid
                  WHERE ear.enrolid <> 0 AND e.id IS NULL";
-        foreach($DB->get_records_sql($sql) as $record) {
+        foreach ($DB->get_records_sql($sql) as $record) {
             $enrolid = $record->enrolid;
             // Delete associated registrations.
             $DB->delete_records('enrol_arlo_registration', ['enrolid' => $enrolid]);
