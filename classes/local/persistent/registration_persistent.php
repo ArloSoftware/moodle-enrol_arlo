@@ -165,7 +165,7 @@ class registration_persistent extends persistent {
     /**
      * Get associated contact persistent.
      *
-     * @return \core\persistent|false
+     * @return contact_persistent|false
      * @throws coding_exception
      */
     public function get_contact() {
@@ -180,7 +180,7 @@ class registration_persistent extends persistent {
     /**
      * Get associated event persistent.
      *
-     * @return bool|\core\persistent|false
+     * @return bool|contact_persistent|false
      * @throws coding_exception
      */
     public function get_event() {
@@ -195,7 +195,7 @@ class registration_persistent extends persistent {
     /**
      * Get associated online activity persistent.
      *
-     * @return bool|\core\persistent|false
+     * @return bool|contact_persistent|false
      * @throws coding_exception
      */
     public function get_online_activity() {
@@ -217,4 +217,19 @@ class registration_persistent extends persistent {
     protected function set_progresspercent($value) {
         return $this->raw_set('progresspercent', round($value, 0));
     }
+
+    /**
+     * Use format Arlo likes.
+     *
+     * @param $value
+     * @return registration_persistent
+     * @throws coding_exception
+     */
+    protected function set_lastactivity($value) {
+        if (is_numeric($value)) {
+            $value = date('Y-m-d\TH:i:s.0000000+00:00', $value);
+        }
+        return $this->raw_set('lastactivity', $value);
+    }
+
 }
