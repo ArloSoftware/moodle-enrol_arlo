@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Online Activities job
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -34,6 +35,13 @@ use enrol_arlo\local\persistent\online_activity_persistent;
 use GuzzleHttp\Psr7\Request;
 use moodle_exception;
 
+/**
+ * Online Activities job
+ *
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class online_activities_job extends job {
 
     public function run() {
@@ -45,6 +53,7 @@ class online_activities_job extends job {
                 $hasnext = false; // Break paging by default.
                 $uri = new RequestUri();
                 $uri->setHost($pluginconfig->get('platform'));
+                $uri->setPagingTop(250);
                 $uri->setResourcePath('onlineactivities/');
                 $uri->addExpand('OnlineActivity/EventTemplate');
                 $filter = "(LastModifiedDateTime gt datetime('" . $jobpersistent->get('lastsourcetimemodified') . "'))";

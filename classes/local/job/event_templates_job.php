@@ -15,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Event Templates job class.
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -30,16 +31,21 @@ use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\local\client;
 use enrol_arlo\local\response_processor;
-use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\persistent\event_template_persistent;
 use GuzzleHttp\Psr7\Request;
-use Exception;
 use moodle_exception;
 
+/**
+ * Event Templates job class.
+ *
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class event_templates_job extends job {
 
     public function run() {
-        $pluginconfig = new arlo_plugin_config();
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $jobpersistent = $this->get_job_persistent();
         try {
             $hasnext = true;
@@ -47,6 +53,7 @@ class event_templates_job extends job {
                 $hasnext = false; // Break paging by default.
                 $uri = new RequestUri();
                 $uri->setHost($pluginconfig->get('platform'));
+                $uri->setPagingTop(250);
                 $uri->setResourcePath('eventtemplates/');
                 $uri->addExpand('EventTemplate');
                 $filter = "(LastModifiedDateTime gt datetimeoffset('" . $jobpersistent->get('lastsourcetimemodified') . "'))";
