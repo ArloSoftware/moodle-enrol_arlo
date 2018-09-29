@@ -227,7 +227,7 @@ class contact_merge_requests_handler {
                     }
                     break;
                 default:
-                    throw new coding_exception('lolshouldnothappen');
+                    return false;
             }
             // Set active flag to done.
             $contactmergerequest->set('active', 0);
@@ -243,7 +243,7 @@ class contact_merge_requests_handler {
         // Finally remove contacts.
         if ($this->removecontacts) {
             foreach ($this->removecontacts as $contact) {
-                // Important saftey check, never remove the initial contact.
+                // Important safety check, never remove the initial contact.
                 if ($contact->get('sourceguid') == $this->initialcontact->get('sourceguid')) {
                     continue;
                 }
