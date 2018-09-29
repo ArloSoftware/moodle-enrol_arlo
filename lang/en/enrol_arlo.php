@@ -51,6 +51,7 @@ $string['backtoenrolmentmethods'] = 'Back to enrolment methods';
 $string['configuration'] = 'Configuration';
 $string['changessaved'] = 'Changes saved';
 $string['codeprimary'] = 'Code primary';
+$string['contactmergerequestfailure'] = 'Failure to apply contact merge request';
 $string['communications'] = 'Communications';
 $string['completed'] = 'Completed';
 $string['coursewelcome'] = 'Course welcome';
