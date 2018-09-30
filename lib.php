@@ -37,6 +37,9 @@ use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\local\persistent\event_persistent;
 use enrol_arlo\local\persistent\online_activity_persistent;
 use enrol_arlo\local\job\job;
+use enrol_arlo\local\job\memberships_job;
+use enrol_arlo\local\job\contacts_job;
+use enrol_arlo\local\job\outcomes_job;
 
 /**
  * Arlo enrolment plugin class.
@@ -257,31 +260,24 @@ class enrol_arlo_plugin extends enrol_plugin {
         $instanceid = parent::add_instance($course, $fields);
 
         // Register enrolment instance jobs.
-        job::register_scheduled_job(
-            'enrolment',
-            'memberships',
+        memberships_job::register_job_instance(
             $instanceid,
             $endpoint,
             $collection,
             $persistent->get_time_norequests_after()
         );
-        job::register_scheduled_job(
-            'enrolment',
-            'outcomes',
+        outcomes_job::register_job_instance(
             $instanceid,
             'registrations/',
             'Registrations',
             $persistent->get_time_norequests_after()
         );
-        job::register_scheduled_job(
-            'enrolment',
-            'contacts',
+        contacts_job::register_job_instance(
             $instanceid,
             $endpoint,
             $collection,
             $persistent->get_time_norequests_after()
         );
-
         return $instanceid;
     }
 
