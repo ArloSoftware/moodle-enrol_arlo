@@ -258,7 +258,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         }
 
         // Register site level jobs.
-        \enrol_arlo\local\job\job::register_site_level_scheduled_jobs();
+        \enrol_arlo\local\job\job::register_site_jobs();
 
         // Migrate schedule information and instance information.
         $scheduletable = new xmldb_table('enrol_arlo_schedule');
@@ -306,9 +306,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                 // Get end request time.
                 $timenorequestsafter = $persistent->get_time_norequests_after();
                 // Create enrolment/memberships scheduled job for this enrolment instance.
-                $membershipsjob = enrol_arlo\local\job\job::register_scheduled_job(
-                    'enrolment',
-                    'memberships',
+                $membershipsjob = enrol_arlo\local\job\memberships_job::register_job_instance(
                     $enrol->id,
                     $endpoint,
                     $collection,
@@ -323,27 +321,23 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                 $membershipsjob->set('errorcounter', $schedule->errorcount);
                 $membershipsjob->save();
                 // Create outcomes scheduled job for this enrolment instance.
-                $outcomesjob = enrol_arlo\local\job\job::register_scheduled_job(
-                    'enrolment',
-                    'outcomes',
+                $outcomesjob = enrol_arlo\local\job\outcomes_job::register_job_instance(
                     $enrol->id,
                     'registrations/',
                     'Registrations',
                     $timenorequestsafter
                 );
+
                 $outcomesjob->set('timelastrequest', $schedule->lastpushtime);
                 $outcomesjob->set('timenextrequestdelay', enrol_arlo\local\job\job::TIME_PERIOD_DELAY);
                 $outcomesjob->set('timerequestsafterextension', enrol_arlo\local\job\job::TIME_PERIOD_EXTENSION);
                 $outcomesjob->save();
                 // Create update contacts info scheduled job for this enrolment instance.
-                $contactsjob = enrol_arlo\local\job\job::register_scheduled_job(
-                    'enrolment',
-                    'contacts',
+                $contactsjob = enrol_arlo\local\job\contacts_job::register_job_instance(
                     $enrol->id,
                     $endpoint,
                     $collection,
                     $timenorequestsafter
-
                 );
                 $contactsjob->set('timenextrequestdelay', enrol_arlo\local\job\contacts_job::TIME_PERIOD_DELAY);
                 $contactsjob->set('timerequestsafterextension', enrol_arlo\local\job\contacts_job::TIME_PERIOD_EXTENSION);
