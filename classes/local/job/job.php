@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Job interface.
+ * Job abstract base class.
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -27,11 +27,19 @@ namespace enrol_arlo\local\job;
 use core\lock\lock_config;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\persistent;
+use coding_exception;
 use null_progress_trace;
 use progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Job abstract base class.
+ *
+ * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 abstract class job {
 
     /** @var int TIME_PERIOD_DELAY time in seconds to delay next request. */
@@ -43,19 +51,25 @@ abstract class job {
     /** @var int TIME_LOCK_TIMEOUT time in seconds to wait for a lock before giving up. */
     const TIME_LOCK_TIMEOUT = 5; // 5 Seconds.
 
-    /** @var array  */
+    /** @var string area */
+    const area = null;
+
+    /** @var string type */
+    const type = null;
+
+    /** @var array */
     protected $errors = [];
 
-    /** @var string*/
+    /** @var string */
     protected $lasterror;
 
     /** @var persistent */
     protected $jobpersistent;
 
-    /** @var array  */
+    /** @var array */
     protected $reasons = [];
 
-    /** @var null_progress_trace  */
+    /** @var null_progress_trace */
     protected $trace;
 
     /**
@@ -223,73 +237,76 @@ abstract class job {
     abstract public function run();
 
     /**
-     * Register in DB a scheduled job.
+     * Method for registering an job instance.
      *
-     * @param $area
-     * @param $type
      * @param $instanceid
-     * @param $endpoint
-     * @param $collection
      * @param int $timenorequestsafter
+     * @param null $timenextrequestdelay
+     * @param null $timerequestsafterextension
      * @return job_persistent
-     * @throws \coding_exception
+     * @throws coding_exception
      */
-    public static function register_scheduled_job($area,
-                                                  $type,
-                                                  $instanceid,
-                                                  $endpoint,
-                                                  $collection,
-                                                  $timenorequestsafter = 0) {
+    public static function register_job_instance($instanceid,
+                                                 $endpoint,
+                                                 $collection,
+                                                 $timenorequestsafter = 0,
+                                                 $timenextrequestdelay = null,
+                                                 $timerequestsafterextension = null) {
+        // Check that all required constants are defined in child classes.
+        if (is_null(static::area)) {
+            throw new coding_exception('Child job class must define area constant');
+        }
+        if (is_null(static::type)) {
+            throw new coding_exception('Child job class must define type constant');
+        }
+        if (!is_numeric($instanceid)) {
+            throw new coding_exception('Parameter instanceid must be a integer');
+        }
         $job = new job_persistent();
         $conditions = [
-            'area' => $area,
-            'type' => $type,
+            'area' => static::area,
+            'type' => static::type,
             'instanceid' => $instanceid
         ];
         $job->from_record_properties($conditions);
         $job->set('collection', $collection);
         $job->set('endpoint', $endpoint);
-        $job->set('timenextrequestdelay', self::TIME_PERIOD_DELAY);
         $job->set('timenorequestsafter', $timenorequestsafter);
-        $job->set('timerequestsafterextension', self::TIME_PERIOD_EXTENSION);
+        if (is_null($timenextrequestdelay)) {
+            $timenextrequestdelay = static::TIME_PERIOD_DELAY;
+        }
+        $job->set('timenextrequestdelay', $timenextrequestdelay);
+        if (is_null($timerequestsafterextension)) {
+            $timerequestsafterextension = static::TIME_PERIOD_EXTENSION;
+        }
+        $job->set('timerequestsafterextension', $timerequestsafterextension);
         $job->save();
         return $job;
     }
 
     /**
-     * Register site level syncronisation jobs.
+     * Register site level jobs.
+     *
+     * @throws coding_exception
      */
-    public static function register_site_level_scheduled_jobs() {
-        global $SITE;
-        // Register Event Templates job.
-        static::register_scheduled_job(
-            'site',
-            'event_templates',
-            $SITE->id,
+    public static function register_site_jobs() {
+        event_templates_job::register_job_instance(
+            SITEID,
             'eventtemplates/',
             'EventTemplates'
         );
-        // Register Events job.
-        static::register_scheduled_job(
-            'site',
-            'events',
-            $SITE->id,
+        events_job::register_job_instance(
+            SITEID,
             'events/',
             'Events'
         );
-        // Register Online Activities job.
-        static::register_scheduled_job(
-            'site',
-            'online_activities',
-            $SITE->id,
+        online_activities_job::register_job_instance(
+            SITEID,
             'onlineactivities/',
             'OnlineActivities'
         );
-        // Register Contact Merge Requests job.
-        static::register_scheduled_job(
-            'site',
-            'contact_merge_requests',
-            $SITE->id,
+        contact_merge_requests_job::register_job_instance(
+            SITEID,
             'contactmergerequests/',
             'ContactMergeRequests'
         );
