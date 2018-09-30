@@ -135,10 +135,7 @@ class api {
             'timerequestnow' => $time,
             'timenorequest' => $time
         ];
-        $timingdelaysql = "";
-        if (!$pluginconfig->get('throttlerequests')) {
-            $timingdelaysql = "AND (timelastrequest + timenextrequestdelay) < :timerequestnow";
-        }
+        $timingdelaysql = "AND (timelastrequest + timenextrequestdelay) < :timerequestnow";
         $sql = "SELECT *
                   FROM {enrol_arlo_scheduledjob}
                  WHERE area <> :area
