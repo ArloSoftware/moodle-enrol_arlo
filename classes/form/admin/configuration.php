@@ -36,7 +36,7 @@ class configuration extends \moodleform {
 
         $form = $this->_form;
 
-        $form->addElement('header', 'user', get_string('user'));
+        //$form->addElement('header', 'user', get_string('user'));
 
         // User account matching.
         $options = array();
@@ -48,8 +48,6 @@ class configuration extends \moodleform {
         $default = user_matching::MATCH_BY_DEFAULT;
         $form->setDefault('matchuseraccountsby', $default);
         $form->addHelpButton('matchuseraccountsby', 'matchuseraccountsby', 'enrol_arlo');
-
-        $form->addElement('header', 'enrolment', get_string('enrolment', 'enrol_arlo'));
 
         $student = get_archetype_roles('student');
         $student = reset($student);
@@ -77,8 +75,6 @@ class configuration extends \moodleform {
         $form->setDefault('expiredaction', ENROL_EXT_REMOVED_SUSPEND);
         $form->addHelpButton('expiredaction', 'expiredaction', 'enrol_arlo');
 
-        $form->addElement('header', 'resulting', get_string('resulting', 'enrol_arlo'));
-
         $form->addElement('advcheckbox', 'pushonlineactivityresults',
             get_string('pushonlineactivityresults', 'enrol_arlo'));
         $form->setDefault('pushonlineactivityresults', 1);
@@ -86,16 +82,27 @@ class configuration extends \moodleform {
 
         $form->addElement('advcheckbox', 'pusheventresults',
             get_string('pusheventresults', 'enrol_arlo'));
-        $form->setDefault('pusheventresults', 0);
+        $form->setDefault('pusheventresults', 1);
         $form->addHelpButton('pusheventresults', 'pusheventresults', 'enrol_arlo');
 
-        $form->addElement('header', 'alert', get_string('alert', 'enrol_arlo'));
 
-        $form->addElement('advcheckbox', 'alertsiteadmins',
-            get_string('alertsiteadmins', 'enrol_arlo'));
-        $form->addHelpButton('alertsiteadmins', 'alertsiteadmins', 'enrol_arlo');
+        $form->addElement('advcheckbox', 'allowcompletedevents',
+            get_string('allowcompletedevents', 'enrol_arlo'),
+            get_string('allowcompletedevents_text', 'enrol_arlo'));
+        $form->setDefault('allowcompletedevents', 1);
+        $form->addHelpButton('allowcompletedevents', 'allowcompletedevents', 'enrol_arlo');
 
-        $form->addElement('header', 'cleanup', get_string('cleanup', 'enrol_arlo'));
+        $form->addElement('advcheckbox', 'allowcompletedonlineactivities',
+            get_string('allowcompletedonlineactivities', 'enrol_arlo'),
+            get_string('allowcompletedonlineactivities_text', 'enrol_arlo'));
+        $form->setDefault('allowcompletedonlineactivities', 1);
+        $form->addHelpButton('allowcompletedonlineactivities', 'allowcompletedonlineactivities', 'enrol_arlo');
+
+        $form->addElement('advcheckbox', 'allowhiddencourses',
+            get_string('allowhiddencourses', 'enrol_arlo'), get_string('allowhiddencourses_text', 'enrol_arlo'));
+        $form->setDefault('allowhiddencourses', 0);
+        $form->addHelpButton('allowhiddencourses', 'allowhiddencourses', 'enrol_arlo');
+
         $options = array(
             0 => get_string('never'),
             7 => get_string('numdays', '', 7),
@@ -115,12 +122,6 @@ class configuration extends \moodleform {
         }
 
         $this->add_action_buttons(true, get_string('savechanges', 'enrol_arlo'));
-
-        $form->setExpanded('user');
-        $form->setExpanded('enrolment');
-        $form->setExpanded('resulting');
-        $form->setExpanded('alert');
-        $form->setExpanded('cleanup');
     }
 
     /**

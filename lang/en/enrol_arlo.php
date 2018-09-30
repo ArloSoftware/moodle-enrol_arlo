@@ -23,8 +23,15 @@
  */
 
 $string['alert'] = 'Alert';
-$string['alertsiteadmins'] = 'Site administrators';
-$string['alertsiteadmins_help'] = 'Alert all site administrators through Moodle\'s messaging system of issues such as connection problems or duplicate user matches.';
+$string['allowcompletedevents'] = 'Allow completed events';
+$string['allowcompletedevents_text'] = 'Completed events can be linked.';
+$string['allowcompletedevents_help'] = 'Completed events will be able to be selected and linked to an enrolment instance.';
+$string['allowcompletedonlineactivities'] = 'Allow completed online activities';
+$string['allowcompletedonlineactivities_text'] = 'Completed online activities can be linked.';
+$string['allowcompletedonlineactivities_help'] = 'Completed online activitieswill be able to be selected and linked to an enrolment instance.';
+$string['allowhiddencourses'] = 'Allow hidden courses';
+$string['allowhiddencourses_text'] = 'Allow Arlo enrolment instances in hidden courses to be processed.';
+$string['allowhiddencourses_help'] = ' Note: You will need to disable course welcome messages of adjust them accordingly.';
 $string['apirequests'] = 'API requests';
 $string['apistatusok'] = 'OK, last request was {$a}';
 $string['apistatusclienterror'] = 'Client connection error!';
@@ -129,7 +136,7 @@ $string['longtime'] = 'This process can take a long time';
 $string['manualsynchronisenotice'] = 'This process can take a long time. Do not close you browser window. You will be redirected to enrolment methods page once the process has completed.';
 $string['locktimeout'] = 'The operation timed out while waiting for a lock';
 $string['messagenotsent'] = 'Message not sent';
-$string['messageprovider:administratornotification'] = 'Admistrator notification of integration issues';
+$string['messageprovider:administratornotification'] = 'Administrator notifications of integration issues';
 $string['messagesent'] = 'Message sent';
 $string['managearlo'] = 'Manage Arlo';
 $string['matchbyarlocodeprimary'] = 'Arlo Contact CodePrimary';
@@ -199,7 +206,7 @@ $string['pleasecheckrequestlog'] = 'Please check <a href="{$a}">request log</a>'
 $string['pluginnotenabled'] = 'Plugin not enabled!';
 $string['platform'] = 'Arlo platform URL';
 $string['platform_desc'] = 'URL of your Arlo management platform \'yourplatform.arlo.co\' (excluding https:// and /). No Arlo platform? <a title="{$a->title}" href="{$a->url}" target="_blank">Create a free trial.</a>';
-$string['pushonlineactivityresults'] = 'Push OnlineActivity results';
+$string['pushonlineactivityresults'] = 'Push Online Activity results';
 $string['pushonlineactivityresults_help'] = 'Push result information from enrolment instances mapped to <strong>OnlineActivities</strong> back to Arlo';
 $string['pusheventresults'] = 'Push Event results';
 $string['pusheventresults_help'] = 'Push result information from enrolment instances mapped to <strong>Events</strong> back to Arlo';
