@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
 use enrol_arlo\local\administrator_notification;
 use enrol_arlo\local\factory\job_factory;
+use enrol_arlo\local\job\job;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo_plugin;
 use moodle_exception;
@@ -120,10 +121,6 @@ class api {
         if (is_null($trace)) {
             $trace = new null_progress_trace();
         }
-        // Register site level jobs if not present.
-        if (!job_persistent::count_records(['area' => 'site'])) {
-            local\job\job::register_site_level_scheduled_jobs();
-        }
         $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
         $conditions = [
             'area' => 'site',
@@ -200,29 +197,33 @@ class api {
             $trace = new null_progress_trace();
         }
         $records = $DB->get_records('enrol_arlo_scheduledjob', ['area' => 'site']);
-        foreach ($records as $record) {
-            $jobpersistent = new job_persistent(0, $record);
-            $sitejob = job_factory::create_from_persistent($jobpersistent);
-            $trace->output($sitejob->get_job_run_identifier());
-            $sitejob->set_trace($trace);
-            if (!$sitejob->can_run()) {
-                if ($sitejob->has_reasons()) {
-                    $trace->output('Site job cannot run for following reasons:', 1);
-                    foreach ($sitejob->get_reasons() as $reason) {
-                        $trace->output($reason, 2);
+        if (!$records) {
+            job::register_site_jobs();
+        } else {
+            foreach ($records as $record) {
+                $jobpersistent = new job_persistent(0, $record);
+                $sitejob = job_factory::create_from_persistent($jobpersistent);
+                $trace->output($sitejob->get_job_run_identifier());
+                $sitejob->set_trace($trace);
+                if (!$sitejob->can_run()) {
+                    if ($sitejob->has_reasons()) {
+                        $trace->output('Site job cannot run for following reasons:', 1);
+                        foreach ($sitejob->get_reasons() as $reason) {
+                            $trace->output($reason, 2);
+                        }
                     }
-                }
-            } else {
-                $status = $sitejob->run();
-                if (!$status) {
-                    if ($sitejob->has_errors()) {
-                        $trace->output('Failed with errors.', 1);
-                        $jobpersistent->set_errors($sitejob->get_errors());
-                        $jobpersistent->save();
-                    }
-
                 } else {
-                    $trace->output('Completed', 1);
+                    $status = $sitejob->run();
+                    if (!$status) {
+                        if ($sitejob->has_errors()) {
+                            $trace->output('Failed with errors.', 1);
+                            $jobpersistent->set_errors($sitejob->get_errors());
+                            $jobpersistent->save();
+                        }
+
+                    } else {
+                        $trace->output('Completed', 1);
+                    }
                 }
             }
         }
