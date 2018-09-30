@@ -63,6 +63,13 @@ class api {
             $trace = new null_progress_trace();
         }
         $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
+        if (empty($pluginconfig->get('platform')) |
+            empty($pluginconfig->get('apiusername')) |
+            empty($pluginconfig->get('apipassword'))) {
+            administrator_notification::send_invalid_credentials_message();
+            $trace->output('Arlo API not callable');
+            return false;
+        }
         $apierrorcounter = $pluginconfig->get('apierrorcounter');
         if ($apierrorcounter >= self::MAXIMUM_ERROR_COUNT) {
             $apistatus = $pluginconfig->get('apistatus');
