@@ -101,13 +101,21 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
     /**
      * Extent in order to trigger event.
      *
-     * @param mixed $data
+     * @param $data
+     * @return mixed|string
+     * @throws coding_exception
+     * @throws dml_exception
      */
     public function write_setting($data) {
         $name = $this->name;
         $oldvalue = $this->get_setting();
         $newvalue = $data;
         $return = parent::write_setting($data);
+        // Reset API flags.
+        set_config('apistatus', -1, 'enrol_arlo');
+        set_config('apitimelastrequest', 0, 'enrol_arlo');
+        set_config('apierrormessage', '', 'enrol_arlo');
+        set_config('apierrorcounter', 0, 'enrol_arlo');
         // Trigger an event for updating this field.
         if (!empty($oldvalue)) {
             $event = \enrol_arlo\event\fqdn_updated::create(array(
