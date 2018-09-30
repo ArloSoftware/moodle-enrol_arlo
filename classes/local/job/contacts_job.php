@@ -50,6 +50,12 @@ class contacts_job extends job {
     /** @const TIME_PERIOD_DELAY time in seconds to delay next request. */
     const TIME_PERIOD_DELAY = 86400; // 24 Hours.
 
+    /** @var string area */
+    const area = 'enrolment';
+
+    /** @var string type */
+    const type = 'contacts';
+
     /** @var mixed $enrolmentinstance */
     protected $enrolmentinstance;
 

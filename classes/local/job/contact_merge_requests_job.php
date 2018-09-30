@@ -48,6 +48,18 @@ use moodle_exception;
  */
 class contact_merge_requests_job extends job {
 
+    /** @var int TIME_PERIOD_DELAY override base class. */
+    const TIME_PERIOD_DELAY = 0;
+
+    /** @var int TIME_PERIOD_EXTENSION override base class. */
+    const TIME_PERIOD_EXTENSION = 0;
+
+    /** @var string area */
+    const area = 'site';
+
+    /** @var string type */
+    const type = 'contact_merge_requests';
+
     /**
      * Run the job.
      *

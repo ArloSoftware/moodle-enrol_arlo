@@ -55,6 +55,12 @@ use coding_exception;
  */
 class memberships_job extends job {
 
+    /** @var string area */
+    const area = 'enrolment';
+
+    /** @var string type */
+    const type = 'memberships';
+
     /** @var mixed $enrolmentinstance */
     protected $enrolmentinstance;
 
