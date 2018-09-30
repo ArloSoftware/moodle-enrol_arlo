@@ -173,6 +173,8 @@ class memberships_job extends job {
                                     $registration->update();
                                     $this->add_error(get_string('contactmergerequestfailure', 'enrol_arlo'));
                                     administrator_notification::send_unsuccessful_enrolment_message();
+                                    $jobpersistent->set('timelastrequest', time());
+                                    $jobpersistent->update();
                                     continue;
                                 } else {
                                     $contact->read();
@@ -180,30 +182,39 @@ class memberships_job extends job {
                                 // No user associated with contact.
                                 if ($contact->get('userid') <= 0) {
                                     $user = static::match_user_from_contact($contact);
-                                    if (!$user) {
-                                        // Mo matches, create a new Moodle user.
-                                        $user = new user_persistent();
-                                        $username = username_generator::generate(
-                                            $contact->get('firstname'),
-                                            $contact->get('lastname'),
-                                            $contact->get('email')
-                                        );
-                                        $user->set('username', $username);
-                                        // Set new property values on user.
-                                        $user->set('firstname', $contact->get('firstname'));
-                                        $user->set('lastname', $contact->get('lastname'));
-                                        $user->set('email', $contact->get('email'));
-                                        // Conditionally add codeprimary as idnumber.
-                                        if (empty($user->get('idnumber'))) {
-                                            $user->set('idnumber', 'codeprimary');
+                                    if (!($user instanceof contact_persistent)) {
+                                        // User is an integer greater than 1 means multiple matches.
+                                        if ($user) {
+                                            $registration->set('enrolmentfailure', 1);
+                                            $registration->update();
+                                            $jobpersistent->set('timelastrequest', time());
+                                            $jobpersistent->update();
+                                            continue;
+                                        } else {
+                                            // Mo matches, create a new Moodle user.
+                                            $user = new user_persistent();
+                                            $username = username_generator::generate(
+                                                $contact->get('firstname'),
+                                                $contact->get('lastname'),
+                                                $contact->get('email')
+                                            );
+                                            $user->set('username', $username);
+                                            // Set new property values on user.
+                                            $user->set('firstname', $contact->get('firstname'));
+                                            $user->set('lastname', $contact->get('lastname'));
+                                            $user->set('email', $contact->get('email'));
+                                            // Conditionally add codeprimary as idnumber.
+                                            if (empty($user->get('idnumber'))) {
+                                                $user->set('idnumber', 'codeprimary');
+                                            }
+                                            $user->set('phone1', $contact->get('phonemobile'));
+                                            $user->set('phone2', $contact->get('phonework'));
+                                            $user->create();
+                                            // Important must associate user with contact.
+                                            $contact->set('userid', $user->get('id'));
+                                            $contact->save();
                                         }
-                                        $user->set('phone1', $contact->get('phonemobile'));
-                                        $user->set('phone2', $contact->get('phonework'));
-                                        $user->create();
                                     }
-                                    // Important must associate user with contact.
-                                    $contact->set('userid', $user->get('id'));
-                                    $contact->save();
                                 } else {
                                     // Get contacts associated user.
                                     $user = user_persistent::get_record_and_unset(
@@ -245,6 +256,8 @@ class memberships_job extends job {
                                 $jobpersistent->set('timelastrequest', time());
                                 $jobpersistent->set('lastsourceid', $registration->get('sourceid'));
                                 $jobpersistent->set('lastsourcetimemodified', $registration->get('sourcemodified'));
+                                $jobpersistent->set('errormessage', '');
+                                $jobpersistent->set('errorcounter', 0);
                                 $jobpersistent->update();
 
                             } catch (moodle_exception $exception) {
@@ -291,9 +304,12 @@ class memberships_job extends job {
         // Associate to Moodle account.
         if ($matchcount == 1) {
             $match = reset($matches);
-            return user_persistent::get_record_and_unset(
+            $user = user_persistent::get_record_and_unset(
                 ['id' => $match->id, 'deleted' => 0]
             );
+            $contact->set('userid', $user->get('id'));
+            $contact->save();
+            return $user;
         }
         return false;
     }
