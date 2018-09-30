@@ -93,10 +93,6 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 1
             ],
-            'alertsiteadmins' => [
-                'type' => PARAM_INT,
-                'default' => 1
-            ],
             'emailsendnewaccountdetails' => [
                 'type' => PARAM_INT,
                 'default' => 1
@@ -111,11 +107,11 @@ class arlo_plugin_config extends plugin_config {
             ],
             'allowcompletedevents' => [
                 'type' => PARAM_INT,
-                'default' => 0
+                'default' => 1
             ],
             'allowcompletedonlineactivities' => [
                 'type' => PARAM_INT,
-                'default' => 0
+                'default' => 1
             ],
             'allowhiddencourses' => [
                 'type' => PARAM_INT,
