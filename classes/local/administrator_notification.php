@@ -44,7 +44,7 @@ class administrator_notification {
             return;
         }
         $extendedproperties = true;
-        if (moodle_major_version() < 3.5) {
+        if (moodle_major_version() < 3.4) {
             $extendedproperties = false;
         }
         $url = new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php');
@@ -82,7 +82,7 @@ class administrator_notification {
             return;
         }
         $extendedproperties = true;
-        if (moodle_major_version() < 3.5) {
+        if (moodle_major_version() < 3.4) {
             $extendedproperties = false;
         }
         $url = new moodle_url('/admin/settings.php', ['section' => 'enrolsettingsarlo']);
