@@ -74,9 +74,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                 'eac.firstname',
                 'eac.lastname',
                 'eac.email',
-                'eac.codeprimary',
-                'eac.usercreationfailure',
-                'eac.userassociationfailure'
+                'eac.codeprimary'
             ];
             $select = implode(',', $fields);
         }
@@ -85,11 +83,8 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                   JOIN {enrol_arlo_registration} ear
                     ON ear.sourcecontactguid = eac.sourceguid
                   JOIN {enrol} e ON e.id = ear.enrolid
-                 WHERE ear.enrolmentfailure = :enrolmentfailure
-                   AND (eac.usercreationfailure = :usercreationfailure OR eac.userassociationfailure = :userassociationfailure)";
+                 WHERE ear.enrolmentfailure = :enrolmentfailure";
         $params = [
-            'usercreationfailure' => 1,
-            'userassociationfailure' => 1,
             'enrolmentfailure' => 1
         ];
         // Add order by if needed.
