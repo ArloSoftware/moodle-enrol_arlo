@@ -207,7 +207,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             }
         }
 
-        // Conditionally add enrol_arlo_scheduled_job table.
+        // Conditionally add enrol_arlo_scheduledjob table.
         if (!$dbman->table_exists('enrol_arlo_scheduledjob')) {
             $table = new xmldb_table('enrol_arlo_scheduledjob');
             $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
