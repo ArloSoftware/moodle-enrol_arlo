@@ -59,6 +59,7 @@ $string['configuration'] = 'Configuration';
 $string['changessaved'] = 'Changes saved';
 $string['codeprimary'] = 'Code primary';
 $string['contactmergerequestfailure'] = 'Failure to apply contact merge request';
+$string['contactmergerequestfailures'] = 'Contact merge request failures';
 $string['communications'] = 'Communications';
 $string['completed'] = 'Completed';
 $string['coursewelcome'] = 'Course welcome';
@@ -308,6 +309,6 @@ $string['invalidcredentials_fullmessagehtml'] = '
 <br>
 <p>There is something wrong with your connection settings. Please check that the api username and api password are correct.</p>
 <p>Moodle Arlo connection settings: <a href="{$a->url}">{$a->url}</a></p>';
-$string['contactmergerequestfailures'] = 'Contact merge request failures';
 $string['morethanonematch'] = 'More than one match found';
 $string['moodleusern'] = 'Moodle user {$a}';
+$string['outcomespushingdisabled'] = 'Outcomes pushing is disabled';
