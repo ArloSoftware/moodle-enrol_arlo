@@ -63,6 +63,7 @@ function enrol_arlo_change_platform($oldinstance, $newinstance) {
     $DB->delete_records('user_preferences', array('name' => 'enrol_arlo_createpassword'));
     // Clear out tables.
     $DB->delete_records('enrol_arlo_contact', array('platform' => $oldinstance));
+    $DB->delete_records('enrol_arlo_contactmerge', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_emailqueue');
     $DB->delete_records('enrol_arlo_event', array('platform' => $oldinstance));
     $DB->delete_records('enrol_arlo_scheduledjob', array('platform' => $oldinstance));
