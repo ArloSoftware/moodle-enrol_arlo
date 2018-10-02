@@ -151,29 +151,31 @@ class contact_merge_requests_handler {
             $destinationcontact = $contactmergerequest->get_destination_contact();
             // Set current destination contact.
             $this->currentdestinationcontact = $destinationcontact;
+            $destinationuser = false;
+            $destinationuserhasenrolments = false;
+            $destinationuserhasaccessedcourses = false;
             if ($destinationcontact) {
                 $destinationuser = $destinationcontact->get_associated_user();
                 if ($destinationuser) {
                     $destinationuserhasenrolments = $destinationuser->has_course_enrolments();
-                } else {
-                    $destinationuserhasenrolments = false;
+                    if ($destinationuserhasenrolments) {
+                        $destinationuserhasaccessedcourses = $destinationuser->has_accessed_courses();
+                    }
                 }
-            } else {
-                $destinationuser = false;
-                $destinationuserhasenrolments = false;
             }
             // Set up required source variables for checking against.
             $sourcecontact = $contactmergerequest->get_source_contact();
+            $sourceuser = false;
+            $sourceuserhasenrolments = false;
+            $sourceuserhasaccessedcourses = false;
             if ($sourcecontact) {
                 $sourceuser = $sourcecontact->get_associated_user();
                 if ($sourceuser) {
                     $sourceuserhasenrolments = $sourceuser->has_course_enrolments();
-                } else {
-                    $sourceuserhasenrolments = false;
+                    if ($sourceuserhasenrolments) {
+                        $sourceuserhasaccessedcourses = $sourceuser->has_accessed_courses();
+                    }
                 }
-            } else {
-                $sourceuser = false;
-                $sourceuserhasenrolments = false;
             }
             // Start evaluation. Using switch to take advantage of break.
             switch (true) {
@@ -220,19 +222,13 @@ class contact_merge_requests_handler {
                             $sourceuser->update();
                         }
                     }
-                    if ($destinationcontact) {
-                        if ($destinationuser) {
-                            // Suspend destination user.
-                            $destinationuser->set('suspended', 1);
-                            $destinationuser->update();
-                        }
-                    }
                     break;
                 default:
                     return false;
             }
-            // Set active flag to done.
+            // Set active flag to done. Reset fail flag.
             $contactmergerequest->set('active', 0);
+            $contactmergerequest->set('mergefailed', 0);
             $contactmergerequest->update();
             $this->processedcounter++;
             // We previous contact merge request may have related contacts in current merge request.
