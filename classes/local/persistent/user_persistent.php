@@ -31,6 +31,7 @@ use context_helper;
 use context_user;
 use core_user;
 use core_text;
+use moodle_exception;
 use enrol_arlo\api;
 use enrol_arlo\manager;
 use enrol_arlo\persistent;
@@ -333,34 +334,104 @@ class user_persistent extends persistent {
     }
 
     /**
-     * Has user got any course enrolment be they hidden or disabled.
+     * Wrapper method for count enrolled courses.
      *
      * @return bool
      * @throws \dml_exception
      * @throws coding_exception
      */
     public function has_course_enrolments() {
+        return ($this->count_enrolled_courses(true)) ? true : false;
+    }
+
+    /**
+     * Count the users enrolled courses.
+     *
+     * @param bool $onlyactive
+     * @return int
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function count_enrolled_courses($onlyactive = false) {
         global $DB;
         if ($this->raw_get('id') <= 0) {
-            throw new coding_exception('reguiredfieldmissing', 'user_persistent:id');
+            throw new coding_exception('requiredfieldmissing');
         }
-        $wheres = ["c.id <> :siteid"];
-        $params = ['siteid' => SITEID];
+        $userid = $this->get('id');
+        $params = ['siteid' => SITEID, 'userid' => $userid];
+        if ($onlyactive) {
+            $subwhere = "WHERE ue.status = :active AND e.status = :enabled";
+            $params['active']  = ENROL_USER_ACTIVE;
+            $params['enabled'] = ENROL_INSTANCE_ENABLED;
+        } else {
+            $subwhere = "";
+        }
         $ccjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = :contextlevel)";
         $params['contextlevel'] = CONTEXT_COURSE;
-        $wheres = implode(" AND ", $wheres);
+        // SQL sub select due to Oracle and MS limitations.
         $sql = "SELECT COUNT(1)
                   FROM {course} c
                   JOIN (SELECT DISTINCT e.courseid
                           FROM {enrol} e
                           JOIN {user_enrolments} ue ON (ue.enrolid = e.id AND ue.userid = :userid)
-                       ) en ON (en.courseid = c.id)
-               $ccjoin
-                 WHERE $wheres";
-        $params['userid'] = $this->raw_get('id');
-        $params['active'] = ENROL_USER_ACTIVE;
-        $count = $DB->count_records_sql($sql, $params);
-        return ($count) ? true : false;
+                          $subwhere
+                        ) en ON (en.courseid = c.id)
+                  $ccjoin
+                 WHERE c.id <> :siteid";
+        return $DB->count_records_sql($sql, $params);
+    }
+
+    /**
+     * Get courses the user is enrolled in.
+     *
+     * @param bool $onlyactive
+     * @return array
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public function get_enrolled_courses($onlyactive = false) {
+        global $DB;
+        if ($this->raw_get('id') <= 0) {
+            throw new coding_exception('requiredfieldmissing');
+        }
+        $userid = $this->get('id');
+        $params = ['siteid' => SITEID, 'userid' => $userid];
+        $coursefields = [
+            'id',
+            'category',
+            'sortorder',
+            'shortname',
+            'fullname',
+            'idnumber',
+            'startdate',
+            'visible'
+        ];
+        if ($onlyactive) {
+            $subwhere = "WHERE ue.status = :active AND e.status = :enabled";
+            $params['active']  = ENROL_USER_ACTIVE;
+            $params['enabled'] = ENROL_INSTANCE_ENABLED;
+        } else {
+            $subwhere = "";
+        }
+        $coursefields = 'c.' .join(',c.', $coursefields);
+        $ccselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
+        $ccjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = :contextlevel)";
+        $params['contextlevel'] = CONTEXT_COURSE;
+        $params['ulauserid']  = $userid;
+        // SQL sub select due to Oracle and MS limitations.
+        $sql = "SELECT $coursefields $ccselect, ula.timeaccess
+                  FROM {course} c
+                  JOIN (SELECT DISTINCT e.courseid
+                          FROM {enrol} e
+                          JOIN {user_enrolments} ue ON (ue.enrolid = e.id AND ue.userid = :userid)
+                          $subwhere
+                        ) en ON (en.courseid = c.id)
+                  $ccjoin
+             LEFT JOIN {user_lastaccess} ula ON ula.courseid = c.id AND ula.userid = :ulauserid
+                 WHERE c.id <> :siteid
+              ORDER BY c.sortorder ASC";
+
+        return $DB->get_records_sql($sql, $params);
     }
 
     /**
