@@ -1,0 +1,45 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+<div class="card">
+    <div class="card-header"><h4>{{title}}</h4></div>
+    <div class="card-body">
+        <h5 class="card-title">{{fullname}}</h5>
+        <p class="card-text"><h6>{{#str}} recordinformation, enrol_arlo {{/str}}</h6></p>
+        <p>{{firstname}}</p>
+        <p>{{lastname}}</p>
+        <p>{{email}}</p>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{#str}} courses {{/str}}</h5>
+    <ul class="list-group list-group-flush">
+    {{#courses}}
+        <li class="list-group-item">{{fullname}}
+            {{#timeaccess}}
+                <a href="{{usercourseoutlineurl}}"><span class="badge badge-warning float-right">{{#str}} accessed, enrol_arlo {{/str}}</span></a>
+            {{/timeaccess}}
+        </li>
+    {{/courses}}
+    </ul>
+    {{#hascourses}}
+    {{#hasunenrolurl}}
+    </div>
+    <div class="card-body">
+        <a href="{{unenrolurl}}" class="btn btn-primary">{{#str}} unenrolfromarlocourses, enrol_arlo{{/str}}</a>
+    </div>
+    {{/hasunenrolurl}}
+    {{/hascourses}}
+</div>
