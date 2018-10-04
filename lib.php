@@ -132,9 +132,12 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @param stdClass $user
      * @throws coding_exception
      */
-    public function unenrol(stdClass $instance, stdClass $user) {
+    public function unenrol(stdClass $instance, stdClass $user, $unenrolactionoverride = null) {
         $pluginconfig = $this->get_plugin_config();
         $unenrolaction = $pluginconfig->get('unenrolaction');
+        if (!is_null($unenrolactionoverride)) {
+            $unenrolaction = $unenrolactionoverride;
+        }
         if ($unenrolaction == ENROL_EXT_REMOVED_UNENROL) {
             parent::unenrol_user($instance, $user->id);
         }
