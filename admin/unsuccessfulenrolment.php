@@ -54,7 +54,6 @@ if ($contactmergerequests) {
     $sourcecontact = new \enrol_arlo\output\contact($contactmergerequest->get_source_contact(), 'source');
     $destinationcontact = new \enrol_arlo\output\contact($contactmergerequest->get_destination_contact(), 'destination');
     echo $OUTPUT->heading(get_string('contactmergerequestfailures', 'enrol_arlo'), 3);
-    echo html_writer::start_div('jumbotron jumbotron-fluid');
     echo html_writer::start_div('container');
     echo html_writer::start_div('row');
     echo html_writer::start_div('col-sm-6 span6');
@@ -62,7 +61,6 @@ if ($contactmergerequests) {
     echo html_writer::end_div();
     echo html_writer::start_div('col-sm-6 span6');
     echo $output->render($destinationcontact);
-    echo html_writer::end_div();
     echo html_writer::end_div();
     echo html_writer::end_div();
     echo html_writer::end_div();
