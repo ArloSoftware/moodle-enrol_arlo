@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 use core_user;
 use core\message\message;
 use moodle_url;
+use stdClass;
 
 class administrator_notification {
 
@@ -58,7 +59,7 @@ class administrator_notification {
             $message->subject           = get_string('unsuccessfulenrolment_subject', 'enrol_arlo');
             $message->fullmessage       = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', $params);
             $message->fullmessageformat = FORMAT_PLAIN;
-            $message->fullmessagehtml   = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', $params);
+            $message->fullmessagehtml   = get_string('unsuccessfulenrolment_fullmessagehtml', 'enrol_arlo', $params);
             $message->smallmessage      = get_string('unsuccessfulenrolment_smallmessage', 'enrol_arlo', $params);
             $message->notification      = 1;
             if ($extendedproperties) {
@@ -71,7 +72,7 @@ class administrator_notification {
     }
 
     /**
-     * Invalid credentials adminstrator notification.
+     * Invalid credentials administrator notification.
      *
      * @throws \coding_exception
      * @throws \moodle_exception
@@ -103,6 +104,45 @@ class administrator_notification {
                 $message->courseid          = SITEID;
                 $message->contexturl        = $url;
                 $message->contexturlname    = 'Connection';
+            }
+            message_send($message);
+        }
+    }
+
+    /**
+     * Suspended user account administrator notification.
+     *
+     * @param stdClass $usersuspended
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    public static function send_user_account_suspended_message(stdClass $usersuspended) {
+        $admins = get_admins();
+        if (empty($admins)) {
+            return;
+        }
+        $extendedproperties = true;
+        if (moodle_major_version() < 3.4) {
+            $extendedproperties = false;
+        }
+        $url = new moodle_url('/user/profile.php', ['id' => $usersuspended->id]);
+        $params = ['fullname' => fullname($usersuspended),'profileurl' => $url->out()];
+        foreach ($admins as $admin) {
+            $message                    = new message();
+            $message->component         = 'enrol_arlo';
+            $message->name              = 'administratornotification';
+            $message->userfrom          = core_user::get_noreply_user();
+            $message->userto            = $admin;
+            $message->subject           = get_string('suspendeduser_subject', 'enrol_arlo');
+            $message->fullmessage       = get_string('suspendeduser_fullmessage', 'enrol_arlo', $params);
+            $message->fullmessageformat = FORMAT_PLAIN;
+            $message->fullmessagehtml   = get_string('suspendeduser_fullmessagehtml', 'enrol_arlo', $params);
+            $message->smallmessage      = get_string('suspendeduser_smallmessage', 'enrol_arlo', $params);
+            $message->notification      = 1;
+            if ($extendedproperties) {
+                $message->courseid          = SITEID;
+                $message->contexturl        = $url->out();
+                $message->contexturlname    = get_string('browseuserprofile', 'enrol_arlo');
             }
             message_send($message);
         }

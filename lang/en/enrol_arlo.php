@@ -295,6 +295,10 @@ $string['unsuccessfulenrolment_fullmessage'] = '
 Unsuccessful enrolment of Arlo contact, this may be due to duplicate matching Moodle user accounts or Moodle account could not be created due to site configuration settings.
 
 Please check report {$a->report} for more information.';
+$string['unsuccessfulenrolment_fullmessagehtml'] = '
+<p>Unsuccessful enrolment of Arlo contact, this may be due to duplicate matching Moodle user accounts or Moodle account could not be created due to site configuration settings.</p>
+<br>
+<p>Please check report <a href="{$a->report}">{$a->report}</a> for more information.</p>';
 $string['unsuccessfulenrolment_smallmessage'] = 'Unsuccessful enrolment of Arlo contact, please check report {$a->report}';
 $string['invalidcredentials_subject'] = 'Moodle cannot connect to Arlo API';
 $string['invalidcredentials_smallmessage'] = 'Moodle cannot connect to Arlo API. Please check connection settings: {$a->url}';
@@ -321,3 +325,18 @@ $string['unenrolcontact'] = 'Unenrol contact';
 $string['removeallarloenrolmentsquestion'] = 'Are you sure you want to remove all Arlo linked enrolments for {$a}?';
 $string['enrolmentwillbeattemptedagain'] = 'The enrolment with be attempted again via the standard scheduled task. You can also try to resolve via a manual syncronisation.';
 $string['morethanonemoodleuserfound'] = 'More than one Moodle user found with same details';
+$string['suspendeduser_subject'] = 'Plugin has suspended a user account';
+$string['suspendeduser_fullmessage'] = '
+Arlo enrolment plugin has suspended a user account while resolving a contact merge request.
+
+The user account did not have any courses enrolments and was linked to an Arlo contact.
+
+Please review user profile {$a->profileurl}';
+$string['suspendeduser_fullmessagehtml'] = '
+<p>Arlo enrolment plugin has suspended a user account while resolving a contact merge request.</p>
+<br>
+<p>The user account did not have any courses enrolments and was linked to an Arlo contact.</p>
+<br>
+<p>Please review user profile <a href="{$a->profileurl}">{$a->profileurl}</a></p>';
+$string['suspendeduser_smallmessage'] = 'A user account has been suspended. Please review user profile {$a->profileurl}';
+$string['browseuserprofile'] = 'Browse user profile';
