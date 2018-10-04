@@ -341,7 +341,7 @@ class user_persistent extends persistent {
      * @throws coding_exception
      */
     public function has_course_enrolments() {
-        return ($this->count_enrolled_courses(true)) ? true : false;
+        return ($this->count_enrolled_courses(false)) ? true : false;
     }
 
     /**
