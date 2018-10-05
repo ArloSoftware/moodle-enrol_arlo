@@ -27,6 +27,8 @@ namespace enrol_arlo\local\handler;
 defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
+use enrol_arlo\local\administrator_notification;
+use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\persistent;
 use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
@@ -52,6 +54,9 @@ class contact_merge_requests_handler {
     /** @var contact_persistent[] $removecontacts */
     protected $removecontacts;
 
+    /** @var user_persistent[] $suspendedusers */
+    protected $suspendedusers;
+
     /** @var array $stack */
     protected $stack;
 
@@ -67,6 +72,7 @@ class contact_merge_requests_handler {
         $this->appliedcount = 0;
         $this->initialcontact = $contact;
         $this->removecontacts = [];
+        $this->suspendedusers = [];
         $this->stack = [];
     }
 
@@ -193,6 +199,8 @@ class contact_merge_requests_handler {
                         if ($sourceuser) {
                             $sourceuser->set('suspended', 1);
                             $sourceuser->update();
+                            // Add source user to list for later administrator notifications
+                            $this->suspendedusers[$sourceuser->get('id')] = $sourceuser;
                         }
                     }
                     break;
@@ -208,6 +216,8 @@ class contact_merge_requests_handler {
                             // Suspend destination user.
                             $destinationuser->set('suspended', 1);
                             $destinationuser->update();
+                            // Add destination user to list for later administrator notifications
+                            $this->suspendedusers[$destinationuser->get('id')] = $destinationuser;
                         }
                     }
                     break;
@@ -220,6 +230,8 @@ class contact_merge_requests_handler {
                         if ($sourceuser) {
                             $sourceuser->set('suspended', 1);
                             $sourceuser->update();
+                            // Add source user to list for later administrator notifications
+                            $this->suspendedusers[$sourceuser->get('id')] = $sourceuser;
                         }
                     }
                     break;
@@ -246,6 +258,12 @@ class contact_merge_requests_handler {
                     continue;
                 }
                 $contact->delete();
+            }
+        }
+        // Notify administrators about suspended users.
+        if ($this->suspendedusers) {
+            foreach ($this->suspendedusers as $suspendeduser) {
+                administrator_notification::send_user_account_suspended_message($suspendeduser->to_record());
             }
         }
         // No active requests for current destination contact so exit.
