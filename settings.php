@@ -92,8 +92,8 @@ if ($hassiteconfig) {
         );
 
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlounsuccessfulenrolment',
-            get_string('unsuccessfulenrolment', 'enrol_arlo'),
-            new moodle_url('/enrol/arlo/admin/unsuccessfulenrolment.php'),
+            get_string('unsuccessfulenrolments', 'enrol_arlo'),
+                new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'),
             'moodle/site:config', true)
         );
 
