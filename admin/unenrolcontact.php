@@ -50,7 +50,7 @@ if ($confirm && confirm_sesskey()) {
     foreach ($instances as $instance) {
         $plugin->unenrol($instance, $userrecord, ENROL_EXT_REMOVED_UNENROL);
     }
-    redirect(new moodle_url('/'), get_string('enrolmentwillbeattemptedagain', 'enrol_arlo'), 5);
+    redirect($returnurl, get_string('enrolmentwillbeattemptedagain', 'enrol_arlo'), 5);
 }
 $confirmurl = new moodle_url($PAGE->url, ['confirm' => 1, 'sesskey' => sesskey()]);
 $output = $PAGE->get_renderer('enrol_arlo');
