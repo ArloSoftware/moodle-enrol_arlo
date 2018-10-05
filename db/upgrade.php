@@ -40,8 +40,8 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         return false;
     }
 
-    // Add required persistent columns.
-    if ($oldversion < 2018092300) {
+    // Add required persistent columns. Migrate data. New scheduled job and contact merge request table.
+    if ($oldversion < 2018100500) {
         $admin = get_admin();
 
         // Add information fields to enrol_arlo_contact table.
@@ -351,6 +351,19 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->drop_table($instancetable);
         }
 
+        // Migrate contacts - add user information.
+        $sql = "SELECT eac.id, eac.sourceid, eac.sourceguid, u.firstname, u.lastname, u.email,
+                       u.idnumber AS codeprimary, u.phone1 AS phonework, u.phone2 AS phonemobile
+                  FROM {enrol_arlo_contact} eac
+                  JOIN {user} u ON u.id = eac.userid";
+        $rs = $DB->get_recordset_sql($sql);
+        foreach ($rs as $record) {
+            $record->timemodified = time();
+            $record->usermodified = $admin->id;
+            $DB->update_record('enrol_arlo_contact', $record);
+        }
+        $rs->close();
+
         // Migrate email queue data.
         $rs = $DB->get_recordset('enrol_arlo_emailqueue');
         foreach ($rs as $record) {
@@ -371,7 +384,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         }
 
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2018092300, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2018100500, 'enrol', 'arlo');
     }
 
     return true;
