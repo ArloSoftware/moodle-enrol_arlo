@@ -55,7 +55,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
         $this->define_columns($columns);
         $this->define_headers($headers);
         $this->is_collapsible = false;
-        $this->define_baseurl("/enrol/arlo/admin/failures.php");
+        $this->define_baseurl("/enrol/arlo/admin/unsuccessfulenrolments.php");
         $this->sortable(true, 'timemodified', SORT_ASC);
     }
 
