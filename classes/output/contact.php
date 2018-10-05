@@ -69,13 +69,13 @@ class contact implements renderable, templatable {
         if ($this->contactmergeposition) {
             if ($this->contactmergeposition == 'source') {
                 $data->title = get_string('sourcecontact', 'enrol_arlo');
-                $data->hasunenrolurl = true;
-                $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
-                $data->unenrolurl = $unenrolurl->out();
             }
             if ($this->contactmergeposition == 'destination') {
                 $data->title = get_string('destinationcontact', 'enrol_arlo');
             }
+            $data->hasunenrolurl = true;
+            $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
+            $data->unenrolurl = $unenrolurl->out();
         }
         $data->firstname = $contact->get('firstname');
         $data->lastname  = $contact->get('lastname');
