@@ -56,10 +56,10 @@ if ($contactmergerequests) {
     echo $OUTPUT->heading(get_string('contactmergerequestfailures', 'enrol_arlo'), 3);
     echo html_writer::start_div('container');
     echo html_writer::start_div('row');
-    echo html_writer::start_div('col-sm-6 span6');
+    echo html_writer::start_div('col-sm-6');
     echo $output->render($sourcecontact);
     echo html_writer::end_div();
-    echo html_writer::start_div('col-sm-6 span6');
+    echo html_writer::start_div('col-sm-6');
     echo $output->render($destinationcontact);
     echo html_writer::end_div();
     echo html_writer::end_div();
