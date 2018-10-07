@@ -17,12 +17,19 @@
 <div class="card">
     <div class="card-header"><h4>{{title}}</h4></div>
     <div class="card-body">
-        <h5 class="card-title">{{fullname}}</h5>
-        <p class="card-text"><h6>{{#str}} recordinformation, enrol_arlo {{/str}}</h6></p>
-        <p>{{firstname}}</p>
-        <p>{{lastname}}</p>
-        <p>{{email}}</p>
+        <h5 class="card-title">{{contactfullname}}</h5>
+        <p class="card-text"><h6>{{#str}} contactrecordinformation, enrol_arlo {{/str}}</h6></p>
+        <p>{{contactfirstname}}</p>
+        <p>{{contactlastname}}</p>
+        <p>{{contactemail}}</p>
+        {{#hasuser}}
+        <p class="card-text"><h6>{{#str}} userrecordinformation, enrol_arlo {{/str}}</h6></p>
+        <p>{{userfirstname}}</p>
+        <p>{{userlastname}}</p>
+        <p>{{useremail}}</p>
+        {{/hasuser}}
     </div>
+    {{#hascourses}}
     <div class="card-body">
         <h5 class="card-title">{{#str}} courses {{/str}}</h5>
     <ul class="list-group list-group-flush">
@@ -34,7 +41,7 @@
         </li>
     {{/courses}}
     </ul>
-    {{#hascourses}}
+
     {{#hasunenrolurl}}
     </div>
     <div class="card-body">

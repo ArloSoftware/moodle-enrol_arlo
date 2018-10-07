@@ -73,15 +73,17 @@ class contact implements renderable, templatable {
             if ($this->contactmergeposition == 'destination') {
                 $data->title = get_string('destinationcontact', 'enrol_arlo');
             }
-            $data->hasunenrolurl = true;
-            $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
-            $data->unenrolurl = $unenrolurl->out();
         }
-        $data->firstname = $contact->get('firstname');
-        $data->lastname  = $contact->get('lastname');
-        $data->fullname  = $data->firstname . ' ' . $data->lastname;
-        $data->email     = $contact->get('email');
+        $data->contactfirstname = $contact->get('firstname');
+        $data->contactlastname  = $contact->get('lastname');
+        $data->contactfullname  = $data->contactfirstname . ' ' . $data->contactlastname;
+        $data->contactemail     = $contact->get('email');
         if ($user) {
+            $data->hasuser = true;
+            $data->userfirstname = $user->get('firstname');
+            $data->userlastname = $user->get('lastname');
+            $data->userfullname = $data->userfirstname . ' ' . $data->userlastname;
+            $data->useremail = $user->get('email');
             $courses = $user->get_enrolled_courses(false);
             if ($courses) {
                 $data->hascourses = true;
@@ -91,6 +93,9 @@ class contact implements renderable, templatable {
                     $course->usercourseoutlineurl = $url->out(false);
                     $data->courses[] = $course;
                 }
+                $data->hasunenrolurl = true;
+                $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
+                $data->unenrolurl = $unenrolurl->out();
             }
         }
         return $data;
