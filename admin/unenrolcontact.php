@@ -58,6 +58,6 @@ $title = get_string('unenrol', 'core_enrol');
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('removeallarloenrolmentsquestion', 'enrol_arlo', fullname($userrecord)));
-echo $OUTPUT->confirm($output->render($contactoutput), $confirmurl, $returnurl);
+$unenrolconfirm = get_string('removeallarloenrolmentsquestion', 'enrol_arlo', fullname($userrecord));
+echo $OUTPUT->confirm($unenrolconfirm, $confirmurl, $returnurl);
 echo $OUTPUT->footer();
