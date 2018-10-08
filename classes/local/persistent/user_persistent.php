@@ -385,11 +385,12 @@ class user_persistent extends persistent {
      * Get courses the user is enrolled in.
      *
      * @param bool $onlyactive
+     * @param bool $onlyarlo
      * @return array
      * @throws \dml_exception
      * @throws coding_exception
      */
-    public function get_enrolled_courses($onlyactive = false) {
+    public function get_enrolled_courses($onlyactive = false, $onlyarlo = false) {
         global $DB;
         if ($this->raw_get('id') <= 0) {
             throw new coding_exception('requiredfieldmissing');
@@ -406,12 +407,19 @@ class user_persistent extends persistent {
             'startdate',
             'visible'
         ];
+        $subwheres = [];
         if ($onlyactive) {
-            $subwhere = "WHERE ue.status = :active AND e.status = :enabled";
+            $subwheres[] = "ue.status = :active AND e.status = :enabled";
             $params['active']  = ENROL_USER_ACTIVE;
             $params['enabled'] = ENROL_INSTANCE_ENABLED;
-        } else {
-            $subwhere = "";
+        }
+        if ($onlyarlo) {
+            $subwheres[] = "e.enrol = :enrol";
+            $params['enrol'] = 'arlo';
+        }
+        $subwhere = '';
+        if ($subwheres) {
+            $subwhere = "WHERE " . implode(" AND ", $subwheres);
         }
         $coursefields = 'c.' .join(',c.', $coursefields);
         $ccselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
