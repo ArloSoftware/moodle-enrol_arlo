@@ -41,6 +41,8 @@ $string['apiusername_desc'] = 'Important: Your Arlo user account must be API ena
 $string['apipassword'] = 'Arlo password';
 $string['apipassword_desc'] = 'Forgot your password? <a title="{$a->title}" href="{$a->url}" target="_blank">Learn how to reset it.</a>';
 $string['arloconnection'] = 'Arlo connection';
+$string['arlocontact'] = 'Arlo contact';
+$string['arlocoursecode'] = 'Arlo course code';
 $string['arloenrolment'] = 'Arlo enrolment';
 $string['arlo:config'] = 'Configure Arlo enrolment instances';
 $string['arlo:manage'] = 'Manage Arlo enrolment instances';
@@ -50,6 +52,7 @@ $string['arlo:synchronizeinstance'] = 'Manually pull new registrations and push 
 $string['arlo:unenrol'] = 'Unenrol suspended users';
 $string['assignedgroup'] = 'Assigned group';
 $string['assignrole'] = 'Assign role';
+$string['associateduser'] = 'Associated user';
 $string['associatearlotemplate'] = 'Associate Arlo template';
 $string['associatetemplatedanger'] = '<div class="alert alert-danger" role="alert">
 <strong>Important!</strong>
