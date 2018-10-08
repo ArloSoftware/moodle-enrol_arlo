@@ -22,11 +22,14 @@
         <p>{{contactfirstname}}</p>
         <p>{{contactlastname}}</p>
         <p>{{contactemail}}</p>
+        <p>{{contactcodeprimary}}</p>
         {{#hasuser}}
-        <p class="card-text"><h6>{{#str}} userrecordinformation, enrol_arlo {{/str}}</h6></p>
-        <p>{{userfirstname}}</p>
-        <p>{{userlastname}}</p>
-        <p>{{useremail}}</p>
+            <p class="card-text"><h6>{{#str}} userrecordinformation, enrol_arlo {{/str}}</h6></p>
+            <p>{{userfirstname}}</p>
+            <p>{{userlastname}}</p>
+            <p>{{useremail}}</p>
+            <p>{{useridnumber}}</p>
+            <p><a href="{{userprofileurl}}">{{#str}} browseuserprofile, enrol_arlo{{/str}}</a></p>
         {{/hasuser}}
     </div>
     {{#hascourses}}
@@ -35,18 +38,20 @@
     <ul class="list-group list-group-flush">
     {{#courses}}
         <li class="list-group-item">{{fullname}}
+            {{#arloenrolment}}
+                <span class="badge badge-info float-right">{{#str}} arloenrolment, enrol_arlo {{/str}}</span>
+            {{/arloenrolment}}
             {{#timeaccess}}
                 <a href="{{usercourseoutlineurl}}"><span class="badge badge-warning float-right">{{#str}} accessed, enrol_arlo {{/str}}</span></a>
             {{/timeaccess}}
         </li>
     {{/courses}}
     </ul>
-
-    {{#hasunenrolurl}}
     </div>
+    {{/hascourses}}
+    {{#unenrolurl}}
     <div class="card-body">
         <a href="{{unenrolurl}}" class="btn btn-primary">{{#str}} unenrolfromarlocourses, enrol_arlo{{/str}}</a>
     </div>
-    {{/hasunenrolurl}}
-    {{/hascourses}}
+    {{/unenrolurl}}
 </div>

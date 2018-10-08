@@ -75,27 +75,40 @@ class contact implements renderable, templatable {
             }
         }
         $data->contactfirstname = $contact->get('firstname');
-        $data->contactlastname  = $contact->get('lastname');
-        $data->contactfullname  = $data->contactfirstname . ' ' . $data->contactlastname;
-        $data->contactemail     = $contact->get('email');
+        $data->contactlastname = $contact->get('lastname');
+        $data->contactfullname = $data->contactfirstname . ' ' . $data->contactlastname;
+        $data->contactemail = $contact->get('email');
+        $data->contactcodeprimary = $contact->get('codeprimary');
         if ($user) {
             $data->hasuser = true;
             $data->userfirstname = $user->get('firstname');
             $data->userlastname = $user->get('lastname');
             $data->userfullname = $data->userfirstname . ' ' . $data->userlastname;
             $data->useremail = $user->get('email');
-            $courses = $user->get_enrolled_courses(false);
-            if ($courses) {
+            $data->useridnumber = $user->get('idnumber');
+            $userprofileurl = new moodle_url('/user/profile.php', ['id' => $user->get('id')]);
+            $data->userprofileurl = $userprofileurl->out(false);
+            $allcourses = $user->get_enrolled_courses(false, false);
+            $arlocourses = $user->get_enrolled_courses(false, true);
+            if ($allcourses) {
                 $data->hascourses = true;
+                $hasaccessed = false;
                 $data->courses = [];
-                foreach ($courses as $course) {
-                    $url = new moodle_url('/report/outline/user.php', ['id' => $user->get('id'), 'course' => $course->id]);
-                    $course->usercourseoutlineurl = $url->out(false);
+                foreach ($allcourses as $course) {
+                    if (in_array($course->id, array_keys($arlocourses))) {
+                        $course->arloenrolment= true;
+                        if (!is_null($course->timeaccess)) {
+                            $hasaccessed= true;
+                        }
+                    }
+                    $outlineurl = new moodle_url('/report/outline/user.php', ['id' => $user->get('id'), 'course' => $course->id]);
+                    $course->usercourseoutlineurl = $outlineurl->out(false);
                     $data->courses[] = $course;
                 }
-                $data->hasunenrolurl = true;
-                $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
-                $data->unenrolurl = $unenrolurl->out();
+                if (!$hasaccessed) {
+                    $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
+                    $data->unenrolurl = $unenrolurl->out();
+                }
             }
         }
         return $data;
