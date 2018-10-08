@@ -41,8 +41,10 @@ $string['apiusername_desc'] = 'Important: Your Arlo user account must be API ena
 $string['apipassword'] = 'Arlo password';
 $string['apipassword_desc'] = 'Forgot your password? <a title="{$a->title}" href="{$a->url}" target="_blank">Learn how to reset it.</a>';
 $string['arloconnection'] = 'Arlo connection';
+$string['arloenrolment'] = 'Arlo enrolment';
 $string['arlo:config'] = 'Configure Arlo enrolment instances';
 $string['arlo:manage'] = 'Manage Arlo enrolment instances';
+$string['arlo:unenrol'] = 'Manually unenrol a user';
 $string['arlo:synchronizecore'] = 'Manually pull new core resources';
 $string['arlo:synchronizeinstance'] = 'Manually pull new registrations and push new results for an enrolment instance';
 $string['arlo:unenrol'] = 'Unenrol suspended users';
