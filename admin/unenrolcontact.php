@@ -48,7 +48,9 @@ if ($confirm && confirm_sesskey()) {
     $params = ['userid' => $userrecord->id];
     $instances = $DB->get_records_sql($sql, $params);
     foreach ($instances as $instance) {
-        $plugin->unenrol($instance, $userrecord, ENROL_EXT_REMOVED_UNENROL);
+        if ($plugin->allow_unenrol($instance)) {
+            $plugin->unenrol($instance, $userrecord, ENROL_EXT_REMOVED_UNENROL);
+        }
     }
     redirect($returnurl, get_string('enrolmentwillbeattemptedagain', 'enrol_arlo'), 5);
 }
