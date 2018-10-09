@@ -110,7 +110,7 @@ if (is_numeric($duplicatescount) && $duplicatescount > 1) {
     echo $OUTPUT->heading(format_string($heading), 3);
     $table->finish_output();
 }
-echo html_writer::start_div('row pull-right float-right');
+echo html_writer::start_div('row float-right');
 echo html_writer::start_tag('h4');
 echo $OUTPUT->action_link(new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'),
     get_string('returntounsucessfulenrolments', 'enrol_arlo'));
