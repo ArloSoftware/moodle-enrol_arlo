@@ -104,6 +104,11 @@ class configuration extends \moodleform {
         $form->setDefault('allowunenrolactiveenrolmentsui', 0);
         $form->addHelpButton('allowunenrolactiveenrolmentsui', 'allowunenrolactiveenrolmentsui', 'enrol_arlo');
 
+        $form->addElement('advcheckbox', 'allowunenrolaccessedui',
+            get_string('allowunenrolaccessedui', 'enrol_arlo'), get_string('allowunenrolaccessedui_text', 'enrol_arlo'));
+        $form->setDefault('allowunenrolaccessedui', 0);
+        $form->addHelpButton('allowunenrolaccessedui', 'allowunenrolaccessedui', 'enrol_arlo');
+
         $options = array(
             0 => get_string('never'),
             7 => get_string('numdays', '', 7),

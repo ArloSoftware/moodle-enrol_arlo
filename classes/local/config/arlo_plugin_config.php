@@ -133,6 +133,10 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 0
             ],
+            'allowunenrolaccessedui' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
             'respectallowaccountssameemail' => [
                 'type' => PARAM_INT,
                 'default' => 0

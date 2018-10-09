@@ -39,7 +39,7 @@
     {{#courses}}
         <li class="list-group-item">{{fullname}}
             {{#arloenrolment}}
-                <span class="badge badge-info float-right">{{#str}} arloenrolment, enrol_arlo {{/str}}</span>
+                <a href="{{enrolurl}}"><span class="badge badge-info float-right">{{#str}} arloenrolment, enrol_arlo {{/str}}</span></a>
             {{/arloenrolment}}
             {{#timeaccess}}
                 <a href="{{usercourseoutlineurl}}"><span class="badge badge-warning float-right">{{#str}} accessed, enrol_arlo {{/str}}</span></a>

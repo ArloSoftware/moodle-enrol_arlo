@@ -26,6 +26,7 @@ namespace enrol_arlo\output;
 
 defined('MOODLE_INTERNAL') || die();
 
+use enrol_arlo\api;
 use enrol_arlo\local\persistent\contact_persistent;
 use moodle_url;
 use renderable;
@@ -65,6 +66,13 @@ class contact implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         $contact = $this->contact;
         $user = $contact->get_associated_user();
+        if (moodle_major_version() < 3.4) {
+            $enrolurl = new moodle_url('/enrol/users.php');
+        } else {
+            $enrolurl = new moodle_url('/user/index.php');
+        }
+        $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
+        $allowunenrolaccessed = $pluginconfig->get('allowunenrolaccessedui');
         $data = new stdClass();
         if ($this->contactmergeposition) {
             if ($this->contactmergeposition == 'source') {
@@ -97,16 +105,22 @@ class contact implements renderable, templatable {
                 foreach ($allcourses as $course) {
                     if (in_array($course->id, array_keys($arlocourses))) {
                         $course->arloenrolment= true;
+                        $enrolurl->param('id', $course->id);
+                        $course->enrolurl = $enrolurl->out(false);
                         if (!is_null($course->timeaccess)) {
-                            $hasaccessed= true;
+                            $hasaccessed = true;
                         }
                     }
                     $outlineurl = new moodle_url('/report/outline/user.php', ['id' => $user->get('id'), 'course' => $course->id]);
                     $course->usercourseoutlineurl = $outlineurl->out(false);
                     $data->courses[] = $course;
                 }
-                if (!$hasaccessed) {
-                    $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
+                $unenrolurl = new moodle_url('/enrol/arlo/admin/unenrolcontact.php', ['id' => $contact->get('id')]);
+                if ($hasaccessed) {
+                    if ($allowunenrolaccessed) {
+                        $data->unenrolurl = $unenrolurl->out();
+                    }
+                } else {
                     $data->unenrolurl = $unenrolurl->out();
                 }
             }
