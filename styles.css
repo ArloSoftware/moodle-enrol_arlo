@@ -2618,3 +2618,56 @@ body.path-admin-enrol-arlo #region-main input[type=reset].btn-block,
 body.path-admin-enrol-arlo #region-main input[type=button].btn-block {
   width: 100%;
 }
+body.path-admin-enrol-arlo #region-main .float-left {
+  float: left !important;
+}
+body.path-admin-enrol-arlo #region-main .float-right {
+  float: right !important;
+}
+body.path-admin-enrol-arlo #region-main .float-none {
+  float: none !important;
+}
+@media (min-width: 576px) {
+  body.path-admin-enrol-arlo #region-main .float-sm-left {
+    float: left !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-sm-right {
+    float: right !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-sm-none {
+    float: none !important;
+  }
+}
+@media (min-width: 768px) {
+  body.path-admin-enrol-arlo #region-main .float-md-left {
+    float: left !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-md-right {
+    float: right !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-md-none {
+    float: none !important;
+  }
+}
+@media (min-width: 992px) {
+  body.path-admin-enrol-arlo #region-main .float-lg-left {
+    float: left !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-lg-right {
+    float: right !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-lg-none {
+    float: none !important;
+  }
+}
+@media (min-width: 1200px) {
+  body.path-admin-enrol-arlo #region-main .float-xl-left {
+    float: left !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-xl-right {
+    float: right !important;
+  }
+  body.path-admin-enrol-arlo #region-main .float-xl-none {
+    float: none !important;
+  }
+}
