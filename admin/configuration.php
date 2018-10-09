@@ -25,6 +25,7 @@ use enrol_arlo\local\config\arlo_plugin_config;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 admin_externalpage_setup('enrolsettingsarloconfiguration');
 

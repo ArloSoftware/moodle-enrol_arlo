@@ -414,6 +414,17 @@ class enrol_arlo_plugin extends enrol_plugin {
     }
 
     /**
+     * Does this plugin allow manual unenrolment of all users?
+     * All plugins allowing this must implement 'enrol/xxx:unenrol' capability
+     *
+     * @param stdClass $instance course enrol instance
+     * @return bool - true means user with 'enrol/xxx:unenrol' may unenrol others freely, false means nobody may touch user_enrolments
+     */
+    public function allow_unenrol(stdClass $instance) {
+        return true;
+    }
+
+    /**
      * Does this plugin allow manual unenrolment of a specific user?
      * Yes, but only if user suspended...
      *
@@ -422,8 +433,12 @@ class enrol_arlo_plugin extends enrol_plugin {
      *
      * @return bool - true means user with 'enrol/xxx:unenrol' may unenrol this user,
      * false means nobody may touch this user enrolment
+     * @throws coding_exception
      */
     public function allow_unenrol_user(stdClass $instance, stdClass $ue) {
+        if ($this->get_plugin_config()->get('allowunenrolactiveenrolmentsui')) {
+            return true;
+        }
         if ($ue->status == ENROL_USER_SUSPENDED) {
             return true;
         }
@@ -841,7 +856,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         $instance = $ue->enrolmentinstance;
         $params = $manager->get_moodlepage()->url->params();
         $params['ue'] = $ue->id;
-        if ($this->allow_unenrol($instance) && has_capability("enrol/arlo:unenrol", $context)) {
+        if ($this->allow_unenrol_user($instance, $ue) && has_capability("enrol/arlo:unenrol", $context)) {
             $url = new moodle_url('/enrol/unenroluser.php', $params);
             $actions[] = new user_enrolment_action(
                 new pix_icon('t/delete', ''),

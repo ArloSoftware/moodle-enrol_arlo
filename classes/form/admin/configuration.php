@@ -26,8 +26,6 @@ namespace enrol_arlo\form\admin;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/formslib.php');
-
 use enrol_arlo\local\enum\user_matching;
 
 class configuration extends \moodleform {
@@ -35,8 +33,6 @@ class configuration extends \moodleform {
     public function definition() {
 
         $form = $this->_form;
-
-        //$form->addElement('header', 'user', get_string('user'));
 
         // User account matching.
         $options = array();
@@ -102,6 +98,11 @@ class configuration extends \moodleform {
             get_string('allowhiddencourses', 'enrol_arlo'), get_string('allowhiddencourses_text', 'enrol_arlo'));
         $form->setDefault('allowhiddencourses', 0);
         $form->addHelpButton('allowhiddencourses', 'allowhiddencourses', 'enrol_arlo');
+
+        $form->addElement('advcheckbox', 'allowunenrolactiveenrolmentsui',
+            get_string('allowunenrolactiveenrolmentsui', 'enrol_arlo'), get_string('allowunenrolactiveenrolmentsui_text', 'enrol_arlo'));
+        $form->setDefault('allowunenrolactiveenrolmentsui', 0);
+        $form->addHelpButton('allowunenrolactiveenrolmentsui', 'allowunenrolactiveenrolmentsui', 'enrol_arlo');
 
         $options = array(
             0 => get_string('never'),
