@@ -47,6 +47,7 @@ class username_generator {
      * @param $firstname
      * @param $lastname
      * @param $email
+     * @param $randmax
      * @return int|mixed|string
      * @throws \dml_exception
      * @throws coding_exception
@@ -113,7 +114,6 @@ class username_generator {
      * @throws coding_exception
      */
     public static function create_from_email_address($email, $randmax = null) {
-        $username = '';
         $email = trim($email);
         $email = clean_param($email, PARAM_USERNAME);
         if (is_null($randmax) || !is_number($randmax)) {
@@ -133,7 +133,6 @@ class username_generator {
      * @throws coding_exception
      */
     public static function create_from_email_address_local_part($email, $randmax = null) {
-        $username = '';
         $email = trim($email);
         $email = clean_param($email, PARAM_USERNAME);
         $position = core_text::strpos($email, '@');
@@ -157,7 +156,6 @@ class username_generator {
      * @throws coding_exception
      */
     public static function create_from_first_and_last_names($firstname, $lastname, $length = 3, $randmax = null) {
-        $username = '';
         $firstname = trim($firstname);
         $firstname = clean_param($firstname, PARAM_USERNAME);
         $lastname = trim($lastname);
