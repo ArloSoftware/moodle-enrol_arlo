@@ -169,7 +169,7 @@ class memberships_job extends job {
                                     $this->enrolmentinstance,
                                     $resource
                                 );
-                                // TODO add function.
+                                // Invoke enrolment processing for this registration.
                                 $result = static::process_enrolment_registration(
                                     $this->enrolmentinstance,
                                     $registration,
