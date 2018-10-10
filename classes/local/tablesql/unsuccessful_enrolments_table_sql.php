@@ -46,19 +46,21 @@ class unsuccessful_enrolments_table_sql extends table_sql {
     public function __construct($uniqueid) {
         parent::__construct($uniqueid);
         $columns = [
+            'timemodified',
             'arlocoursecode',
             'course',
             'arlocontact',
             'associateduser',
-            'timemodified',
+            'type',
             'actions'
         ];
         $headers = [
+            get_string('date'),
             get_string('arlocoursecode', 'enrol_arlo'),
             get_string('course'),
             get_string('arlocontact', 'enrol_arlo'),
             get_string('associateduser', 'enrol_arlo'),
-            get_string('timemodified', 'enrol_arlo'),
+            get_string('report'),
             ''
         ];
         $this->define_columns($columns);
@@ -81,13 +83,16 @@ class unsuccessful_enrolments_table_sql extends table_sql {
             $fields = [
                 'ear.id',
                 'e.name as arlocoursecode',
+                'c.id AS courseid',
+                'c.fullname AS coursefullname',
                 'eac.id AS contactid',
                 'eac.firstname',
                 'eac.lastname',
                 'eac.email',
                 'eac.codeprimary',
-                'c.id AS courseid',
-                'c.fullname AS coursefullname',
+                'eac.usercreationfailure',
+                'eac.userassociationfailure',
+                'eacmr.mergefailed',
                 'ear.timemodified'
             ];
             $select = implode(',', $fields);
@@ -96,6 +101,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                   FROM {enrol_arlo_contact} eac
                   JOIN {enrol_arlo_registration} ear
                     ON ear.sourcecontactguid = eac.sourceguid
+             LEFT JOIN {enrol_arlo_contactmerge} eacmr ON eacmr.destinationcontactguid = eac.sourceguid
                   JOIN {enrol} e ON e.id = ear.enrolid
                   JOIN {course} c ON c.id = e.courseid
                  WHERE ear.enrolmentfailure = :enrolmentfailure";
@@ -196,15 +202,10 @@ class unsuccessful_enrolments_table_sql extends table_sql {
      *
      * @param $values
      * @return string
-     * @throws \coding_exception
-     * @throws \moodle_exception
      */
     public function col_actions($values) {
         global $OUTPUT;
-        $url = new moodle_url('/enrol/arlo/admin/unsuccessfulenrolment.php');
-        $url->param('id', $values->id);
-        $text = get_string('viewreport', 'enrol_arlo');
-        $actions[] = $OUTPUT->action_link($url, $text, null, null);
+        $actions[] = '';
         return implode('', $actions);
     }
 
@@ -213,6 +214,32 @@ class unsuccessful_enrolments_table_sql extends table_sql {
      * @return string
      */
     public function col_timemodified($values) {
-        return userdate($values->timemodified);
+        return userdate($values->timemodified, '%d %B %Y');
+    }
+
+    /**
+     * Build report access URL's based on type of failure.
+     *
+     * @param $values
+     * @return string
+     * @throws \coding_exception
+     * @throws \moodle_exception
+     */
+    public function col_type($values) {
+        global $OUTPUT;
+        $output = '';
+        if (!empty($values->userassociationfailure)) {
+            $url = new moodle_url('/enrol/arlo/admin/userassociationfailure.php');
+            $url->param('id', $values->id);
+            $text = get_string('userassociationfailurereport', 'enrol_arlo');
+            $output .= $OUTPUT->action_link($url, $text, null, null);
+        }
+        if (!empty($values->mergefailed)) {
+            $url = new moodle_url('/enrol/arlo/admin/contactmergefailure.php');
+            $url->param('id', $values->id);
+            $text = get_string('contactmergefailurereport', 'enrol_arlo');
+            $output .= $OUTPUT->action_link($url, $text, null, null);
+        }
+        return $output;
     }
 }

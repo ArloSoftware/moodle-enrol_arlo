@@ -77,7 +77,6 @@ if ($hassiteconfig) {
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloconfiguration',
             $name = get_string('configuration', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/configuration.php')));
-
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapirequests',
             $name = get_string('apirequests', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/apirequests.php')));
@@ -91,10 +90,16 @@ if ($hassiteconfig) {
             new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'))
         );
 
-        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlounsuccessfulenrolment',
-            get_string('unsuccessfulenrolments', 'enrol_arlo'),
-                new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'),
-            'moodle/site:config', true)
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlocontactmergefailure',
+                get_string('contactmergefailurereport', 'enrol_arlo'),
+                new moodle_url('/enrol/arlo/admin/contactmergefailure.php'),
+                'moodle/site:config', true)
+        );
+
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlouserassociationfailure',
+                get_string('morethanonemoodleuserfound', 'enrol_arlo'),
+                new moodle_url('/enrol/arlo/admin/userassociationfailure.php'),
+                'moodle/site:config', true)
         );
 
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlounenrolcontact',
