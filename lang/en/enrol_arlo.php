@@ -93,6 +93,7 @@ $string['defaultrole'] = 'Default role';
 $string['defaultrole_help'] = 'The role which should be assigned to users during enrolment';
 $string['delivered'] = 'Delivered';
 $string['enrolment'] = 'Enrolment';
+$string['enrolmentfailure'] = 'Enrolment failure has occurred';
 $string['enrolusers'] = 'Enrol users';
 $string['enrolperiod'] = 'Enrolment duration';
 $string['errorselecttype'] = 'You must select an Type';
