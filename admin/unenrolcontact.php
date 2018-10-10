@@ -35,8 +35,8 @@ if (!enrol_is_enabled('arlo')) {
 }
 $returnurl = new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php');
 $plugin = enrol_arlo\api::get_enrolment_plugin();
-$contact = new \enrol_arlo\local\persistent\contact_persistent($id);
-$contactoutput = new \enrol_arlo\output\contact($contact);
+$contact = new enrol_arlo\local\persistent\contact_persistent($id);
+$contactoutput = new enrol_arlo\output\contact($contact);
 $user = $contact->get_associated_user();
 $userrecord = $user->to_record();
 if ($confirm && confirm_sesskey()) {
