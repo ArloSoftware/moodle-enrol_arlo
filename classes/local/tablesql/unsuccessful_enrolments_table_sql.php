@@ -202,14 +202,22 @@ class unsuccessful_enrolments_table_sql extends table_sql {
      *
      * @param $values
      * @return string
+     * @throws \coding_exception
+     * @throws \moodle_exception
      */
     public function col_actions($values) {
         global $OUTPUT;
         $actions[] = '';
+        $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php');
+        $url->param('id', $values->id);
+        $text = get_string('reattemptenrolment', 'enrol_arlo');
+        $actions[] .= $OUTPUT->action_link($url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']);
         return implode('', $actions);
     }
 
     /**
+     * Shorten date.
+     *
      * @param $values
      * @return string
      */
