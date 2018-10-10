@@ -55,10 +55,10 @@ class contact_merge_requests_job extends job {
     const TIME_PERIOD_EXTENSION = 0;
 
     /** @var string area */
-    const area = 'site';
+    const AREA = 'site';
 
     /** @var string type */
-    const type = 'contact_merge_requests';
+    const TYPE = 'contact_merge_requests';
 
     /**
      * Run the job.

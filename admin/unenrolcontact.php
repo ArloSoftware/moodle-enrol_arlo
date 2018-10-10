@@ -41,8 +41,8 @@ $user = $contact->get_associated_user();
 $userrecord = $user->to_record();
 if ($confirm && confirm_sesskey()) {
     // Arlo enrolments instances the user belongs to.
-    $sql = "SELECT e.* 
-              FROM {enrol} e 
+    $sql = "SELECT e.*
+              FROM {enrol} e
               JOIN {user_enrolments} ue ON ue.enrolid = e.id
              WHERE e.enrol = 'arlo' AND ue.userid = :userid";
     $params = ['userid' => $userrecord->id];

@@ -53,10 +53,10 @@ class events_job extends job {
     const TIME_PERIOD_EXTENSION = 0;
 
     /** @var string area */
-    const area = 'site';
+    const AREA = 'site';
 
     /** @var string type */
-    const type = 'events';
+    const TYPE = 'events';
 
     /**
      * Run the job.

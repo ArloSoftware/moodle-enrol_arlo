@@ -51,10 +51,10 @@ class online_activities_job extends job {
     const TIME_PERIOD_EXTENSION = 0;
 
     /** @var string area */
-    const area = 'site';
+    const AREA = 'site';
 
     /** @var string type */
-    const type = 'online_activities';
+    const TYPE = 'online_activities';
 
     /**
      * Run the job.

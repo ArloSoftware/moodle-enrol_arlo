@@ -29,7 +29,7 @@ require_once($CFG->libdir . '/tablelib.php');
 $id = required_param('id', PARAM_INT);
 
 admin_externalpage_setup('enrolsettingsarlounsuccessfulenrolment',
-    null, ['id' => $id],'/enrol/arlo/admin/unsuccessfulenrolment.php');
+    null, ['id' => $id], '/enrol/arlo/admin/unsuccessfulenrolment.php');
 
 $registration = new \enrol_arlo\local\persistent\registration_persistent($id);
 $contact = $registration->get_contact();

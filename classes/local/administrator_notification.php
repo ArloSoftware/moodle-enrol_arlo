@@ -126,7 +126,7 @@ class administrator_notification {
             $extendedproperties = false;
         }
         $url = new moodle_url('/user/profile.php', ['id' => $usersuspended->id]);
-        $params = ['fullname' => fullname($usersuspended),'profileurl' => $url->out()];
+        $params = ['fullname' => fullname($usersuspended), 'profileurl' => $url->out()];
         foreach ($admins as $admin) {
             $message                    = new message();
             $message->component         = 'enrol_arlo';

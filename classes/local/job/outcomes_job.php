@@ -50,10 +50,10 @@ use moodle_exception;
 class outcomes_job extends job {
 
     /** @var string area */
-    const area = 'enrolment';
+    const AREA = 'enrolment';
 
     /** @var string type */
-    const type = 'outcomes';
+    const TYPE = 'outcomes';
 
     /** @var mixed $enrolmentinstance */
     protected $enrolmentinstance;

@@ -81,7 +81,6 @@ class configuration extends \moodleform {
         $form->setDefault('pusheventresults', 1);
         $form->addHelpButton('pusheventresults', 'pusheventresults', 'enrol_arlo');
 
-
         $form->addElement('advcheckbox', 'allowcompletedevents',
             get_string('allowcompletedevents', 'enrol_arlo'),
             get_string('allowcompletedevents_text', 'enrol_arlo'));

@@ -51,10 +51,10 @@ class event_templates_job extends job {
     const TIME_PERIOD_EXTENSION = 0;
 
     /** @var string area */
-    const area = 'site';
+    const AREA = 'site';
 
     /** @var string type */
-    const type = 'event_templates';
+    const TYPE = 'event_templates';
 
     /**
      * Run the job.

@@ -52,10 +52,10 @@ abstract class job {
     const TIME_LOCK_TIMEOUT = 5; // 5 Seconds.
 
     /** @var string area */
-    const area = null;
+    const AREA = null;
 
     /** @var string type */
-    const type = null;
+    const TYPE = null;
 
     /** @var array */
     protected $errors = [];
@@ -253,10 +253,10 @@ abstract class job {
                                                  $timenextrequestdelay = null,
                                                  $timerequestsafterextension = null) {
         // Check that all required constants are defined in child classes.
-        if (is_null(static::area)) {
+        if (is_null(static::AREA)) {
             throw new coding_exception('Child job class must define area constant');
         }
-        if (is_null(static::type)) {
+        if (is_null(static::TYPE)) {
             throw new coding_exception('Child job class must define type constant');
         }
         if (!is_numeric($instanceid)) {
@@ -264,8 +264,8 @@ abstract class job {
         }
         $job = new job_persistent();
         $conditions = [
-            'area' => static::area,
-            'type' => static::type,
+            'area' => static::AREA,
+            'type' => static::TYPE,
             'instanceid' => $instanceid
         ];
         $job->from_record_properties($conditions);

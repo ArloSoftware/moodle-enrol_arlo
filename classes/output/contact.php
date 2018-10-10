@@ -104,7 +104,7 @@ class contact implements renderable, templatable {
                 $data->courses = [];
                 foreach ($allcourses as $course) {
                     if (in_array($course->id, array_keys($arlocourses))) {
-                        $course->arloenrolment= true;
+                        $course->arloenrolment = true;
                         $enrolurl->param('id', $course->id);
                         $course->enrolurl = $enrolurl->out(false);
                         if (!is_null($course->timeaccess)) {

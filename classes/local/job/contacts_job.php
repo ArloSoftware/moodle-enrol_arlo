@@ -51,10 +51,10 @@ class contacts_job extends job {
     const TIME_PERIOD_DELAY = 86400; // 24 Hours.
 
     /** @var string area */
-    const area = 'enrolment';
+    const AREA = 'enrolment';
 
     /** @var string type */
-    const type = 'contacts';
+    const TYPE = 'contacts';
 
     /** @var mixed $enrolmentinstance */
     protected $enrolmentinstance;
