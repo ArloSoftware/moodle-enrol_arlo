@@ -107,6 +107,12 @@ if ($hassiteconfig) {
                 new moodle_url('/enrol/arlo/admin/unenrolcontact.php'),
                 'moodle/site:config', true)
         );
+
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloreattemptenrolment',
+                get_string('unsuccessfulenrolments', 'enrol_arlo'),
+                new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'),
+                'moodle/site:config', true)
+        );
     }
 
 }

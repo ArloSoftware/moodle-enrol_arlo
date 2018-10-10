@@ -228,6 +228,8 @@ $string['pluginname'] = 'Arlo enrolment';
 $string['pluginname_desc'] = '<p>These enrolments are managed by local_arlo</p>';
 $string['pluginstatus'] = 'Status';
 $string['queued'] = 'Queued';
+$string['reattemptenrolment'] = 'Re-attempt enrolment';
+$string['reattemptenrolmentconfirm'] = 'Please ensure you have actioned all issues found in the failure reports before re-attempting the enrolment or the enrolment will fail again. Re-attempt enrolment?';
 $string['remove'] = 'Remove';
 $string['removetemplatedanger'] = '
 <div class="alert alert-danger" role="alert">
