@@ -26,10 +26,12 @@ namespace enrol_arlo\local\tablesql;
 
 defined('MOODLE_INTERNAL') || die();
 
+use enrol_arlo\local\job\memberships_job;
+use enrol_arlo\local\persistent\contact_persistent;
+use enrol_arlo\local\persistent\contact_merge_request_persistent;
 use html_writer;
 use moodle_url;
 use table_sql;
-use enrol_arlo\local\persistent\contact_persistent;
 
 /**
  * Unsuccessful enrolments table SQL class.
@@ -41,8 +43,18 @@ use enrol_arlo\local\persistent\contact_persistent;
 
 class unsuccessful_enrolments_table_sql extends table_sql {
 
-    const PAGINATION_MAX_LIMIT = 20;
+    /** @var int PAGINATION_MAX_LIMIT */
+    const PAGINATION_MAX_LIMIT = 10;
 
+    /** @var array $contacts Contacts cache. */
+    protected static $contacts = [];
+
+    /**
+     * Constructor.
+     *
+     * @param $uniqueid
+     * @throws \coding_exception
+     */
     public function __construct($uniqueid) {
         parent::__construct($uniqueid);
         $columns = [
@@ -67,12 +79,31 @@ class unsuccessful_enrolments_table_sql extends table_sql {
         $this->define_headers($headers);
         $this->is_collapsible = false;
         $this->define_baseurl("/enrol/arlo/admin/unsuccessfulenrolments.php");
-        $this->sortable(false, 'timemodified', SORT_ASC);
+        $this->sortable(true, 'timemodified', SORT_ASC);
         $this->no_sorting('arlocoursecode');
         $this->no_sorting('course');
+        $this->no_sorting('arlocontact');
+        $this->no_sorting('associateduser');
+        $this->no_sorting('type');
+        $this->no_sorting('actions');
     }
 
     /**
+     * Accessor contacts static cache.
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function get_contact($id) {
+        if (!isset(static::$contacts[$id])) {
+            static::$contacts[$id] = new contact_persistent($id);
+        }
+        return static::$contacts[$id];
+    }
+
+    /**
+     * Helper method to make SQL and PARAMS.
+     *
      * @param bool $count
      * @return array
      */
@@ -174,7 +205,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
      */
     public function col_associateduser($values) {
         $output = '';
-        $contact = new contact_persistent($values->contactid);
+        $contact = $this->get_contact($values->contactid);
         if ($contact) {
             $user = $contact->get_associated_user();
             if ($user) {
@@ -207,11 +238,37 @@ class unsuccessful_enrolments_table_sql extends table_sql {
      */
     public function col_actions($values) {
         global $OUTPUT;
-        $actions[] = '';
-        $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php');
-        $url->param('id', $values->id);
-        $text = get_string('reattemptenrolment', 'enrol_arlo');
-        $actions[] .= $OUTPUT->action_link($url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']);
+        $actions['reattemptenrolment'] = '';
+        if (!empty($values->userassociationfailure)) {
+            $contact = $this->get_contact($values->contactid);
+            if ($contact) {
+                $duplicatescount = memberships_job::match_user_from_contact($contact);
+                if (is_numeric($duplicatescount) && $duplicatescount <= 1) {
+                    $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php');
+                    $url->param('id', $values->id);
+                    $text = get_string('reattemptenrolment', 'enrol_arlo');
+                    $actions['reattemptenrolment'] .= $OUTPUT->action_link($url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']);
+                }
+            }
+        }
+        if (!empty($values->mergefailed)) {
+            $contact = $this->get_contact($values->contactid);
+            if ($contact) {
+                $contactmergerequests = contact_merge_request_persistent::get_records(
+                    ['destinationcontactid' => $contact->get('sourceid'), 'mergefailed' => 1]
+                );
+                $contactmergerequest = reset($contactmergerequests);
+                $sourcecontact = $contactmergerequest->get_source_contact();
+                $sourceenrolments = $sourcecontact->get_associated_user()->has_course_enrolments();
+                $destinationenrolments = $contact->get_associated_user()->has_course_enrolments();
+                if (!($sourceenrolments && $destinationenrolments)) {
+                    $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php');
+                    $url->param('id', $values->id);
+                    $text = get_string('reattemptenrolment', 'enrol_arlo');
+                    $actions['reattemptenrolment'] .= $OUTPUT->action_link($url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']);
+                }
+            }
+        }
         return implode('', $actions);
     }
 
