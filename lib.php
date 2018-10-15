@@ -130,6 +130,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      *
      * @param stdClass $instance
      * @param stdClass $user
+     * @param int $unenrolactionoverride
      * @throws coding_exception
      */
     public function unenrol(stdClass $instance, stdClass $user, $unenrolactionoverride = null) {
