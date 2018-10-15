@@ -129,15 +129,18 @@ class unsuccessful_enrolments_table_sql extends table_sql {
             $select = implode(',', $fields);
         }
         $sql = "SELECT $select
-                  FROM {enrol_arlo_contact} eac
-                  JOIN {enrol_arlo_registration} ear
-                    ON ear.sourcecontactguid = eac.sourceguid
-             LEFT JOIN {enrol_arlo_contactmerge} eacmr ON eacmr.destinationcontactguid = eac.sourceguid
+                  FROM {enrol_arlo_registration} ear
+                  JOIN {enrol_arlo_contact} eac
+                    ON eac.sourceguid = ear.sourcecontactguid
+             LEFT JOIN {enrol_arlo_contactmerge} eacmr
+                    ON eacmr.destinationcontactguid = eac.sourceguid AND eacmr.mergefailed = :mergefailed
                   JOIN {enrol} e ON e.id = ear.enrolid
                   JOIN {course} c ON c.id = e.courseid
                  WHERE ear.enrolmentfailure = :enrolmentfailure";
+
         $params = [
-            'enrolmentfailure' => 1
+            'enrolmentfailure' => 1,
+            'mergefailed' => 1
         ];
         // Add order by if needed.
         if (!$count && $sqlsort = $this->get_sql_sort()) {
@@ -200,8 +203,6 @@ class unsuccessful_enrolments_table_sql extends table_sql {
      *
      * @param $values
      * @return string
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
     public function col_associateduser($values) {
         $output = '';
