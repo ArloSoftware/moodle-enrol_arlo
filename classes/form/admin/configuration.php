@@ -98,11 +98,6 @@ class configuration extends \moodleform {
         $form->setDefault('allowhiddencourses', 0);
         $form->addHelpButton('allowhiddencourses', 'allowhiddencourses', 'enrol_arlo');
 
-        $form->addElement('advcheckbox', 'allowunenrolactiveenrolmentsui',
-            get_string('allowunenrolactiveenrolmentsui', 'enrol_arlo'), get_string('allowunenrolactiveenrolmentsui_text', 'enrol_arlo'));
-        $form->setDefault('allowunenrolactiveenrolmentsui', 0);
-        $form->addHelpButton('allowunenrolactiveenrolmentsui', 'allowunenrolactiveenrolmentsui', 'enrol_arlo');
-
         $form->addElement('advcheckbox', 'allowunenrolaccessedui',
             get_string('allowunenrolaccessedui', 'enrol_arlo'), get_string('allowunenrolaccessedui_text', 'enrol_arlo'));
         $form->setDefault('allowunenrolaccessedui', 0);
