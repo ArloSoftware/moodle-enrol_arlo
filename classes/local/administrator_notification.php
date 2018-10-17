@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Adminstrator notifications.
+ * Administrator notifications.
  *
  * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -34,7 +34,7 @@ use stdClass;
 class administrator_notification {
 
     /**
-     * Unsuccessful enrolment adminstrator notification.
+     * Unsuccessful enrolment administrator notification.
      *
      * @throws \coding_exception
      * @throws \moodle_exception
