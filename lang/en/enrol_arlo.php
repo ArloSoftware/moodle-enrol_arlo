@@ -230,6 +230,7 @@ $string['pluginstatus'] = 'Status';
 $string['queued'] = 'Queued';
 $string['reattemptenrolment'] = 'Re-attempt enrolment';
 $string['reattemptenrolmentconfirm'] = 'Please ensure you have actioned all issues found in the failure reports before re-attempting the enrolment or the enrolment will fail again. Re-attempt enrolment?';
+$string['registrationstatus'] = 'Registration status';
 $string['remove'] = 'Remove';
 $string['removetemplatedanger'] = '
 <div class="alert alert-danger" role="alert">
@@ -297,7 +298,7 @@ $string['contactresourcemissing'] = 'Contact resource missing from Registration.
 $string['contactrecordmissing'] = 'Contact record missing.';
 $string['noassociateduser'] = 'No associated Moodle user account.';
 $string['unsuccessfulenrolment'] = 'Unsuccessful enrolment';
-$string['unsuccessfulenrolments'] = 'Unsuccessful enrolments';
+$string['unsuccessfulenrolments'] = 'Unsuccessful enrolments: {$a}';
 $string['unsuccessfulenrolmentof'] = 'Unsuccessful enrolment of {$a->fullname} into {$a->code}';
 $string['report'] = 'Report';
 $string['viewreport'] = 'View report';
