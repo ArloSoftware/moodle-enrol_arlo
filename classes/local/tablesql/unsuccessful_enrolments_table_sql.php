@@ -59,6 +59,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
         parent::__construct($uniqueid);
         $columns = [
             'timemodified',
+            'sourcestatus',
             'arlocoursecode',
             'course',
             'arlocontact',
@@ -68,6 +69,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
         ];
         $headers = [
             get_string('date'),
+            get_string('registrationstatus', 'enrol_arlo'),
             get_string('arlocoursecode', 'enrol_arlo'),
             get_string('course'),
             get_string('arlocontact', 'enrol_arlo'),
@@ -116,6 +118,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                 'e.name as arlocoursecode',
                 'c.id AS courseid',
                 'c.fullname AS coursefullname',
+                'ear.sourcestatus',
                 'eac.id AS contactid',
                 'eac.firstname',
                 'eac.lastname',
@@ -274,13 +277,25 @@ class unsuccessful_enrolments_table_sql extends table_sql {
     }
 
     /**
+     * Registration status.
+     *
+     * @param $values
+     * @return mixed
+     */
+    public function col_sourcestatus($values) {
+        return $values->sourcestatus;
+    }
+
+    /**
      * Shorten date.
      *
      * @param $values
      * @return string
      */
     public function col_timemodified($values) {
-        return userdate($values->timemodified, '%d %B %Y');
+        $content = userdate($values->timemodified, '%d %B %Y');
+        $title = userdate($values->timemodified);
+        return html_writer::span($content, '', ['title' => $title]);
     }
 
     /**
