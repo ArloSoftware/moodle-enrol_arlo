@@ -69,7 +69,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
         ];
         $headers = [
             get_string('date'),
-            get_string('registrationstatus', 'enrol_arlo'),
+            get_string('status'),
             get_string('arlocoursecode', 'enrol_arlo'),
             get_string('course'),
             get_string('arlocontact', 'enrol_arlo'),

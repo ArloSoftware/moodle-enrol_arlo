@@ -34,6 +34,6 @@ $report = new unsuccessful_enrolments_table_sql('enrolsettingsarlounsuccessfulen
 list($sql, $params) = $report->get_sql_and_params(true);
 $count = $DB->count_records_sql($sql, $params);
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('unsuccessfulenrolments', 'enrol_arlo', $count));
+echo $OUTPUT->heading(get_string('unsuccessfulenrolmentscount', 'enrol_arlo', $count));
 $report->out(unsuccessful_enrolments_table_sql::PAGINATION_MAX_LIMIT, false);
 echo $OUTPUT->footer();
