@@ -226,7 +226,6 @@ class memberships_job extends job {
         if ($matchcount > 1) {
             $contact->set('userassociationfailure', 1);
             $contact->save();
-            administrator_notification::send_unsuccessful_enrolment_message();
             return $matchcount;
         }
         // Associate to Moodle account.
@@ -286,6 +285,7 @@ class memberships_job extends job {
                 if ($user) {
                     $registration->set('enrolmentfailure', 1);
                     $registration->update();
+                    administrator_notification::send_unsuccessful_enrolment_message();
                     return false;
                 } else {
                     // Mo matches, create a new Moodle user.

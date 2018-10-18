@@ -30,8 +30,29 @@ use core_user;
 use core\message\message;
 use moodle_url;
 use stdClass;
+use coding_exception;
 
 class administrator_notification {
+
+    /** @var stdClass $mainadmin */
+    protected static $mainadmin;
+
+    /**
+     * Get main administrator.
+     *
+     * @return mixed
+     * @throws coding_exception
+     */
+    public static function get_main_admin() {
+        if (is_null(static::$mainadmin)) {
+            $mainadmin = get_admin();
+            if (!$mainadmin) {
+                throw new coding_exception('mainadminmissing');
+            }
+            static::$mainadmin = $mainadmin;
+        }
+        return static::$mainadmin;
+    }
 
     /**
      * Unsuccessful enrolment administrator notification.
