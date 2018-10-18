@@ -43,11 +43,27 @@ if (!$registration->get('enrolmentfailure')) {
 $enrolmentinstance = $plugin::get_instance_record($registration->get('enrolid'), MUST_EXIST);
 $returnurl = new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php');
 if ($confirm && confirm_sesskey()) {
-    $result = \enrol_arlo\local\job\memberships_job::process_enrolment_registration(
+    $membershipsjobpersistent = enrol_arlo\local\persistent\job_persistent::get_record(
+        [
+            'area' => 'enrolment',
+            'type' => 'memberships',
+            'instanceid' => $enrolmentinstance->id
+        ]
+    );
+    $membershipsjob = enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
+    if (!$membershipsjob->can_run()) {
+        redirect($returnurl, implode('<br>', $membershipsjob->get_reasons()), 1);
+    }
+    $result = enrol_arlo\local\job\memberships_job::process_enrolment_registration(
         $enrolmentinstance,
         $registration
     );
-    redirect($returnurl);
+    if ($result) {
+        $message = get_string('success');
+    } else {
+        $message = get_string('failed', 'enrol_arlo');
+    }
+    redirect($returnurl, $message, 1);
 }
 $confirmurl = new moodle_url($PAGE->url, ['confirm' => 1, 'sesskey' => sesskey()]);
 $output = $PAGE->get_renderer('enrol_arlo');
