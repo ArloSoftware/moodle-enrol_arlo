@@ -46,24 +46,24 @@ $returnstring = get_string('backtoenrolmentmethods', 'enrol_arlo');
 if (confirm_sesskey() and $confirm == true) {
     try {
         // Run enrolment job.
-        $membershipsjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+        $membershipsjobpersistent = enrol_arlo\local\persistent\job_persistent::get_record(
             [
                 'area' => 'enrolment',
                 'type' => 'memberships',
                 'instanceid' => $instance->id
             ]
         );
-        $membershipsjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
+        $membershipsjob = enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
         $status = $membershipsjob->run();
         // Run outcomes job.
-        $outcomesjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+        $outcomesjobpersistent = enrol_arlo\local\persistent\job_persistent::get_record(
             [
                 'area' => 'enrolment',
                 'type' => 'outcomes',
                 'instanceid' => $instance->id
             ]
         );
-        $outcomesjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($outcomesjobpersistent);
+        $outcomesjob = enrol_arlo\local\factory\job_factory::create_from_persistent($outcomesjobpersistent);
         $status = $outcomesjob->run();
     } catch (moodle_exception $exception) {
         if ($exception->getMessage() == 'error/locktimeout') {
@@ -80,7 +80,7 @@ if (confirm_sesskey() and $confirm == true) {
         get_string('manualsynchronisenotice', 'enrol_arlo'),
         'warning'
     );
-    echo $OUTPUT->confirm('', $confirmurl, $returnurl);
+    echo $OUTPUT->confirm(get_string('manualsynchronisenotice', 'enrol_arlo'), $confirmurl, $returnurl);
 } else {
     echo $OUTPUT->header();
     echo print_error('nopermissions', 'error', '', 'please ensure you are signed in and have permission');
