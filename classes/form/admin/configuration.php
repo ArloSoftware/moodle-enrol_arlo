@@ -31,6 +31,7 @@ use enrol_arlo\local\enum\user_matching;
 class configuration extends \moodleform {
 
     public function definition() {
+        global $CFG;
 
         $form = $this->_form;
 
@@ -114,6 +115,20 @@ class configuration extends \moodleform {
             get_string('requestlogcleanup', 'enrol_arlo'), $options);
         $form->setDefault('requestlogcleanup', 0);
         $form->addHelpButton('requestlogcleanup', 'requestlogcleanup', 'enrol_arlo');
+
+        // Developer information for outgoing email delivery.
+        $emaildisabled = !empty($CFG->noemailever);
+        $emaildiverted = !empty(trim($CFG->divertallemailsto));
+        $emailprocessing = '';
+        if ($emaildiverted) {
+            $emailprocessing = get_string('divertedto', 'enrol_arlo', $CFG->divertallemailsto);
+        }
+        if ($emaildisabled) {
+            $emailprocessing = get_string('disabled', 'enrol_arlo');
+        }
+        if ($emailprocessing) {
+            $form->addElement('static', 'outboundemaildelivery', get_string('outboundemaildelivery', 'enrol_arlo'), $emailprocessing);
+        }
 
         // Hack - Quick load existing config if exists.
         $config = (array) get_config('enrol_arlo');
