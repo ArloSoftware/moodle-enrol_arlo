@@ -113,7 +113,7 @@ class user_matcher {
         global $DB;
         $idnumber = clean_param($idnumber, PARAM_TEXT);
         if (empty($idnumber)) {
-            throw new coding_exception('IDNumber parameter is empty after being cleaned.');
+            return [];
         }
         return $DB->get_records('user', ['idnumber' => $idnumber, 'deleted' => 0]);
     }
