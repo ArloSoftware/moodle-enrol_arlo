@@ -428,7 +428,8 @@ class enrol_arlo_plugin extends enrol_plugin {
      * All plugins allowing this must implement 'enrol/xxx:unenrol' capability
      *
      * @param stdClass $instance course enrol instance
-     * @return bool - true means user with 'enrol/xxx:unenrol' may unenrol others freely, false means nobody may touch user_enrolments
+     * @return bool - true means user with 'enrol/xxx:unenrol' may unenrol others freely,
+     * false means nobody may touch user_enrolments
      */
     public function allow_unenrol(stdClass $instance) {
         return true;

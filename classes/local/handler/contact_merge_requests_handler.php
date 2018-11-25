@@ -199,7 +199,7 @@ class contact_merge_requests_handler {
                         if ($sourceuser) {
                             $sourceuser->set('suspended', 1);
                             $sourceuser->update();
-                            // Add source user to list for later administrator notifications
+                            // Add source user to list for later administrator notifications.
                             $this->suspendedusers[$sourceuser->get('id')] = $sourceuser;
                         }
                     }
@@ -216,7 +216,7 @@ class contact_merge_requests_handler {
                             // Suspend destination user.
                             $destinationuser->set('suspended', 1);
                             $destinationuser->update();
-                            // Add destination user to list for later administrator notifications
+                            // Add destination user to list for later administrator notifications.
                             $this->suspendedusers[$destinationuser->get('id')] = $destinationuser;
                         }
                     }
@@ -230,7 +230,7 @@ class contact_merge_requests_handler {
                         if ($sourceuser) {
                             $sourceuser->set('suspended', 1);
                             $sourceuser->update();
-                            // Add source user to list for later administrator notifications
+                            // Add source user to list for later administrator notifications.
                             $this->suspendedusers[$sourceuser->get('id')] = $sourceuser;
                         }
                     }

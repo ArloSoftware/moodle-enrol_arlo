@@ -251,7 +251,9 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                     $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php');
                     $url->param('id', $values->id);
                     $text = get_string('reattemptenrolment', 'enrol_arlo');
-                    $actions['reattemptenrolment'] .= $OUTPUT->action_link($url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']);
+                    $actions['reattemptenrolment'] .= $OUTPUT->action_link(
+                        $url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']
+                    );
                 }
             }
         }
@@ -269,7 +271,9 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                     $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php');
                     $url->param('id', $values->id);
                     $text = get_string('reattemptenrolment', 'enrol_arlo');
-                    $actions['reattemptenrolment'] .= $OUTPUT->action_link($url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']);
+                    $actions['reattemptenrolment'] .= $OUTPUT->action_link(
+                        $url, $text, null, ['class' => 'btn btn-outline-primary btn-sm']
+                    );
                 }
             }
         }

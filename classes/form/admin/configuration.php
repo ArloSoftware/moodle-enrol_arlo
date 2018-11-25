@@ -127,7 +127,10 @@ class configuration extends \moodleform {
             $emailprocessing = get_string('disabled', 'enrol_arlo');
         }
         if ($emailprocessing) {
-            $form->addElement('static', 'outboundemaildelivery', get_string('outboundemaildelivery', 'enrol_arlo'), $emailprocessing);
+            $form->addElement('static', 'outboundemaildelivery',
+                get_string('outboundemaildelivery', 'enrol_arlo'),
+                $emailprocessing
+            );
         }
 
         // Hack - Quick load existing config if exists.
