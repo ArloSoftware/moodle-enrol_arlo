@@ -14,6 +14,35 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
+{{!
+    @template enrol_arlo/contact_card
+
+    Contact card template
+
+    Context variables required for this template:
+    * title - The title of the card
+    * contactfullname - The full name of contact
+    * contactfirstname - The first name of contact
+    * contactlastname - The last name of contact
+    * contactemail - The email of contact
+    * contactcodprimary - The primary code of contact
+
+    Example context (json):
+    {
+        "title": "Source",
+        "contactfullname": "Arthur Fonzarelli",
+        "contactfirstname": "Arthur",
+        "contactlastname": "Fonzarelli",
+        "contactemail": "Arthur.Fonzarelli@happydays.com",
+        "contactcodeprimary": "XXX-1000",
+        "hasuser": false,
+        "userfirstname": "Arthur",
+        "userlastname": "Fonzarelli",
+        "useremail": "Arthur.Fonzarelli@happydays.com",
+        "useridnumber": "XXX-1000",
+        "hascourses": false
+    }
+}}
 <div class="card">
     <div class="card-header"><h4>{{title}}</h4></div>
     <div class="card-body">
@@ -48,10 +77,10 @@
     {{/courses}}
     </ul>
     </div>
+        {{#unenrolurl}}
+            <div class="card-body">
+                <a href="{{unenrolurl}}" class="btn btn-outline-primary btn-sm">{{#str}} unenrolfromarlocourses, enrol_arlo{{/str}}</a>
+            </div>
+        {{/unenrolurl}}
     {{/hascourses}}
-    {{#unenrolurl}}
-    <div class="card-body">
-        <a href="{{unenrolurl}}" class="btn btn-outline-primary btn-sm">{{#str}} unenrolfromarlocourses, enrol_arlo{{/str}}</a>
-    </div>
-    {{/unenrolurl}}
 </div>
