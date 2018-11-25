@@ -31,15 +31,6 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     // Moodle v3.5.0 release upgrade line.
     // Put any upgrade step following this.
 
-    // Back out if using the old local and enrol plugin set.
-    if ($oldversion < 2016052309) {
-        echo $OUTPUT->notification(
-            'Cannot upgrade from old enrol/local Arlo plugin set. You must be running single enrolment plugin.',
-            'notifyerror'
-        );
-        return false;
-    }
-
     // Add required persistent columns. Migrate data. New scheduled job and contact merge request table.
     if ($oldversion < 2018100500) {
         $admin = get_admin();
