@@ -87,6 +87,7 @@ class client {
      */
     public function send_request(Request $request) {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
+        $statuscode = 0;
         try {
             $time = time();
             $pluginconfig->set('apitimelastrequest', $time);
@@ -94,6 +95,7 @@ class client {
             $statuscode = $response->getStatusCode();
             return $response;
         } catch (Exception $exception) {
+            $trace = $exception->getTraceAsString();
             if ($exception instanceof ClientException || $exception instanceof ServerException) {
                 $statuscode = $exception->getResponse()->getStatusCode();
                 return $exception->getResponse();

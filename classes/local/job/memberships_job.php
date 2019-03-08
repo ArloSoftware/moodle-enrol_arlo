@@ -164,6 +164,13 @@ class memberships_job extends job {
                     if ($collection->count() > 0) {
                         foreach ($collection as $resource) {
                             try {
+                                // Only process approved and completed registrations.
+                                if (!in_array($resource->Status,
+                                    [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])) {
+                                    $jobpersistent->set('timelastrequest', time());
+                                    $jobpersistent->update();
+                                    continue;
+                                }
                                 // Save Arlo registration information into Moodle persistents.
                                 list($registration, $contact) = static::save_resource_information_to_persistents(
                                     $this->enrolmentinstance,
