@@ -31,13 +31,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__).'/adminlib.php');
+require_once(__DIR__ . '/adminlib.php');
 
 if ($hassiteconfig) {
     $name = get_string('arloconnection', 'enrol_arlo');
     $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
 
-    $settings->add(new admin_setting_configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
+    $settings->add(new enrol_arlo_admin_setting_configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
 
     $name = get_string('platform', 'enrol_arlo');
 
@@ -47,7 +47,7 @@ if ($hassiteconfig) {
     $url->param('utm_campaign', 'Moodle inproduct trial signup link');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
     $description = get_string('platform_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
-    $settings->add(new admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, ''));
+    $settings->add(new enrol_arlo_admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, ''));
 
     $name = get_string('apiusername', 'enrol_arlo');
     $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/115003692863');
@@ -56,7 +56,7 @@ if ($hassiteconfig) {
     $url->param('utm_campaign', 'Moodle inproduct config support link');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
     $description = get_string('apiusername_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
-    $settings->add(new admin_setting_configemail('enrol_arlo/apiusername', $name, $description, null));
+    $settings->add(new enrol_arlo_admin_setting_configemail('enrol_arlo/apiusername', $name, $description, null));
 
     $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/211902623');
     $url->param('utm_source', 'Moodle product');

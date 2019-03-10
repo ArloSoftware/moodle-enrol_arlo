@@ -35,7 +35,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class admin_setting_configlockedtext extends admin_setting_configtext {
+class enrol_arlo_admin_setting_configlockedtext extends admin_setting_configtext {
     /**
      * Constructor
      * @param string $name unique name, 'mysetting' for settings that in config, 'myplugin/mysetting' for ones in config_plugins.
@@ -90,8 +90,8 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
         }
         //]]>
         </script>';
-        $html = '<div class="form-password">
-                 <input type="text" size="'.$this->size.'" id="'.$id.'" name="'.$this->get_full_name().'" value="'.s($data).'" />
+        $html = '<div class="form-text">
+                 <input type="text" class="form-control text-ltr"vsize=" '.$this->size.'" id="'.$id.'" name="'.$this->get_full_name().'" value="'.s($data).'" />
                  <div class="unmask" id="'.$id.'unmaskdiv">
                  </div>'.$unmaskjs.'</div>';
         return format_admin_setting($this, $this->visiblename, $html,
@@ -136,7 +136,8 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
      * Validate FQDN - host.
      *
      * @param $data
-     * @return bool|string
+     * @return bool|mixed|string
+     * @throws coding_exception
      */
     public function validate($data) {
         $cleaned = clean_param($data, PARAM_HOST);
@@ -150,7 +151,7 @@ class admin_setting_configlockedtext extends admin_setting_configtext {
 /**
  * Displays current Arlo API status in admin settings page.
  */
-class admin_setting_configarlostatus extends admin_setting {
+class enrol_arlo_admin_setting_configarlostatus extends admin_setting {
     public function __construct($name, $visiblename) {
         $this->nosave = true;
         parent::__construct($name, $visiblename, '', '');
@@ -184,6 +185,9 @@ class admin_setting_configarlostatus extends admin_setting {
      * @param mixed $data
      * @param string $query
      * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
      */
     public function output_html($data, $query = '') {
         global $OUTPUT;
@@ -233,12 +237,13 @@ class admin_setting_configarlostatus extends admin_setting {
 /**
  * Extends config text to allow email validation.
  */
-class admin_setting_configemail extends admin_setting_configtext {
+class enrol_arlo_admin_setting_configemail extends admin_setting_configtext {
     /**
      * Validate email address.
      *
      * @param $data
-     * @return bool|string
+     * @return bool|mixed|string
+     * @throws coding_exception
      */
     public function validate($data) {
         if (!validate_email($data)) {
