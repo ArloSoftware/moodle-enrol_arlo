@@ -26,6 +26,9 @@ defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\persistent\event_template_persistent;
+use enrol_arlo\local\persistent\event_persistent;
+
 
 
 /**
@@ -48,6 +51,23 @@ class enrol_arlo_generator extends testing_module_generator {
     public function get_arlo_type_datetime() {
         return date('Y-m-d\TH:i:sP');
     }
+    
+    /**
+     * Core model properties that need to be protected.
+     *
+     * @var array
+     */
+    protected static $protected = [
+        'id',
+        'usermodified',
+        'timecreated',
+        'timemodified',
+        'platform',
+        'sourceid',
+        'sourceguid',
+        'sourcecreated',
+        'sourcemodified'
+    ];
 
     /**
      * Create a contact record.
@@ -69,13 +89,71 @@ class enrol_arlo_generator extends testing_module_generator {
         $contact = $contact->create();
         if (!is_null($data)) {
             foreach (get_object_vars($data) as $property => $value) {
-                if ($contact::has_property($property)) {
+                if ($contact::has_property($property) && in_array($property, self::$protected)) {
                     $contact->set($property, $value);
                 }
             }
         }
         $contact->update();
         return $contact;
+    }
+    
+    
+    
+    /**
+     * Create a Event template record.
+     *
+     * @return event_template_persistent
+     * @throws coding_exception
+     */
+    public function create_event_template() {
+        $randomnumber = rand();
+        $datetime = $this->get_arlo_type_datetime();
+        $template = new event_template_persistent();
+        $template->set('platform', $this->get_platform());
+        $template->set('sourceid', $randomnumber);
+        $template->set('sourceguid', $randomnumber);
+        $template->set('name', 'EvtTplName-' . $randomnumber);
+        $template->set('code', 'EvtTplCode-' . $randomnumber);
+        $template->set('sourcecreated', $datetime);
+        $template->set('sourcemodified', $datetime);
+        return $template;
+    }
+    
+    /**
+     * Create Event record off a Event template record.
+     *
+     * @param event_template_persistent $template
+     * @param stdClass|null $data
+     * @return event_persistent
+     * @throws coding_exception
+     */
+    public function create_event(event_template_persistent $template, stdClass $data = null) {
+        $randomnumber = rand();
+        $datetime = $this->get_arlo_type_datetime();
+        $event = new event_persistent();
+        $event->set('platform', $this->get_platform());
+        $event->set('sourceid', $randomnumber);
+        $event->set('sourceguid', $randomnumber);
+        $event->set('sourcecreated', $datetime);
+        $code = $template->get('code') . 'E-' . $randomnumber;
+        $event->set('code', $code);
+        $event->set('sourcemodified', $datetime);
+        $event->set('sourcetemplateid', $template->get('sourceid'));
+        $event->set('sourcetemplateguid', $template->get('sourceguid'));
+        if (!is_null($data)) {
+            foreach (get_object_vars($data) as $property => $value) {
+                if ($event::has_property($property)) {
+                    $event->set($property, $value);
+                }
+            }
+        }
+        return $event;
+    }
+    
+    public function create_event_enrolent_instance() {}
+    
+    public function create_event_registration(event_persistent $event, contact_persistent $contact, $enrol = null, stdClass $data = null) {
     }
 
     /**
