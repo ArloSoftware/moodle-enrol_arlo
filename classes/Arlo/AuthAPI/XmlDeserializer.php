@@ -214,7 +214,8 @@ class XmlDeserializer {
                 if ($childNode->hasChildNodes()) {
                     // Single element.
                     if (1 === $childNode->childNodes->length) {
-                        if ($propertyInfo->isWritable($classInstance, $childNode->nodeName)) {
+                        $classInstanceName = get_class($classInstance);
+                        if ($propertyInfo->isWritable($classInstanceName, $childNode->nodeName)) {
                             $propertyAccessor->setValue($classInstance, $childNode->nodeName, $childNode->nodeValue);
                         }
                         continue;
