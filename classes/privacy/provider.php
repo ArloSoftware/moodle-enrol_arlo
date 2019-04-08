@@ -167,6 +167,72 @@ class provider implements
         $user = $contextlist->get_user();
         foreach ($contextlist->get_contexts() as $context) {
             list($contextsql, $contextparams) = $DB->get_in_or_equal($context->id, SQL_PARAMS_NAMED);
+            // Handle exporting of course context user data.
+            if ($context instanceof context_course) {
+                $enrolmentinstances = [];
+                // Registration information.
+                $registrationsubcontext = \core_enrol\privacy\provider::get_subcontext(
+                    [
+                        get_string('pluginname', 'enrol_arlo'),
+                        get_string('metadata:enrol_arlo_registration', 'enrol_arlo')
+                    ]
+                );
+                $sql = "SELECT ear.*
+                          FROM {context} ctx
+                          JOIN {enrol} e ON e.courseid = ctx.instanceid AND ctx.contextlevel = :contextcourse
+                          JOIN {enrol_arlo_registration} ear ON ear.enrolid = e.id
+                          JOIN {enrol_arlo_contact} eac ON eac.userid = ear.userid
+                          JOIN {user} u ON u.id = eac.userid
+                         WHERE ctx.id {$contextsql} AND u.id = :userid";
+                $params = [
+                    'contextcourse' => CONTEXT_COURSE,
+                    'userid'        => $user->id
+                ];
+                $params += $contextparams;
+                $rs = $DB->get_recordset_sql($sql, $params);
+                foreach ($rs as $record) {
+                    $enrolmentinstances[] = $record->enrolid;
+                    $registration = (object) [
+                        'enrolid'           => $record->enrolid,
+                        'userid'            => $record->userid,
+                        'sourceid'          => $record->sourceid,
+                        'sourceguid'        => $record->sourceguid,
+                        'grade'             => $record->grade,
+                        'outcome'           => $record->outcome,
+                        'lastactivity'      => $record->lastactivity,
+                        'progressstatus'    => $record->progressstatus,
+                        'progresspercent'   => $record->progresspercent,
+                        'sourcecontactid'   => $record->sourcecontactid,
+                        'sourcecontactguid' => $record->sourcecontactguid
+                    ];
+                    writer::with_context($context)->export_data($registrationsubcontext, $registration);
+                }
+                $rs->close();
+                // Email communications at enrolment context.
+                $communicationsubcontext = \core_enrol\privacy\provider::get_subcontext(
+                    [
+                        get_string('pluginname', 'enrol_arlo'),
+                        get_string('communications', 'enrol_arlo')
+                    ]
+                );
+                list($insql, $inparams) = $DB->get_in_or_equal($enrolmentinstances, SQL_PARAMS_NAMED);
+                $params = ['userid' => $user->id, 'area' => 'enrolment'];
+                $params = array_merge($params, $inparams);
+                $select = "userid = :userid AND area = :area AND instanceid $insql";
+                $rs = $DB->get_recordset_select('enrol_arlo_emailqueue', $select, $params);
+                foreach ($rs as $record) {
+                    $communication = (object) [
+                        'area'          => $record->area,
+                        'instanceid'    => $record->instanceid,
+                        'userid'        => $record->userid,
+                        'type'          => $record->type,
+                        'status'        => $record->status,
+                        'extra'         => $record->extra];
+                    writer::with_context($context)->export_data($communicationsubcontext, $communication);
+                }
+                $rs->close();
+            }
+            // Handle exporting of user context user data (site).
             if ($context instanceof context_user) {
                 // Associated Contact information.
                 $sql = "SELECT eac.*
@@ -193,15 +259,15 @@ class provider implements
                         'phonemobile'   => $contact->phonemobile
                     ];
                     writer::with_context($context)->export_data([
-                            get_string('pluginname', 'enrol_arlo'),
-                            get_string('metadata:enrol_arlo_contact', 'enrol_arlo')
-                        ],
+                        get_string('pluginname', 'enrol_arlo'),
+                        get_string('metadata:enrol_arlo_contact', 'enrol_arlo')
+                    ],
                         $data
                     );
                 }
                 $rs->close();
-                // Email communications.
-                $rs = $DB->get_recordset('enrol_arlo_emailqueue', ['userid' => $user->id]);
+                // Email communications at user context.
+                $rs = $DB->get_recordset('enrol_arlo_emailqueue', ['userid' => $user->id, 'area' => 'site']);
                 foreach ($rs as $email) {
                     $data = (object) [
                         'area'          => $email->area,
@@ -211,50 +277,11 @@ class provider implements
                         'status'        => $email->status,
                         'extra'         => $email->extra];
                     writer::with_context($context)->export_data([
-                            get_string('pluginname', 'enrol_arlo'),
-                            get_string('communications', 'enrol_arlo')
-                        ],
+                        get_string('pluginname', 'enrol_arlo'),
+                        get_string('communications', 'enrol_arlo')
+                    ],
                         $data
                     );
-                }
-                $rs->close();
-            }
-            if ($context instanceof context_course) {
-                // Registration information.
-                $subcontext = \core_enrol\privacy\provider::get_subcontext(
-                    [
-                        get_string('pluginname', 'enrol_arlo'),
-                        get_string('metadata:enrol_arlo_registration', 'enrol_arlo')
-                    ]
-                );
-                $sql = "SELECT ear.*
-                          FROM {context} ctx
-                          JOIN {enrol} e ON e.courseid = ctx.instanceid AND ctx.contextlevel = :contextcourse
-                          JOIN {enrol_arlo_registration} ear ON ear.enrolid = e.id
-                          JOIN {enrol_arlo_contact} eac ON eac.userid = ear.userid
-                          JOIN {user} u ON u.id = eac.userid
-                         WHERE ctx.id {$contextsql} AND u.id = :userid";
-                $params = [
-                    'contextcourse' => CONTEXT_COURSE,
-                    'userid'        => $user->id
-                ];
-                $params += $contextparams;
-                $rs = $DB->get_recordset_sql($sql, $params);
-                foreach ($rs as $registration) {
-                    $data = (object) [
-                        'enrolid'           => $registration->enrolid,
-                        'userid'            => $registration->userid,
-                        'sourceid'          => $registration->sourceid,
-                        'sourceguid'        => $registration->sourceguid,
-                        'grade'             => $registration->grade,
-                        'outcome'           => $registration->outcome,
-                        'lastactivity'      => $registration->lastactivity,
-                        'progressstatus'    => $registration->progressstatus,
-                        'progresspercent'   => $registration->progresspercent,
-                        'sourcecontactid'   => $registration->sourcecontactid,
-                        'sourcecontactguid' => $registration->sourcecontactguid
-                    ];
-                    writer::with_context($context)->export_data($subcontext, $data);
                 }
                 $rs->close();
             }
