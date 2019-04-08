@@ -234,6 +234,13 @@ class provider implements
             }
             // Handle exporting of user context user data (site).
             if ($context instanceof context_user) {
+                // Contact information in user context.
+                $contactsubcontext = \core_enrol\privacy\provider::get_subcontext(
+                    [
+                        get_string('pluginname', 'enrol_arlo'),
+                        get_string('metadata:enrol_arlo_contact', 'enrol_arlo')
+                    ]
+                );
                 // Associated Contact information.
                 $sql = "SELECT eac.*
                           FROM {context} ctx
@@ -246,42 +253,38 @@ class provider implements
                 ];
                 $params += $contextparams;
                 $rs = $DB->get_recordset_sql($sql, $params);
-                foreach ($rs as $contact) {
-                    $data = (object) [
-                        'userid'        => $contact->userid,
-                        'sourceid'      => $contact->sourceid,
-                        'sourceguid'    => $contact->sourceguid,
-                        'firstname'     => $contact->firstname,
-                        'lastname'      => $contact->lastname,
-                        'email'         => $contact->email,
-                        'codeprimary'   => $contact->codeprimary,
-                        'phonework'     => $contact->phonework,
-                        'phonemobile'   => $contact->phonemobile
+                foreach ($rs as $record) {
+                    $contact = (object) [
+                        'userid'        => $record->userid,
+                        'sourceid'      => $record->sourceid,
+                        'sourceguid'    => $record->sourceguid,
+                        'firstname'     => $record->firstname,
+                        'lastname'      => $record->lastname,
+                        'email'         => $record->email,
+                        'codeprimary'   => $record->codeprimary,
+                        'phonework'     => $record->phonework,
+                        'phonemobile'   => $record->phonemobile
                     ];
-                    writer::with_context($context)->export_data([
-                        get_string('pluginname', 'enrol_arlo'),
-                        get_string('metadata:enrol_arlo_contact', 'enrol_arlo')
-                    ],
-                        $data
-                    );
+                    writer::with_context($context)->export_data($contactsubcontext, $contact);
                 }
                 $rs->close();
-                // Email communications at user context.
-                $rs = $DB->get_recordset('enrol_arlo_emailqueue', ['userid' => $user->id, 'area' => 'site']);
-                foreach ($rs as $email) {
-                    $data = (object) [
-                        'area'          => $email->area,
-                        'instanceid'    => $email->instanceid,
-                        'userid'        => $email->userid,
-                        'type'          => $email->type,
-                        'status'        => $email->status,
-                        'extra'         => $email->extra];
-                    writer::with_context($context)->export_data([
+                // Communications at user context.
+                $communicationsubcontext = \core_enrol\privacy\provider::get_subcontext(
+                    [
                         get_string('pluginname', 'enrol_arlo'),
                         get_string('communications', 'enrol_arlo')
-                    ],
-                        $data
-                    );
+                    ]
+                );
+                $rs = $DB->get_recordset('enrol_arlo_emailqueue', ['userid' => $user->id, 'area' => 'site']);
+                foreach ($rs as $record) {
+                    $communication = (object) [
+                        'area'          => $record->area,
+                        'instanceid'    => $record->instanceid,
+                        'userid'        => $record->userid,
+                        'type'          => $record->type,
+                        'status'        => $record->status,
+                        'extra'         => $record->extra];
+                    writer::with_context($context)->export_data($communicationsubcontext, $communication);
                 }
                 $rs->close();
             }
@@ -377,6 +380,8 @@ class provider implements
         global $DB;
         $context = $userlist->get_context();
         $userids = $userlist->get_userids();
+        global $CFG;
+        file_put_contents($CFG->dataroot . '/enrol_arlo_deletedateforusersctx.txt', print_r($context, true), FILE_APPEND);
         if ($context instanceof context_course) {
             $enrolids = $DB->get_fieldset_select(
                 'enrol',
@@ -388,13 +393,13 @@ class provider implements
                 list($enrolsql, $enrolparams) = $DB->get_in_or_equal($enrolids, SQL_PARAMS_NAMED);
                 list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
                 $params = $enrolparams + $userparams;
-                // Delete associated registrations.
+                // Delete registrations.
                 $DB->delete_records_select(
                     'enrol_arlo_registration',
                     "enrolid $enrolsql AND userid $usersql",
                     $params
                 );
-                // Delete email queue information.
+                // Delete communications in context of course.
                 $DB->delete_records_select(
                     'enrol_arlo_emailqueue',
                     "area = 'enrolment' AND instanceid $enrolsql AND userid $usersql",
