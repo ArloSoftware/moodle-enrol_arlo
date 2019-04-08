@@ -102,10 +102,10 @@ abstract class PropertyAccessorCollectionTest extends PropertyAccessorArrayAcces
 {
     public function testSetValueCallsAdderAndRemoverForCollections()
     {
-        $axesBefore = $this->getContainer(array(1 => 'second', 3 => 'fourth', 4 => 'fifth'));
-        $axesMerged = $this->getContainer(array(1 => 'first', 2 => 'second', 3 => 'third'));
-        $axesAfter = $this->getContainer(array(1 => 'second', 5 => 'first', 6 => 'third'));
-        $axesMergedCopy = is_object($axesMerged) ? clone $axesMerged : $axesMerged;
+        $axesBefore = $this->getContainer([1 => 'second', 3 => 'fourth', 4 => 'fifth']);
+        $axesMerged = $this->getContainer([1 => 'first', 2 => 'second', 3 => 'third']);
+        $axesAfter = $this->getContainer([1 => 'second', 5 => 'first', 6 => 'third']);
+        $axesMergedCopy = \is_object($axesMerged) ? clone $axesMerged : $axesMerged;
 
         // Don't use a mock in order to test whether the collections are
         // modified while iterating them
@@ -123,8 +123,8 @@ abstract class PropertyAccessorCollectionTest extends PropertyAccessorArrayAcces
     {
         $car = $this->getMockBuilder(__CLASS__.'_CompositeCar')->getMock();
         $structure = $this->getMockBuilder(__CLASS__.'_CarStructure')->getMock();
-        $axesBefore = $this->getContainer(array(1 => 'second', 3 => 'fourth'));
-        $axesAfter = $this->getContainer(array(0 => 'first', 1 => 'second', 2 => 'third'));
+        $axesBefore = $this->getContainer([1 => 'second', 3 => 'fourth']);
+        $axesAfter = $this->getContainer([0 => 'first', 1 => 'second', 2 => 'third']);
 
         $car->expects($this->any())
             ->method('getStructure')
@@ -148,13 +148,13 @@ abstract class PropertyAccessorCollectionTest extends PropertyAccessorArrayAcces
 
     /**
      * @expectedException \Symfony\Component\PropertyAccess\Exception\NoSuchPropertyException
-     * @expectedExceptionMessage Could not determine access type for property "axes".
+     * @expectedExceptionMessageRegExp /Could not determine access type for property "axes" in class "Mock_PropertyAccessorCollectionTest_CarNoAdderAndRemover_[^"]*"./
      */
     public function testSetValueFailsIfNoAdderNorRemoverFound()
     {
         $car = $this->getMockBuilder(__CLASS__.'_CarNoAdderAndRemover')->getMock();
-        $axesBefore = $this->getContainer(array(1 => 'second', 3 => 'fourth'));
-        $axesAfter = $this->getContainer(array(0 => 'first', 1 => 'second', 2 => 'third'));
+        $axesBefore = $this->getContainer([1 => 'second', 3 => 'fourth']);
+        $axesAfter = $this->getContainer([0 => 'first', 1 => 'second', 2 => 'third']);
 
         $car->expects($this->any())
             ->method('getAxes')

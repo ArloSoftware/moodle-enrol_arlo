@@ -6,15 +6,11 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Symfony\\Polyfill\\Php70\\' => array($vendorDir . '/symfony/polyfill-php70'),
+    'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
     'Symfony\\Component\\PropertyInfo\\' => array($vendorDir . '/symfony/property-info'),
     'Symfony\\Component\\PropertyAccess\\' => array($vendorDir . '/symfony/property-access'),
     'Symfony\\Component\\Inflector\\' => array($vendorDir . '/symfony/inflector'),
-    'Symfony\\Component\\Cache\\' => array($vendorDir . '/symfony/cache'),
-    'Psr\\SimpleCache\\' => array($vendorDir . '/psr/simple-cache/src'),
-    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
-    'Psr\\Cache\\' => array($vendorDir . '/psr/cache/src'),
     'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
     'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
     'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
