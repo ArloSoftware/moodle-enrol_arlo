@@ -29,13 +29,6 @@
         <licenseversion></licenseversion>
     </library>
     <library>
-        <location>vendor/paragonie</location>
-        <name>PHP 5.x polyfill for random_bytes() and random_int()</name>
-        <version></version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
         <location>classes/Arlo/AuthAPI</location>
         <name>Arlo AuthAPI</name>
         <version></version>
