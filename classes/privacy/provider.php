@@ -308,7 +308,7 @@ class provider implements
                 // Delete associated registrations.
                 $DB->delete_records('enrol_arlo_registration', ['enrolid' => $instance->id]);
                 // Delete email queue information.
-                $DB->delete_records('enrol_arlo_emailqueue', ['area' => 'site', 'instanceid' => $instance->id]);
+                $DB->delete_records('enrol_arlo_emailqueue', ['area' => 'enrolment', 'instanceid' => $instance->id]);
             }
             // Delete all the associated groups.
             \core_group\privacy\provider::delete_groups_for_all_users($context, 'enrol_arlo');
@@ -317,7 +317,7 @@ class provider implements
             // Delete contact association.
             $DB->delete_records('enrol_arlo_contact', ['userid' => $context->instanceid]);
             // Delete email queue information.
-            $DB->delete_records('enrol_arlo_emailqueue', ['area' => 'enrolment', 'userid' => $context->instanceid]);
+            $DB->delete_records('enrol_arlo_emailqueue', ['area' => 'site', 'userid' => $context->instanceid]);
         }
     }
     
