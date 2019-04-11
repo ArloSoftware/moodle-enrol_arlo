@@ -244,8 +244,6 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
         $contact2 = $this->plugingenerator->create_contact($user2);
     
         $user3 = $this->getDataGenerator()->create_user();
-        $user3->userid = $user3->id;
-        $contact3 = $this->plugingenerator->create_contact($user3);
     
         $template1 = $this->plugingenerator->create_event_template();
         $event1 = $this->plugingenerator->create_event($template1);
@@ -261,19 +259,19 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
         );
         $this->plugingenerator->create_event_registration($contact1, $event1, $enrolinstance1);
         $this->plugingenerator->create_event_registration($contact2, $event1, $enrolinstance1);
-        $this->plugingenerator->create_event_registration($contact3, $event1, $enrolinstance1);
-    
         enrol_get_plugin('arlo')->enrol($enrolinstance1, $user1);
         enrol_get_plugin('arlo')->enrol($enrolinstance1, $user2);
-        enrol_get_plugin('arlo')->enrol($enrolinstance1, $user3);
-    
+
+        $manualinstance1 = $DB->get_record('enrol', ['courseid' => $course1->id, 'enrol' => 'manual'], '*', MUST_EXIST);
+        enrol_get_plugin('manual')->enrol_user($manualinstance1, $user3->id);
+        groups_add_member($group1, $user3);
+
         $this->setUser($user1);
-    
+
         $sql =  "SELECT COUNT(gm.id)
                    FROM {groups_members} gm
                    JOIN {groups} g ON gm.groupid = g.id
                   WHERE g.courseid = ? ";
-    
         $this->assertEquals(3, $DB->count_records_sql($sql, [$course1->id]));
         $coursecontext1 = context_course::instance($course1->id);
         $approveduserlist = new approved_userlist(
@@ -282,7 +280,7 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
             [$user1->id, $user2->id]
         );
         provider::delete_data_for_users($approveduserlist);
-        
+
         // Check for 1 user user3 in groups because user1 and user2 where deleted.
         $this->assertEquals(1, $DB->count_records_sql($sql, [$course1->id]));
     }
@@ -304,16 +302,16 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
         $user2 = $this->getDataGenerator()->create_user();
         $user2->userid = $user2->id;
         $contact2 = $this->plugingenerator->create_contact($user2);
-    
+
         $user3 = $this->getDataGenerator()->create_user();
-        
+
         $template1 = $this->plugingenerator->create_event_template();
         $event1 = $this->plugingenerator->create_event($template1);
     
         $category1 = $this->getDataGenerator()->create_category();
         $course1 = $this->getDataGenerator()->create_course(['category' => $category1->id]);
         $group1 = $this->getDataGenerator()->create_group(['courseid' => $course1->id]);
-    
+
         $enrolinstance1 = $this->plugingenerator->create_event_enrolment_instance(
             $course1,
             $event1,
@@ -321,7 +319,6 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
         );
         $this->plugingenerator->create_event_registration($contact1, $event1, $enrolinstance1);
         $this->plugingenerator->create_event_registration($contact2, $event1, $enrolinstance1);
-        
         enrol_get_plugin('arlo')->enrol($enrolinstance1, $user1);
         enrol_get_plugin('arlo')->enrol($enrolinstance1, $user2);
         
