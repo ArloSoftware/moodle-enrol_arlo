@@ -344,22 +344,24 @@ class provider implements
                 $courseids[] = $context->instanceid;
             }
         }
-        list($sql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
-        $enrolids = $DB->get_fieldset_select(
-            'enrol',
-            'id',
-            "enrol = 'arlo' AND courseid $sql",
-            $params
-        );
-        if (!empty($enrolids)) {
-            list($sql, $params) = $DB->get_in_or_equal($enrolids, SQL_PARAMS_NAMED);
-            $params = array_merge($params, ['userid' => $user->id]);
-            // Delete associated registrations.
-            $DB->delete_records_select(
-                'enrol_arlo_registration',
-                "enrolid $sql AND userid = :userid",
+        if (!empty($courseids)) {
+            list($sql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+            $enrolids = $DB->get_fieldset_select(
+                'enrol',
+                'id',
+                "enrol = 'arlo' AND courseid $sql",
                 $params
             );
+            if (!empty($enrolids)) {
+                list($sql, $params) = $DB->get_in_or_equal($enrolids, SQL_PARAMS_NAMED);
+                $params = array_merge($params, ['userid' => $user->id]);
+                // Delete associated registrations.
+                $DB->delete_records_select(
+                    'enrol_arlo_registration',
+                    "enrolid $sql AND userid = :userid",
+                    $params
+                );
+            }
         }
         // Delete contact association.
         $DB->delete_records('enrol_arlo_contact', ['userid' => $user->id]);
@@ -378,35 +380,61 @@ class provider implements
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
+        // User deletions and expiries are always handled at the user context.
         $context = $userlist->get_context();
         $userids = $userlist->get_userids();
-        global $CFG;
-        file_put_contents($CFG->dataroot . '/enrol_arlo_deletedateforusersctx.txt', print_r($context, true), FILE_APPEND);
-        if ($context instanceof context_course) {
-            $enrolids = $DB->get_fieldset_select(
-                'enrol',
-                'id',
-                "enrol = 'arlo' AND courseid = :courseid",
-                ['courseid' => $context->instanceid]
+        $allowedcontextlevels = [
+            CONTEXT_SYSTEM, CONTEXT_COURSE
+        ];
+        if (!in_array($context->contextlevel, $allowedcontextlevels)) {
+            return;
+        }
+        if (empty($userids)) {
+            return;
+        }
+        if ($context->contextlevel == CONTEXT_SYSTEM) {
+            list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+            // Delete registrations.
+            $DB->delete_records_select(
+                'enrol_arlo_registration',
+                "userid $usersql",
+                $userparams
             );
-            if ($enrolids) {
-                list($enrolsql, $enrolparams) = $DB->get_in_or_equal($enrolids, SQL_PARAMS_NAMED);
-                list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
-                $params = $enrolparams + $userparams;
-                // Delete registrations.
-                $DB->delete_records_select(
-                    'enrol_arlo_registration',
-                    "enrolid $enrolsql AND userid $usersql",
-                    $params
-                );
-                // Delete communications in context of course.
-                $DB->delete_records_select(
-                    'enrol_arlo_emailqueue',
-                    "area = 'enrolment' AND instanceid $enrolsql AND userid $usersql",
-                    $params
-                );
-            }
+            // Delete contacts
+            $DB->delete_records_select(
+                'enrol_arlo_contact',
+                "userid $usersql",
+                $userparams
+            );
+            // Delete communications.
+            $DB->delete_records_select(
+                'enrol_arlo_emailqueue',
+                "userid $usersql",
+                $userparams
+            );
             \core_group\privacy\provider::delete_groups_for_users($userlist, 'enrol_arlo');
+        }
+        if ($context->contextlevel == CONTEXT_COURSE) {
+            $instances = $DB->get_records('enrol', ['enrol' => 'arlo', 'courseid' => $context->instanceid]);
+            if (empty($instances)) {
+                return;
+            }
+            $instanceids = array_keys($instances);
+            list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'u');
+            list($enrolsql, $enrolparams) = $DB->get_in_or_equal($instanceids, SQL_PARAMS_NAMED, 'e');
+            // Delete registrations in course context.
+            $DB->delete_records_select(
+                'enrol_arlo_registration',
+                "enrolid $enrolsql AND userid $usersql",
+                array_merge($userparams, $enrolparams)
+            );
+            // Delete communications in course context.
+            $DB->delete_records_select(
+                'enrol_arlo_emailqueue',
+                "area = 'site' AND instanceid $enrolsql AND userid $usersql",
+                array_merge($userparams, $enrolparams)
+            );
+            \core_group\privacy\provider::delete_groups_for_all_users($context, 'enrol_arlo');
         }
     }
 }
