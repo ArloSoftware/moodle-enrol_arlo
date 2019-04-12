@@ -333,18 +333,39 @@ class provider implements
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
+        // User deletions and expiries are always handled at the user context.
         if (empty($contextlist->count())) {
             return;
         }
-        $courseids = [];
         $user = $contextlist->get_user();
         $contexts = $contextlist->get_contexts();
+        // Context collectors.
+        $systemcontext = [];
+        $usercontext = [];
+        $coursecontexts = [];
         foreach ($contexts as $context) {
-            if ($context instanceof context_course) {
-                $courseids[] = $context->instanceid;
+            if ($context->contextlevel == CONTEXT_SYSTEM) {
+                $systemcontext[$context->instanceid] = $context;
+            }
+            if ($context->contextlevel == CONTEXT_USER) {
+                $usercontext[$context->instanceid] = $context;
+            }
+            if ($context->contextlevel == CONTEXT_COURSE) {
+                $coursecontexts[$context->instanceid] = $context;
             }
         }
-        if (!empty($courseids)) {
+        // Everything must go.
+        if (count($systemcontext) == 1 || count($usercontext) == 1) {
+            // Delete registrations.
+            $DB->delete_records('enrol_arlo_registration', ['userid' => $user->id]);
+            // Delete contact association.
+            $DB->delete_records('enrol_arlo_contact', ['userid' => $user->id]);
+            // Delete communications.
+            $DB->delete_records('enrol_arlo_emailqueue', ['userid' => $user->id]);
+            // Delete all the associated groups.
+            \core_group\privacy\provider::delete_groups_for_user($contextlist, 'enrol_arlo');
+        } else if (count($coursecontexts) > 0) {
+            $courseids = array_keys($coursecontexts);
             list($sql, $params) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
             $enrolids = $DB->get_fieldset_select(
                 'enrol',
@@ -361,12 +382,14 @@ class provider implements
                     "enrolid $sql AND userid = :userid",
                     $params
                 );
+                // Delete associated communications.
+                $DB->delete_records_select(
+                    'enrol_arlo_emailqueue',
+                    "area = 'enrolment' AND instanceid sql AND userid =:userid",
+                    $params
+                );
             }
         }
-        // Delete contact association.
-        $DB->delete_records('enrol_arlo_contact', ['userid' => $user->id]);
-        // Delete email queue information.
-        $DB->delete_records('enrol_arlo_emailqueue', ['userid' => $user->id]);
         // Delete all the associated groups.
         \core_group\privacy\provider::delete_groups_for_user($contextlist, 'enrol_arlo');
     }
@@ -431,7 +454,7 @@ class provider implements
             // Delete communications in course context.
             $DB->delete_records_select(
                 'enrol_arlo_emailqueue',
-                "area = 'site' AND instanceid $enrolsql AND userid $usersql",
+                "area = 'enrolment' AND instanceid $enrolsql AND userid $usersql",
                 array_merge($userparams, $enrolparams)
             );
             \core_group\privacy\provider::delete_groups_for_all_users($context, 'enrol_arlo');
