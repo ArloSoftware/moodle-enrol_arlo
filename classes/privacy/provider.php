@@ -385,7 +385,7 @@ class provider implements
                 // Delete associated communications.
                 $DB->delete_records_select(
                     'enrol_arlo_emailqueue',
-                    "area = 'enrolment' AND instanceid sql AND userid =:userid",
+                    "area = 'enrolment' AND instanceid $sql AND userid =:userid",
                     $params
                 );
             }
