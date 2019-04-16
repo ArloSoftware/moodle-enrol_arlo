@@ -88,9 +88,9 @@ class manager {
      * @param $type
      * @param $status
      */
-    public function update_email_status_queue($enrolid, $userid, $type, $status) {
+    public function update_email_status_queue($area, $instanceid, $userid, $type, $status) {
         global $DB;
-        $conditions = array('enrolid' => $enrolid, 'userid' => $userid, 'type' => $type);
+        $conditions = array('area' => $area, 'instanceid' => $instanceid, 'userid' => $userid, 'type' => $type);
         $record = $DB->get_record('enrol_arlo_emailqueue', $conditions);
         if ($record) {
             $record->status = $status;
@@ -134,21 +134,15 @@ class manager {
         $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
             0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
-            $instance = $DB->get_record('enrol', array('id' => $record->enrolid));
-            if (!$instance) {
-                // Clean up.
-                $DB->delete_records('enrol_arlo_emailqueue', array('enrolid' => $record->enrolid));
-                continue;
-            }
             $user = $DB->get_record('user', array('id' => $record->userid));
             if (!$user) {
                 // Clean up.
                 $DB->delete_records('enrol_arlo_emailqueue', array('userid' => $record->userid));
                 continue;
             }
-            $status = self::email_newaccountdetails($instance, $user);
+            $status = self::email_newaccountdetails(null, $user);
             $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
-            self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
+            self::update_email_status_queue('site', SITEID, $user->id, self::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
         }
         $rs->close();
         // Process course welcome emails.
@@ -171,7 +165,7 @@ class manager {
             }
             $status = self::email_coursewelcome($instance, $user);
             $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
-            self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_COURSE_WELCOME, $deliverystatus);
+            self::update_email_status_queue('enrolment', $instance->id, $user->id, self::EMAIL_TYPE_COURSE_WELCOME, $deliverystatus);
         }
         $rs->close();
         // Process expiration emails.
@@ -194,7 +188,7 @@ class manager {
             }
             $status = self::email_expirynotice($instance, $user);
             $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
-            self::update_email_status_queue($instance->id, $user->id, self::EMAIL_TYPE_NOTIFY_EXPIRY, $deliverystatus);
+            self::update_email_status_queue('enrolment', $instance->id, $user->id, self::EMAIL_TYPE_NOTIFY_EXPIRY, $deliverystatus);
         }
         $rs->close();
         $timefinish = microtime();
