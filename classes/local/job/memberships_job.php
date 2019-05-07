@@ -297,11 +297,7 @@ class memberships_job extends job {
                 } else {
                     // Mo matches, create a new Moodle user.
                     $user = new user_persistent();
-                    $username = username_generator::generate(
-                        $contact->get('firstname'),
-                        $contact->get('lastname'),
-                        $contact->get('email')
-                    );
+                    $username = username_generator::generate($contact->to_record());
                     $user->set('username', $username);
                     // Set new property values on user.
                     $user->set('firstname', $contact->get('firstname'));
