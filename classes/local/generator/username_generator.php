@@ -17,7 +17,7 @@
 /**
  * Moodle username generator.
  *
- * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @package   enrol_arlo
  * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,145 +29,261 @@ defined('MOODLE_INTERNAL') || die();
 use coding_exception;
 use core_text;
 use enrol_arlo\local\persistent\contact_persistent;
-use moodle_exception;
+use stdClass;
+use enrol_arlo\local\config\arlo_plugin_config;
 
+/**
+ * Moodle username generator.
+ *
+ * @package   enrol_arlo
+ * @copyright 2018 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class username_generator {
 
     /**
-     * Generate username based on passed in firstname, lastname and email.
-     *
-     * Order:
-     *
-     *  1. Use first 3 letters of firstname + first 3 letters of lastname + random 3 digit number.
-     *  2. Use email username address before @ symbol.
-     *  3. Use email username address before @ symbol + random 3 digit number.
-     *  4. Use full email address.
-     *  5. Use full email address + random 3 digit number.
-     *
-     * @param $firstname
-     * @param $lastname
-     * @param $email
-     * @param $randmax
-     * @return int|mixed|string
-     * @throws \dml_exception
-     * @throws coding_exception
-     * @throws moodle_exception
+     * @var int Maximum value to use with rand function.
      */
-    public static function generate($firstname, $lastname, $email, $randmax = 9) {
-        global $DB;
+    const MAXRANDMAX = 999;
 
-        $maxrandmax = 999;
-        if ($randmax > $maxrandmax) {
-            $randmax = $maxrandmax;
-        }
-        $tries = 0;
-        $exists = true;
-        while ($exists) {
-            ++$tries;
-            switch($tries) {
-                case 1;
-                    $username = static::create_from_first_and_last_names($firstname, $lastname, 3, $randmax);
-                    break;
-                case 2:
-                    $username = static::create_from_email_address_local_part($email);
-                    break;
-                case 3:
-                    $username = static::create_from_email_address_local_part($email, $randmax);
-                    break;
-                case 4:
-                    $username = static::create_from_email_address($email);
-                    break;
-                case 5:
-                    $username = static::create_from_email_address($email, $randmax);
-                    break;
-                default:
-                    throw new moodle_exception('failedtogenerateusername');
-            }
-            $username = core_text::strtolower($username);
-            $exists = $DB->get_record('user', ['username' => $username]);
-        }
-        return $username;
+    /**
+     * Defines generator patterns.
+     *
+     * Each pattern requires method, userfieldsrequired, name, and description.
+     *
+     * Default order are items top to bottom order in array.
+     *
+     * @return array
+     * @throws coding_exception
+     */
+    public static function get_patterns() {
+        return [
+            'firstnamelastnamerandomnumber' => [
+                'method' => 'from_firstname_and_lastname_and_randomnumber',
+                'userfieldsrequired' => ['firstname', 'lastname'],
+                'name' => get_string('firstnamelastnamerandomnumber', 'enrol_arlo'),
+                'description' => get_string('firstnamelastnamerandomnumber_desc', 'enrol_arlo')
+            ],
+            'emaillocalpart' => [
+                'method' => 'from_email_local_part',
+                'userfieldsrequired' => ['email'],
+                'name' => get_string('emaillocalpart', 'enrol_arlo'),
+                'description' => get_string('emaillocalpart_desc', 'enrol_arlo')
+            ],
+            'emaillocalpartrandomnumber' => [
+                'method' => 'from_email_local_part_and_randomnumber',
+                'userfieldsrequired' => ['email'],
+                'name' => get_string('emaillocalpartrandomnumber', 'enrol_arlo'),
+                'description' => get_string('emaillocalpartrandomnumber_desc', 'enrol_arlo')
+            ],
+            'email' => [
+                'method' => 'from_email',
+                'userfieldsrequired' => ['email'],
+                'name' => get_string('email', 'enrol_arlo'),
+                'description' => get_string('email_desc', 'enrol_arlo')
+            ],
+            'emailrandomnumber' => [
+                'name' => get_string('email', 'enrol_arlo'),
+                'method' => 'from_email_and_randomnumber',
+                'userfieldsrequired' => ['email'],
+                'description' => get_string('email_desc', 'enrol_arlo')
+            ]
+        ];
     }
 
     /**
-     * Create from contact persistent information.
+     * Get default generator order, return as array or comma separated string.
+     *
+     * @param bool $returncommaseparated
+     * @return array|string
+     * @throws coding_exception
+     */
+    final public static function get_default_order($returncommaseparated = false) {
+        $patterns = array_keys(static::get_patterns());
+        if ($returncommaseparated) {
+            return implode(',', $patterns);
+        }
+        return $patterns;
+    }
+
+    /**
+     * @param $pattern
+     * @return mixed
+     * @throws coding_exception
+     */
+    final public static function get_pattern($pattern) {
+        if (!static::has_pattern($pattern)) {
+            throw new coding_exception("Pattern $pattern not found");
+        }
+        $patterns = static::get_patterns();
+        return $patterns[$pattern];
+    }
+
+    /**
+     * @param $pattern
+     * @return bool
+     * @throws coding_exception
+     */
+    final public static function has_pattern($pattern) {
+        $patterns = static::get_patterns();
+        return isset($patterns[$pattern]);
+    }
+
+    /**
+     * @param stdClass $userinformation
+     * @return bool|string
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public static function generate(stdClass $userinformation) {
+        global $DB;
+        $pluginconfig = new arlo_plugin_config();
+        $usernamepatternorder = explode(',', $pluginconfig->get('usernamepatternorder'));
+        if (count($usernamepatternorder) != count(static::get_patterns())) {
+            throw new coding_exception("Incorrect number of username patterns in order");
+        }
+        while ($usernamepatternorder) {
+            $name = array_shift($usernamepatternorder);
+            $pattern = static::get_pattern($name);
+            $patternmethod = isset($pattern['method']) ? $pattern['method'] : null;
+            $userfieldsrequired = isset($pattern['userfieldsrequired']) ? $pattern['userfieldsrequired'] : null;
+            if (is_null($patternmethod) || is_null($userfieldsrequired)) {
+                throw new coding_exception("Incoorect pattern definition for $name");
+            }
+            foreach ($userfieldsrequired as $userfieldrequired) {
+                if (!isset($userinformation->{$userfieldrequired})) {
+                    throw new coding_exception("Missing required field $userfieldrequired");
+                }
+                $username = static::$patternmethod($userinformation);
+                $username = core_text::strtolower($username);
+                $exists = $DB->get_record('user', ['username' => $username]);
+                if (!$exists) {
+                    return $username;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Convenience method.
      *
      * @param contact_persistent $contact
-     * @return int|mixed|string
+     * @return bool|string
      * @throws \dml_exception
      * @throws coding_exception
-     * @throws moodle_exception
      */
-    public static function create_from_contact_persistent(contact_persistent $contact) {
-        $firstname = $contact->get('firstname');
-        $lastname = $contact->get('lastname');
-        $email = $contact->get('email');
-        return static::generate($firstname, $lastname, $email);
+    final public static function from_contact_persistent(contact_persistent $contact) {
+        $userinformation            = new stdClass();
+        $userinformation->firstname = $contact->get('firstname');
+        $userinformation->lastname  = $contact->get('lastname');
+        $userinformation->email     = $contact->get('email');
+        return static::generate($userinformation);
     }
 
     /**
-     * Create username from email.
+     * Use first 3 letters of firstname + first 3 letters of lastname + random number.
      *
-     * @param $email
-     * @param null $randmax
+     * @param stdClass $userinformation
+     * @param int $length
+     * @param int $randmax
      * @return string
      * @throws coding_exception
      */
-    public static function create_from_email_address($email, $randmax = null) {
-        $email = trim($email);
-        $email = clean_param($email, PARAM_USERNAME);
-        if (is_null($randmax) || !is_number($randmax)) {
-            $username = $email;
-        } else {
-            $username = $email . rand(0, $randmax);
+    public static function from_firstname_and_lastname_and_randomnumber(stdClass $userinformation, $length = 3, $randmax = 9) {
+        if (!isset($userinformation->firstname)) {
+            throw new coding_exception("Require field firstname missing");
         }
+        if (!isset($userinformation->lastname)) {
+            throw new coding_exception("Require field lastname missing");
+        }
+        if ($randmax > static::MAXRANDMAX) {
+            $randmax = static::MAXRANDMAX;
+        }
+        $firstname = trim($userinformation->firstname);
+        $firstname = clean_param($firstname, PARAM_USERNAME);
+        $lastname = trim($userinformation->lastname);
+        $lastname = clean_param($lastname, PARAM_USERNAME);
+        $username = core_text::substr($firstname, 0 , $length) .
+            core_text::substr($lastname, 0 , $length) . rand(0, $randmax);
         return core_text::strtolower($username);
     }
 
     /**
-     * Create username from local part of email.
+     * Use email username address before @ symbol.
      *
-     * @param $email
-     * @param null $randmax
+     * @param $userinformation
      * @return string
      * @throws coding_exception
      */
-    public static function create_from_email_address_local_part($email, $randmax = null) {
-        $email = trim($email);
+    public static function from_email_local_part($userinformation) {
+        if (!isset($userinformation->email)) {
+            throw new coding_exception("Require field email missing");
+        }
+        $email = trim($userinformation->email);
+        $email = clean_param($email, PARAM_USERNAME);
+        $position = core_text::strpos($email, '@');
+        $username = core_text::substr($email, 0, $position);
+        return core_text::strtolower($username);
+    }
+
+    /**
+     * Use email username address before @ symbol + random number.
+     *
+     * @param $userinformation
+     * @param int $randmax
+     * @return string
+     * @throws coding_exception
+     */
+    public static function from_email_local_part_and_randomnumber($userinformation, $randmax = 9) {
+        if (!isset($userinformation->email)) {
+            throw new coding_exception("Require field email missing");
+        }
+        if ($randmax > static::MAXRANDMAX) {
+            $randmax = static::MAXRANDMAX;
+        }
+        $email = trim($userinformation->email);
         $email = clean_param($email, PARAM_USERNAME);
         $position = core_text::strpos($email, '@');
         $localpart = core_text::substr($email, 0, $position);
-        if (is_null($randmax) || !is_number($randmax)) {
-            $username = $localpart;
-        } else {
-            $username = $localpart . rand(0, $randmax);
-        }
+        $username = $localpart . rand(0, $randmax);
         return core_text::strtolower($username);
     }
 
     /**
-     * Create username using firstname and lastname.
+     * Use full email address.
      *
-     * @param $firstname
-     * @param $lastname
-     * @param int $length
-     * @param null $randmax
+     * @param $userinformation
      * @return string
      * @throws coding_exception
      */
-    public static function create_from_first_and_last_names($firstname, $lastname, $length = 3, $randmax = null) {
-        $firstname = trim($firstname);
-        $firstname = clean_param($firstname, PARAM_USERNAME);
-        $lastname = trim($lastname);
-        $lastname = clean_param($lastname, PARAM_USERNAME);
-        if (is_null($randmax) || !is_number($randmax)) {
-            $username = core_text::substr($firstname, 0 , $length) .
-                core_text::substr($lastname, 0 , $length);
-        } else {
-            $username = core_text::substr($firstname, 0 , $length) .
-                core_text::substr($lastname, 0 , $length) . rand(0, $randmax);
+    public static function from_email($userinformation) {
+        if (!isset($userinformation->email)) {
+            throw new coding_exception("Require field email missing");
         }
+        $email = trim($userinformation->email);
+        $username = clean_param($email, PARAM_USERNAME);
         return core_text::strtolower($username);
     }
 
+    /**
+     * Use full email address + random number.
+     *
+     * @param $userinformation
+     * @param int $randmax
+     * @return string
+     * @throws coding_exception
+     */
+    public static function from_email_and_randomnumber($userinformation, $randmax = 9) {
+        if (!isset($userinformation->email)) {
+            throw new coding_exception("Require field email missing");
+        }
+        if ($randmax > static::MAXRANDMAX) {
+            $randmax = static::MAXRANDMAX;
+        }
+        $email = trim($userinformation->email);
+        $email = clean_param($email, PARAM_USERNAME);
+        $username = $email . rand(0, $randmax);
+        return core_text::strtolower($username);
+    }
 }

@@ -19,6 +19,7 @@ namespace enrol_arlo\local\config;
 defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\local\enum\user_matching;
+use enrol_arlo\local\generator\username_generator;
 
 class arlo_plugin_config extends plugin_config {
 
@@ -84,6 +85,10 @@ class arlo_plugin_config extends plugin_config {
             'expiredaction' => [
                 'type' => PARAM_INT,
                 'default' => ENROL_EXT_REMOVED_SUSPEND,
+            ],
+            'usernamepatternorder' => [
+                'type' => PARAM_RAW,
+                'default' => username_generator::get_default_order(true)
             ],
             'pushonlineactivityresults' => [
                 'type' => PARAM_INT,
