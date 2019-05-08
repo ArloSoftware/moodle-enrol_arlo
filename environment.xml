@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<COMPATIBILITY_MATRIX>
+    <MOODLE version="3.5">
+        <PHP version="7.1.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
+    <MOODLE version="3.6">
+        <PHP version="7.1.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
+    <MOODLE version="3.7">
+        <PHP version="7.1.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
+</COMPATIBILITY_MATRIX>
