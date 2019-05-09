@@ -22,13 +22,6 @@
         <licenseversion></licenseversion>
     </library>
     <library>
-        <location>vendor/symfony</location>
-        <name>Symfony components</name>
-        <version></version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
         <location>classes/Arlo/AuthAPI</location>
         <name>Arlo AuthAPI</name>
         <version></version>
