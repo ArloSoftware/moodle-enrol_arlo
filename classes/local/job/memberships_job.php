@@ -290,6 +290,9 @@ class memberships_job extends job {
             if (!($user instanceof contact_persistent)) {
                 // User is an integer greater than 1 means multiple matches.
                 if ($user) {
+                    $contact->set('userassociationfailure', 1);
+                    $contact->set('errormessage', 'Duplicate user accounts.');
+                    $contact->update();
                     $registration->set('enrolmentfailure', 1);
                     $registration->update();
                     administrator_notification::send_unsuccessful_enrolment_message();
@@ -297,7 +300,17 @@ class memberships_job extends job {
                 } else {
                     // Mo matches, create a new Moodle user.
                     $user = new user_persistent();
-                    $username = username_generator::generate($contact->to_record());
+                    $usernamegenerator = new username_generator($contact->to_record());
+                    $username = $usernamegenerator->generate();
+                    if (!$username) {
+                        $contact->set('usercreationfailure', 1);
+                        $contact->set('errormessage', 'Failed to create username');
+                        $contact->update();
+                        $registration->set('enrolmentfailure', 1);
+                        $registration->update();
+                        administrator_notification::send_unsuccessful_enrolment_message();
+                        return false;
+                    }
                     $user->set('username', $username);
                     // Set new property values on user.
                     $user->set('firstname', $contact->get('firstname'));

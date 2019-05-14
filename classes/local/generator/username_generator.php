@@ -28,9 +28,13 @@ defined('MOODLE_INTERNAL') || die();
 
 use coding_exception;
 use core_text;
-use enrol_arlo\local\persistent\contact_persistent;
 use stdClass;
-use enrol_arlo\local\config\arlo_plugin_config;
+use enrol_arlo\local\format\username\username_format_interface;
+use enrol_arlo\local\format\username\firstnamelastnamerandomnumber;
+use enrol_arlo\local\format\username\emaillocalpart;
+use enrol_arlo\local\format\username\emaillocalpartrandomnumber;
+use enrol_arlo\local\format\username\email;
+use enrol_arlo\local\format\username\emailrandomnumber;
 
 /**
  * Moodle username generator.
@@ -42,248 +46,290 @@ use enrol_arlo\local\config\arlo_plugin_config;
 class username_generator {
 
     /**
-     * @var int Maximum value to use with rand function.
+     * @var stdClass $data Data passed to formats.
      */
-    const MAXRANDMAX = 999;
+    protected $data;
 
     /**
-     * Defines generator patterns.
+     * @var array $formats indexed array of format classes.
+     */
+    protected $formats = [];
+
+    /**
+     * @var array $options Options passed to formats.
+     */
+    protected $options = [];
+
+    /**
+     * @var string $order The order formats are called.
+     */
+    protected $order;
+
+    /**
+     * username_generator constructor.
      *
-     * Each pattern requires method, userfieldsrequired, name, and description.
+     * @param null $data
+     * @param string|null $order
+     * @param array|null $options
+     * @throws coding_exception
+     */
+    public function __construct($data = null, string $order = null, array $options = null) {
+        $this->register_default_formats();
+        if (!is_null($data)) {
+            $this->add_data($data);
+        } else {
+            $this->add_data(new stdClass);
+        }
+        if (!is_null($order)) {
+            $this->set_order($order);
+        } else {
+            $this->set_order(static::get_default_order());
+        }
+        if (!is_null($options)) {
+            $this->add_options($options);
+        }
+    }
+
+    /**
+     * @param $data
+     */
+    public function add_data($data) {
+        $this->data = $data;
+    }
+
+    /**
+     * @param array $options
+     */
+    public function add_options(array $options) {
+        $this->options = $options;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function get_data() {
+        return $this->data;
+    }
+
+    /**
+     * Default order of out of the box formats.
      *
-     * Default order are items top to bottom order in array.
+     * @return string
+     */
+    final public static function get_default_order() {
+        return 'firstnamelastnamerandomnumber,emaillocalpart,emaillocalpartrandomnumber,email,emailrandomnumber';
+    }
+
+    public function get_format($uniquename) {
+        if (isset($this->formats[$uniquename])) {
+            return $this->formats[$uniquename];
+        }
+        return false;
+    }
+
+    /**
+     * @return array
+     */
+    public function get_options() {
+        return $this->options;
+    }
+
+    /**
+     * @return string
+     */
+    final public function get_order() {
+        if (is_null($this->order)) {
+            return static::get_default_order();
+        }
+        return $this->order;
+    }
+
+    /**
+     * Creates an ordered array of information about each format. This includes order,
+     * shortname, name, and description.
      *
      * @return array
-     * @throws coding_exception
      */
-    public static function get_patterns() {
-        return [
-            'firstnamelastnamerandomnumber' => [
-                'method' => 'from_firstname_and_lastname_and_randomnumber',
-                'userfieldsrequired' => ['firstname', 'lastname'],
-                'name' => get_string('firstnamelastnamerandomnumber', 'enrol_arlo'),
-                'description' => get_string('firstnamelastnamerandomnumber_desc', 'enrol_arlo')
-            ],
-            'emaillocalpart' => [
-                'method' => 'from_email_local_part',
-                'userfieldsrequired' => ['email'],
-                'name' => get_string('emaillocalpart', 'enrol_arlo'),
-                'description' => get_string('emaillocalpart_desc', 'enrol_arlo')
-            ],
-            'emaillocalpartrandomnumber' => [
-                'method' => 'from_email_local_part_and_randomnumber',
-                'userfieldsrequired' => ['email'],
-                'name' => get_string('emaillocalpartrandomnumber', 'enrol_arlo'),
-                'description' => get_string('emaillocalpartrandomnumber_desc', 'enrol_arlo')
-            ],
-            'email' => [
-                'method' => 'from_email',
-                'userfieldsrequired' => ['email'],
-                'name' => get_string('email', 'enrol_arlo'),
-                'description' => get_string('email_desc', 'enrol_arlo')
-            ],
-            'emailrandomnumber' => [
-                'name' => get_string('email', 'enrol_arlo'),
-                'method' => 'from_email_and_randomnumber',
-                'userfieldsrequired' => ['email'],
-                'description' => get_string('email_desc', 'enrol_arlo')
-            ]
-        ];
-    }
-
-    /**
-     * Get default generator order, return as array or comma separated string.
-     *
-     * @param bool $returncommaseparated
-     * @return array|string
-     * @throws coding_exception
-     */
-    final public static function get_default_order($returncommaseparated = false) {
-        $patterns = array_keys(static::get_patterns());
-        if ($returncommaseparated) {
-            return implode(',', $patterns);
+    public function export_current_order_to_array() {
+        $data = [];
+        $order = 0;
+        foreach (explode(',', $this->get_order()) as $formatuniquename) {
+            /** @var $format username_format_interface $format */
+            $format = $this->get_format($formatuniquename);
+            $data[$formatuniquename] = [
+                'order' => ++$order,
+                'shortname' => $format->get_shortname(),
+                'name' => $format->get_name(),
+                'description' => $format->get_description(),
+            ];
         }
-        return $patterns;
+        return $data;
     }
 
     /**
-     * @param $pattern
-     * @return mixed
-     * @throws coding_exception
-     */
-    final public static function get_pattern($pattern) {
-        if (!static::has_pattern($pattern)) {
-            throw new coding_exception("Pattern $pattern not found");
-        }
-        $patterns = static::get_patterns();
-        return $patterns[$pattern];
-    }
-
-    /**
-     * @param $pattern
+     * @param $uniquename
      * @return bool
-     * @throws coding_exception
      */
-    final public static function has_pattern($pattern) {
-        $patterns = static::get_patterns();
-        return isset($patterns[$pattern]);
+    public function has_format($uniquename) {
+        if (isset($this->formats[$uniquename])) {
+            return true;
+        }
+        return false;
     }
 
     /**
-     * @param stdClass $userinformation
+     * Procedual method used to generate username based on ordered list of username formats.
+     *
      * @return bool|string
      * @throws \dml_exception
      * @throws coding_exception
      */
-    public static function generate(stdClass $userinformation) {
+    public function generate() {
         global $DB;
-        $pluginconfig = new arlo_plugin_config();
-        $usernamepatternorder = explode(',', $pluginconfig->get('usernamepatternorder'));
-        if (count($usernamepatternorder) != count(static::get_patterns())) {
-            throw new coding_exception("Incorrect number of username patterns in order");
-        }
-        while ($usernamepatternorder) {
-            $name = array_shift($usernamepatternorder);
-            $pattern = static::get_pattern($name);
-            $patternmethod = isset($pattern['method']) ? $pattern['method'] : null;
-            $userfieldsrequired = isset($pattern['userfieldsrequired']) ? $pattern['userfieldsrequired'] : null;
-            if (is_null($patternmethod) || is_null($userfieldsrequired)) {
-                throw new coding_exception("Incoorect pattern definition for $name");
-            }
-            foreach ($userfieldsrequired as $userfieldrequired) {
-                if (!isset($userinformation->{$userfieldrequired})) {
-                    throw new coding_exception("Missing required field $userfieldrequired");
-                }
-                $username = static::$patternmethod($userinformation);
-                $username = core_text::strtolower($username);
-                $exists = $DB->get_record('user', ['username' => $username]);
-                if (!$exists) {
-                    return $username;
-                }
+        foreach (explode(',', $this->get_order()) as $formatuniquename) {
+            /** @var $format username_format_interface $format */
+            $format = $this->get_format($formatuniquename);
+            $this->validate_required_fields($format->get_required_fields());
+            $format->add_data($this->get_data());
+            $format->add_options($this->get_options());
+            $username = $format->get_username();
+            $usernamelower = core_text::strtolower($username);
+            $exists = $DB->get_record('user', ['username' => $usernamelower]);
+            if (!$exists) {
+                return $usernamelower;
             }
         }
         return false;
     }
 
     /**
-     * Convenience method.
+     * Static method wrapper used to generate username based on ordered list of username formats.
      *
-     * @param contact_persistent $contact
+     * @param $data
+     * @param $order
      * @return bool|string
      * @throws \dml_exception
      * @throws coding_exception
      */
-    final public static function from_contact_persistent(contact_persistent $contact) {
-        $userinformation            = new stdClass();
-        $userinformation->firstname = $contact->get('firstname');
-        $userinformation->lastname  = $contact->get('lastname');
-        $userinformation->email     = $contact->get('email');
-        return static::generate($userinformation);
+    final public static function generate_username($data, $order) {
+        $usernamegenerator = new username_generator($data, $order);
+        return $usernamegenerator->generate();
     }
 
     /**
-     * Use first 3 letters of firstname + first 3 letters of lastname + random number.
+     * Move format one position down the current order.
      *
-     * @param stdClass $userinformation
-     * @param int $length
-     * @param int $randmax
+     * @param $uniquename
      * @return string
      * @throws coding_exception
      */
-    public static function from_firstname_and_lastname_and_randomnumber(stdClass $userinformation, $length = 3, $randmax = 9) {
-        if (!isset($userinformation->firstname)) {
-            throw new coding_exception("Require field firstname missing");
+    final public function move_format_down_order($uniquename) {
+        if (!$this->has_format($uniquename)) {
+            throw new coding_exception("Format {$uniquename} must be registered used register_format() first");
         }
-        if (!isset($userinformation->lastname)) {
-            throw new coding_exception("Require field lastname missing");
+        $order = explode(',', $this->get_order());
+        foreach ($order as $key => $value) {
+            if ($key == count($order) && $value == $uniquename) {
+                break;
+            }
+            if ($value == $uniquename) {
+                $next = $order[$key + 1];
+                $order[$key + 1] = $value;
+                $order[$key] = $next;
+            }
         }
-        if ($randmax > static::MAXRANDMAX) {
-            $randmax = static::MAXRANDMAX;
-        }
-        $firstname = trim($userinformation->firstname);
-        $firstname = clean_param($firstname, PARAM_USERNAME);
-        $lastname = trim($userinformation->lastname);
-        $lastname = clean_param($lastname, PARAM_USERNAME);
-        $username = core_text::substr($firstname, 0 , $length) .
-            core_text::substr($lastname, 0 , $length) . rand(0, $randmax);
-        return core_text::strtolower($username);
+        $this->set_order(implode(',', $order));
+        return $this->get_order();
     }
 
     /**
-     * Use email username address before @ symbol.
+     * Move format one position up the current order.
      *
-     * @param $userinformation
+     * @param $uniquename
      * @return string
      * @throws coding_exception
      */
-    public static function from_email_local_part($userinformation) {
-        if (!isset($userinformation->email)) {
-            throw new coding_exception("Require field email missing");
+    final public function move_format_up_order($uniquename) {
+        if (!$this->has_format($uniquename)) {
+            throw new coding_exception("Format {$uniquename} must be registered used register_format() first");
         }
-        $email = trim($userinformation->email);
-        $email = clean_param($email, PARAM_USERNAME);
-        $position = core_text::strpos($email, '@');
-        $username = core_text::substr($email, 0, $position);
-        return core_text::strtolower($username);
+        $order = explode(',', $this->get_order());
+        foreach ($order as $key => $value) {
+            if ($key == 0 && $value == $uniquename) {
+                break;
+            }
+            if ($value == $uniquename) {
+                $prev = $order[$key - 1];
+                $order[$key - 1] = $value;
+                $order[$key] = $prev;
+            }
+        }
+        $this->set_order(implode(',', $order));
+        return $this->get_order();
     }
 
     /**
-     * Use email username address before @ symbol + random number.
-     *
-     * @param $userinformation
-     * @param int $randmax
-     * @return string
-     * @throws coding_exception
+     * Register out of the box username formats.
      */
-    public static function from_email_local_part_and_randomnumber($userinformation, $randmax = 9) {
-        if (!isset($userinformation->email)) {
-            throw new coding_exception("Require field email missing");
-        }
-        if ($randmax > static::MAXRANDMAX) {
-            $randmax = static::MAXRANDMAX;
-        }
-        $email = trim($userinformation->email);
-        $email = clean_param($email, PARAM_USERNAME);
-        $position = core_text::strpos($email, '@');
-        $localpart = core_text::substr($email, 0, $position);
-        $username = $localpart . rand(0, $randmax);
-        return core_text::strtolower($username);
+    final protected function register_default_formats() {
+        $this->register_format('firstnamelastnamerandomnumber', new firstnamelastnamerandomnumber());
+        $this->register_format('emaillocalpart', new emaillocalpart());
+        $this->register_format('emaillocalpartrandomnumber', new emaillocalpartrandomnumber());
+        $this->register_format('email', new email());
+        $this->register_format('emailrandomnumber', new emailrandomnumber());
     }
 
     /**
-     * Use full email address.
-     *
-     * @param $userinformation
-     * @return string
+     * @param string $order
      * @throws coding_exception
      */
-    public static function from_email($userinformation) {
-        if (!isset($userinformation->email)) {
-            throw new coding_exception("Require field email missing");
-        }
-        $email = trim($userinformation->email);
-        $username = clean_param($email, PARAM_USERNAME);
-        return core_text::strtolower($username);
+    final public function set_order(string $order) {
+        $this->validate_order($order);
+        $this->order = $order;
     }
 
     /**
-     * Use full email address + random number.
+     * Used to add a username format to the list. Must implement username format interface.
      *
-     * @param $userinformation
-     * @param int $randmax
-     * @return string
+     * @param $uniquename
+     * @param username_format_interface $class
+     */
+    final public function register_format($uniquename, username_format_interface $class) {
+        $this->formats[$uniquename] = $class;
+    }
+
+    /**
+     * Check format classes loaded for passed in order.
+     *
+     * @param string $order
+     * @return bool
      * @throws coding_exception
      */
-    public static function from_email_and_randomnumber($userinformation, $randmax = 9) {
-        if (!isset($userinformation->email)) {
-            throw new coding_exception("Require field email missing");
+    final public function validate_order(string $order) {
+        $validateorder = explode(',', trim($order));
+        if (empty($validateorder )) {
+            throw new coding_exception("Empty order");
         }
-        if ($randmax > static::MAXRANDMAX) {
-            $randmax = static::MAXRANDMAX;
+        foreach ($validateorder as $uniquename) {
+            if (!$this->has_format($uniquename)) {
+                throw new coding_exception("Format {$uniquename} must be registered used register_format() first");
+            }
         }
-        $email = trim($userinformation->email);
-        $email = clean_param($email, PARAM_USERNAME);
-        $username = $email . rand(0, $randmax);
-        return core_text::strtolower($username);
+        return true;
     }
+
+    /**
+     * Check if data property has passed in required fields.
+     *
+     * @param array $requiredfields
+     * @throws coding_exception
+     */
+    public function validate_required_fields(array $requiredfields) {
+        foreach ($requiredfields as $requiredfield) {
+            if (!isset($this->data->{$requiredfield})) {
+                throw new coding_exception("Datafield {$requiredfield} required in data by a formatter");
+            }
+        }
+    }
+
 }

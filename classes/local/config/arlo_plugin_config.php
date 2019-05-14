@@ -86,9 +86,9 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => ENROL_EXT_REMOVED_SUSPEND,
             ],
-            'usernamepatternorder' => [
+            'usernameformatorder' => [
                 'type' => PARAM_RAW,
-                'default' => username_generator::get_default_order(true)
+                'default' => username_generator::get_default_order()
             ],
             'pushonlineactivityresults' => [
                 'type' => PARAM_INT,
