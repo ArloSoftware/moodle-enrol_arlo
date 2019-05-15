@@ -318,7 +318,9 @@ class memberships_job extends job {
                     $user->set('email', $contact->get('email'));
                     // Conditionally add codeprimary as idnumber.
                     if (empty($user->get('idnumber'))) {
-                        $user->set('idnumber', 'codeprimary');
+                        if (!empty($contact->get('codeprimary'))) {
+                            $user->set('idnumber', $contact->get('codeprimary'));
+                        }
                     }
                     $user->set('phone1', $contact->get('phonemobile'));
                     $user->set('phone2', $contact->get('phonework'));
@@ -344,7 +346,9 @@ class memberships_job extends job {
             $user->set('email', $contact->get('email'));
             // Conditionally add codeprimary as idnumber.
             if (empty($user->get('idnumber'))) {
-                $user->set('idnumber', 'codeprimary');
+                if (!empty($contact->get('codeprimary'))) {
+                    $user->set('idnumber', $contact->get('codeprimary'));
+                }
             }
             $user->set('phone1', $contact->get('phonemobile'));
             $user->set('phone2', $contact->get('phonework'));
