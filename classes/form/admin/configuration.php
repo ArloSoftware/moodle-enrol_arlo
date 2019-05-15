@@ -164,7 +164,7 @@ class configuration extends \moodleform {
         }
         $this->add_action_buttons(true, get_string('savechanges', 'enrol_arlo'));
     }
-    
+
     /**
      * Table for username format order.
      *

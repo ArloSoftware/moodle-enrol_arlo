@@ -56,11 +56,11 @@ class enrol_arlo_generator extends testing_module_generator {
     public function get_arlo_type_datetime() {
         return date('Y-m-d\TH:i:sP');
     }
-    
+
     public function get_arlo_datetime_format() {
         return 'Y-m-d\TH:i:sP';
     }
-    
+
     /**
      * Core model properties that need to be protected.
      *
@@ -77,7 +77,7 @@ class enrol_arlo_generator extends testing_module_generator {
         'sourcecreated',
         'sourcemodified'
     ];
-    
+
     /**
      * Make sure plugin is enabled.
      *
@@ -88,7 +88,7 @@ class enrol_arlo_generator extends testing_module_generator {
         $enabled = array_keys($enabled);
         set_config('enrol_plugins_enabled', implode(',', $enabled));
     }
-    
+
     /**
      * Configure plugin settings.
      *
@@ -130,7 +130,7 @@ class enrol_arlo_generator extends testing_module_generator {
         $contact->save();
         return $contact;
     }
-    
+
     /**
      * Create Event record off a Event template record.
      *
@@ -170,7 +170,7 @@ class enrol_arlo_generator extends testing_module_generator {
         $event->save();
         return $event;
     }
-    
+
     /**
      * Create a Event template record.
      *
@@ -192,7 +192,7 @@ class enrol_arlo_generator extends testing_module_generator {
         $template->save();
         return $template;
     }
-    
+
     /**
      * Create an Arlo enrolment instance.
      *
@@ -221,9 +221,9 @@ class enrol_arlo_generator extends testing_module_generator {
             '*',
             MUST_EXIST
         );
-    
+
     }
-    
+
     /**
      * Create a registration record.
      *

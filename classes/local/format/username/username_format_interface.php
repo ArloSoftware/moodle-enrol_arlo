@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 interface username_format_interface {
-    
+
     /**
      * Add data to be used by format.
      *
@@ -42,7 +42,7 @@ interface username_format_interface {
      * @return mixed
      */
     public function add_data($object);
-    
+
     /**
      * Add any options that a format may support.
      *
@@ -50,35 +50,35 @@ interface username_format_interface {
      * @return mixed
      */
     public function add_options(array $options);
-    
+
     /**
      * Get readable name of format.
      *
      * @return string
      */
     public function get_name() : string;
-    
+
     /**
      * Get alpha shortname of format.
      *
      * @return string
      */
     public function get_shortname() : string;
-    
+
     /**
      * Get description of what format does.
      *
      * @return string
      */
     public function get_description() : string;
-    
+
     /**
      * Get fields that are required in data the format will use.
      *
      * @return array
      */
     public function get_required_fields() : array;
-    
+
     /**
      * Get generated username of format.
      *

@@ -151,7 +151,7 @@ class provider implements
             $userlist->add_from_sql('id', $sql, $params);
         }
     }
-    
+
     /**
      * Export all user data for the specified user, in the specified contexts.
      *
@@ -290,7 +290,7 @@ class provider implements
             }
         }
     }
-    
+
     /**
      * Delete all user data which matches the specified context.
      *
@@ -323,7 +323,7 @@ class provider implements
             $DB->delete_records('enrol_arlo_emailqueue', ['area' => 'site', 'userid' => $context->instanceid]);
         }
     }
-    
+
     /**
      * Delete all user data for the specified user, in the specified contexts.
      *
@@ -393,7 +393,7 @@ class provider implements
         // Delete all the associated groups.
         \core_group\privacy\provider::delete_groups_for_user($contextlist, 'enrol_arlo');
     }
-    
+
     /**
      * Delete multiple users within a single context.
      *
@@ -423,7 +423,7 @@ class provider implements
                 "userid $usersql",
                 $userparams
             );
-            // Delete contacts
+            // Delete contacts.
             $DB->delete_records_select(
                 'enrol_arlo_contact',
                 "userid $usersql",

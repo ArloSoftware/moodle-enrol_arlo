@@ -29,28 +29,28 @@ use core_text;
 defined('MOODLE_INTERNAL') || die();
 
 class firstnamelastnamerandomnumber implements username_format_interface {
-    
+
     /**
      * @var int MAXRANDMAX Maximum value to use with rand function.
      */
     const MAXRANDMAX = 999;
-    
+
     /** @var stdClass $data Data used by format, could be persons first name, last name, email etc. */
     protected $data;
-    
+
     /** @var int $length  */
     protected $length = 3;
-    
+
     /** @var int $randmax */
     protected $randmax = 9;
-    
+
     /**
      * @param $object
      */
     public function add_data($object) {
         $this->data = $object;
     }
-    
+
     /**
      * @param array $options
      */
@@ -63,7 +63,7 @@ class firstnamelastnamerandomnumber implements username_format_interface {
             $this->randmax = $randmax;
         }
     }
-    
+
     /**
      * @return string
      * @throws coding_exception
@@ -71,14 +71,14 @@ class firstnamelastnamerandomnumber implements username_format_interface {
     public function get_name() : string {
         return get_string('firstnamelastnamerandomnumber', 'enrol_arlo');
     }
-    
+
     /**
      * @return string
      */
     public function get_shortname() : string {
         return 'firstnamelastnamerandomnumber';
     }
-    
+
     /**
      * @return string
      * @throws coding_exception
@@ -86,7 +86,7 @@ class firstnamelastnamerandomnumber implements username_format_interface {
     public function get_description() : string {
         return get_string('firstnamelastnamerandomnumber_desc', 'enrol_arlo');
     }
-    
+
     /**
      * @return array
      */

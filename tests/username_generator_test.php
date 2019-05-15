@@ -24,18 +24,18 @@ defined('MOODLE_INTERNAL') || die();
  */
 
 class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provider_testcase {
-    
+
     /**
      *  @var enrol_arlo_generator $plugingenerator handle to plugin generator.
      */
     protected $plugingenerator;
-    
+
     /**
      * @throws coding_exception
      */
     public function setUp() {
         global $CFG;
-        
+
         require_once($CFG->dirroot . '/enrol/arlo/lib.php');
         /** @var enrol_arlo_generator $plugingenerator */
         $this->plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
@@ -43,7 +43,7 @@ class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provide
         $this->plugingenerator->enable_plugin();
         $this->plugingenerator->setup_plugin();
     }
-    
+
     /**
      * Passed generating a username.
      *
@@ -52,20 +52,20 @@ class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provide
      */
     public function test_pass_username_generate() {
         $this->resetAfterTest();
-        
+
         $userdata = new stdClass();
         $userdata->firstname = 'Frank';
         $userdata->lastname = 'Rizzo';
-    
+
         $usernamegenerator = new \enrol_arlo\local\generator\username_generator();
         $usernamegenerator->set_order('firstnamelastnamerandomnumber');
         $usernamegenerator->add_data($userdata);
-        
+
         $username = $usernamegenerator->generate();
         $matched = (bool) preg_match('/([a-zA-Z]{1,6}[\d]{1,3})/', $username);
         $this->assertTrue($matched);
     }
-    
+
     /**
      * Failed to generate username.
      *
@@ -77,11 +77,11 @@ class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provide
         $user1 = $this->getDataGenerator()->create_user(
             ['username' => 'username@example.com', 'email' => 'username@example.com']
         );
-        
+
         $usernamegenerator = new \enrol_arlo\local\generator\username_generator();
         $usernamegenerator->set_order('email');
         $usernamegenerator->add_data($user1);
-        
+
         $username = $usernamegenerator->generate();
         $this->assertFalse($username);
     }

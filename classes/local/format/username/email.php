@@ -29,19 +29,20 @@ use core_text;
 defined('MOODLE_INTERNAL') || die();
 
 class email implements username_format_interface {
-    
+
     /** @var stdClass $data Data used by format, could be persons first name, last name, email etc. */
     protected $data;
-    
+
     /**
      * @param $object
      */
     public function add_data($object) {
         $this->data = $object;
     }
-    
-    public function add_options(array $options) {}
-    
+
+    public function add_options(array $options) {
+    }
+
     /**
      * @return string
      * @throws coding_exception
@@ -49,14 +50,14 @@ class email implements username_format_interface {
     public function get_name() : string {
         return get_string('email', 'enrol_arlo');
     }
-    
+
     /**
      * @return string
      */
     public function get_shortname() : string {
         return 'email';
     }
-    
+
     /**
      * @return string
      * @throws coding_exception
@@ -64,14 +65,14 @@ class email implements username_format_interface {
     public function get_description() : string {
         return get_string('email_desc', 'enrol_arlo');
     }
-    
+
     /**
      * @return array
      */
     public function get_required_fields() : array {
         return ['email'];
     }
-    
+
     /**
      * @return string
      * @throws coding_exception
