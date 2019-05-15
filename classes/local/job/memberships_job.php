@@ -287,7 +287,7 @@ class memberships_job extends job {
         // No user associated with contact.
         if ($contact->get('userid') <= 0) {
             $user = static::match_user_from_contact($contact);
-            if (!($user instanceof contact_persistent)) {
+            if (!($user instanceof user_persistent)) {
                 // User is an integer greater than 1 means multiple matches.
                 if ($user) {
                     $contact->set('userassociationfailure', 1);
