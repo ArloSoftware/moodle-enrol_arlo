@@ -79,7 +79,7 @@ class email implements username_format_interface {
      */
     public function get_username() {
         if (!isset($this->data->email)) {
-            throw new coding_exception("Require field email missing");
+            throw new coding_exception("Required field email missing");
         }
         $email = trim($this->data->email);
         $username = clean_param($email, PARAM_USERNAME);

@@ -69,9 +69,9 @@ switch ($action) {
 $form = new \enrol_arlo\form\admin\configuration();
 $data = $form->get_submitted_data();
 if ($data) {
-    $pluginconfig = new arlo_plugin_config();
+    $pluginconfig = new \enrol_arlo\local\config\arlo_plugin_config();
     foreach (get_object_vars($data) as $property => $value) {
-        if (arlo_plugin_config::has_property($property)) {
+        if (\enrol_arlo\local\config\arlo_plugin_config::has_property($property)) {
             $pluginconfig->set($property, $value);
         }
     }
