@@ -21,6 +21,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\local\config\arlo_plugin_config;
+
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/formslib.php');
@@ -32,7 +34,7 @@ admin_externalpage_setup('enrolsettingsarloconfiguration');
 
 $pageurl = clone($PAGE->url);
 $pageurl->remove_all_params();
-
+$pluginconfig = new enrol_arlo\local\config\arlo_plugin_config();
 switch ($action) {
     case 'moveup':
         if (confirm_sesskey()) {
