@@ -326,9 +326,11 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
 
         $context1 = context_course::instance($course1->id);
         $userlist = new userlist($context1, 'enrol_arlo');
-        \enrol_arlo\privacy\provider::get_users_in_context($userlist);
+        enrol_arlo\privacy\provider::get_users_in_context($userlist);
 
-        $this->assertEquals([$user1->id, $user2->id], $userlist->get_userids());
+        $userids = $userlist->get_userids();
+        asort($userids);
+        $this->assertEquals([$user1->id, $user2->id], array_values($userids));
     }
 
 }
