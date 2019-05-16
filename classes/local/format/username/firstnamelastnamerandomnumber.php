@@ -100,10 +100,10 @@ class firstnamelastnamerandomnumber implements username_format_interface {
      */
     public function get_username() {
         if (!isset($this->data->firstname)) {
-            throw new coding_exception("Require field firstname missing");
+            throw new coding_exception("Required field firstname missing");
         }
         if (!isset($this->data->lastname)) {
-            throw new coding_exception("Require field lastname missing");
+            throw new coding_exception("Required field lastname missing");
         }
         $firstname = trim($this->data->firstname);
         $firstname = clean_param($firstname, PARAM_USERNAME);
