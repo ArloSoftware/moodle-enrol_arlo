@@ -57,7 +57,7 @@ class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provide
         $userdata->firstname = 'Frank';
         $userdata->lastname = 'Rizzo';
 
-        $usernamegenerator = new \enrol_arlo\local\generator\username_generator();
+        $usernamegenerator = new enrol_arlo\local\generator\username_generator();
         $usernamegenerator->set_order('firstnamelastnamerandomnumber');
         $usernamegenerator->add_data($userdata);
 
@@ -78,7 +78,7 @@ class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provide
             ['username' => 'username@example.com', 'email' => 'username@example.com']
         );
 
-        $usernamegenerator = new \enrol_arlo\local\generator\username_generator();
+        $usernamegenerator = new enrol_arlo\local\generator\username_generator();
         $usernamegenerator->set_order('email');
         $usernamegenerator->add_data($user1);
 
