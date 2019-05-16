@@ -2,10 +2,6 @@
 
 namespace enrol_arlo\Arlo\AuthAPI;
 
-use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
-use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
-use Symfony\Component\PropertyAccess\PropertyAccess;
-
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractCollection;
 use enrol_arlo\Arlo\AuthAPI\Resource\AbstractResource;
 use enrol_arlo\Arlo\AuthAPI\Exception\XMLDeserializerException;
@@ -19,42 +15,18 @@ class XmlDeserializer {
      * @var bool
      */
     private $ignoreMissingClasses = true;
-    /**
-     * @var object $propertyInformer return a single PropertyInfo instance.
-     */
-    private $propertyInformer;
 
     /**
      * XmlDeserializer constructor.
      *
      * @param null $resourceClassPath
-     * @param null $loadOptions A bit field of LIBXML_* constants
+     * @param bool $ignoreMissingClasses
+     * @param null $loadOptions
      */
     public function __construct($resourceClassPath = null, $ignoreMissingClasses = true, $loadOptions = null) {
         $this->resourceClassPath = null !== $resourceClassPath ? $resourceClassPath : '';
         $this->ignoreMissingClasses = ($ignoreMissingClasses) ? true : false;
         $this->loadOptions = null !== $loadOptions ? $loadOptions : LIBXML_NONET | LIBXML_NOBLANKS;
-    }
-
-    /**
-     * Return a property info extractor singleton. Will use to check what
-     * resource class properties are writable.
-     *
-     * @return PropertyInfoExtractor
-     */
-    public function getPropertyInformer() {
-        if (is_null($this->propertyInformer)) {
-            $reflectionExtractor = new ReflectionExtractor();
-            $listExtractors = array($reflectionExtractor);
-            $accessExtractors = array($reflectionExtractor);
-            $this->propertyInformer = new PropertyInfoExtractor(
-                $listExtractors,
-                array(),
-                array(),
-                $accessExtractors
-            );
-        }
-        return $this->propertyInformer;
     }
 
     /**
@@ -114,7 +86,6 @@ class XmlDeserializer {
         // Root node is a single resource.
         if ($classInstance instanceof AbstractResource) {
             $this->parseResourceNode($node, $classInstance);
-
         }
     }
 
@@ -126,8 +97,6 @@ class XmlDeserializer {
      * @throws \Exception
      */
     private function parseLinkNode(\DOMNode $node, $classInstance) {
-        $propertyInfo = $this->getPropertyInformer();
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
         // Make sure a Link.
         if ($node->nodeName !== 'Link') {
             throw new XMLDeserializerException('Not a Link');
@@ -140,26 +109,16 @@ class XmlDeserializer {
             }
             $link = new $linkClassName();
             if ($node->hasAttributes()) {
-                $properties = $propertyInfo->getProperties($link);
                 foreach ($node->attributes as $attribute) {
                     $attributeName = $attribute->name;
                     $attributeValue = (string)$attribute->value;
-                    if (in_array($attributeName, $properties)) {
-                        if ($propertyInfo->isWritable($linkClassName, $attributeName)) {
-                            $propertyAccessor->setValue($link, $attributeName, $attributeValue);
-                        }
-                    }
-                }
-                // Add Link attributes.
-                $adder = 'addLink';
-                if (method_exists($classInstance, $adder)) {
-                    $classInstance->{$adder}($link);
+                    $this->setValue($link, $attributeName, $attributeValue);
                 }
             }
         }
         // Deal with Link that has expansions.
         if ($node->hasChildNodes()) {
-            foreach($node->childNodes as $childNode) {
+            foreach ($node->childNodes as $childNode) {
                 $childClassName = $this->resourceClassPath . $childNode->nodeName;
                 if (!class_exists($childClassName)) {
                     if (!$this->ignoreMissingClasses) {
@@ -169,16 +128,7 @@ class XmlDeserializer {
                 }
                 $childClassInstance = new $childClassName();
                 $this->parseResourceNode($childNode, $childClassInstance);
-                // Do we have a setter on the passed in class.
-                $setter = 'set' . $childNode->nodeName;
-                if (method_exists($classInstance, $setter)) {
-                    $classInstance->{$setter}($childClassInstance);
-                }
-                // Do we have an adder on the passed in class.
-                $adder = 'add' . $childNode->nodeName;
-                if (method_exists($classInstance, $adder)) {
-                    $classInstance->{$adder}($childClassInstance);
-                }
+                $this->setValue($classInstance, $childNode->nodeName, $childClassInstance);
             }
         }
     }
@@ -205,8 +155,6 @@ class XmlDeserializer {
      * @throws \Exception
      */
     private function parseResourceNode(\DOMNode $node, AbstractResource $classInstance) {
-        $propertyInfo = $this->getPropertyInformer();
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach ($node->childNodes as $childNode) {
             if ($childNode->nodeName === 'Link') {
                 $this->parseLinkNode($childNode, $classInstance);
@@ -214,10 +162,7 @@ class XmlDeserializer {
                 if ($childNode->hasChildNodes()) {
                     // Single element.
                     if (1 === $childNode->childNodes->length) {
-                        $classInstanceName = get_class($classInstance);
-                        if ($propertyInfo->isWritable($classInstanceName, $childNode->nodeName)) {
-                            $propertyAccessor->setValue($classInstance, $childNode->nodeName, $childNode->nodeValue);
-                        }
+                        $this->setValue($classInstance, $childNode->nodeName, $childNode->nodeValue);
                         continue;
                     }
                     // Has multiple elements, parse as resource.
@@ -233,14 +178,52 @@ class XmlDeserializer {
                         // Initiate class and parse.
                         $childClassInstance = new $childClassName();
                         $this->parseResourceNode($childNode, $childClassInstance);
-                        // Do we have a setter on the passed in class.
-                        $setter = 'set' . $childNode->nodeName;
-                        if (method_exists($classInstance, $setter)) {
-                            $classInstance->{$setter}($childClassInstance);
-                        }
+                        $this->setValue($classInstance, $childNode->nodeName, $childClassInstance);
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Will try set value by public property, setter or adder.
+     *
+     * @param $class
+     * @param $property
+     * @param $value
+     */
+    protected function setValue($class, $property, $value) {
+        try {
+            $reflectionClass = new \ReflectionClass($class);
+        } catch (\ReflectionException $e) {
+            return;
+        }
+        $properties = [];
+        foreach ($reflectionClass->getProperties() as $reflectionProperty) {
+            if ($reflectionProperty->isPublic()) {
+                $properties[$reflectionProperty->name] = $reflectionProperty->name;
+            }
+        }
+        if (in_array($property, $properties)) {
+            $class->{$property} = $value;
+            return;
+        }
+        $methods = [];
+        foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
+            if ($reflectionMethod->isStatic()) {
+                continue;
+            }
+            $methods[$reflectionMethod->name] = $reflectionMethod->name;
+        }
+        $setter = 'set' . $property;
+        if (in_array($setter, $methods)) {
+            $class->{$setter}($value);
+            return;
+        }
+        $adder = 'add' . $property;
+        if (in_array($adder, $methods)) {
+            $class->{$adder}($value);
+            return;
         }
     }
 }

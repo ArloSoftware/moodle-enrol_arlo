@@ -95,8 +95,7 @@ class user_matcher {
         $conditions = [
             'firstname' => $firstname,
             'lastname' => $lastname,
-            'email' => $email,
-            'deleted' => 0
+            'email' => $email
         ];
         return $DB->get_records_select('user', $select, $conditions);
     }

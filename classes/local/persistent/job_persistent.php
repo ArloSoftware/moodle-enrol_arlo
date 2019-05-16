@@ -165,6 +165,30 @@ class job_persistent extends persistent {
     }
 
     /**
+     * Resets all sync state information to their default
+     * values.
+     *
+     * @throws coding_exception
+     */
+    public function reset_sync_state_information() {
+        $properties = static::properties_definition();
+        $statefields = [
+            'lastsourceid',
+            'lastsourcetimemodified',
+            'timelastrequest',
+            'timenextrequestdelay',
+            'timenorequestsafter',
+            'timerequestsafterextension'
+        ];
+        foreach ($statefields as $statefield) {
+            if (isset($properties[$statefield]['default'])) {
+                $default = $properties[$statefield]['default'];
+                $this->set($statefield, $default);
+            }
+        }
+    }
+
+    /**
      * Set job area.
      *
      * @param $value

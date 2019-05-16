@@ -378,5 +378,16 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2018100500, 'enrol', 'arlo');
     }
 
+    // Set username generator order configuration setting.
+    if ($oldversion < 2019051500) {
+        $pluginconfig = new \enrol_arlo\local\config\arlo_plugin_config();
+        $pluginconfig->set('usernameformatorder', \enrol_arlo\local\generator\username_generator::get_default_order());
+
+        // Fix issue #104 on GitHub.
+        $DB->set_field('user', 'idnumber', '', ['idnumber' => 'codeprimary']);
+
+        // Arlo savepoint reached.
+        upgrade_plugin_savepoint(true, 2019051500, 'enrol', 'arlo');
+    }
     return true;
 }

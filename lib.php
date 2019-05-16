@@ -384,18 +384,21 @@ class enrol_arlo_plugin extends enrol_plugin {
         $membershipsjob = job_persistent::get_record(
             ['area' => 'enrolment', 'type' => 'memberships', 'instanceid' => $instance->id]
         );
+        $membershipsjob->reset_sync_state_information();
         $membershipsjob->set('timenorequestsafter', $timenorequestsafter);
         $membershipsjob->save();
 
         $outcomesjob = job_persistent::get_record(
             ['area' => 'enrolment', 'type' => 'outcomes', 'instanceid' => $instance->id]
         );
+        $outcomesjob->reset_sync_state_information();
         $outcomesjob->set('timenorequestsafter', $timenorequestsafter);
         $outcomesjob->save();
 
         $contactsjob = job_persistent::get_record(
             ['area' => 'enrolment', 'type' => 'contacts', 'instanceid' => $instance->id]
         );
+        $contactsjob->reset_sync_state_information();
         $contactsjob->set('timenorequestsafter', $timenorequestsafter);
         $contactsjob->save();
 

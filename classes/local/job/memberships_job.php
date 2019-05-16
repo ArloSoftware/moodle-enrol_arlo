@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\local\administrator_notification;
+use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\generator\username_generator;
 use enrol_arlo\local\handler\contact_merge_requests_handler;
@@ -265,6 +266,8 @@ class memberships_job extends job {
                                                           contact_persistent $contact = null) {
         // Load plugin class instance.
         $plugin = api::get_enrolment_plugin();
+        // Get plugin config.
+        $pluginconfig = new arlo_plugin_config();
         // Reset enrolment failure flag by default.
         $registration->set('enrolmentfailure', 0);
         if (is_null($contact)) {
@@ -287,9 +290,12 @@ class memberships_job extends job {
         // No user associated with contact.
         if ($contact->get('userid') <= 0) {
             $user = static::match_user_from_contact($contact);
-            if (!($user instanceof contact_persistent)) {
+            if (!($user instanceof user_persistent)) {
                 // User is an integer greater than 1 means multiple matches.
                 if ($user) {
+                    $contact->set('userassociationfailure', 1);
+                    $contact->set('errormessage', 'Duplicate user accounts.');
+                    $contact->update();
                     $registration->set('enrolmentfailure', 1);
                     $registration->update();
                     administrator_notification::send_unsuccessful_enrolment_message();
@@ -297,11 +303,17 @@ class memberships_job extends job {
                 } else {
                     // Mo matches, create a new Moodle user.
                     $user = new user_persistent();
-                    $username = username_generator::generate(
-                        $contact->get('firstname'),
-                        $contact->get('lastname'),
-                        $contact->get('email')
-                    );
+                    $usernamegenerator = new username_generator($contact->to_record(), $pluginconfig->get('usernameformatorder'));
+                    $username = $usernamegenerator->generate();
+                    if (!$username) {
+                        $contact->set('usercreationfailure', 1);
+                        $contact->set('errormessage', 'Failed to create username');
+                        $contact->update();
+                        $registration->set('enrolmentfailure', 1);
+                        $registration->update();
+                        administrator_notification::send_unsuccessful_enrolment_message();
+                        return false;
+                    }
                     $user->set('username', $username);
                     // Set new property values on user.
                     $user->set('firstname', $contact->get('firstname'));
@@ -309,7 +321,9 @@ class memberships_job extends job {
                     $user->set('email', $contact->get('email'));
                     // Conditionally add codeprimary as idnumber.
                     if (empty($user->get('idnumber'))) {
-                        $user->set('idnumber', 'codeprimary');
+                        if (!empty($contact->get('codeprimary'))) {
+                            $user->set('idnumber', $contact->get('codeprimary'));
+                        }
                     }
                     $user->set('phone1', $contact->get('phonemobile'));
                     $user->set('phone2', $contact->get('phonework'));
@@ -335,7 +349,9 @@ class memberships_job extends job {
             $user->set('email', $contact->get('email'));
             // Conditionally add codeprimary as idnumber.
             if (empty($user->get('idnumber'))) {
-                $user->set('idnumber', 'codeprimary');
+                if (!empty($contact->get('codeprimary'))) {
+                    $user->set('idnumber', $contact->get('codeprimary'));
+                }
             }
             $user->set('phone1', $contact->get('phonemobile'));
             $user->set('phone2', $contact->get('phonework'));

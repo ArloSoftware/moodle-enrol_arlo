@@ -2,10 +2,11 @@
     "name": "arlo/moodle-enrol_arlo",
     "description": "Arlo integration for Moodle",
     "require": {
-        "php": "7.2.*",
-        "guzzlehttp/guzzle": "6.3.*",
-        "symfony/property-info": "4.2.*",
-        "symfony/property-access": "4.2.*"
+        "php": ">=7.0 <7.3",
+        "ext-curl": "*",
+        "ext-date": "*",
+        "ext-dom": "*",
+        "guzzlehttp/guzzle": "6.3.*"
     },
     "authors": [
         {

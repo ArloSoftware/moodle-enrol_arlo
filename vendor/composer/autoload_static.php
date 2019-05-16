@@ -4,10 +4,9 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite4aad6fbfefb391c58bfe8300aa4260b
+class ComposerStaticInite90e3586fc50341bc4af9645466eb9fb
 {
     public static $files = array (
-        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
@@ -15,13 +14,6 @@ class ComposerStaticInite4aad6fbfefb391c58bfe8300aa4260b
     );
 
     public static $prefixLengthsPsr4 = array (
-        'S' => 
-        array (
-            'Symfony\\Polyfill\\Ctype\\' => 23,
-            'Symfony\\Component\\PropertyInfo\\' => 31,
-            'Symfony\\Component\\PropertyAccess\\' => 33,
-            'Symfony\\Component\\Inflector\\' => 28,
-        ),
         'P' => 
         array (
             'Psr\\Http\\Message\\' => 17,
@@ -35,22 +27,6 @@ class ComposerStaticInite4aad6fbfefb391c58bfe8300aa4260b
     );
 
     public static $prefixDirsPsr4 = array (
-        'Symfony\\Polyfill\\Ctype\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
-        ),
-        'Symfony\\Component\\PropertyInfo\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/property-info',
-        ),
-        'Symfony\\Component\\PropertyAccess\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/property-access',
-        ),
-        'Symfony\\Component\\Inflector\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/inflector',
-        ),
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
@@ -72,8 +48,8 @@ class ComposerStaticInite4aad6fbfefb391c58bfe8300aa4260b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite4aad6fbfefb391c58bfe8300aa4260b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite4aad6fbfefb391c58bfe8300aa4260b::$prefixDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite90e3586fc50341bc4af9645466eb9fb::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite90e3586fc50341bc4af9645466eb9fb::$prefixDirsPsr4;
 
         }, null, ClassLoader::class);
     }

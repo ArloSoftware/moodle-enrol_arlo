@@ -27,6 +27,10 @@ namespace enrol_arlo\form\admin;
 defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\local\enum\user_matching;
+use enrol_arlo\local\config\arlo_plugin_config;
+use enrol_arlo\local\generator\username_generator;
+use html_table;
+use html_writer;
 
 class configuration extends \moodleform {
 
@@ -41,10 +45,21 @@ class configuration extends \moodleform {
         $options[user_matching::MATCH_BY_CODE_PRIMARY] = get_string('matchbyarlocodeprimary', 'enrol_arlo');
         $options[user_matching::MATCH_BY_AUTO] = get_string('matchbyauto', 'enrol_arlo');
 
+        $form->addElement('header', 'useraccountmatching', get_string('useraccountmatching', 'enrol_arlo'));
+        $form->setExpanded('useraccountmatching', true);
+
         $form->addElement('select', 'matchuseraccountsby', get_string('matchuseraccountsby', 'enrol_arlo'), $options);
         $default = user_matching::MATCH_BY_DEFAULT;
         $form->setDefault('matchuseraccountsby', $default);
         $form->addHelpButton('matchuseraccountsby', 'matchuseraccountsby', 'enrol_arlo');
+
+        $form->addElement('header', 'useraccountcreation', get_string('useraccountcreation', 'enrol_arlo'));
+        $form->setExpanded('useraccountcreation', true);
+
+        $form->addElement('html', static::get_username_generation_table_html());
+
+        $form->addElement('header', 'courseenrolment', get_string('courseenrolment', 'enrol_arlo'));
+        $form->setExpanded('courseenrolment', true);
 
         $student = get_archetype_roles('student');
         $student = reset($student);
@@ -72,6 +87,9 @@ class configuration extends \moodleform {
         $form->setDefault('expiredaction', ENROL_EXT_REMOVED_SUSPEND);
         $form->addHelpButton('expiredaction', 'expiredaction', 'enrol_arlo');
 
+        $form->addElement('header', 'resulting', get_string('resulting', 'enrol_arlo'));
+        $form->setExpanded('resulting', true);
+
         $form->addElement('advcheckbox', 'pushonlineactivityresults',
             get_string('pushonlineactivityresults', 'enrol_arlo'));
         $form->setDefault('pushonlineactivityresults', 1);
@@ -81,6 +99,9 @@ class configuration extends \moodleform {
             get_string('pusheventresults', 'enrol_arlo'));
         $form->setDefault('pusheventresults', 1);
         $form->addHelpButton('pusheventresults', 'pusheventresults', 'enrol_arlo');
+
+        $form->addElement('header', 'other', get_string('other'));
+        $form->setExpanded('other', true);
 
         $form->addElement('advcheckbox', 'allowcompletedevents',
             get_string('allowcompletedevents', 'enrol_arlo'),
@@ -104,6 +125,9 @@ class configuration extends \moodleform {
         $form->setDefault('allowunenrolaccessedui', 0);
         $form->addHelpButton('allowunenrolaccessedui', 'allowunenrolaccessedui', 'enrol_arlo');
 
+        $form->addElement('header', 'cleanup', get_string('cleanup', 'enrol_arlo'));
+        $form->setExpanded('cleanup', true);
+
         $options = array(
             0 => get_string('never'),
             7 => get_string('numdays', '', 7),
@@ -118,7 +142,7 @@ class configuration extends \moodleform {
 
         // Developer information for outgoing email delivery.
         $emaildisabled = !empty($CFG->noemailever);
-        $emaildiverted = !empty(trim($CFG->divertallemailsto));
+        $emaildiverted = !empty($CFG->divertallemailsto);
         $emailprocessing = '';
         if ($emaildiverted) {
             $emailprocessing = get_string('divertedto', 'enrol_arlo', $CFG->divertallemailsto);
@@ -138,8 +162,62 @@ class configuration extends \moodleform {
         if ($config) {
             $this->set_data($config);
         }
-
         $this->add_action_buttons(true, get_string('savechanges', 'enrol_arlo'));
+    }
+
+    /**
+     * Table for username format order.
+     *
+     * @return string
+     * @throws \coding_exception
+     */
+    public static function  get_username_generation_table_html() {
+        global $PAGE, $OUTPUT;
+        $url = clone($PAGE->url);
+        $strmoveup = get_string('moveup');
+        $strmovedown = get_string('movedown');
+        $pluginconfig = new arlo_plugin_config();
+        $table = new html_table();
+        $table->colclasses = ['leftalign', 'leftalign', 'leftalign', 'leftleft'];
+        $table->id = 'roles';
+        $table->attributes['class'] = 'admintable generaltable';
+        $table->head = [
+            get_string('order'),
+            get_string('name'),
+            get_string('description'),
+            get_string('move')
+        ];
+        $usernamegenerator = new username_generator();
+        $usernamegenerator->set_order($pluginconfig->get('usernameformatorder'));
+        $formats = $usernamegenerator->export_current_order_to_array();
+        $first = (object) reset($formats);
+        $last = (object) end($formats);
+        foreach ($formats as $format) {
+            $formatobject = (object) $format;
+            $row = [
+                $formatobject->order,
+                $formatobject->name,
+                $formatobject->description,
+                ''
+            ];
+            $url->remove_all_params();
+            // Move up.
+            if ($first->shortname != $formatobject->shortname) {
+                $url->params(['action' => 'moveup', 'usernameformat' => $formatobject->shortname, 'sesskey' => sesskey()]);
+                $row[3] .= html_writer::link($url, $OUTPUT->pix_icon('t/up', $strmoveup));
+            } else {
+                $row[3] .= $OUTPUT->spacer();
+            }
+            // Move down.
+            if ($last->shortname != $formatobject->shortname) {
+                $url->params(['action' => 'movedown', 'usernameformat' => $formatobject->shortname, 'sesskey' => sesskey()]);
+                $row[3] .= html_writer::link($url, $OUTPUT->pix_icon('t/down', $strmovedown));
+            } else {
+                $row[3] .= $OUTPUT->spacer();
+            }
+            $table->data[] = $row;
+        }
+        return get_string('usernamegeneration_desc', 'enrol_arlo') . html_writer::table($table);
     }
 
     /**

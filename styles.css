@@ -1,5 +1,5 @@
 /* stylelint-disable */
-body.path-admin-enrol-arlo #region-main {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main {
   /*!
    * Bootstrap Reboot v4.1.3 (https://getbootstrap.com/)
    * Copyright 2011-2018 The Bootstrap Authors
@@ -14,12 +14,12 @@ body.path-admin-enrol-arlo #region-main {
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
    */
 }
-body.path-admin-enrol-arlo #region-main *,
-body.path-admin-enrol-arlo #region-main *::before,
-body.path-admin-enrol-arlo #region-main *::after {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main *,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main *::before,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main *::after {
   box-sizing: border-box;
 }
-body.path-admin-enrol-arlo #region-main html {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main html {
   font-family: sans-serif;
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
@@ -30,10 +30,10 @@ body.path-admin-enrol-arlo #region-main html {
 @-ms-viewport {
   width: device-width;
 }
-body.path-admin-enrol-arlo #region-main article, body.path-admin-enrol-arlo #region-main aside, body.path-admin-enrol-arlo #region-main figcaption, body.path-admin-enrol-arlo #region-main figure, body.path-admin-enrol-arlo #region-main footer, body.path-admin-enrol-arlo #region-main header, body.path-admin-enrol-arlo #region-main hgroup, body.path-admin-enrol-arlo #region-main main, body.path-admin-enrol-arlo #region-main nav, body.path-admin-enrol-arlo #region-main section {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main article, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main aside, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main figcaption, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main figure, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main footer, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main header, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main hgroup, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main main, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main nav, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main section {
   display: block;
 }
-body.path-admin-enrol-arlo #region-main body {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   font-size: 1rem;
@@ -43,201 +43,201 @@ body.path-admin-enrol-arlo #region-main body {
   text-align: left;
   background-color: #fff;
 }
-body.path-admin-enrol-arlo #region-main [tabindex="-1"]:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [tabindex="-1"]:focus {
   outline: 0 !important;
 }
-body.path-admin-enrol-arlo #region-main hr {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main hr {
   box-sizing: content-box;
   height: 0;
   overflow: visible;
 }
-body.path-admin-enrol-arlo #region-main h1, body.path-admin-enrol-arlo #region-main h2, body.path-admin-enrol-arlo #region-main h3, body.path-admin-enrol-arlo #region-main h4, body.path-admin-enrol-arlo #region-main h5, body.path-admin-enrol-arlo #region-main h6 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main h1, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main h2, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main h3, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main h4, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main h5, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main h6 {
   margin-top: 0;
   margin-bottom: 0.5rem;
 }
-body.path-admin-enrol-arlo #region-main p {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main p {
   margin-top: 0;
   margin-bottom: 1rem;
 }
-body.path-admin-enrol-arlo #region-main abbr[title],
-body.path-admin-enrol-arlo #region-main abbr[data-original-title] {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main abbr[title],
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main abbr[data-original-title] {
   text-decoration: underline;
   text-decoration: underline dotted;
   cursor: help;
   border-bottom: 0;
 }
-body.path-admin-enrol-arlo #region-main address {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main address {
   margin-bottom: 1rem;
   font-style: normal;
   line-height: inherit;
 }
-body.path-admin-enrol-arlo #region-main ol,
-body.path-admin-enrol-arlo #region-main ul,
-body.path-admin-enrol-arlo #region-main dl {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main ol,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main ul,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main dl {
   margin-top: 0;
   margin-bottom: 1rem;
 }
-body.path-admin-enrol-arlo #region-main ol ol,
-body.path-admin-enrol-arlo #region-main ul ul,
-body.path-admin-enrol-arlo #region-main ol ul,
-body.path-admin-enrol-arlo #region-main ul ol {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main ol ol,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main ul ul,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main ol ul,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main ul ol {
   margin-bottom: 0;
 }
-body.path-admin-enrol-arlo #region-main dt {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main dt {
   font-weight: 700;
 }
-body.path-admin-enrol-arlo #region-main dd {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main dd {
   margin-bottom: 0.5rem;
   margin-left: 0;
 }
-body.path-admin-enrol-arlo #region-main blockquote {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main blockquote {
   margin: 0 0 1rem;
 }
-body.path-admin-enrol-arlo #region-main dfn {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main dfn {
   font-style: italic;
 }
-body.path-admin-enrol-arlo #region-main b,
-body.path-admin-enrol-arlo #region-main strong {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main b,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main strong {
   font-weight: bolder;
 }
-body.path-admin-enrol-arlo #region-main small {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main small {
   font-size: 80%;
 }
-body.path-admin-enrol-arlo #region-main sub,
-body.path-admin-enrol-arlo #region-main sup {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main sub,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main sup {
   position: relative;
   font-size: 75%;
   line-height: 0;
   vertical-align: baseline;
 }
-body.path-admin-enrol-arlo #region-main sub {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main sub {
   bottom: -0.25em;
 }
-body.path-admin-enrol-arlo #region-main sup {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main sup {
   top: -0.5em;
 }
-body.path-admin-enrol-arlo #region-main a {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main a {
   color: #007bff;
   text-decoration: none;
   background-color: transparent;
   -webkit-text-decoration-skip: objects;
 }
-body.path-admin-enrol-arlo #region-main a:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main a:hover {
   color: #0056b3;
   text-decoration: underline;
 }
-body.path-admin-enrol-arlo #region-main a:not([href]):not([tabindex]) {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main a:not([href]):not([tabindex]) {
   color: inherit;
   text-decoration: none;
 }
-body.path-admin-enrol-arlo #region-main a:not([href]):not([tabindex]):hover, body.path-admin-enrol-arlo #region-main a:not([href]):not([tabindex]):focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main a:not([href]):not([tabindex]):hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main a:not([href]):not([tabindex]):focus {
   color: inherit;
   text-decoration: none;
 }
-body.path-admin-enrol-arlo #region-main a:not([href]):not([tabindex]):focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main a:not([href]):not([tabindex]):focus {
   outline: 0;
 }
-body.path-admin-enrol-arlo #region-main pre,
-body.path-admin-enrol-arlo #region-main code,
-body.path-admin-enrol-arlo #region-main kbd,
-body.path-admin-enrol-arlo #region-main samp {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main pre,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main code,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main kbd,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main samp {
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 1em;
 }
-body.path-admin-enrol-arlo #region-main pre {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main pre {
   margin-top: 0;
   margin-bottom: 1rem;
   overflow: auto;
   -ms-overflow-style: scrollbar;
 }
-body.path-admin-enrol-arlo #region-main figure {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main figure {
   margin: 0 0 1rem;
 }
-body.path-admin-enrol-arlo #region-main img {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main img {
   vertical-align: middle;
   border-style: none;
 }
-body.path-admin-enrol-arlo #region-main svg {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main svg {
   overflow: hidden;
   vertical-align: middle;
 }
-body.path-admin-enrol-arlo #region-main table {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main table {
   border-collapse: collapse;
 }
-body.path-admin-enrol-arlo #region-main caption {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main caption {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   color: #6c757d;
   text-align: left;
   caption-side: bottom;
 }
-body.path-admin-enrol-arlo #region-main th {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main th {
   text-align: inherit;
 }
-body.path-admin-enrol-arlo #region-main label {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main label {
   display: inline-block;
   margin-bottom: 0.5rem;
 }
-body.path-admin-enrol-arlo #region-main button {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main button {
   border-radius: 0;
 }
-body.path-admin-enrol-arlo #region-main button:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main button:focus {
   outline: 1px dotted;
   outline: 5px auto -webkit-focus-ring-color;
 }
-body.path-admin-enrol-arlo #region-main input,
-body.path-admin-enrol-arlo #region-main button,
-body.path-admin-enrol-arlo #region-main select,
-body.path-admin-enrol-arlo #region-main optgroup,
-body.path-admin-enrol-arlo #region-main textarea {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main button,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main select,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main optgroup,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main textarea {
   margin: 0;
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
 }
-body.path-admin-enrol-arlo #region-main button,
-body.path-admin-enrol-arlo #region-main input {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main button,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input {
   overflow: visible;
 }
-body.path-admin-enrol-arlo #region-main button,
-body.path-admin-enrol-arlo #region-main select {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main button,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main select {
   text-transform: none;
 }
-body.path-admin-enrol-arlo #region-main button,
-body.path-admin-enrol-arlo #region-main html [type=button],
-body.path-admin-enrol-arlo #region-main [type=reset],
-body.path-admin-enrol-arlo #region-main [type=submit] {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main button,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main html [type=button],
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=reset],
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=submit] {
   -webkit-appearance: button;
 }
-body.path-admin-enrol-arlo #region-main button::-moz-focus-inner,
-body.path-admin-enrol-arlo #region-main [type=button]::-moz-focus-inner,
-body.path-admin-enrol-arlo #region-main [type=reset]::-moz-focus-inner,
-body.path-admin-enrol-arlo #region-main [type=submit]::-moz-focus-inner {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main button::-moz-focus-inner,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=button]::-moz-focus-inner,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=reset]::-moz-focus-inner,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=submit]::-moz-focus-inner {
   padding: 0;
   border-style: none;
 }
-body.path-admin-enrol-arlo #region-main input[type=radio],
-body.path-admin-enrol-arlo #region-main input[type=checkbox] {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=radio],
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=checkbox] {
   box-sizing: border-box;
   padding: 0;
 }
-body.path-admin-enrol-arlo #region-main input[type=date],
-body.path-admin-enrol-arlo #region-main input[type=time],
-body.path-admin-enrol-arlo #region-main input[type=datetime-local],
-body.path-admin-enrol-arlo #region-main input[type=month] {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=date],
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=time],
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=datetime-local],
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=month] {
   -webkit-appearance: listbox;
 }
-body.path-admin-enrol-arlo #region-main textarea {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main textarea {
   overflow: auto;
   resize: vertical;
 }
-body.path-admin-enrol-arlo #region-main fieldset {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main fieldset {
   min-width: 0;
   padding: 0;
   margin: 0;
   border: 0;
 }
-body.path-admin-enrol-arlo #region-main legend {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main legend {
   display: block;
   width: 100%;
   max-width: 100%;
@@ -248,51 +248,51 @@ body.path-admin-enrol-arlo #region-main legend {
   color: inherit;
   white-space: normal;
 }
-body.path-admin-enrol-arlo #region-main progress {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main progress {
   vertical-align: baseline;
 }
-body.path-admin-enrol-arlo #region-main [type=number]::-webkit-inner-spin-button,
-body.path-admin-enrol-arlo #region-main [type=number]::-webkit-outer-spin-button {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=number]::-webkit-inner-spin-button,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=number]::-webkit-outer-spin-button {
   height: auto;
 }
-body.path-admin-enrol-arlo #region-main [type=search] {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=search] {
   outline-offset: -2px;
   -webkit-appearance: none;
 }
-body.path-admin-enrol-arlo #region-main [type=search]::-webkit-search-cancel-button,
-body.path-admin-enrol-arlo #region-main [type=search]::-webkit-search-decoration {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=search]::-webkit-search-cancel-button,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [type=search]::-webkit-search-decoration {
   -webkit-appearance: none;
 }
-body.path-admin-enrol-arlo #region-main ::-webkit-file-upload-button {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main ::-webkit-file-upload-button {
   font: inherit;
   -webkit-appearance: button;
 }
-body.path-admin-enrol-arlo #region-main output {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main output {
   display: inline-block;
 }
-body.path-admin-enrol-arlo #region-main summary {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main summary {
   display: list-item;
   cursor: pointer;
 }
-body.path-admin-enrol-arlo #region-main template {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main template {
   display: none;
 }
-body.path-admin-enrol-arlo #region-main [hidden] {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main [hidden] {
   display: none !important;
 }
 @-ms-viewport {
   width: device-width;
 }
-body.path-admin-enrol-arlo #region-main html {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main html {
   box-sizing: border-box;
   -ms-overflow-style: scrollbar;
 }
-body.path-admin-enrol-arlo #region-main *,
-body.path-admin-enrol-arlo #region-main *::before,
-body.path-admin-enrol-arlo #region-main *::after {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main *,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main *::before,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main *::after {
   box-sizing: inherit;
 }
-body.path-admin-enrol-arlo #region-main .container {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .container {
   width: 100%;
   padding-right: 15px;
   padding-left: 15px;
@@ -300,1450 +300,1450 @@ body.path-admin-enrol-arlo #region-main .container {
   margin-left: auto;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .container {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .container {
     max-width: 540px;
   }
 }
 @media (min-width: 768px) {
-  body.path-admin-enrol-arlo #region-main .container {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .container {
     max-width: 720px;
   }
 }
 @media (min-width: 992px) {
-  body.path-admin-enrol-arlo #region-main .container {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .container {
     max-width: 960px;
   }
 }
 @media (min-width: 1200px) {
-  body.path-admin-enrol-arlo #region-main .container {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .container {
     max-width: 1140px;
   }
 }
-body.path-admin-enrol-arlo #region-main .container-fluid {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .container-fluid {
   width: 100%;
   padding-right: 15px;
   padding-left: 15px;
   margin-right: auto;
   margin-left: auto;
 }
-body.path-admin-enrol-arlo #region-main .row {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .row {
   display: flex;
   flex-wrap: wrap;
   margin-right: -15px;
   margin-left: -15px;
 }
-body.path-admin-enrol-arlo #region-main .no-gutters {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .no-gutters {
   margin-right: 0;
   margin-left: 0;
 }
-body.path-admin-enrol-arlo #region-main .no-gutters > .col,
-body.path-admin-enrol-arlo #region-main .no-gutters > [class*=col-] {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .no-gutters > .col,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .no-gutters > [class*=col-] {
   padding-right: 0;
   padding-left: 0;
 }
-body.path-admin-enrol-arlo #region-main .col-xl,
-body.path-admin-enrol-arlo #region-main .col-xl-auto, body.path-admin-enrol-arlo #region-main .col-xl-12, body.path-admin-enrol-arlo #region-main .col-xl-11, body.path-admin-enrol-arlo #region-main .col-xl-10, body.path-admin-enrol-arlo #region-main .col-xl-9, body.path-admin-enrol-arlo #region-main .col-xl-8, body.path-admin-enrol-arlo #region-main .col-xl-7, body.path-admin-enrol-arlo #region-main .col-xl-6, body.path-admin-enrol-arlo #region-main .col-xl-5, body.path-admin-enrol-arlo #region-main .col-xl-4, body.path-admin-enrol-arlo #region-main .col-xl-3, body.path-admin-enrol-arlo #region-main .col-xl-2, body.path-admin-enrol-arlo #region-main .col-xl-1, body.path-admin-enrol-arlo #region-main .col-lg,
-body.path-admin-enrol-arlo #region-main .col-lg-auto, body.path-admin-enrol-arlo #region-main .col-lg-12, body.path-admin-enrol-arlo #region-main .col-lg-11, body.path-admin-enrol-arlo #region-main .col-lg-10, body.path-admin-enrol-arlo #region-main .col-lg-9, body.path-admin-enrol-arlo #region-main .col-lg-8, body.path-admin-enrol-arlo #region-main .col-lg-7, body.path-admin-enrol-arlo #region-main .col-lg-6, body.path-admin-enrol-arlo #region-main .col-lg-5, body.path-admin-enrol-arlo #region-main .col-lg-4, body.path-admin-enrol-arlo #region-main .col-lg-3, body.path-admin-enrol-arlo #region-main .col-lg-2, body.path-admin-enrol-arlo #region-main .col-lg-1, body.path-admin-enrol-arlo #region-main .col-md,
-body.path-admin-enrol-arlo #region-main .col-md-auto, body.path-admin-enrol-arlo #region-main .col-md-12, body.path-admin-enrol-arlo #region-main .col-md-11, body.path-admin-enrol-arlo #region-main .col-md-10, body.path-admin-enrol-arlo #region-main .col-md-9, body.path-admin-enrol-arlo #region-main .col-md-8, body.path-admin-enrol-arlo #region-main .col-md-7, body.path-admin-enrol-arlo #region-main .col-md-6, body.path-admin-enrol-arlo #region-main .col-md-5, body.path-admin-enrol-arlo #region-main .col-md-4, body.path-admin-enrol-arlo #region-main .col-md-3, body.path-admin-enrol-arlo #region-main .col-md-2, body.path-admin-enrol-arlo #region-main .col-md-1, body.path-admin-enrol-arlo #region-main .col-sm,
-body.path-admin-enrol-arlo #region-main .col-sm-auto, body.path-admin-enrol-arlo #region-main .col-sm-12, body.path-admin-enrol-arlo #region-main .col-sm-11, body.path-admin-enrol-arlo #region-main .col-sm-10, body.path-admin-enrol-arlo #region-main .col-sm-9, body.path-admin-enrol-arlo #region-main .col-sm-8, body.path-admin-enrol-arlo #region-main .col-sm-7, body.path-admin-enrol-arlo #region-main .col-sm-6, body.path-admin-enrol-arlo #region-main .col-sm-5, body.path-admin-enrol-arlo #region-main .col-sm-4, body.path-admin-enrol-arlo #region-main .col-sm-3, body.path-admin-enrol-arlo #region-main .col-sm-2, body.path-admin-enrol-arlo #region-main .col-sm-1, body.path-admin-enrol-arlo #region-main .col,
-body.path-admin-enrol-arlo #region-main .col-auto, body.path-admin-enrol-arlo #region-main .col-12, body.path-admin-enrol-arlo #region-main .col-11, body.path-admin-enrol-arlo #region-main .col-10, body.path-admin-enrol-arlo #region-main .col-9, body.path-admin-enrol-arlo #region-main .col-8, body.path-admin-enrol-arlo #region-main .col-7, body.path-admin-enrol-arlo #region-main .col-6, body.path-admin-enrol-arlo #region-main .col-5, body.path-admin-enrol-arlo #region-main .col-4, body.path-admin-enrol-arlo #region-main .col-3, body.path-admin-enrol-arlo #region-main .col-2, body.path-admin-enrol-arlo #region-main .col-1 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-auto, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-12, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-11, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-10, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-9, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-8, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-7, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-6, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-5, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-4, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-3, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-2, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-1, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-auto, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-12, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-11, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-10, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-9, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-8, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-7, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-6, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-5, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-4, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-3, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-2, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-1, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-auto, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-12, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-11, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-10, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-9, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-8, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-7, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-6, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-5, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-4, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-3, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-2, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-1, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-auto, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-12, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-11, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-10, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-9, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-8, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-7, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-6, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-5, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-4, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-3, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-2, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-1, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-auto, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-12, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-11, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-10, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-9, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-8, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-7, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-6, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-5, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-4, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-3, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-2, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-1 {
   position: relative;
   width: 100%;
   min-height: 1px;
   padding-right: 15px;
   padding-left: 15px;
 }
-body.path-admin-enrol-arlo #region-main .col {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col {
   flex-basis: 0;
   flex-grow: 1;
   max-width: 100%;
 }
-body.path-admin-enrol-arlo #region-main .col-auto {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-auto {
   flex: 0 0 auto;
   width: auto;
   max-width: none;
 }
-body.path-admin-enrol-arlo #region-main .col-1 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-1 {
   flex: 0 0 8.3333333333%;
   max-width: 8.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .col-2 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-2 {
   flex: 0 0 16.6666666667%;
   max-width: 16.6666666667%;
 }
-body.path-admin-enrol-arlo #region-main .col-3 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-3 {
   flex: 0 0 25%;
   max-width: 25%;
 }
-body.path-admin-enrol-arlo #region-main .col-4 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-4 {
   flex: 0 0 33.3333333333%;
   max-width: 33.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .col-5 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-5 {
   flex: 0 0 41.6666666667%;
   max-width: 41.6666666667%;
 }
-body.path-admin-enrol-arlo #region-main .col-6 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-6 {
   flex: 0 0 50%;
   max-width: 50%;
 }
-body.path-admin-enrol-arlo #region-main .col-7 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-7 {
   flex: 0 0 58.3333333333%;
   max-width: 58.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .col-8 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-8 {
   flex: 0 0 66.6666666667%;
   max-width: 66.6666666667%;
 }
-body.path-admin-enrol-arlo #region-main .col-9 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-9 {
   flex: 0 0 75%;
   max-width: 75%;
 }
-body.path-admin-enrol-arlo #region-main .col-10 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-10 {
   flex: 0 0 83.3333333333%;
   max-width: 83.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .col-11 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-11 {
   flex: 0 0 91.6666666667%;
   max-width: 91.6666666667%;
 }
-body.path-admin-enrol-arlo #region-main .col-12 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-12 {
   flex: 0 0 100%;
   max-width: 100%;
 }
-body.path-admin-enrol-arlo #region-main .order-first {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-first {
   order: -1;
 }
-body.path-admin-enrol-arlo #region-main .order-last {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-last {
   order: 13;
 }
-body.path-admin-enrol-arlo #region-main .order-0 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-0 {
   order: 0;
 }
-body.path-admin-enrol-arlo #region-main .order-1 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-1 {
   order: 1;
 }
-body.path-admin-enrol-arlo #region-main .order-2 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-2 {
   order: 2;
 }
-body.path-admin-enrol-arlo #region-main .order-3 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-3 {
   order: 3;
 }
-body.path-admin-enrol-arlo #region-main .order-4 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-4 {
   order: 4;
 }
-body.path-admin-enrol-arlo #region-main .order-5 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-5 {
   order: 5;
 }
-body.path-admin-enrol-arlo #region-main .order-6 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-6 {
   order: 6;
 }
-body.path-admin-enrol-arlo #region-main .order-7 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-7 {
   order: 7;
 }
-body.path-admin-enrol-arlo #region-main .order-8 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-8 {
   order: 8;
 }
-body.path-admin-enrol-arlo #region-main .order-9 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-9 {
   order: 9;
 }
-body.path-admin-enrol-arlo #region-main .order-10 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-10 {
   order: 10;
 }
-body.path-admin-enrol-arlo #region-main .order-11 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-11 {
   order: 11;
 }
-body.path-admin-enrol-arlo #region-main .order-12 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-12 {
   order: 12;
 }
-body.path-admin-enrol-arlo #region-main .offset-1 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-1 {
   margin-left: 8.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .offset-2 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-2 {
   margin-left: 16.6666666667%;
 }
-body.path-admin-enrol-arlo #region-main .offset-3 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-3 {
   margin-left: 25%;
 }
-body.path-admin-enrol-arlo #region-main .offset-4 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-4 {
   margin-left: 33.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .offset-5 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-5 {
   margin-left: 41.6666666667%;
 }
-body.path-admin-enrol-arlo #region-main .offset-6 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-6 {
   margin-left: 50%;
 }
-body.path-admin-enrol-arlo #region-main .offset-7 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-7 {
   margin-left: 58.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .offset-8 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-8 {
   margin-left: 66.6666666667%;
 }
-body.path-admin-enrol-arlo #region-main .offset-9 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-9 {
   margin-left: 75%;
 }
-body.path-admin-enrol-arlo #region-main .offset-10 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-10 {
   margin-left: 83.3333333333%;
 }
-body.path-admin-enrol-arlo #region-main .offset-11 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-11 {
   margin-left: 91.6666666667%;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .col-sm {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm {
     flex-basis: 0;
     flex-grow: 1;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-auto {
     flex: 0 0 auto;
     width: auto;
     max-width: none;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-1 {
     flex: 0 0 8.3333333333%;
     max-width: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-2 {
     flex: 0 0 16.6666666667%;
     max-width: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-3 {
     flex: 0 0 25%;
     max-width: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-4 {
     flex: 0 0 33.3333333333%;
     max-width: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-5 {
     flex: 0 0 41.6666666667%;
     max-width: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-6 {
     flex: 0 0 50%;
     max-width: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-7 {
     flex: 0 0 58.3333333333%;
     max-width: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-8 {
     flex: 0 0 66.6666666667%;
     max-width: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-9 {
     flex: 0 0 75%;
     max-width: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-10 {
     flex: 0 0 83.3333333333%;
     max-width: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-11 {
     flex: 0 0 91.6666666667%;
     max-width: 91.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-sm-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-sm-12 {
     flex: 0 0 100%;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-first {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-first {
     order: -1;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-last {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-last {
     order: 13;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-0 {
     order: 0;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-1 {
     order: 1;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-2 {
     order: 2;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-3 {
     order: 3;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-4 {
     order: 4;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-5 {
     order: 5;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-6 {
     order: 6;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-7 {
     order: 7;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-8 {
     order: 8;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-9 {
     order: 9;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-10 {
     order: 10;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-11 {
     order: 11;
   }
-  body.path-admin-enrol-arlo #region-main .order-sm-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-sm-12 {
     order: 12;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-0 {
     margin-left: 0;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-1 {
     margin-left: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-2 {
     margin-left: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-3 {
     margin-left: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-4 {
     margin-left: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-5 {
     margin-left: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-6 {
     margin-left: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-7 {
     margin-left: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-8 {
     margin-left: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-9 {
     margin-left: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-10 {
     margin-left: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-sm-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-sm-11 {
     margin-left: 91.6666666667%;
   }
 }
 @media (min-width: 768px) {
-  body.path-admin-enrol-arlo #region-main .col-md {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md {
     flex-basis: 0;
     flex-grow: 1;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-auto {
     flex: 0 0 auto;
     width: auto;
     max-width: none;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-1 {
     flex: 0 0 8.3333333333%;
     max-width: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-2 {
     flex: 0 0 16.6666666667%;
     max-width: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-3 {
     flex: 0 0 25%;
     max-width: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-4 {
     flex: 0 0 33.3333333333%;
     max-width: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-5 {
     flex: 0 0 41.6666666667%;
     max-width: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-6 {
     flex: 0 0 50%;
     max-width: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-7 {
     flex: 0 0 58.3333333333%;
     max-width: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-8 {
     flex: 0 0 66.6666666667%;
     max-width: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-9 {
     flex: 0 0 75%;
     max-width: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-10 {
     flex: 0 0 83.3333333333%;
     max-width: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-11 {
     flex: 0 0 91.6666666667%;
     max-width: 91.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-md-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-md-12 {
     flex: 0 0 100%;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-first {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-first {
     order: -1;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-last {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-last {
     order: 13;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-0 {
     order: 0;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-1 {
     order: 1;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-2 {
     order: 2;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-3 {
     order: 3;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-4 {
     order: 4;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-5 {
     order: 5;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-6 {
     order: 6;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-7 {
     order: 7;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-8 {
     order: 8;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-9 {
     order: 9;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-10 {
     order: 10;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-11 {
     order: 11;
   }
-  body.path-admin-enrol-arlo #region-main .order-md-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-md-12 {
     order: 12;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-0 {
     margin-left: 0;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-1 {
     margin-left: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-2 {
     margin-left: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-3 {
     margin-left: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-4 {
     margin-left: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-5 {
     margin-left: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-6 {
     margin-left: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-7 {
     margin-left: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-8 {
     margin-left: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-9 {
     margin-left: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-10 {
     margin-left: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-md-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-md-11 {
     margin-left: 91.6666666667%;
   }
 }
 @media (min-width: 992px) {
-  body.path-admin-enrol-arlo #region-main .col-lg {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg {
     flex-basis: 0;
     flex-grow: 1;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-auto {
     flex: 0 0 auto;
     width: auto;
     max-width: none;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-1 {
     flex: 0 0 8.3333333333%;
     max-width: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-2 {
     flex: 0 0 16.6666666667%;
     max-width: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-3 {
     flex: 0 0 25%;
     max-width: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-4 {
     flex: 0 0 33.3333333333%;
     max-width: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-5 {
     flex: 0 0 41.6666666667%;
     max-width: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-6 {
     flex: 0 0 50%;
     max-width: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-7 {
     flex: 0 0 58.3333333333%;
     max-width: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-8 {
     flex: 0 0 66.6666666667%;
     max-width: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-9 {
     flex: 0 0 75%;
     max-width: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-10 {
     flex: 0 0 83.3333333333%;
     max-width: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-11 {
     flex: 0 0 91.6666666667%;
     max-width: 91.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-lg-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-lg-12 {
     flex: 0 0 100%;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-first {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-first {
     order: -1;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-last {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-last {
     order: 13;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-0 {
     order: 0;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-1 {
     order: 1;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-2 {
     order: 2;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-3 {
     order: 3;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-4 {
     order: 4;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-5 {
     order: 5;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-6 {
     order: 6;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-7 {
     order: 7;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-8 {
     order: 8;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-9 {
     order: 9;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-10 {
     order: 10;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-11 {
     order: 11;
   }
-  body.path-admin-enrol-arlo #region-main .order-lg-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-lg-12 {
     order: 12;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-0 {
     margin-left: 0;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-1 {
     margin-left: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-2 {
     margin-left: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-3 {
     margin-left: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-4 {
     margin-left: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-5 {
     margin-left: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-6 {
     margin-left: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-7 {
     margin-left: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-8 {
     margin-left: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-9 {
     margin-left: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-10 {
     margin-left: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-lg-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-lg-11 {
     margin-left: 91.6666666667%;
   }
 }
 @media (min-width: 1200px) {
-  body.path-admin-enrol-arlo #region-main .col-xl {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl {
     flex-basis: 0;
     flex-grow: 1;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-auto {
     flex: 0 0 auto;
     width: auto;
     max-width: none;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-1 {
     flex: 0 0 8.3333333333%;
     max-width: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-2 {
     flex: 0 0 16.6666666667%;
     max-width: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-3 {
     flex: 0 0 25%;
     max-width: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-4 {
     flex: 0 0 33.3333333333%;
     max-width: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-5 {
     flex: 0 0 41.6666666667%;
     max-width: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-6 {
     flex: 0 0 50%;
     max-width: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-7 {
     flex: 0 0 58.3333333333%;
     max-width: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-8 {
     flex: 0 0 66.6666666667%;
     max-width: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-9 {
     flex: 0 0 75%;
     max-width: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-10 {
     flex: 0 0 83.3333333333%;
     max-width: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-11 {
     flex: 0 0 91.6666666667%;
     max-width: 91.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .col-xl-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .col-xl-12 {
     flex: 0 0 100%;
     max-width: 100%;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-first {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-first {
     order: -1;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-last {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-last {
     order: 13;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-0 {
     order: 0;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-1 {
     order: 1;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-2 {
     order: 2;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-3 {
     order: 3;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-4 {
     order: 4;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-5 {
     order: 5;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-6 {
     order: 6;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-7 {
     order: 7;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-8 {
     order: 8;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-9 {
     order: 9;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-10 {
     order: 10;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-11 {
     order: 11;
   }
-  body.path-admin-enrol-arlo #region-main .order-xl-12 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .order-xl-12 {
     order: 12;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-0 {
     margin-left: 0;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-1 {
     margin-left: 8.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-2 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-2 {
     margin-left: 16.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-3 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-3 {
     margin-left: 25%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-4 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-4 {
     margin-left: 33.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-5 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-5 {
     margin-left: 41.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-6 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-6 {
     margin-left: 50%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-7 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-7 {
     margin-left: 58.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-8 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-8 {
     margin-left: 66.6666666667%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-9 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-9 {
     margin-left: 75%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-10 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-10 {
     margin-left: 83.3333333333%;
   }
-  body.path-admin-enrol-arlo #region-main .offset-xl-11 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .offset-xl-11 {
     margin-left: 91.6666666667%;
   }
 }
-body.path-admin-enrol-arlo #region-main .d-none {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-none {
   display: none !important;
 }
-body.path-admin-enrol-arlo #region-main .d-inline {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-inline {
   display: inline !important;
 }
-body.path-admin-enrol-arlo #region-main .d-inline-block {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-inline-block {
   display: inline-block !important;
 }
-body.path-admin-enrol-arlo #region-main .d-block {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-block {
   display: block !important;
 }
-body.path-admin-enrol-arlo #region-main .d-table {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-table {
   display: table !important;
 }
-body.path-admin-enrol-arlo #region-main .d-table-row {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-table-row {
   display: table-row !important;
 }
-body.path-admin-enrol-arlo #region-main .d-table-cell {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-table-cell {
   display: table-cell !important;
 }
-body.path-admin-enrol-arlo #region-main .d-flex {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-flex {
   display: flex !important;
 }
-body.path-admin-enrol-arlo #region-main .d-inline-flex {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-inline-flex {
   display: inline-flex !important;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .d-sm-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-none {
     display: none !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-inline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-inline {
     display: inline !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-inline-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-inline-block {
     display: inline-block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-block {
     display: block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-table {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-table {
     display: table !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-table-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-table-row {
     display: table-row !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-table-cell {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-table-cell {
     display: table-cell !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-flex {
     display: flex !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-sm-inline-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-sm-inline-flex {
     display: inline-flex !important;
   }
 }
 @media (min-width: 768px) {
-  body.path-admin-enrol-arlo #region-main .d-md-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-none {
     display: none !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-inline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-inline {
     display: inline !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-inline-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-inline-block {
     display: inline-block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-block {
     display: block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-table {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-table {
     display: table !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-table-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-table-row {
     display: table-row !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-table-cell {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-table-cell {
     display: table-cell !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-flex {
     display: flex !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-md-inline-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-md-inline-flex {
     display: inline-flex !important;
   }
 }
 @media (min-width: 992px) {
-  body.path-admin-enrol-arlo #region-main .d-lg-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-none {
     display: none !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-inline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-inline {
     display: inline !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-inline-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-inline-block {
     display: inline-block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-block {
     display: block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-table {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-table {
     display: table !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-table-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-table-row {
     display: table-row !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-table-cell {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-table-cell {
     display: table-cell !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-flex {
     display: flex !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-lg-inline-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-lg-inline-flex {
     display: inline-flex !important;
   }
 }
 @media (min-width: 1200px) {
-  body.path-admin-enrol-arlo #region-main .d-xl-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-none {
     display: none !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-inline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-inline {
     display: inline !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-inline-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-inline-block {
     display: inline-block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-block {
     display: block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-table {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-table {
     display: table !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-table-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-table-row {
     display: table-row !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-table-cell {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-table-cell {
     display: table-cell !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-flex {
     display: flex !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-xl-inline-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-xl-inline-flex {
     display: inline-flex !important;
   }
 }
 @media print {
-  body.path-admin-enrol-arlo #region-main .d-print-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-none {
     display: none !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-inline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-inline {
     display: inline !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-inline-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-inline-block {
     display: inline-block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-block {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-block {
     display: block !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-table {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-table {
     display: table !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-table-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-table-row {
     display: table-row !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-table-cell {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-table-cell {
     display: table-cell !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-flex {
     display: flex !important;
   }
-  body.path-admin-enrol-arlo #region-main .d-print-inline-flex {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .d-print-inline-flex {
     display: inline-flex !important;
   }
 }
-body.path-admin-enrol-arlo #region-main .flex-row {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-row {
   flex-direction: row !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-column {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-column {
   flex-direction: column !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-row-reverse {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-row-reverse {
   flex-direction: row-reverse !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-column-reverse {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-column-reverse {
   flex-direction: column-reverse !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-wrap {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-wrap {
   flex-wrap: wrap !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-nowrap {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-nowrap {
   flex-wrap: nowrap !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-wrap-reverse {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-wrap-reverse {
   flex-wrap: wrap-reverse !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-fill {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-fill {
   flex: 1 1 auto !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-grow-0 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-grow-0 {
   flex-grow: 0 !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-grow-1 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-grow-1 {
   flex-grow: 1 !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-shrink-0 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-shrink-0 {
   flex-shrink: 0 !important;
 }
-body.path-admin-enrol-arlo #region-main .flex-shrink-1 {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-shrink-1 {
   flex-shrink: 1 !important;
 }
-body.path-admin-enrol-arlo #region-main .justify-content-start {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-start {
   justify-content: flex-start !important;
 }
-body.path-admin-enrol-arlo #region-main .justify-content-end {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-end {
   justify-content: flex-end !important;
 }
-body.path-admin-enrol-arlo #region-main .justify-content-center {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-center {
   justify-content: center !important;
 }
-body.path-admin-enrol-arlo #region-main .justify-content-between {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-between {
   justify-content: space-between !important;
 }
-body.path-admin-enrol-arlo #region-main .justify-content-around {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-around {
   justify-content: space-around !important;
 }
-body.path-admin-enrol-arlo #region-main .align-items-start {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-start {
   align-items: flex-start !important;
 }
-body.path-admin-enrol-arlo #region-main .align-items-end {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-end {
   align-items: flex-end !important;
 }
-body.path-admin-enrol-arlo #region-main .align-items-center {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-center {
   align-items: center !important;
 }
-body.path-admin-enrol-arlo #region-main .align-items-baseline {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-baseline {
   align-items: baseline !important;
 }
-body.path-admin-enrol-arlo #region-main .align-items-stretch {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-stretch {
   align-items: stretch !important;
 }
-body.path-admin-enrol-arlo #region-main .align-content-start {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-start {
   align-content: flex-start !important;
 }
-body.path-admin-enrol-arlo #region-main .align-content-end {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-end {
   align-content: flex-end !important;
 }
-body.path-admin-enrol-arlo #region-main .align-content-center {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-center {
   align-content: center !important;
 }
-body.path-admin-enrol-arlo #region-main .align-content-between {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-between {
   align-content: space-between !important;
 }
-body.path-admin-enrol-arlo #region-main .align-content-around {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-around {
   align-content: space-around !important;
 }
-body.path-admin-enrol-arlo #region-main .align-content-stretch {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-stretch {
   align-content: stretch !important;
 }
-body.path-admin-enrol-arlo #region-main .align-self-auto {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-auto {
   align-self: auto !important;
 }
-body.path-admin-enrol-arlo #region-main .align-self-start {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-start {
   align-self: flex-start !important;
 }
-body.path-admin-enrol-arlo #region-main .align-self-end {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-end {
   align-self: flex-end !important;
 }
-body.path-admin-enrol-arlo #region-main .align-self-center {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-center {
   align-self: center !important;
 }
-body.path-admin-enrol-arlo #region-main .align-self-baseline {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-baseline {
   align-self: baseline !important;
 }
-body.path-admin-enrol-arlo #region-main .align-self-stretch {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-stretch {
   align-self: stretch !important;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .flex-sm-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-row {
     flex-direction: row !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-column {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-column {
     flex-direction: column !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-row-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-row-reverse {
     flex-direction: row-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-column-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-column-reverse {
     flex-direction: column-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-wrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-wrap {
     flex-wrap: wrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-nowrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-nowrap {
     flex-wrap: nowrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-wrap-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-wrap-reverse {
     flex-wrap: wrap-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-fill {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-fill {
     flex: 1 1 auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-grow-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-grow-0 {
     flex-grow: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-grow-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-grow-1 {
     flex-grow: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-shrink-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-shrink-0 {
     flex-shrink: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-sm-shrink-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-sm-shrink-1 {
     flex-shrink: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-sm-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-sm-start {
     justify-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-sm-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-sm-end {
     justify-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-sm-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-sm-center {
     justify-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-sm-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-sm-between {
     justify-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-sm-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-sm-around {
     justify-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-sm-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-sm-start {
     align-items: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-sm-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-sm-end {
     align-items: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-sm-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-sm-center {
     align-items: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-sm-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-sm-baseline {
     align-items: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-sm-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-sm-stretch {
     align-items: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-sm-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-sm-start {
     align-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-sm-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-sm-end {
     align-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-sm-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-sm-center {
     align-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-sm-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-sm-between {
     align-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-sm-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-sm-around {
     align-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-sm-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-sm-stretch {
     align-content: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-sm-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-sm-auto {
     align-self: auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-sm-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-sm-start {
     align-self: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-sm-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-sm-end {
     align-self: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-sm-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-sm-center {
     align-self: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-sm-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-sm-baseline {
     align-self: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-sm-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-sm-stretch {
     align-self: stretch !important;
   }
 }
 @media (min-width: 768px) {
-  body.path-admin-enrol-arlo #region-main .flex-md-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-row {
     flex-direction: row !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-column {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-column {
     flex-direction: column !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-row-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-row-reverse {
     flex-direction: row-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-column-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-column-reverse {
     flex-direction: column-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-wrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-wrap {
     flex-wrap: wrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-nowrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-nowrap {
     flex-wrap: nowrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-wrap-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-wrap-reverse {
     flex-wrap: wrap-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-fill {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-fill {
     flex: 1 1 auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-grow-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-grow-0 {
     flex-grow: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-grow-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-grow-1 {
     flex-grow: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-shrink-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-shrink-0 {
     flex-shrink: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-md-shrink-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-md-shrink-1 {
     flex-shrink: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-md-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-md-start {
     justify-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-md-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-md-end {
     justify-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-md-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-md-center {
     justify-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-md-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-md-between {
     justify-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-md-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-md-around {
     justify-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-md-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-md-start {
     align-items: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-md-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-md-end {
     align-items: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-md-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-md-center {
     align-items: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-md-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-md-baseline {
     align-items: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-md-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-md-stretch {
     align-items: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-md-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-md-start {
     align-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-md-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-md-end {
     align-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-md-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-md-center {
     align-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-md-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-md-between {
     align-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-md-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-md-around {
     align-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-md-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-md-stretch {
     align-content: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-md-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-md-auto {
     align-self: auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-md-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-md-start {
     align-self: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-md-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-md-end {
     align-self: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-md-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-md-center {
     align-self: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-md-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-md-baseline {
     align-self: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-md-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-md-stretch {
     align-self: stretch !important;
   }
 }
 @media (min-width: 992px) {
-  body.path-admin-enrol-arlo #region-main .flex-lg-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-row {
     flex-direction: row !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-column {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-column {
     flex-direction: column !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-row-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-row-reverse {
     flex-direction: row-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-column-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-column-reverse {
     flex-direction: column-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-wrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-wrap {
     flex-wrap: wrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-nowrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-nowrap {
     flex-wrap: nowrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-wrap-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-wrap-reverse {
     flex-wrap: wrap-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-fill {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-fill {
     flex: 1 1 auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-grow-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-grow-0 {
     flex-grow: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-grow-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-grow-1 {
     flex-grow: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-shrink-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-shrink-0 {
     flex-shrink: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-lg-shrink-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-lg-shrink-1 {
     flex-shrink: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-lg-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-lg-start {
     justify-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-lg-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-lg-end {
     justify-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-lg-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-lg-center {
     justify-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-lg-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-lg-between {
     justify-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-lg-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-lg-around {
     justify-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-lg-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-lg-start {
     align-items: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-lg-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-lg-end {
     align-items: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-lg-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-lg-center {
     align-items: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-lg-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-lg-baseline {
     align-items: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-lg-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-lg-stretch {
     align-items: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-lg-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-lg-start {
     align-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-lg-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-lg-end {
     align-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-lg-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-lg-center {
     align-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-lg-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-lg-between {
     align-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-lg-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-lg-around {
     align-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-lg-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-lg-stretch {
     align-content: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-lg-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-lg-auto {
     align-self: auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-lg-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-lg-start {
     align-self: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-lg-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-lg-end {
     align-self: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-lg-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-lg-center {
     align-self: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-lg-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-lg-baseline {
     align-self: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-lg-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-lg-stretch {
     align-self: stretch !important;
   }
 }
 @media (min-width: 1200px) {
-  body.path-admin-enrol-arlo #region-main .flex-xl-row {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-row {
     flex-direction: row !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-column {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-column {
     flex-direction: column !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-row-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-row-reverse {
     flex-direction: row-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-column-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-column-reverse {
     flex-direction: column-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-wrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-wrap {
     flex-wrap: wrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-nowrap {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-nowrap {
     flex-wrap: nowrap !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-wrap-reverse {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-wrap-reverse {
     flex-wrap: wrap-reverse !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-fill {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-fill {
     flex: 1 1 auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-grow-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-grow-0 {
     flex-grow: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-grow-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-grow-1 {
     flex-grow: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-shrink-0 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-shrink-0 {
     flex-shrink: 0 !important;
   }
-  body.path-admin-enrol-arlo #region-main .flex-xl-shrink-1 {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .flex-xl-shrink-1 {
     flex-shrink: 1 !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-xl-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-xl-start {
     justify-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-xl-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-xl-end {
     justify-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-xl-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-xl-center {
     justify-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-xl-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-xl-between {
     justify-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .justify-content-xl-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .justify-content-xl-around {
     justify-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-xl-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-xl-start {
     align-items: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-xl-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-xl-end {
     align-items: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-xl-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-xl-center {
     align-items: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-xl-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-xl-baseline {
     align-items: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-items-xl-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-items-xl-stretch {
     align-items: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-xl-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-xl-start {
     align-content: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-xl-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-xl-end {
     align-content: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-xl-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-xl-center {
     align-content: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-xl-between {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-xl-between {
     align-content: space-between !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-xl-around {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-xl-around {
     align-content: space-around !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-content-xl-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-content-xl-stretch {
     align-content: stretch !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-xl-auto {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-xl-auto {
     align-self: auto !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-xl-start {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-xl-start {
     align-self: flex-start !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-xl-end {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-xl-end {
     align-self: flex-end !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-xl-center {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-xl-center {
     align-self: center !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-xl-baseline {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-xl-baseline {
     align-self: baseline !important;
   }
-  body.path-admin-enrol-arlo #region-main .align-self-xl-stretch {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .align-self-xl-stretch {
     align-self: stretch !important;
   }
 }
-body.path-admin-enrol-arlo #region-main .card {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1754,69 +1754,69 @@ body.path-admin-enrol-arlo #region-main .card {
   border: 1px solid rgba(0, 0, 0, 0.125);
   border-radius: 0.25rem;
 }
-body.path-admin-enrol-arlo #region-main .card > hr {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card > hr {
   margin-right: 0;
   margin-left: 0;
 }
-body.path-admin-enrol-arlo #region-main .card > .list-group:first-child .list-group-item:first-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card > .list-group:first-child .list-group-item:first-child {
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
 }
-body.path-admin-enrol-arlo #region-main .card > .list-group:last-child .list-group-item:last-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card > .list-group:last-child .list-group-item:last-child {
   border-bottom-right-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
 }
-body.path-admin-enrol-arlo #region-main .card-body {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-body {
   flex: 1 1 auto;
   padding: 1.25rem;
 }
-body.path-admin-enrol-arlo #region-main .card-title {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-title {
   margin-bottom: 0.75rem;
 }
-body.path-admin-enrol-arlo #region-main .card-subtitle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-subtitle {
   margin-top: -0.375rem;
   margin-bottom: 0;
 }
-body.path-admin-enrol-arlo #region-main .card-text:last-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-text:last-child {
   margin-bottom: 0;
 }
-body.path-admin-enrol-arlo #region-main .card-link:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-link:hover {
   text-decoration: none;
 }
-body.path-admin-enrol-arlo #region-main .card-link + .card-link {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-link + .card-link {
   margin-left: 1.25rem;
 }
-body.path-admin-enrol-arlo #region-main .card-header {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-header {
   padding: 0.75rem 1.25rem;
   margin-bottom: 0;
   background-color: rgba(0, 0, 0, 0.03);
   border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
-body.path-admin-enrol-arlo #region-main .card-header:first-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-header:first-child {
   border-radius: calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0;
 }
-body.path-admin-enrol-arlo #region-main .card-header + .list-group .list-group-item:first-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-header + .list-group .list-group-item:first-child {
   border-top: 0;
 }
-body.path-admin-enrol-arlo #region-main .card-footer {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-footer {
   padding: 0.75rem 1.25rem;
   background-color: rgba(0, 0, 0, 0.03);
   border-top: 1px solid rgba(0, 0, 0, 0.125);
 }
-body.path-admin-enrol-arlo #region-main .card-footer:last-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-footer:last-child {
   border-radius: 0 0 calc(0.25rem - 1px) calc(0.25rem - 1px);
 }
-body.path-admin-enrol-arlo #region-main .card-header-tabs {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-header-tabs {
   margin-right: -0.625rem;
   margin-bottom: -0.75rem;
   margin-left: -0.625rem;
   border-bottom: 0;
 }
-body.path-admin-enrol-arlo #region-main .card-header-pills {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-header-pills {
   margin-right: -0.625rem;
   margin-left: -0.625rem;
 }
-body.path-admin-enrol-arlo #region-main .card-img-overlay {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-img-overlay {
   position: absolute;
   top: 0;
   right: 0;
@@ -1824,34 +1824,34 @@ body.path-admin-enrol-arlo #region-main .card-img-overlay {
   left: 0;
   padding: 1.25rem;
 }
-body.path-admin-enrol-arlo #region-main .card-img {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-img {
   width: 100%;
   border-radius: calc(0.25rem - 1px);
 }
-body.path-admin-enrol-arlo #region-main .card-img-top {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-img-top {
   width: 100%;
   border-top-left-radius: calc(0.25rem - 1px);
   border-top-right-radius: calc(0.25rem - 1px);
 }
-body.path-admin-enrol-arlo #region-main .card-img-bottom {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-img-bottom {
   width: 100%;
   border-bottom-right-radius: calc(0.25rem - 1px);
   border-bottom-left-radius: calc(0.25rem - 1px);
 }
-body.path-admin-enrol-arlo #region-main .card-deck {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-deck {
   display: flex;
   flex-direction: column;
 }
-body.path-admin-enrol-arlo #region-main .card-deck .card {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-deck .card {
   margin-bottom: 15px;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .card-deck {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-deck {
     flex-flow: row wrap;
     margin-right: -15px;
     margin-left: -15px;
   }
-  body.path-admin-enrol-arlo #region-main .card-deck .card {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-deck .card {
     display: flex;
     flex: 1 0 0%;
     flex-direction: column;
@@ -1860,124 +1860,124 @@ body.path-admin-enrol-arlo #region-main .card-deck .card {
     margin-left: 15px;
   }
 }
-body.path-admin-enrol-arlo #region-main .card-group {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group {
   display: flex;
   flex-direction: column;
 }
-body.path-admin-enrol-arlo #region-main .card-group > .card {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card {
   margin-bottom: 15px;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .card-group {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group {
     flex-flow: row wrap;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card {
     flex: 1 0 0%;
     margin-bottom: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card + .card {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card + .card {
     margin-left: 0;
     border-left: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:first-child {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:first-child {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:first-child .card-img-top,
-body.path-admin-enrol-arlo #region-main .card-group > .card:first-child .card-header {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:first-child .card-img-top,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:first-child .card-header {
     border-top-right-radius: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:first-child .card-img-bottom,
-body.path-admin-enrol-arlo #region-main .card-group > .card:first-child .card-footer {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:first-child .card-img-bottom,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:first-child .card-footer {
     border-bottom-right-radius: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:last-child {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:last-child {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:last-child .card-img-top,
-body.path-admin-enrol-arlo #region-main .card-group > .card:last-child .card-header {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:last-child .card-img-top,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:last-child .card-header {
     border-top-left-radius: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:last-child .card-img-bottom,
-body.path-admin-enrol-arlo #region-main .card-group > .card:last-child .card-footer {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:last-child .card-img-bottom,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:last-child .card-footer {
     border-bottom-left-radius: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:only-child {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:only-child {
     border-radius: 0.25rem;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:only-child .card-img-top,
-body.path-admin-enrol-arlo #region-main .card-group > .card:only-child .card-header {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:only-child .card-img-top,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:only-child .card-header {
     border-top-left-radius: 0.25rem;
     border-top-right-radius: 0.25rem;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:only-child .card-img-bottom,
-body.path-admin-enrol-arlo #region-main .card-group > .card:only-child .card-footer {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:only-child .card-img-bottom,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:only-child .card-footer {
     border-bottom-right-radius: 0.25rem;
     border-bottom-left-radius: 0.25rem;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) {
     border-radius: 0;
   }
-  body.path-admin-enrol-arlo #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-img-top,
-body.path-admin-enrol-arlo #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-img-bottom,
-body.path-admin-enrol-arlo #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-header,
-body.path-admin-enrol-arlo #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-footer {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-img-top,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-img-bottom,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-header,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-group > .card:not(:first-child):not(:last-child):not(:only-child) .card-footer {
     border-radius: 0;
   }
 }
-body.path-admin-enrol-arlo #region-main .card-columns .card {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-columns .card {
   margin-bottom: 0.75rem;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .card-columns {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-columns {
     column-count: 3;
     column-gap: 1.25rem;
     orphans: 1;
     widows: 1;
   }
-  body.path-admin-enrol-arlo #region-main .card-columns .card {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .card-columns .card {
     display: inline-block;
     width: 100%;
   }
 }
-body.path-admin-enrol-arlo #region-main .accordion .card:not(:first-of-type):not(:last-of-type) {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .accordion .card:not(:first-of-type):not(:last-of-type) {
   border-bottom: 0;
   border-radius: 0;
 }
-body.path-admin-enrol-arlo #region-main .accordion .card:not(:first-of-type) .card-header:first-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .accordion .card:not(:first-of-type) .card-header:first-child {
   border-radius: 0;
 }
-body.path-admin-enrol-arlo #region-main .accordion .card:first-of-type {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .accordion .card:first-of-type {
   border-bottom: 0;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
-body.path-admin-enrol-arlo #region-main .accordion .card:last-of-type {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .accordion .card:last-of-type {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-body.path-admin-enrol-arlo #region-main .list-group {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group {
   display: flex;
   flex-direction: column;
   padding-left: 0;
   margin-bottom: 0;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-action {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-action {
   width: 100%;
   color: #495057;
   text-align: inherit;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-action:focus {
   color: #495057;
   text-decoration: none;
   background-color: #f8f9fa;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-action:active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-action:active {
   color: #212529;
   background-color: #e9ecef;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item {
   position: relative;
   display: block;
   padding: 0.75rem 1.25rem;
@@ -1985,145 +1985,145 @@ body.path-admin-enrol-arlo #region-main .list-group-item {
   background-color: #fff;
   border: 1px solid rgba(0, 0, 0, 0.125);
 }
-body.path-admin-enrol-arlo #region-main .list-group-item:first-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item:first-child {
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item:last-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item:last-child {
   margin-bottom: 0;
   border-bottom-right-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item:hover, body.path-admin-enrol-arlo #region-main .list-group-item:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item:focus {
   z-index: 1;
   text-decoration: none;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item.disabled, body.path-admin-enrol-arlo #region-main .list-group-item:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item:disabled {
   color: #6c757d;
   background-color: #fff;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item.active {
   z-index: 2;
   color: #fff;
   background-color: #007bff;
   border-color: #007bff;
 }
-body.path-admin-enrol-arlo #region-main .list-group-flush .list-group-item {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-flush .list-group-item {
   border-right: 0;
   border-left: 0;
   border-radius: 0;
 }
-body.path-admin-enrol-arlo #region-main .list-group-flush:first-child .list-group-item:first-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-flush:first-child .list-group-item:first-child {
   border-top: 0;
 }
-body.path-admin-enrol-arlo #region-main .list-group-flush:last-child .list-group-item:last-child {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-flush:last-child .list-group-item:last-child {
   border-bottom: 0;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-primary {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-primary {
   color: #004085;
   background-color: #b8daff;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-primary.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-primary.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-primary.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-primary.list-group-item-action:focus {
   color: #004085;
   background-color: #9fcdff;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-primary.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-primary.list-group-item-action.active {
   color: #fff;
   background-color: #004085;
   border-color: #004085;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-secondary {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-secondary {
   color: #383d41;
   background-color: #d6d8db;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-secondary.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-secondary.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-secondary.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-secondary.list-group-item-action:focus {
   color: #383d41;
   background-color: #c8cbcf;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-secondary.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-secondary.list-group-item-action.active {
   color: #fff;
   background-color: #383d41;
   border-color: #383d41;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-success {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-success {
   color: #155724;
   background-color: #c3e6cb;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-success.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-success.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-success.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-success.list-group-item-action:focus {
   color: #155724;
   background-color: #b1dfbb;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-success.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-success.list-group-item-action.active {
   color: #fff;
   background-color: #155724;
   border-color: #155724;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-info {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-info {
   color: #0c5460;
   background-color: #bee5eb;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-info.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-info.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-info.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-info.list-group-item-action:focus {
   color: #0c5460;
   background-color: #abdde5;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-info.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-info.list-group-item-action.active {
   color: #fff;
   background-color: #0c5460;
   border-color: #0c5460;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-warning {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-warning {
   color: #856404;
   background-color: #ffeeba;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-warning.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-warning.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-warning.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-warning.list-group-item-action:focus {
   color: #856404;
   background-color: #ffe8a1;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-warning.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-warning.list-group-item-action.active {
   color: #fff;
   background-color: #856404;
   border-color: #856404;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-danger {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-danger {
   color: #721c24;
   background-color: #f5c6cb;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-danger.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-danger.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-danger.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-danger.list-group-item-action:focus {
   color: #721c24;
   background-color: #f1b0b7;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-danger.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-danger.list-group-item-action.active {
   color: #fff;
   background-color: #721c24;
   border-color: #721c24;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-light {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-light {
   color: #818182;
   background-color: #fdfdfe;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-light.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-light.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-light.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-light.list-group-item-action:focus {
   color: #818182;
   background-color: #ececf6;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-light.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-light.list-group-item-action.active {
   color: #fff;
   background-color: #818182;
   border-color: #818182;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-dark {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-dark {
   color: #1b1e21;
   background-color: #c6c8ca;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-dark.list-group-item-action:hover, body.path-admin-enrol-arlo #region-main .list-group-item-dark.list-group-item-action:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-dark.list-group-item-action:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-dark.list-group-item-action:focus {
   color: #1b1e21;
   background-color: #b9bbbe;
 }
-body.path-admin-enrol-arlo #region-main .list-group-item-dark.list-group-item-action.active {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .list-group-item-dark.list-group-item-action.active {
   color: #fff;
   background-color: #1b1e21;
   border-color: #1b1e21;
 }
-body.path-admin-enrol-arlo #region-main .btn {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn {
   display: inline-block;
   font-weight: 400;
   text-align: center;
@@ -2138,537 +2138,537 @@ body.path-admin-enrol-arlo #region-main .btn {
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 @media screen and (prefers-reduced-motion: reduce) {
-  body.path-admin-enrol-arlo #region-main .btn {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn {
     transition: none;
   }
 }
-body.path-admin-enrol-arlo #region-main .btn:hover, body.path-admin-enrol-arlo #region-main .btn:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn:hover, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn:focus {
   text-decoration: none;
 }
-body.path-admin-enrol-arlo #region-main .btn:focus, body.path-admin-enrol-arlo #region-main .btn.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn.focus {
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
-body.path-admin-enrol-arlo #region-main .btn.disabled, body.path-admin-enrol-arlo #region-main .btn:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn:disabled {
   opacity: 0.65;
 }
-body.path-admin-enrol-arlo #region-main .btn:not(:disabled):not(.disabled) {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn:not(:disabled):not(.disabled) {
   cursor: pointer;
 }
-body.path-admin-enrol-arlo #region-main a.btn.disabled,
-body.path-admin-enrol-arlo #region-main fieldset:disabled a.btn {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main a.btn.disabled,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main fieldset:disabled a.btn {
   pointer-events: none;
 }
-body.path-admin-enrol-arlo #region-main .btn-primary {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary {
   color: #fff;
   background-color: #007bff;
   border-color: #007bff;
 }
-body.path-admin-enrol-arlo #region-main .btn-primary:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary:hover {
   color: #fff;
   background-color: #0069d9;
   border-color: #0062cc;
 }
-body.path-admin-enrol-arlo #region-main .btn-primary:focus, body.path-admin-enrol-arlo #region-main .btn-primary.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary.focus {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-primary.disabled, body.path-admin-enrol-arlo #region-main .btn-primary:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary:disabled {
   color: #fff;
   background-color: #007bff;
   border-color: #007bff;
 }
-body.path-admin-enrol-arlo #region-main .btn-primary:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-primary:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-primary.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary.dropdown-toggle {
   color: #fff;
   background-color: #0062cc;
   border-color: #005cbf;
 }
-body.path-admin-enrol-arlo #region-main .btn-primary:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-primary:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-primary.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-primary.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-secondary {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary {
   color: #fff;
   background-color: #6c757d;
   border-color: #6c757d;
 }
-body.path-admin-enrol-arlo #region-main .btn-secondary:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary:hover {
   color: #fff;
   background-color: #5a6268;
   border-color: #545b62;
 }
-body.path-admin-enrol-arlo #region-main .btn-secondary:focus, body.path-admin-enrol-arlo #region-main .btn-secondary.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary.focus {
   box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-secondary.disabled, body.path-admin-enrol-arlo #region-main .btn-secondary:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary:disabled {
   color: #fff;
   background-color: #6c757d;
   border-color: #6c757d;
 }
-body.path-admin-enrol-arlo #region-main .btn-secondary:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-secondary:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-secondary.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary.dropdown-toggle {
   color: #fff;
   background-color: #545b62;
   border-color: #4e555b;
 }
-body.path-admin-enrol-arlo #region-main .btn-secondary:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-secondary:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-secondary.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-secondary.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-success {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success {
   color: #fff;
   background-color: #28a745;
   border-color: #28a745;
 }
-body.path-admin-enrol-arlo #region-main .btn-success:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success:hover {
   color: #fff;
   background-color: #218838;
   border-color: #1e7e34;
 }
-body.path-admin-enrol-arlo #region-main .btn-success:focus, body.path-admin-enrol-arlo #region-main .btn-success.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success.focus {
   box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-success.disabled, body.path-admin-enrol-arlo #region-main .btn-success:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success:disabled {
   color: #fff;
   background-color: #28a745;
   border-color: #28a745;
 }
-body.path-admin-enrol-arlo #region-main .btn-success:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-success:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-success.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success.dropdown-toggle {
   color: #fff;
   background-color: #1e7e34;
   border-color: #1c7430;
 }
-body.path-admin-enrol-arlo #region-main .btn-success:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-success:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-success.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-success.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-info {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info {
   color: #fff;
   background-color: #17a2b8;
   border-color: #17a2b8;
 }
-body.path-admin-enrol-arlo #region-main .btn-info:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info:hover {
   color: #fff;
   background-color: #138496;
   border-color: #117a8b;
 }
-body.path-admin-enrol-arlo #region-main .btn-info:focus, body.path-admin-enrol-arlo #region-main .btn-info.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info.focus {
   box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-info.disabled, body.path-admin-enrol-arlo #region-main .btn-info:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info:disabled {
   color: #fff;
   background-color: #17a2b8;
   border-color: #17a2b8;
 }
-body.path-admin-enrol-arlo #region-main .btn-info:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-info:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-info.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info.dropdown-toggle {
   color: #fff;
   background-color: #117a8b;
   border-color: #10707f;
 }
-body.path-admin-enrol-arlo #region-main .btn-info:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-info:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-info.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-info.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-warning {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning {
   color: #212529;
   background-color: #ffc107;
   border-color: #ffc107;
 }
-body.path-admin-enrol-arlo #region-main .btn-warning:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning:hover {
   color: #212529;
   background-color: #e0a800;
   border-color: #d39e00;
 }
-body.path-admin-enrol-arlo #region-main .btn-warning:focus, body.path-admin-enrol-arlo #region-main .btn-warning.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning.focus {
   box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-warning.disabled, body.path-admin-enrol-arlo #region-main .btn-warning:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning:disabled {
   color: #212529;
   background-color: #ffc107;
   border-color: #ffc107;
 }
-body.path-admin-enrol-arlo #region-main .btn-warning:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-warning:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-warning.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning.dropdown-toggle {
   color: #212529;
   background-color: #d39e00;
   border-color: #c69500;
 }
-body.path-admin-enrol-arlo #region-main .btn-warning:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-warning:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-warning.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-warning.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-danger {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger {
   color: #fff;
   background-color: #dc3545;
   border-color: #dc3545;
 }
-body.path-admin-enrol-arlo #region-main .btn-danger:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger:hover {
   color: #fff;
   background-color: #c82333;
   border-color: #bd2130;
 }
-body.path-admin-enrol-arlo #region-main .btn-danger:focus, body.path-admin-enrol-arlo #region-main .btn-danger.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger.focus {
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-danger.disabled, body.path-admin-enrol-arlo #region-main .btn-danger:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger:disabled {
   color: #fff;
   background-color: #dc3545;
   border-color: #dc3545;
 }
-body.path-admin-enrol-arlo #region-main .btn-danger:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-danger:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-danger.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger.dropdown-toggle {
   color: #fff;
   background-color: #bd2130;
   border-color: #b21f2d;
 }
-body.path-admin-enrol-arlo #region-main .btn-danger:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-danger:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-danger.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-danger.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-light {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light {
   color: #212529;
   background-color: #f8f9fa;
   border-color: #f8f9fa;
 }
-body.path-admin-enrol-arlo #region-main .btn-light:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light:hover {
   color: #212529;
   background-color: #e2e6ea;
   border-color: #dae0e5;
 }
-body.path-admin-enrol-arlo #region-main .btn-light:focus, body.path-admin-enrol-arlo #region-main .btn-light.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light.focus {
   box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-light.disabled, body.path-admin-enrol-arlo #region-main .btn-light:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light:disabled {
   color: #212529;
   background-color: #f8f9fa;
   border-color: #f8f9fa;
 }
-body.path-admin-enrol-arlo #region-main .btn-light:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-light:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-light.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light.dropdown-toggle {
   color: #212529;
   background-color: #dae0e5;
   border-color: #d3d9df;
 }
-body.path-admin-enrol-arlo #region-main .btn-light:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-light:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-light.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-light.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-dark {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark {
   color: #fff;
   background-color: #343a40;
   border-color: #343a40;
 }
-body.path-admin-enrol-arlo #region-main .btn-dark:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark:hover {
   color: #fff;
   background-color: #23272b;
   border-color: #1d2124;
 }
-body.path-admin-enrol-arlo #region-main .btn-dark:focus, body.path-admin-enrol-arlo #region-main .btn-dark.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark.focus {
   box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-dark.disabled, body.path-admin-enrol-arlo #region-main .btn-dark:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark:disabled {
   color: #fff;
   background-color: #343a40;
   border-color: #343a40;
 }
-body.path-admin-enrol-arlo #region-main .btn-dark:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-dark:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-dark.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark.dropdown-toggle {
   color: #fff;
   background-color: #1d2124;
   border-color: #171a1d;
 }
-body.path-admin-enrol-arlo #region-main .btn-dark:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-dark:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-dark.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-dark.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-primary {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary {
   color: #007bff;
   background-color: transparent;
   background-image: none;
   border-color: #007bff;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-primary:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary:hover {
   color: #fff;
   background-color: #007bff;
   border-color: #007bff;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-primary:focus, body.path-admin-enrol-arlo #region-main .btn-outline-primary.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary.focus {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-primary.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-primary:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary:disabled {
   color: #007bff;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-primary:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-primary:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-primary.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary.dropdown-toggle {
   color: #fff;
   background-color: #007bff;
   border-color: #007bff;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-primary:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-primary:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-primary.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-primary.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-secondary {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary {
   color: #6c757d;
   background-color: transparent;
   background-image: none;
   border-color: #6c757d;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-secondary:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary:hover {
   color: #fff;
   background-color: #6c757d;
   border-color: #6c757d;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-secondary:focus, body.path-admin-enrol-arlo #region-main .btn-outline-secondary.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary.focus {
   box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-secondary.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-secondary:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary:disabled {
   color: #6c757d;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-secondary:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-secondary:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-secondary.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary.dropdown-toggle {
   color: #fff;
   background-color: #6c757d;
   border-color: #6c757d;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-secondary:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-secondary:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-secondary.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-secondary.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-success {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success {
   color: #28a745;
   background-color: transparent;
   background-image: none;
   border-color: #28a745;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-success:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success:hover {
   color: #fff;
   background-color: #28a745;
   border-color: #28a745;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-success:focus, body.path-admin-enrol-arlo #region-main .btn-outline-success.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success.focus {
   box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-success.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-success:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success:disabled {
   color: #28a745;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-success:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-success:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-success.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success.dropdown-toggle {
   color: #fff;
   background-color: #28a745;
   border-color: #28a745;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-success:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-success:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-success.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-success.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-info {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info {
   color: #17a2b8;
   background-color: transparent;
   background-image: none;
   border-color: #17a2b8;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-info:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info:hover {
   color: #fff;
   background-color: #17a2b8;
   border-color: #17a2b8;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-info:focus, body.path-admin-enrol-arlo #region-main .btn-outline-info.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info.focus {
   box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-info.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-info:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info:disabled {
   color: #17a2b8;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-info:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-info:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-info.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info.dropdown-toggle {
   color: #fff;
   background-color: #17a2b8;
   border-color: #17a2b8;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-info:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-info:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-info.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-info.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-warning {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning {
   color: #ffc107;
   background-color: transparent;
   background-image: none;
   border-color: #ffc107;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-warning:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning:hover {
   color: #212529;
   background-color: #ffc107;
   border-color: #ffc107;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-warning:focus, body.path-admin-enrol-arlo #region-main .btn-outline-warning.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning.focus {
   box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-warning.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-warning:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning:disabled {
   color: #ffc107;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-warning:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-warning:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-warning.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning.dropdown-toggle {
   color: #212529;
   background-color: #ffc107;
   border-color: #ffc107;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-warning:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-warning:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-warning.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-warning.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-danger {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger {
   color: #dc3545;
   background-color: transparent;
   background-image: none;
   border-color: #dc3545;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-danger:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger:hover {
   color: #fff;
   background-color: #dc3545;
   border-color: #dc3545;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-danger:focus, body.path-admin-enrol-arlo #region-main .btn-outline-danger.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger.focus {
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-danger.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-danger:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger:disabled {
   color: #dc3545;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-danger:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-danger:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-danger.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger.dropdown-toggle {
   color: #fff;
   background-color: #dc3545;
   border-color: #dc3545;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-danger:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-danger:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-danger.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-danger.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-light {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light {
   color: #f8f9fa;
   background-color: transparent;
   background-image: none;
   border-color: #f8f9fa;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-light:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light:hover {
   color: #212529;
   background-color: #f8f9fa;
   border-color: #f8f9fa;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-light:focus, body.path-admin-enrol-arlo #region-main .btn-outline-light.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light.focus {
   box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-light.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-light:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light:disabled {
   color: #f8f9fa;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-light:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-light:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-light.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light.dropdown-toggle {
   color: #212529;
   background-color: #f8f9fa;
   border-color: #f8f9fa;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-light:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-light:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-light.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-light.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-dark {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark {
   color: #343a40;
   background-color: transparent;
   background-image: none;
   border-color: #343a40;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-dark:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark:hover {
   color: #fff;
   background-color: #343a40;
   border-color: #343a40;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-dark:focus, body.path-admin-enrol-arlo #region-main .btn-outline-dark.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark.focus {
   box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-dark.disabled, body.path-admin-enrol-arlo #region-main .btn-outline-dark:disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark.disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark:disabled {
   color: #343a40;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-dark:not(:disabled):not(.disabled):active, body.path-admin-enrol-arlo #region-main .btn-outline-dark:not(:disabled):not(.disabled).active, .show > body.path-admin-enrol-arlo #region-main .btn-outline-dark.dropdown-toggle {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark:not(:disabled):not(.disabled):active, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark:not(:disabled):not(.disabled).active, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark.dropdown-toggle {
   color: #fff;
   background-color: #343a40;
   border-color: #343a40;
 }
-body.path-admin-enrol-arlo #region-main .btn-outline-dark:not(:disabled):not(.disabled):active:focus, body.path-admin-enrol-arlo #region-main .btn-outline-dark:not(:disabled):not(.disabled).active:focus, .show > body.path-admin-enrol-arlo #region-main .btn-outline-dark.dropdown-toggle:focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark:not(:disabled):not(.disabled):active:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark:not(:disabled):not(.disabled).active:focus, .show > #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-outline-dark.dropdown-toggle:focus {
   box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
 }
-body.path-admin-enrol-arlo #region-main .btn-link {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-link {
   font-weight: 400;
   color: #007bff;
   background-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-link:hover {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-link:hover {
   color: #0056b3;
   text-decoration: underline;
   background-color: transparent;
   border-color: transparent;
 }
-body.path-admin-enrol-arlo #region-main .btn-link:focus, body.path-admin-enrol-arlo #region-main .btn-link.focus {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-link:focus, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-link.focus {
   text-decoration: underline;
   border-color: transparent;
   box-shadow: none;
 }
-body.path-admin-enrol-arlo #region-main .btn-link:disabled, body.path-admin-enrol-arlo #region-main .btn-link.disabled {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-link:disabled, #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-link.disabled {
   color: #6c757d;
   pointer-events: none;
 }
-body.path-admin-enrol-arlo #region-main .btn-lg {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-lg {
   padding: 0.5rem 1rem;
   font-size: 1.25rem;
   line-height: 1.5;
   border-radius: 0.3rem;
 }
-body.path-admin-enrol-arlo #region-main .btn-sm {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   line-height: 1.5;
   border-radius: 0.2rem;
 }
-body.path-admin-enrol-arlo #region-main .btn-block {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-block {
   display: block;
   width: 100%;
 }
-body.path-admin-enrol-arlo #region-main .btn-block + .btn-block {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .btn-block + .btn-block {
   margin-top: 0.5rem;
 }
-body.path-admin-enrol-arlo #region-main input[type=submit].btn-block,
-body.path-admin-enrol-arlo #region-main input[type=reset].btn-block,
-body.path-admin-enrol-arlo #region-main input[type=button].btn-block {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=submit].btn-block,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=reset].btn-block,
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main input[type=button].btn-block {
   width: 100%;
 }
-body.path-admin-enrol-arlo #region-main .float-left {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-left {
   float: left !important;
 }
-body.path-admin-enrol-arlo #region-main .float-right {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-right {
   float: right !important;
 }
-body.path-admin-enrol-arlo #region-main .float-none {
+#page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-none {
   float: none !important;
 }
 @media (min-width: 576px) {
-  body.path-admin-enrol-arlo #region-main .float-sm-left {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-sm-left {
     float: left !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-sm-right {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-sm-right {
     float: right !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-sm-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-sm-none {
     float: none !important;
   }
 }
 @media (min-width: 768px) {
-  body.path-admin-enrol-arlo #region-main .float-md-left {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-md-left {
     float: left !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-md-right {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-md-right {
     float: right !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-md-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-md-none {
     float: none !important;
   }
 }
 @media (min-width: 992px) {
-  body.path-admin-enrol-arlo #region-main .float-lg-left {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-lg-left {
     float: left !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-lg-right {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-lg-right {
     float: right !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-lg-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-lg-none {
     float: none !important;
   }
 }
 @media (min-width: 1200px) {
-  body.path-admin-enrol-arlo #region-main .float-xl-left {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-xl-left {
     float: left !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-xl-right {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-xl-right {
     float: right !important;
   }
-  body.path-admin-enrol-arlo #region-main .float-xl-none {
+  #page-admin-enrol-arlo-admin-unsuccessfulenrolments #region-main .float-xl-none {
     float: none !important;
   }
 }

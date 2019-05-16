@@ -27,14 +27,53 @@ require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/formslib.php');
 
+$action = optional_param('action', '', PARAM_ALPHA);
+$usernameformat = optional_param('usernameformat', '', PARAM_ALPHA);
+
 admin_externalpage_setup('enrolsettingsarloconfiguration');
 
-$form = new \enrol_arlo\form\admin\configuration();
+$pageurl = clone($PAGE->url);
+$pageurl->remove_all_params();
+$pluginconfig = new enrol_arlo\local\config\arlo_plugin_config();
+switch ($action) {
+    case 'moveup':
+        if (confirm_sesskey()) {
+            if (empty($usernameformat)) {
+                throw new moodle_exception('Empty username pattern');
+            }
+            $usernamegenerator = new enrol_arlo\local\generator\username_generator();
+            if (!$usernamegenerator->has_format($usernameformat)) {
+                throw new moodle_exception('Non existent username format');
+            }
+            $usernamegenerator->set_order($pluginconfig->get('usernameformatorder'));
+            $neworder = $usernamegenerator->move_format_up_order($usernameformat);
+            $pluginconfig->set('usernameformatorder', $neworder);
+        }
+        redirect($pageurl);
+        break;
+    case 'movedown':
+        if (confirm_sesskey()) {
+            if (empty($usernameformat)) {
+                throw new moodle_exception('Empty username pattern');
+            }
+            $usernamegenerator = new enrol_arlo\local\generator\username_generator();
+            if (!$usernamegenerator->has_format($usernameformat)) {
+                throw new moodle_exception('Non existent username format');
+            }
+            $usernamegenerator->set_order($pluginconfig->get('usernameformatorder'));
+            $neworder = $usernamegenerator->move_format_down_order($usernameformat);
+            $pluginconfig->set('usernameformatorder', $neworder);
+        }
+        redirect($pageurl);
+        break;
+}
+
+$form = new enrol_arlo\form\admin\configuration();
 $data = $form->get_submitted_data();
 if ($data) {
-    $pluginconfig = new arlo_plugin_config();
+    $pluginconfig = new enrol_arlo\local\config\arlo_plugin_config();
     foreach (get_object_vars($data) as $property => $value) {
-        if (arlo_plugin_config::has_property($property)) {
+        if (enrol_arlo\local\config\arlo_plugin_config::has_property($property)) {
             $pluginconfig->set($property, $value);
         }
     }
