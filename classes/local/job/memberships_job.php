@@ -30,6 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\local\administrator_notification;
+use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\generator\username_generator;
 use enrol_arlo\local\handler\contact_merge_requests_handler;
@@ -265,6 +266,8 @@ class memberships_job extends job {
                                                           contact_persistent $contact = null) {
         // Load plugin class instance.
         $plugin = api::get_enrolment_plugin();
+        // Get plugin config.
+        $pluginconfig = new arlo_plugin_config();
         // Reset enrolment failure flag by default.
         $registration->set('enrolmentfailure', 0);
         if (is_null($contact)) {
@@ -300,7 +303,7 @@ class memberships_job extends job {
                 } else {
                     // Mo matches, create a new Moodle user.
                     $user = new user_persistent();
-                    $usernamegenerator = new username_generator($contact->to_record());
+                    $usernamegenerator = new username_generator($contact->to_record(), $pluginconfig->get('usernameformatorder'));
                     $username = $usernamegenerator->generate();
                     if (!$username) {
                         $contact->set('usercreationfailure', 1);

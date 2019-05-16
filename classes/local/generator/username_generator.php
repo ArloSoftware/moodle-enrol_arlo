@@ -135,10 +135,13 @@ class username_generator {
     }
 
     /**
+     * Get order of formats to process, fallback to default order.
+     *
+     * @param bool $fallbackdefault
      * @return string
      */
-    final public function get_order() {
-        if (is_null($this->order)) {
+    final public function get_order($fallbackdefault = true) {
+        if (is_null($this->order) && $fallbackdefault) {
             return static::get_default_order();
         }
         return $this->order;
