@@ -32,14 +32,14 @@ admin_externalpage_setup('enrolsettingsarloconfiguration');
 
 $pageurl = clone($PAGE->url);
 $pageurl->remove_all_params();
-$pluginconfig = new enrol_arlo\local\config\arlo_plugin_config();
+
 switch ($action) {
     case 'moveup':
         if (confirm_sesskey()) {
             if (empty($usernameformat)) {
                 throw new moodle_exception('Empty username pattern');
             }
-            $usernamegenerator = new \enrol_arlo\local\generator\username_generator();
+            $usernamegenerator = new enrol_arlo\local\generator\username_generator();
             if (!$usernamegenerator->has_format($usernameformat)) {
                 throw new moodle_exception('Non existent username format');
             }
@@ -54,7 +54,7 @@ switch ($action) {
             if (empty($usernameformat)) {
                 throw new moodle_exception('Empty username pattern');
             }
-            $usernamegenerator = new \enrol_arlo\local\generator\username_generator();
+            $usernamegenerator = new enrol_arlo\local\generator\username_generator();
             if (!$usernamegenerator->has_format($usernameformat)) {
                 throw new moodle_exception('Non existent username format');
             }
@@ -66,12 +66,12 @@ switch ($action) {
         break;
 }
 
-$form = new \enrol_arlo\form\admin\configuration();
+$form = new enrol_arlo\form\admin\configuration();
 $data = $form->get_submitted_data();
 if ($data) {
-    $pluginconfig = new \enrol_arlo\local\config\arlo_plugin_config();
+    $pluginconfig = new enrol_arlo\local\config\arlo_plugin_config();
     foreach (get_object_vars($data) as $property => $value) {
-        if (\enrol_arlo\local\config\arlo_plugin_config::has_property($property)) {
+        if (enrol_arlo\local\config\arlo_plugin_config::has_property($property)) {
             $pluginconfig->set($property, $value);
         }
     }
