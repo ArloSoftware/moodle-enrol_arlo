@@ -15,35 +15,43 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Definition for scheduled tasks.
+ * Dialy scheduled task execution class. This is for running more intensive tasks.
  *
  * @author      Troy Williams
- * @package     local_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
- * @copyright   2017 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @package     enrol_arlo
+ * @copyright   2019 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace enrol_arlo\task;
+
+use core\task\scheduled_task;
+use enrol_arlo\api;
+
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = [
-    [
-        'classname' => 'enrol_arlo\task\synchronize',
-        'blocking' => 0,
-        'minute' => '*',
-        'hour' => '*',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*',
-        'disabled' => 0
-    ],
-    [
-        'classname' => 'enrol_arlo\task\daily',
-        'blocking' => 0,
-        'minute' => '*',
-        'hour' => '5',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*',
-        'disabled' => 0
-    ]
-];
+
+class daily extends scheduled_task {
+
+    /**
+     * @return string
+     * @throws \coding_exception
+     */
+    public function get_name() {
+        return get_string('dailytask', 'enrol_arlo');
+    }
+
+    /**
+     * Run.
+     */
+    public function execute() {
+        global $CFG;
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        if (!enrol_is_enabled('arlo')) {
+            return;
+        }
+        api::run_cleanup();
+        return;
+    }
+
+}

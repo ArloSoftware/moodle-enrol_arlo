@@ -378,16 +378,26 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2018100500, 'enrol', 'arlo');
     }
 
-    // Set username generator order configuration setting.
-    if ($oldversion < 2019051500) {
-        $pluginconfig = new \enrol_arlo\local\config\arlo_plugin_config();
-        $pluginconfig->set('usernameformatorder', \enrol_arlo\local\generator\username_generator::get_default_order());
+    // Upgrade v3.6.x
+    if ($oldversion < 2019051505) {
+
+        // Set username generator order configuration setting.
+        $pluginconfig = new enrol_arlo\local\config\arlo_plugin_config();
+        $pluginconfig->set('usernameformatorder', enrol_arlo\local\generator\username_generator::get_default_order());
 
         // Fix issue #104 on GitHub.
         $DB->set_field('user', 'idnumber', '', ['idnumber' => 'codeprimary']);
 
+        // Define index timelogged (not unique) to be added to enrol_arlo_requestlog.
+        $table = new xmldb_table('enrol_arlo_requestlog');
+        $index = new xmldb_index('timelogged', XMLDB_INDEX_NOTUNIQUE, ['timelogged']);
+        // Conditionally launch add index timelogged.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2019051500, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2019051505, 'enrol', 'arlo');
     }
     return true;
 }

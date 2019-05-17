@@ -250,6 +250,7 @@ $string['status_help'] = '';
 $string['synchronize'] = 'Synchronize';
 $string['synchronizeinstance'] = 'Manually pull new registrations and push new results for an enrolment instance';
 $string['synchroniseinstancefor'] = 'Manually synchronise Arlo enrolments and outcomes for {$a}';
+$string['dailytask'] = 'Daily Arlo task for more intensive jobs';
 $string['synctask'] = 'Synchronization of Arlo data';
 $string['template'] = 'Template';
 $string['timelogged'] = 'Time logged';
