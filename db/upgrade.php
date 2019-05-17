@@ -379,7 +379,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     }
 
     // Upgrade v3.6.x
-    if ($oldversion < 2019051505) {
+    if ($oldversion < 2019031101) {
 
         // Set username generator order configuration setting.
         $pluginconfig = new enrol_arlo\local\config\arlo_plugin_config();
@@ -397,7 +397,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         }
 
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2019051505, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2019031101, 'enrol', 'arlo');
     }
     return true;
 }

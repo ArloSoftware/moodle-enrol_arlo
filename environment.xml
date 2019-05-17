@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <COMPATIBILITY_MATRIX>
+    <MOODLE version="3.5">
+        <PHP version="7.0.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
+    <MOODLE version="3.4">
+        <PHP version="7.0.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
+    <MOODLE version="3.3">
+        <PHP version="7.0.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
+    <MOODLE version="3.2">
+        <PHP version="7.0.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
+    <MOODLE version="3.1">
+        <PHP version="7.0.0" level="required">
+            <RESTRICT function="restrict_php_version_73" message="unsupportedphpversion73" />
+        </PHP>
+    </MOODLE>
     <PLUGIN name="enrol_arlo">
         <PHP_EXTENSIONS>
             <PHP_EXTENSION name="curl" level="required" />
