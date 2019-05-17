@@ -25,13 +25,14 @@
 
 namespace enrol_arlo\task;
 
+use core\task\scheduled_task;
 use enrol_arlo\api;
 use enrol_arlo\manager;
 
 defined('MOODLE_INTERNAL') || die();
 
 
-class synchronize extends \core\task\scheduled_task {
+class synchronize extends scheduled_task {
 
     /**
      * @return string
