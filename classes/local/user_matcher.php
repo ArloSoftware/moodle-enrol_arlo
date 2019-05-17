@@ -91,11 +91,13 @@ class user_matcher {
         }
         $select = "LOWER(firstname) = LOWER(:firstname) AND
                    LOWER(lastname) = LOWER(:lastname) AND
-                   LOWER(email) = LOWER(:email)";
+                   LOWER(email) = LOWER(:email) AND
+                   deleted <> :deleted";
         $conditions = [
             'firstname' => $firstname,
             'lastname' => $lastname,
-            'email' => $email
+            'email' => $email,
+            'deleted' => 1
         ];
         return $DB->get_records_select('user', $select, $conditions);
     }
