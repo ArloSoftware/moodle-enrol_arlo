@@ -14,19 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\writer;
-use core_privacy\local\request\userlist;
 use enrol_arlo\privacy\provider;
-
-
 
 defined('MOODLE_INTERNAL') || die();
 
-
 /**
+ * Privacy API unit tests.
  *
  * @package   enrol_arlo
  * @copyright 2019 LearningWorks Ltd {@link http://www.learningworks.co.nz}
@@ -39,8 +35,11 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
 
     public function setUp() {
         global $CFG;
-
         require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+
+        if (!class_exists('core_privacy\manager')) {
+            $this->markTestSkipped('Moodle version does not support privacy subsystem.');
+        }
         /** @var enrol_arlo_generator $plugingenerator */
         $this->plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
         // Enable and setup plugin.
@@ -231,6 +230,11 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
      */
     public function test_delete_data_for_users() {
         global $DB;
+
+        if (!interface_exists('\core_privacy\local\request\core_userlist_provider')) {
+            $this->markTestSkipped('Moodle version does not support privacy version.');
+        }
+
         $this->resetAfterTest();
 
         $user1 = $this->getDataGenerator()->create_user();
@@ -291,6 +295,11 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
      */
     public function test_get_users_in_context() {
         global $DB;
+
+        if (!interface_exists('\core_privacy\local\request\core_userlist_provider')) {
+            $this->markTestSkipped('Moodle version does not support privacy version.');
+        }
+
         $this->resetAfterTest();
 
         $user1 = $this->getDataGenerator()->create_user();
@@ -324,8 +333,9 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
         $manualplugin = enrol_get_plugin('manual');
         $manualplugin->enrol_user($manualinstance, $user3->id);
 
-        $context1 = context_course::instance($course1->id);
-        $userlist = new userlist($context1, 'enrol_arlo');
+        $context1 = context_course::instance($course1->id);;
+        $userlist = new core_privacy\local\request\userlist($context1, 'enrol_arlo');
+
         enrol_arlo\privacy\provider::get_users_in_context($userlist);
 
         $userids = $userlist->get_userids();
