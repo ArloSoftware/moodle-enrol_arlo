@@ -33,15 +33,23 @@ use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\contextlist;
-use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
+
+if (interface_exists('\core_privacy\local\request\core_userlist_provider')) {
+    interface userlist_provider extends \core_privacy\local\request\core_userlist_provider{}
+} else {
+    interface userlist_provider {};
+}
 
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\plugin\provider,
-    \core_privacy\local\request\core_userlist_provider {
+    userlist_provider {
 
-    public static function get_metadata(collection $collection) : collection {
+    // Backwards compatibility.
+    use \core_privacy\local\legacy_polyfill;
+
+    public static function _get_metadata(collection $collection) {
         $collection->add_database_table(
             'enrol_arlo_contact',
             [
@@ -98,7 +106,7 @@ class provider implements
      * @param int $userid
      * @return contextlist
      */
-    public static function get_contexts_for_userid(int $userid) : contextlist {
+    public static function _get_contexts_for_userid($userid){
         $contextlist = new contextlist();
         $sql = "SELECT ctx.id
                   FROM {context} ctx
@@ -128,9 +136,9 @@ class provider implements
     /**
      * Get the list of users who have data within a context.
      *
-     * @param userlist $userlist
+     * @param \core_privacy\local\request\userlist $userlist
      */
-    public static function get_users_in_context(userlist $userlist) {
+    public static function get_users_in_context(\core_privacy\local\request\userlist $userlist) {
         $context = $userlist->get_context();
         if ($context instanceof context_user) {
             $sql = "SELECT u.id
@@ -159,7 +167,7 @@ class provider implements
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function export_user_data(approved_contextlist $contextlist) {
+    public static function _export_user_data(approved_contextlist $contextlist) {
         global $DB;
         if (empty($contextlist->count())) {
             return;
@@ -297,7 +305,7 @@ class provider implements
      * @param context $context
      * @throws \dml_exception
      */
-    public static function delete_data_for_all_users_in_context(context $context) {
+    public static function _delete_data_for_all_users_in_context(context $context) {
         global $CFG, $DB;
         require_once($CFG->libdir . '/enrollib.php');
         if (empty($context)) {
@@ -331,9 +339,9 @@ class provider implements
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function delete_data_for_user(approved_contextlist $contextlist) {
+    public static function _delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
-        // User deletions and expiries are always handled at the user context.
+        // User deletions are always handled at the user context.
         if (empty($contextlist->count())) {
             return;
         }
@@ -403,7 +411,7 @@ class provider implements
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
-        // User deletions and expiries are always handled at the user context.
+        // User deletions are always handled at the user context.
         $context = $userlist->get_context();
         $userids = $userlist->get_userids();
         $allowedcontextlevels = [
