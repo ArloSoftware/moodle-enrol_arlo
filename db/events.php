@@ -43,15 +43,7 @@ $observers = array(
         'callback'    => '\enrol_arlo\event\observer::event_created',
     ),
     array(
-        'eventname'   => '\enrol_arlo\event\event_updated',
-        'callback'    => '\enrol_arlo\event\observer::event_updated',
-    ),
-    array(
         'eventname'   => '\enrol_arlo\event\onlineactivity_created',
         'callback'    => '\enrol_arlo\event\observer::onlineactivity_created',
-    ),
-    array(
-        'eventname'   => '\enrol_arlo\event\onlineactivity_updated',
-        'callback'    => '\enrol_arlo\event\observer::onlineactivity_updated',
-    ),
+    )
 );

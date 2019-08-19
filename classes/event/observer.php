@@ -113,6 +113,9 @@ class observer {
      * On created Event check if can add to course with associated Template.
      *
      * @param $event
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public static function event_created($event) {
         global $CFG;
@@ -121,20 +124,12 @@ class observer {
     }
 
     /**
-     * Handle a update to Event record.
-     *
-     * @param $event
-     */
-    public static function event_updated($event) {
-        global $CFG;
-        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
-        enrol_arlo_handle_update(arlo_type::EVENT, $event->other);
-    }
-
-    /**
      * On created Online Activity check if can add to course with associated Template.
      *
      * @param $event
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public static function onlineactivity_created($event) {
         global $CFG;
@@ -142,14 +137,4 @@ class observer {
         enrol_arlo_add_associated(arlo_type::ONLINEACTIVITY, $event->other);
     }
 
-    /**
-     * Handle a update to Online Activity record.
-     *
-     * @param $event
-     */
-    public static function onlineactivity_updated($event) {
-        global $CFG;
-        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
-        enrol_arlo_handle_update(arlo_type::ONLINEACTIVITY, $event->other);
-    }
 }
