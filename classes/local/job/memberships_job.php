@@ -165,13 +165,6 @@ class memberships_job extends job {
                     if ($collection->count() > 0) {
                         foreach ($collection as $resource) {
                             try {
-                                // Only process approved and completed registrations.
-                                if (!in_array($resource->Status,
-                                    [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])) {
-                                    $jobpersistent->set('timelastrequest', time());
-                                    $jobpersistent->update();
-                                    continue;
-                                }
                                 // Save Arlo registration information into Moodle persistents.
                                 list($registration, $contact) = static::save_resource_information_to_persistents(
                                     $this->enrolmentinstance,
@@ -252,6 +245,8 @@ class memberships_job extends job {
     /**
      * Method to process an enrolment against a saved registration.
      *
+     * @todo Refactor code, separation of concerns etc. Make easier to understand.
+     *
      * @param stdClass $enrolmentinstance
      * @param registration_persistent $registration
      * @param contact_persistent|null $contact
@@ -276,102 +271,106 @@ class memberships_job extends job {
                 return false;
             }
         }
-        // Load contact merge request handler.
-        $handler = new contact_merge_requests_handler($contact);
-        $result = $handler->apply_all_merge_requests();
-        if (!$result) {
-            $registration->set('enrolmentfailure', 1);
-            $registration->update();
-            administrator_notification::send_unsuccessful_enrolment_message();
-            return false;
-        } else {
-            $contact->read();
+        $contact->set('usercreationfailure', 0);
+        $contact->set('userassociationfailure', 0);
+        // Process unenrolment.
+        if ($registration->get('sourcestatus') == RegistrationStatus::CANCELLED) {
+            $user = $contact->get_associated_user();
+            $plugin->unenrol($enrolmentinstance, $user->to_record());
+            // Cleanup registration.
+            $registration->delete();
         }
-        // No user associated with contact.
-        if ($contact->get('userid') <= 0) {
-            $user = static::match_user_from_contact($contact);
-            if (!($user instanceof user_persistent)) {
-                // User is an integer greater than 1 means multiple matches.
-                if ($user) {
-                    $contact->set('userassociationfailure', 1);
-                    $contact->set('errormessage', 'Duplicate user accounts.');
-                    $contact->update();
-                    $registration->set('enrolmentfailure', 1);
-                    $registration->update();
-                    administrator_notification::send_unsuccessful_enrolment_message();
-                    return false;
-                } else {
-                    // Mo matches, create a new Moodle user.
-                    $user = new user_persistent();
-                    $usernamegenerator = new username_generator($contact->to_record(), $pluginconfig->get('usernameformatorder'));
-                    $username = $usernamegenerator->generate();
-                    if (!$username) {
-                        $contact->set('usercreationfailure', 1);
-                        $contact->set('errormessage', 'Failed to create username');
+        // Process enrolment.
+        if (in_array($registration->get('sourcestatus'), [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])) {
+            // Load contact merge request handler.
+            $handler = new contact_merge_requests_handler($contact);
+            $result = $handler->apply_all_merge_requests();
+            if (!$result) {
+                $registration->set('enrolmentfailure', 1);
+                $registration->update();
+                administrator_notification::send_unsuccessful_enrolment_message();
+                return false;
+            } else {
+                $contact->read();
+            }
+            // No user associated with contact.
+            if ($contact->get('userid') <= 0) {
+                $user = static::match_user_from_contact($contact);
+                if (!($user instanceof user_persistent)) {
+                    // User is an integer greater than 1 means multiple matches.
+                    if ($user) {
+                        $contact->set('userassociationfailure', 1);
+                        $contact->set('errormessage', 'Duplicate user accounts.');
                         $contact->update();
                         $registration->set('enrolmentfailure', 1);
                         $registration->update();
                         administrator_notification::send_unsuccessful_enrolment_message();
                         return false;
-                    }
-                    $user->set('username', $username);
-                    // Set new property values on user.
-                    $user->set('firstname', $contact->get('firstname'));
-                    $user->set('lastname', $contact->get('lastname'));
-                    $user->set('email', $contact->get('email'));
-                    // Conditionally add codeprimary as idnumber.
-                    if (empty($user->get('idnumber'))) {
-                        if (!empty($contact->get('codeprimary'))) {
-                            $user->set('idnumber', $contact->get('codeprimary'));
+                    } else {
+                        // Mo matches, create a new Moodle user.
+                        $user = new user_persistent();
+                        $usernamegenerator = new username_generator($contact->to_record(), $pluginconfig->get('usernameformatorder'));
+                        $username = $usernamegenerator->generate();
+                        if (!$username) {
+                            $contact->set('usercreationfailure', 1);
+                            $contact->set('errormessage', 'Failed to create username');
+                            $contact->update();
+                            $registration->set('enrolmentfailure', 1);
+                            $registration->update();
+                            administrator_notification::send_unsuccessful_enrolment_message();
+                            return false;
                         }
+                        $user->set('username', $username);
+                        // Set new property values on user.
+                        $user->set('firstname', $contact->get('firstname'));
+                        $user->set('lastname', $contact->get('lastname'));
+                        $user->set('email', $contact->get('email'));
+                        // Conditionally add codeprimary as idnumber.
+                        if (empty($user->get('idnumber'))) {
+                            if (!empty($contact->get('codeprimary'))) {
+                                $user->set('idnumber', $contact->get('codeprimary'));
+                            }
+                        }
+                        $user->set('phone1', $contact->get('phonemobile'));
+                        $user->set('phone2', $contact->get('phonework'));
+                        $user->create();
+                        // Important must associate user with contact.
+                        $contact->set('userid', $user->get('id'));
+                        $contact->save();
                     }
-                    $user->set('phone1', $contact->get('phonemobile'));
-                    $user->set('phone2', $contact->get('phonework'));
-                    $user->create();
-                    // Important must associate user with contact.
-                    $contact->set('userid', $user->get('id'));
-                    $contact->save();
                 }
-            }
-        } else {
-            // Get contacts associated user.
-            $user = user_persistent::get_record_and_unset(
-                ['id' => $contact->get('userid'), 'deleted' => 0]
-            );
-            if (!$user) {
-                $registration->set('enrolmentfailure', 1);
-                $registration->update();
-                throw new moodle_exception('moodleaccountdoesnotexist');
-            }
-            // Update property values for existing user.
-            $user->set('firstname', $contact->get('firstname'));
-            $user->set('lastname', $contact->get('lastname'));
-            $user->set('email', $contact->get('email'));
-            // Conditionally add codeprimary as idnumber.
-            if (empty($user->get('idnumber'))) {
-                if (!empty($contact->get('codeprimary'))) {
-                    $user->set('idnumber', $contact->get('codeprimary'));
+            } else {
+                // Get contacts associated user.
+                $user = user_persistent::get_record_and_unset(
+                    ['id' => $contact->get('userid'), 'deleted' => 0]
+                );
+                if (!$user) {
+                    $registration->set('enrolmentfailure', 1);
+                    $registration->update();
+                    throw new moodle_exception('moodleaccountdoesnotexist');
                 }
+                // Update property values for existing user.
+                $user->set('firstname', $contact->get('firstname'));
+                $user->set('lastname', $contact->get('lastname'));
+                $user->set('email', $contact->get('email'));
+                // Conditionally add codeprimary as idnumber.
+                if (empty($user->get('idnumber'))) {
+                    if (!empty($contact->get('codeprimary'))) {
+                        $user->set('idnumber', $contact->get('codeprimary'));
+                    }
+                }
+                $user->set('phone1', $contact->get('phonemobile'));
+                $user->set('phone2', $contact->get('phonework'));
+                $user->update();
+
             }
-            $user->set('phone1', $contact->get('phonemobile'));
-            $user->set('phone2', $contact->get('phonework'));
-            $user->update();
-        }
-        // Important must associate user with registration.
-        $registration->set('userid', $user->get('id'));
-        // Save registration record state.
-        $registration->save();
-        // Process enrolment.
-        if (in_array($registration->get('sourcestatus'),
-            [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])
-        ) {
+            // Important must associate user with registration.
+            $registration->set('userid', $user->get('id'));
+            // Save registration record state.
+            $registration->save();
+            // Process enrolment.
             $plugin->enrol($enrolmentinstance, $user->to_record());
-        }
-        // Process unenrolment.
-        if ($registration->get('sourcestatus') == RegistrationStatus::CANCELLED) {
-            $plugin->unenrol($enrolmentinstance, $user->to_record());
-            // Cleanup registration.
-            $registration->delete();
+
         }
         return true;
     }
