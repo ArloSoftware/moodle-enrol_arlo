@@ -85,6 +85,15 @@ if ($hassiteconfig) {
             $name = get_string('communications', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/communications.php')));
 
+        $ADMIN->add(
+            'enrolsettingsarlomanage',
+            new admin_externalpage(
+                'enrolsettingsarloenrolmentinstances',
+                get_string('enrolmentinstances', 'enrol_arlo'),
+                new moodle_url('/enrol/arlo/admin/enrolmentinstances.php')
+            )
+        );
+
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlounsuccessfulenrolments',
             get_string('unsuccessfulenrolments', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php'))
