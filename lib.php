@@ -106,9 +106,6 @@ class enrol_arlo_plugin extends enrol_plugin {
         $pluginconfig = $this->get_plugin_config();
         $timestart = time();
         $timeend = 0;
-        // Does user have a current active enrolment.
-        $conditions = ['status' => ENROL_USER_ACTIVE, 'enrolid' => $instance->id, 'userid' => $user->id];
-        $currentlyactive = $DB->record_exists('user_enrolments', $conditions);
         // Handle entolment period.
         if ($instance->enrolperiod) {
             $timeend = $timestart + $instance->enrolperiod;
@@ -118,8 +115,10 @@ class enrol_arlo_plugin extends enrol_plugin {
         if (!empty($instance->customint2) && $instance->customint2 != self::CREATE_GROUP) {
             groups_add_member($instance->customint2, $user->id, 'enrol_arlo');
         }
-        // Do not send welcome email for users that have current active enrolment.
-        if (!$currentlyactive) {
+        // Do not send welcome email for users that have a user enrolment both active and inactive.
+        $conditions = ['enrolid' => $instance->id, 'userid' => $user->id];
+        $userenrolment = $DB->record_exists('user_enrolments', $conditions);
+        if (!$userenrolment) {
             $manager = new manager();
             if ($instance->customint8) {
                 if ($pluginconfig->get('emailsendimmediately')) {
