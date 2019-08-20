@@ -24,6 +24,6 @@ admin_externalpage_setup('enrolsettingsarloenrolmentinstances');
 
 $report = new enrolment_instances_table_sql('enrolsettingsarloenrolmentinstances');
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('enrolmentinstances', 'enrol_arlo', $report->get_total()));
+echo $OUTPUT->heading(get_string('enrolmentinstancescount', 'enrol_arlo', $report->get_total()));
 $report->out(enrolment_instances_table_sql::PAGINATION_MAX_LIMIT, false);
 echo $OUTPUT->footer();
