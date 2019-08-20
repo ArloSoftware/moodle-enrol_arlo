@@ -119,7 +119,8 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
                AND eae.sourcestatus $insql
                AND eae.sourceguid NOT IN (SELECT e.customchar3
                                             FROM {enrol} e
-                                           WHERE e.enrol = 'arlo')";
+                                           WHERE e.enrol = 'arlo')
+          ORDER BY eae.sourceid";
     $events = $DB->get_records_sql($sql, $conditions);
     foreach ($events as $event) {
         $item = new stdClass();
@@ -146,7 +147,8 @@ function enrol_arlo_associate_all($course, $sourcetemplateguid) {
                AND eaoa.sourcestatus $insql
                AND eaoa.sourceguid NOT IN (SELECT e.customchar3
                                             FROM {enrol} e
-                                           WHERE e.enrol = 'arlo')";
+                                           WHERE e.enrol = 'arlo')
+          ORDER BY eaoa.sourceid";
     $onlineactivites = $DB->get_records_sql($sql, $conditions);
     foreach ($onlineactivites as $onlineactivity) {
         $item = new stdClass();
@@ -252,12 +254,12 @@ function enrol_arlo_add_associated($arlotype, $eventdata) {
     $sourcetemplateguid = $eventdata['sourcetemplateguid'];
     // Can associate.
     if ($arlotype == arlo_type::EVENT) {
-        if (! ($sourcestatus == EventStatus::ACTIVE) || ($sourcestatus == EventStatus::COMPLETED)) {
+        if (!in_array($sourcestatus, [EventStatus::ACTIVE, EventStatus::COMPLETED])) {
             return;
         }
     }
     if ($arlotype == arlo_type::ONLINEACTIVITY) {
-        if (! ($sourcestatus == OnlineActivityStatus::ACTIVE) || ($sourcestatus == OnlineActivityStatus::COMPLETED)) {
+        if (!in_array($sourcestatus, [OnlineActivityStatus::ACTIVE, OnlineActivityStatus::COMPLETED])) {
             return;
         }
     }

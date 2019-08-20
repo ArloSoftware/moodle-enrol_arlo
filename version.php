@@ -15,20 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  Version information
+ * Version information.
  *
  * @author    Troy Williams
  * @author    Corey Davis
- * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @package   enrol_arlo
  * @copyright 2015 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
+
 $plugin            = new stdClass();
-$plugin->version   = 2019051703;
+$plugin->version   = 2019082000;
 $plugin->requires  = 2017111300;        // See http://docs.moodle.org/dev/Moodle_Version
 $plugin->component = 'enrol_arlo';      // Full name of the plugin (used for diagnostics).
-$plugin->release   = '3.6.1';           // Human-friendly version name.
+$plugin->release   = '3.7.0';           // Human-friendly version name.
 $plugin->maturity  = MATURITY_STABLE;   // This version's maturity level.
 $plugin->dependencies = [];

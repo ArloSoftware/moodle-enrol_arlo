@@ -27,6 +27,7 @@ namespace enrol_arlo;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
 
 use enrol_arlo\local\administrator_notification;
 use enrol_arlo\local\factory\job_factory;
@@ -271,6 +272,20 @@ class api {
             );
             // Delete email queue information.
             $DB->delete_records('enrol_arlo_emailqueue', $conditions);
+        }
+    }
+
+    /**
+     * Method to add any missing event or elearning module associations.
+     *
+     * @throws \dml_exception
+     */
+    public static function run_associate_all() {
+        global $DB;
+        $records = $DB->get_records('enrol_arlo_templateassociate');
+        foreach ($records as $record) {
+            $course = get_course($record->courseid);
+            enrol_arlo_associate_all($course, $record->sourcetemplateguid);
         }
     }
 
