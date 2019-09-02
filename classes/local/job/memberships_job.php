@@ -276,7 +276,9 @@ class memberships_job extends job {
         // Process unenrolment.
         if ($registration->get('sourcestatus') == RegistrationStatus::CANCELLED) {
             $user = $contact->get_associated_user();
-            $plugin->unenrol($enrolmentinstance, $user->to_record());
+            if ($user instanceof user_persistent) {
+                $plugin->unenrol($enrolmentinstance, $user->to_record());
+            }
             // Cleanup registration.
             $registration->delete();
         }
