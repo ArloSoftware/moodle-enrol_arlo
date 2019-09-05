@@ -117,6 +117,10 @@ class user_persistent extends persistent {
                 'type' => PARAM_INT,
                 'default' => 1
             ],
+            'deleted' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
             'suspended' => [
                 'type' => PARAM_INT,
                 'default' => 0
@@ -305,6 +309,15 @@ class user_persistent extends persistent {
             throw new coding_exception('invalidpropertyprecision', 'user_persistent:idnumber');
         }
         return $this->raw_set('idnumber', $value);
+    }
+
+    /**
+     * Deleted property is read-only.
+     *
+     * @param $value
+     */
+    protected function set_deleted($value) {
+        return;
     }
 
     /**
