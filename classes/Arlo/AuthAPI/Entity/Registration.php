@@ -1,5 +1,7 @@
 <?php namespace enrol_arlo\Arlo\AuthAPI\Entity;
 
+use UnexpectedValueException;
+
 /**
  * Registration Entity Class
  *
@@ -9,46 +11,68 @@
  */
 class Registration {
 
+    /** @var int $RegistrationID */
     private $RegistrationID;
 
+    /** @var string $UniqueIdentifier GUID value represented as a VARCHAR(36) */
     private $UniqueIdentifier;
 
+    /** @var string $Attendance */
     private $Attendance;
 
+    /** @var string $Grade */
     private $Grade;
 
+    /** @var string $Outcome */
     private $Outcome;
 
+    /** @var string $LastActivityDateTime  */
     private $LastActivityDateTime;
 
+    /** @var string $ProgressStatus */
     private $ProgressStatus;
 
+    /** @var string $ProgressPercent */
     private $ProgressPercent;
 
+    /** @var string $Status */
     private $Status;
 
+    /** @var string $CertificateSentDateTime */
     private $CertificateSentDateTime;
 
+    /** @var string $CompletedDateTime */
     private $CompletedDateTime;
 
+    /** @var string $Comments */
     private $Comments;
 
+    /** @var string $CreatedDateTime */
     private $CreatedDateTime;
 
+    /** @var string $LastModifiedDateTime*/
     private $LastModifiedDateTime;
 
+    /** @var CustomFields $CustomFields */
     private $CustomFields;
 
+    /** @var Event $Event */
     private $Event;
 
+    /** @var OnlineActivity $OnlineActivity */
     private $OnlineActivity;
 
+    /** @var Contact $Contact */
     private $Contact;
 
     /**
      * @var array $Links Related resource links.
      */
     private $Links = [];
+
+    public function addLink(Link $Link) {
+        $this->Links[] = $Link;
+    }
 
     /**
      * An integer value that uniquely identifies this resource within the platform.
@@ -60,8 +84,7 @@ class Registration {
     }
 
     /**
-     * A GUID value that uniquely identifies this resource across any platform, such as
-     * Attended, DidNotAttend and Unknown.
+     * A GUID value that uniquely identifies this resource across any platform.
      *
      * @return mixed
      */
@@ -70,7 +93,8 @@ class Registration {
     }
 
     /**
-     * A RegistrationContactAttendance value indicating whether the Contact attended the Event.
+     * A RegistrationContactAttendance value indicating whether the Contact attended the Event. Such as
+     * Attended, DidNotAttend and Unknown.
      *
      * @return mixed
      */
@@ -192,15 +216,30 @@ class Registration {
     }
 
     /**
+     * Check value beings set is record ID greater than 0.
+     *
      * @param int $Value
      * @return $this
      */
     public function setRegistrationID(int $Value) {
+        if ($Value <= 0) {
+            throw new UnexpectedValueException("RegistrationID must be an integer greater than Zero");
+        }
         $this->RegistrationID = $Value;
         return $this;
     }
 
+    /**
+     * Check value being set is ahexadecimal (base-16) digits, displayed in 5 groups separated by hyphens,
+     * in the form 8-4-4-4-12 for a total of 36 characters.
+     *
+     * @param string $Value
+     * @return $this
+     */
     public function setUniqueIdentifier(string $Value) {
+        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $Value)) {
+            throw new UnexpectedValueException("UniqueIdentifier must be a GUID string");
+        }
         $this->UniqueIdentifier = $Value;
         return $this;
     }
@@ -240,7 +279,7 @@ class Registration {
         return $this;
     }
 
-    public function setCertificateSentDateTime($Value) {
+    public function setCertificateSentDateTime(string $Value) {
         $this->CertificateSentDateTime = $Value;
         return $this;
     }
@@ -250,17 +289,17 @@ class Registration {
         return $this;
     }
 
-    public function setComments($Value) {
+    public function setComments(string $Value) {
         $this->Comments = $Value;
         return $this;
     }
 
-    public function setCreatedDateTime($Value) {
+    public function setCreatedDateTime(string $Value) {
         $this->CreatedDateTime = $Value;
         return $this;
     }
 
-    public function setLastModifiedDateTime($Value) {
+    public function setLastModifiedDateTime(string $Value) {
         $this->LastModifiedDateTime = $Value;
         return $this;
     }
@@ -269,6 +308,11 @@ class Registration {
         return $this->Links;
     }
 
+    /**
+     * CustomFields associated with this Registration.
+     *
+     * @return CustomFields
+     */
     public function getCustomFields() {
         return $this->CustomFields;
     }
@@ -285,10 +329,43 @@ class Registration {
         return $this->Contact;
     }
 
-    public function addLink(Link $Link) {}
-    public function setCustomFields(CustomFields $Entity) {}
-    public function setEvent(Event $Entity) {}
-    public function setOnlineActivity(OnlineActivity $Entity) {}
-    public function setContact(Contact $Entity) {}
+    public function hasCustomFields() {
+        return (is_null($this->CustomFields)) ? false : true;
+    }
+
+    public function hasEvent() {
+        return (is_null($this->Event)) ? false : true;
+    }
+
+    public function hasOnlineActivity() {
+        return (is_null($this->OnlineActivity)) ? false : true;
+    }
+
+    public function hasContact() {
+        return (is_null($this->Contact)) ? false : true;
+    }
+
+    public function setCustomFields(CustomFields $Entity) {
+        $this->CustomFields = $Entity;
+        return $this;
+    }
+
+    public function setEvent(Event $Entity) {
+        if (is_null($Entity->getEventID()) || $Entity->getUniqueIdentifier()) {
+            throw new UnexpectedValueException("Event must have EventID and UniqueIdentifier properties set");
+        }
+        $this->Event = $Entity;
+        return $this;
+    }
+
+    public function setOnlineActivity(OnlineActivity $Entity) {
+        $this->OnlineActivity = $Entity;
+        return $this;
+    }
+
+    public function setContact(Contact $Entity) {
+        $this->Contact = $Entity;
+        return $this;
+    }
 
 }
