@@ -1,5 +1,6 @@
 <?php namespace enrol_arlo\Arlo\AuthAPI\Entity;
 
+use enrol_arlo\Arlo\AuthAPI\FieldFormat\GuidFieldFormat;
 use UnexpectedValueException;
 
 /**
@@ -7,7 +8,9 @@ use UnexpectedValueException;
  *
  * A Registration represents a request from a Contact to attend an Event or Online Activity.
  *
- * @package enrol_arlo\Arlo\AuthAPI\Entity
+ * @package     enrol_arlo\Arlo\AuthAPI\FieldFormat
+ * @author      Troy Williams
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class Registration {
 
@@ -230,14 +233,13 @@ class Registration {
     }
 
     /**
-     * Check value being set is ahexadecimal (base-16) digits, displayed in 5 groups separated by hyphens,
-     * in the form 8-4-4-4-12 for a total of 36 characters.
+     * Check value is valid GUID string.
      *
      * @param string $Value
      * @return $this
      */
     public function setUniqueIdentifier(string $Value) {
-        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $Value)) {
+        if (!GuidFieldFormat::Validate($Value)) {
             throw new UnexpectedValueException("UniqueIdentifier must be a GUID string");
         }
         $this->UniqueIdentifier = $Value;

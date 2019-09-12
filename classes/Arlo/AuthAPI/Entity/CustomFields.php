@@ -10,7 +10,9 @@ use ArrayIterator;
  * Each entity can have a collection of typed fields, with the metadata for all available fields
  * being described by the ResourceDescription for that entity.
  *
- * @package enrol_arlo\Arlo\AuthAPI\Entity
+ * @package     enrol_arlo\Arlo\AuthAPI
+ * @author      Troy Williams
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class CustomFields implements IteratorAggregate {
 

@@ -5,7 +5,9 @@
  *
  * Represents a field with Name/Value used by CustomFields entity.
  *
- * @package enrol_arlo\Arlo\AuthAPI\Entity
+ * @package     enrol_arlo\Arlo\AuthAPI
+ * @author      Troy Williams
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class Field {
 

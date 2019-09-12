@@ -1,5 +1,6 @@
 <?php namespace enrol_arlo\Arlo\AuthAPI\Entity;
 
+use enrol_arlo\Arlo\AuthAPI\FieldFormat\GuidFieldFormat;
 use UnexpectedValueException;
 
 /**
@@ -8,7 +9,9 @@ use UnexpectedValueException;
  * Events represent a scheduled instance of an EventTemplate resource with associated start and end dates,
  * and a collection of Registrations representing contacts who will attend the event.
  *
- * @package enrol_arlo\Arlo\AuthAPI\Entity
+ * @package     enrol_arlo\Arlo\AuthAPI
+ * @author      Troy Williams
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class Event {
 
@@ -224,17 +227,71 @@ class Event {
     }
 
     /**
-     * Check value being set is ahexadecimal (base-16) digits, displayed in 5 groups separated by hyphens,
-     * in the form 8-4-4-4-12 for a total of 36 characters.
+     * Check value is valid GUID string.
      *
      * @param string $Value
      * @return $this
      */
     public function setUniqueIdentifier(string $Value) {
-        if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $Value)) {
+        if (!GuidFieldFormat::Validate($Value)) {
             throw new UnexpectedValueException("UniqueIdentifier must be a GUID string");
         }
         $this->UniqueIdentifier = $Value;
+        return $this;
+    }
+
+    public function setCode($Value) {
+        $this->Code = $Value;
+        return $this;
+    }
+
+    public function setStartDateTime($Value) {
+        $this->StartDateTime = $Value;
+        return $this;
+    }
+
+    public function setFinishDateTime($Value) {
+        $this->FinishDateTime = $Value;
+        return $this;
+    }
+
+    public function setStartTimeZoneAbbr($Value) {
+        $this->StartTimeZoneAbbr = $Value;
+        return $this;
+    }
+
+    public function setFinishTimeZoneAbbr($Value) {
+        $this->FinishTimeZoneAbbr = $Value;
+        return $this;
+    }
+
+    public function setDescription($Value) {
+        $this->Description = $Value;
+        return $this;
+    }
+
+    public function setLocationName($Value) {
+        $this->LocationName = $Value;
+        return $this;
+    }
+
+    public function setContentUri($Value) {
+        $this->ContentUri = $Value;
+        return $this;
+    }
+
+    public function setStatus($Value) {
+        $this->Status = $Value;
+        return $this;
+    }
+
+    public function setCreatedDateTime(string $Value) {
+        $this->CreatedDateTime = $Value;
+        return $this;
+    }
+
+    public function setLastModifiedDateTime(string $Value) {
+        $this->LastModifiedDateTime = $Value;
         return $this;
     }
 
