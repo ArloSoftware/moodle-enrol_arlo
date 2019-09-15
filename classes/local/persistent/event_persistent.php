@@ -72,6 +72,9 @@ class event_persistent extends persistent {
             'finishdatetime' => [
                 'type' => PARAM_TEXT
             ],
+            'contenturi' => [
+                'type' => PARAM_TEXT
+            ],
             'sourcestatus' => [
                 'type' => PARAM_TEXT
             ],
@@ -123,6 +126,18 @@ class event_persistent extends persistent {
     protected function set_code($value) {
         $truncated = core_text::substr($value, 0, 32);
         return $this->raw_set('code', $truncated);
+    }
+
+    /**
+     * Custom setter for contenturi, just for now until implement truncate support in persistent.
+     *
+     * @param $value
+     * @return $this
+     * @throws coding_exception
+     */
+    protected function set_contenturi($value) {
+        $truncated = core_text::substr($value, 0, 256);
+        return $this->raw_set('contenturi', $truncated);
     }
 
     /**
