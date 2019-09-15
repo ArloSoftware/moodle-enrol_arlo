@@ -399,5 +399,24 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2019051505, 'enrol', 'arlo');
     }
+
+    // Upgrade v3.7.x
+    if ($oldversion < 2019091600) {
+
+        // Define field contenturi to be added to enrol_arlo_event.
+        $table = new xmldb_table('enrol_arlo_event');
+        $field = new xmldb_field('contenturi', XMLDB_TYPE_CHAR, '256',
+            null, null, null, null, 'finishdatetime');
+
+        // Conditionally launch add field contenturi.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Arlo savepoint reached.
+        upgrade_plugin_savepoint(true, 2019091600, 'enrol', 'arlo');
+
+    }
+
     return true;
 }
