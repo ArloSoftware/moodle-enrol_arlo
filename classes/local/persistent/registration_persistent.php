@@ -164,7 +164,7 @@ class registration_persistent extends persistent {
     public function add_error_message($value) {
         $counter = $this->raw_get('errorcounter');
         $this->raw_set('errormessage', $value);
-        $this->raw_set('errormessage', ++$counter);
+        $this->raw_set('errorcounter', ++$counter);
     }
 
     /**
