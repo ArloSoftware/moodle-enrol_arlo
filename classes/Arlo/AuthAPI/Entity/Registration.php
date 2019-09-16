@@ -1,5 +1,6 @@
 <?php namespace enrol_arlo\Arlo\AuthAPI\Entity;
 
+use enrol_arlo\Arlo\AuthAPI\FieldFormat\DateTimeFieldFormat;
 use enrol_arlo\Arlo\AuthAPI\FieldFormat\GuidFieldFormat;
 use UnexpectedValueException;
 
@@ -296,16 +297,39 @@ class Registration {
         return $this;
     }
 
+    /**
+     * Check value is valid DateTime string.
+     *
+     * @param string $Value
+     * @return $this
+     */
     public function setCreatedDateTime(string $Value) {
+        if (!DateTimeFieldFormat::Validate($Value)) {
+            throw new UnexpectedValueException("CreatedDateTime must be a DateTime string");
+        }
         $this->CreatedDateTime = $Value;
         return $this;
     }
 
+    /**
+     * Check value is valid DateTime string.
+     *
+     * @param string $Value
+     * @return $this
+     */
     public function setLastModifiedDateTime(string $Value) {
+        if (!DateTimeFieldFormat::Validate($Value)) {
+            throw new UnexpectedValueException("LastModifiedDateTime must be a DateTime string");
+        }
         $this->LastModifiedDateTime = $Value;
         return $this;
     }
 
+    /**
+     * Collection of associated resource links.
+     *
+     * @return array
+     */
     public function getLinks() {
         return $this->Links;
     }
@@ -319,39 +343,86 @@ class Registration {
         return $this->CustomFields;
     }
 
+    /**
+     * Event associated with this Registration.
+     *
+     * @return Event
+     */
     public function getEvent() {
         return $this->Event;
     }
 
+    /**
+     * OnlineActivity associated with this Registration.
+     *
+     * @return OnlineActivity
+     */
     public function getOnlineActivity() {
         return $this->OnlineActivity;
     }
 
+    /**
+     * Contact associated with this Registration.
+     *
+     * @return Contact
+     */
     public function getContact() {
         return $this->Contact;
     }
 
+    /**
+     * Has associated CustomFields collection linked.
+     *
+     * @return bool
+     */
     public function hasCustomFields() {
         return (is_null($this->CustomFields)) ? false : true;
     }
 
+    /**
+     * Has associated Event linked.
+     *
+     * @return bool
+     */
     public function hasEvent() {
         return (is_null($this->Event)) ? false : true;
     }
 
+    /**
+     * Has associated OnlineActivity linked.
+     *
+     * @return bool
+     */
     public function hasOnlineActivity() {
         return (is_null($this->OnlineActivity)) ? false : true;
     }
 
+    /**
+     * Has associated Contact linked.
+     *
+     * @return bool
+     */
     public function hasContact() {
         return (is_null($this->Contact)) ? false : true;
     }
 
+    /**
+     * Associated CustomFields.
+     *
+     * @param CustomFields $Entity
+     * @return $this
+     */
     public function setCustomFields(CustomFields $Entity) {
         $this->CustomFields = $Entity;
         return $this;
     }
 
+    /**
+     * Associated Event.
+     *
+     * @param Event $Entity
+     * @return $this
+     */
     public function setEvent(Event $Entity) {
         if (is_null($Entity->getEventID()) || $Entity->getUniqueIdentifier()) {
             throw new UnexpectedValueException("Event must have EventID and UniqueIdentifier properties set");
@@ -360,12 +431,30 @@ class Registration {
         return $this;
     }
 
+    /**
+     * Associated OnlineActivity.
+     *
+     * @param OnlineActivity $Entity
+     * @return $this
+     */
     public function setOnlineActivity(OnlineActivity $Entity) {
+        if (is_null($Entity->getOnlineActivityID()) || $Entity->getUniqueIdentifier()) {
+            throw new UnexpectedValueException("OnlineActivity must have OnlineActivityID and UniqueIdentifier properties set");
+        }
         $this->OnlineActivity = $Entity;
         return $this;
     }
 
+    /**
+     * Associated Contact.
+     *
+     * @param Contact $Entity
+     * @return $this
+     */
     public function setContact(Contact $Entity) {
+        if (is_null($Entity->getContactID()) || is_null($Entity->getUniqueIdentifier())) {
+            throw new UnexpectedValueException("Contact must have ContectID and UniqueIdentifier properties set");
+        }
         $this->Contact = $Entity;
         return $this;
     }

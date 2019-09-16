@@ -16,6 +16,9 @@ use ArrayIterator;
  */
 class CustomFields implements IteratorAggregate {
 
+    /**
+     * @var array $fields.
+     */
     private $fields = [];
 
     public function addCustomField(Field $field) {

@@ -213,6 +213,15 @@ class Event {
     }
 
     /**
+     * Has associated CustomFields collection linked.
+     *
+     * @return bool
+     */
+    public function hasCustomFields() {
+        return (is_null($this->CustomFields)) ? false : true;
+    }
+
+    /**
      * Check value beings set is record ID greater than 0.
      *
      * @param int $Value
@@ -240,47 +249,47 @@ class Event {
         return $this;
     }
 
-    public function setCode($Value) {
+    public function setCode(string $Value) {
         $this->Code = $Value;
         return $this;
     }
 
-    public function setStartDateTime($Value) {
+    public function setStartDateTime(string $Value) {
         $this->StartDateTime = $Value;
         return $this;
     }
 
-    public function setFinishDateTime($Value) {
+    public function setFinishDateTime(string $Value) {
         $this->FinishDateTime = $Value;
         return $this;
     }
 
-    public function setStartTimeZoneAbbr($Value) {
+    public function setStartTimeZoneAbbr(string $Value) {
         $this->StartTimeZoneAbbr = $Value;
         return $this;
     }
 
-    public function setFinishTimeZoneAbbr($Value) {
+    public function setFinishTimeZoneAbbr(string $Value) {
         $this->FinishTimeZoneAbbr = $Value;
         return $this;
     }
 
-    public function setDescription($Value) {
+    public function setDescription(string $Value) {
         $this->Description = $Value;
         return $this;
     }
 
-    public function setLocationName($Value) {
+    public function setLocationName(string $Value) {
         $this->LocationName = $Value;
         return $this;
     }
 
-    public function setContentUri($Value) {
+    public function setContentUri(string $Value) {
         $this->ContentUri = $Value;
         return $this;
     }
 
-    public function setStatus($Value) {
+    public function setStatus(string $Value) {
         $this->Status = $Value;
         return $this;
     }
@@ -292,6 +301,17 @@ class Event {
 
     public function setLastModifiedDateTime(string $Value) {
         $this->LastModifiedDateTime = $Value;
+        return $this;
+    }
+
+    /**
+     * Associated CustomFields.
+     *
+     * @param CustomFields $Entity
+     * @return $this
+     */
+    public function setCustomFields(CustomFields $Entity) {
+        $this->CustomFields = $Entity;
         return $this;
     }
 
