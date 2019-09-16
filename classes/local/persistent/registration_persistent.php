@@ -92,6 +92,11 @@ class registration_persistent extends persistent {
                 'null' => NULL_ALLOWED,
                 'default' => null
             ),
+            'completeddatetime' => array(
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
+            ),
             'sourcestatus' => array(
                 'type' => PARAM_TEXT
             ),

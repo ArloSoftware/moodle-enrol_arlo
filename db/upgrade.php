@@ -401,7 +401,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
     }
 
     // Upgrade v3.7.x
-    if ($oldversion < 2019091600) {
+    if ($oldversion < 2019091700) {
 
         // Define field contenturi to be added to enrol_arlo_event.
         $table = new xmldb_table('enrol_arlo_event');
@@ -413,8 +413,17 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
+        // Define field completeddatetime to be added to enrol_arlo_registration.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('completeddatetime', XMLDB_TYPE_CHAR, '36', null, null, null, null, 'progresspercent');
+
+        // Conditionally launch add field completeddatetime.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
         // Arlo savepoint reached.
-        upgrade_plugin_savepoint(true, 2019091600, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2019091700, 'enrol', 'arlo');
 
     }
 
