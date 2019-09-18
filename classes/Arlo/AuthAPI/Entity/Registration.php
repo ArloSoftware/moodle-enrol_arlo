@@ -1,6 +1,7 @@
 <?php namespace enrol_arlo\Arlo\AuthAPI\Entity;
 
 use enrol_arlo\Arlo\AuthAPI\FieldFormat\DateTimeFieldFormat;
+use enrol_arlo\Arlo\AuthAPI\FieldFormat\DateTimeOffsetFieldFormat;
 use enrol_arlo\Arlo\AuthAPI\FieldFormat\GuidFieldFormat;
 use UnexpectedValueException;
 
@@ -42,7 +43,7 @@ class Registration {
     /** @var string $Status */
     private $Status;
 
-    /** @var string $CertificateSentDateTime */
+    /** @var string $CertificateSentDateTime An Arlo DateTimeOffset as a string. */
     private $CertificateSentDateTime;
 
     /** @var string $CompletedDateTime */
@@ -288,6 +289,9 @@ class Registration {
     }
 
     public function setCompletedDateTime(string $Value) {
+        if (!DateTimeOffsetFieldFormat::Validate($Value)) {
+            throw new UnexpectedValueException("CompletedDateTime must be a DateTimeOffset string");
+        }
         $this->CompletedDateTime = $Value;
         return $this;
     }
