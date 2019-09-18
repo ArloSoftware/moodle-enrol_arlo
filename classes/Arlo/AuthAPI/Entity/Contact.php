@@ -5,9 +5,7 @@ use enrol_arlo\Arlo\AuthAPI\FieldFormat\GuidFieldFormat;
 use UnexpectedValueException;
 
 /**
- * Contact Entity Class
- *
- * A Contact.
+ * Contact Entity Class.
  *
  * @package     enrol_arlo\Arlo\AuthAPI\FieldFormat
  * @author      Troy Williams

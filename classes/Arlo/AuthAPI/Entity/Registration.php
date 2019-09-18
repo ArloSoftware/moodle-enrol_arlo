@@ -453,7 +453,7 @@ class Registration {
      */
     public function setContact(Contact $Entity) {
         if (is_null($Entity->getContactID()) || is_null($Entity->getUniqueIdentifier())) {
-            throw new UnexpectedValueException("Contact must have ContectID and UniqueIdentifier properties set");
+            throw new UnexpectedValueException("Contact must have ContactID and UniqueIdentifier properties set");
         }
         $this->Contact = $Entity;
         return $this;
