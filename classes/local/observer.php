@@ -14,28 +14,41 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Event observer class.
- *
- * @package   enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}
- * @copyright 2017 LearningWorks Ltd {@link http://www.learningworks.co.nz}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-namespace enrol_arlo\event;
+namespace enrol_arlo\local;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core\event\course_completed;
 use enrol_arlo\local\enum\arlo_type;
 
+/**
+ * Main Event API Observer class.
+ *
+ * @package     enrol_arlo
+ * @author      Troy Williams
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class observer {
+
+    /**
+     * Handle a course completed event.
+     *
+     * @param course_completed $event
+     * @throws \dml_exception
+     */
+    public static function course_completed(course_completed $event) {
+        $courseid = $event->courseid;
+        $userid   = $event->relateduserid;
+        static::set_update_source($courseid, $userid);
+    }
 
     /**
      * Set updatesource field in enrol_arlo_registration table. Fired on cours module update and
      * user graded events. This will inform manager to update result information via registration patch.
      *
      * @param $courseid
-     * @param $relateduserid
+     * @param $userid
+     * @throws \dml_exception
      */
     private static function set_update_source($courseid, $userid) {
         global $DB;
@@ -45,16 +58,16 @@ class observer {
                   JOIN {course} c ON c.id = e.courseid
                  WHERE e.enrol = :enrol
                    AND c.id = :courseid AND ear.userid = :userid";
-        $conditions = array(
+        $conditions = [
             'enrol' => 'arlo',
             'courseid' => $courseid,
             'userid' => $userid
-        );
+        ];
         $registrations = $DB->get_records_sql($sql, $conditions);
         if ($registrations) {
             foreach ($registrations as $registration) {
                 $result = $DB->set_field('enrol_arlo_registration',
-                    'updatesource', 1, array('id' => $registration->id));
+                    'updatesource', 1, ['id' => $registration->id]);
             }
         }
     }
@@ -63,50 +76,49 @@ class observer {
      * Course module completion event handler. Used for updating results.
      *
      * @param $event
+     * @throws \dml_exception
      */
     public static function course_module_completion_updated($event) {
-        static::set_update_source($event->courseid, $event->relateduserid);
+        $courseid = $event->courseid;
+        $userid   = $event->relateduserid;
+        static::set_update_source($courseid, $userid);
     }
 
     /**
      * Course viewed event handler. Update last activity in registration.
      *
      * @param $event
+     * @throws \dml_exception
      */
     public static function course_viewed($event) {
-        static::set_update_source($event->courseid, $event->userid);
+        $courseid = $event->courseid;
+        $userid   = $event->userid;
+        static::set_update_source($courseid, $userid);
     }
 
     /**
      * User deleted event handler. Clean up, remove user from enrol_arlo_contact table.
      *
      * @param $event
+     * @throws \dml_exception
      */
     public static function user_deleted($event) {
         global $DB;
-        $DB->delete_records('enrol_arlo_contact', array('userid' => $event->relateduserid));
-        $DB->delete_records('enrol_arlo_registration', array('userid' => $event->relateduserid));
-        $DB->delete_records('enrol_arlo_emailqueue', array('userid' => $event->relateduserid));
+        $DB->delete_records('enrol_arlo_contact', ['userid' => $event->relateduserid]);
+        $DB->delete_records('enrol_arlo_registration', ['userid' => $event->relateduserid]);
+        $DB->delete_records('enrol_arlo_emailqueue', ['userid' => $event->relateduserid]);
     }
 
     /**
      * User graded event handler. Used for updating results.
      *
      * @param $event
+     * @throws \dml_exception
      */
     public static function user_graded($event) {
-        static::set_update_source($event->courseid, $event->relateduserid);
-    }
-
-    /**
-     * On Platform name change fire platform change function.
-     *
-     * @param $event
-     */
-    public static function fqdn_updated($event) {
-        global $CFG;
-        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
-        enrol_arlo_change_platform($event->other['oldvalue'], $event->other['newvalue']);
+        $courseid = $event->courseid;
+        $userid   = $event->relateduserid;
+        static::set_update_source($courseid, $userid);
     }
 
     /**
@@ -119,8 +131,23 @@ class observer {
      */
     public static function event_created($event) {
         global $CFG;
-        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
+        require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
         enrol_arlo_add_associated(arlo_type::EVENT, $event->other);
+    }
+
+    /**
+     * On Platform name change fire platform change function.
+     *
+     * @param $event
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function fqdn_updated($event) {
+        global $CFG;
+        require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+        $oldvalue = $event->other['oldvalue'];
+        $newvalue = $event->other['newvalue'];
+        enrol_arlo_change_platform($oldvalue, $newvalue);
     }
 
     /**
@@ -133,7 +160,7 @@ class observer {
      */
     public static function onlineactivity_created($event) {
         global $CFG;
-        require_once($CFG->dirroot.'/enrol/arlo/locallib.php');
+        require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
         enrol_arlo_add_associated(arlo_type::ONLINEACTIVITY, $event->other);
     }
 

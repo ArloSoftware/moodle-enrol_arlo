@@ -92,6 +92,11 @@ class registration_persistent extends persistent {
                 'null' => NULL_ALLOWED,
                 'default' => null
             ),
+            'completeddatetime' => array(
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
+            ),
             'sourcestatus' => array(
                 'type' => PARAM_TEXT
             ),
@@ -159,7 +164,7 @@ class registration_persistent extends persistent {
     public function add_error_message($value) {
         $counter = $this->raw_get('errorcounter');
         $this->raw_set('errormessage', $value);
-        $this->raw_set('errormessage', ++$counter);
+        $this->raw_set('errorcounter', ++$counter);
     }
 
     /**
