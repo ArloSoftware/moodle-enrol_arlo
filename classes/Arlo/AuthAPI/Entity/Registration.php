@@ -428,7 +428,7 @@ class Registration {
      * @return $this
      */
     public function setEvent(Event $Entity) {
-        if (is_null($Entity->getEventID()) || $Entity->getUniqueIdentifier()) {
+        if (is_null($Entity->getEventID()) || is_null($Entity->getUniqueIdentifier())) {
             throw new UnexpectedValueException("Event must have EventID and UniqueIdentifier properties set");
         }
         $this->Event = $Entity;
@@ -442,7 +442,7 @@ class Registration {
      * @return $this
      */
     public function setOnlineActivity(OnlineActivity $Entity) {
-        if (is_null($Entity->getOnlineActivityID()) || $Entity->getUniqueIdentifier()) {
+        if (is_null($Entity->getOnlineActivityID()) || is_null($Entity->getUniqueIdentifier())) {
             throw new UnexpectedValueException("OnlineActivity must have OnlineActivityID and UniqueIdentifier properties set");
         }
         $this->OnlineActivity = $Entity;
