@@ -20,7 +20,7 @@ class DateTimeFieldFormat implements FieldValueValidatorInterface {
      * @param $Value
      * @return bool
      */
-    public static function Validate($Value) : bool {
+    public static function Validate($Value) :  bool  {
         if (preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2}.[0-9]{3,7})?Z$/i', $Value)) {
             return true;
         }

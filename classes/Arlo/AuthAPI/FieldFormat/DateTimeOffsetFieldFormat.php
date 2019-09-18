@@ -19,7 +19,7 @@ class DateTimeOffsetFieldFormat implements FieldValueValidatorInterface {
      * @param $Value
      * @return bool
      */
-    public static function Validate($Value) :bool {
+    public static function Validate($Value) : bool {
         $pattern = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2}.[0-9]{3,7})?[+-][0-9]{2}:[0-9]{2}$/i';
         if (preg_match($pattern, $Value)) {
             return true;
