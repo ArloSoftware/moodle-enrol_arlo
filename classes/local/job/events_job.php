@@ -99,7 +99,6 @@ class events_job extends job {
                         $sourcecreated  = $resource->CreatedDateTime;
                         $sourcemodified = $resource->LastModifiedDateTime;
                         $eventtemplate  = $resource->getEventTemplate();
-                        $contenturi     = $resource->ContentUri;
                         if ($eventtemplate) {
                             $sourcetemplateid   = $eventtemplate->TemplateID;
                             $sourcetemplateguid = $eventtemplate->UniqueIdentifier;
@@ -121,7 +120,6 @@ class events_job extends job {
                             $event->set('sourcemodified', $sourcemodified);
                             $event->set('sourcetemplateid', $sourcetemplateid);
                             $event->set('sourcetemplateguid' , $sourcetemplateguid);
-                            $event->set('contenturi', $contenturi);
                             $event->save();
                             // Update scheduling information on persistent after successfull save.
                             $jobpersistent->set('timelastrequest', time());

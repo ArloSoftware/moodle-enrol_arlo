@@ -73,7 +73,9 @@ class event_persistent extends persistent {
                 'type' => PARAM_TEXT
             ],
             'contenturi' => [
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'sourcestatus' => [
                 'type' => PARAM_TEXT
