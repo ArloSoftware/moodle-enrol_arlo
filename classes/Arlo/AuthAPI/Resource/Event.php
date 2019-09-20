@@ -14,6 +14,7 @@ class Event extends AbstractResource {
     public $FinishDateTime;
     public $LocationName;
     public $Description;
+    public $ContentUri;
     /**
      * @var EventTemplate associated resource.
      */
