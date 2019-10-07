@@ -52,6 +52,7 @@ class completion {
         $data->timeenrolled = null;
         $data->timestarted = null;
         $data->progresspercentage = null;
+        $data->progressstatus = get_string('notstarted', 'enrol_arlo');
         $data->timecompleted = null;
 
         // Harvest course completion data for the user.
@@ -69,6 +70,7 @@ class completion {
                 if ($coursecompletion->is_complete()) {
                     $data->progresspercentage = 100;
                     $data->timecompleted = $coursecompletion->timecompleted;
+                    $data->progressstatus = get_string('completed', 'enrol_arlo');
                 } else {
                     $modules = $completion->get_activities();
                     $count = count($modules);
@@ -79,6 +81,9 @@ class completion {
                             $completed += $modulecompletiondata->completionstate == COMPLETION_INCOMPLETE ? 0 : 1;
                         }
                         $data->progresspercentage =  ($completed / $count) * 100;
+                        if ($data->timestarted) {
+                            $data->progressstatus = get_string('inprogress', 'enrol_arlo');
+                        }
                     }
                 }
             }
