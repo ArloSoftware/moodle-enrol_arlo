@@ -7,14 +7,27 @@ namespace enrol_arlo\Arlo\AuthAPI\Resource;
  * @package enrol_arlo\Arlo\AuthAPI\Resource
  */
 class Registration extends AbstractResource {
+
     public $RegistrationID;
+
     public $UniqueIdentifier;
+
     public $Attendance;
+
     public $Outcome;
+
     public $Grade;
-    public $ProgressPercent;
-    public $ProgressStatus;
+
     public $LastActivityDateTime;
+
+    public $ProgressPercent;
+
+    public $ProgressStatus;
+
+    public $CertificateSentDateTime;
+
+    public $CompletedDateTime;
+
     public $Comments;
 
     /**
