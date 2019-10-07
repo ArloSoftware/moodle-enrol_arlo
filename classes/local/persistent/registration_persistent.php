@@ -144,7 +144,7 @@ class registration_persistent extends persistent {
                 'default' => 0
             ),
             'errormessage' => array(
-                'type' => PARAM_TEXT,
+                'type' => PARAM_RAW,
                 'null' => NULL_ALLOWED,
                 'default' => null
             ),
