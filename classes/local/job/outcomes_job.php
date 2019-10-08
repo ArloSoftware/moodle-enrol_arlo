@@ -27,7 +27,10 @@ namespace enrol_arlo\local\job;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core_user;
 use enrol_arlo\api;
+use enrol_arlo\local\external;
+use enrol_arlo\local\learner_progress;
 use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\local\client;
@@ -136,28 +139,16 @@ class outcomes_job extends job {
             $registrations = registration_persistent::get_records(
                 ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1]
             );
+            $course = get_course($enrolmentinstance->courseid);
             foreach ($registrations as $registrationpersistent) {
                 try {
-                    $result = new result($enrolmentinstance->courseid, $registrationpersistent->to_record());
-                    $uri = new RequestUri();
-                    $uri->setHost($pluginconfig->get('platform'));
-                    $endpoint = $jobpersistent->get('endpoint') . $registrationpersistent->get('sourceid') .'/';
-                    $uri->setResourcePath($endpoint);
-                    $request = new Request(
-                        'PATCH',
-                        $uri->output(true),
-                        ['Content-type' => 'application/xml; charset=utf-8'],
-                        $result->export_to_xml());
-                    $response = client::get_instance()->send_request($request);
-                    if ($response->getStatusCode() != 200) {
-                        throw new moodle_exception($response->getReasonPhrase());
-                    }
-                    // We need to set changed properties back on registration record. This is
-                    // important as required when determining the use of add or replace in the
-                    // patch request.
-                    $changed = $result->get_changed();
-                    foreach (get_object_vars($changed) as $field => $value) {
-                        $registrationpersistent->set($field, $value);
+                    $user = core_user::get_user($registrationpersistent->get('userid'));
+                    $registrationid = $registrationpersistent->get('sourceid');
+                    $sourceregistration = external::get_registration_resource($registrationid);
+                    $learnerprogress = new learner_progress($course, $user);
+                    $data = $learnerprogress->get_keyed_data_for_arlo();
+                    if (!empty($data)) {
+                        external::patch_registration_resource($sourceregistration, $data);
                     }
                     // Reset update flag.
                     $registrationpersistent->set('updatesource', 0);

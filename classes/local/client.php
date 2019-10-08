@@ -78,11 +78,23 @@ class client {
     }
 
     /**
+     * Send PSR-7 Request to Arlo API.
+     *
+     * @param Request $request
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function send(Request $request) {
+        $response = $this->httpclient->send($request);
+        return $response;
+    }
+
+    /**
      * Send PSR-7 Request to Arlo API. Count errors of same type.
      *
      * @param Request $request
-     * @return Response|mixed|\Psr\Http\Message\ResponseInterface
-     * @throws Exception
+     * @return mixed|\Psr\Http\Message\ResponseInterface|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \coding_exception
      */
     public function send_request(Request $request) {

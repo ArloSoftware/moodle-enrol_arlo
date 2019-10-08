@@ -57,10 +57,11 @@ class request_log_persistent extends persistent {
                 'type' => PARAM_TEXT
             ],
             'status' => [
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'default' => 0
             ],
             'extra' => [
-                'type' => PARAM_TEXT,
+                'type' => PARAM_RAW,
                 'default' => ''
             ]
         ];
