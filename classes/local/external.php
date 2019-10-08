@@ -31,8 +31,24 @@ use GuzzleHttp\Psr7\Request;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Help class to simplify construction and calls to Arlo API.
+ *
+ * @package     enrol_arlo
+ * @copyright   2019 Troy Williams <troy.williams@learningworks.co.nz>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class external {
 
+    /**
+     * Get a single registration from Arlo and deserialize to resource object.
+     *
+     * @param int $id
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \moodle_exception
+     * @throws coding_exception
+     */
     public static function get_registration_resource(int $id) {
         if ($id <= 0) {
             throw new coding_exception('UnexpectedValueException');
@@ -48,6 +64,14 @@ class external {
         return $resource;
     }
 
+    /**
+     * Patch an Arlo Registration with new result/progress data from Moodle.
+     *
+     * @param RegistrationResource $registration
+     * @param array $data
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws coding_exception
+     */
     public static function patch_registration_resource(RegistrationResource $registration, array $data) {
         $id = $registration->RegistrationID;
         if ($id <= 0) {
@@ -57,6 +81,7 @@ class external {
             throw new coding_exception('UnexpectedValueException');
         }
         $pluginconfig = new arlo_plugin_config();
+        $updatableproperties = explode(',', $pluginconfig->get('updatableregistrationproperties'));
         $client = client::get_instance();
         $uri = new RequestUri();
         $uri->setHost($pluginconfig->get('platform'));
@@ -65,7 +90,7 @@ class external {
         $root = $dom->appendChild(new DOMElement('diff'));
         foreach ($data as $key => $value) {
             if (!is_null($value)) {
-                if ($registration->{$key} != $value) {
+                if (in_array($key, $updatableproperties) && ($registration->{$key} != $value)) {
                     if (!is_null($registration->{$key})) {
                         $element = $dom->createElement('replace', $value);
                         $element->setAttribute("sel", "Registration/{$key}/text()[1]");
