@@ -66,7 +66,7 @@ $observers = [
     ],
     // Plugin event: A new Event fetched from Arlo and created in Moodle.
     [
-        'eventname'   => '\core\event\event_created',
+        'eventname'   => '\enrol_arlo\event\event_created',
         'callback'    => '\enrol_arlo\local\observer::event_created',
         'includefile' => null,
         'internal'    => true,
@@ -74,7 +74,7 @@ $observers = [
     ],
     // Plugin event: Arlo platform changed.
     [
-        'eventname'   => '\core\event\fqdn_updated',
+        'eventname'   => '\enrol_arlo\event\fqdn_updated',
         'callback'    => '\enrol_arlo\local\observer::fqdn_updated',
         'includefile' => null,
         'internal'    => true,
@@ -82,7 +82,7 @@ $observers = [
     ],
     // Plugin event: A new OnlineActivity fetched from Arlo and created in Moodle.
     [
-        'eventname'   => '\core\event\onlineactivity_created',
+        'eventname'   => '\enrol_arlo\event\onlineactivity_created',
         'callback'    => '\enrol_arlo\local\observer::onlineactivity_created',
         'includefile' => null,
         'internal'    => true,

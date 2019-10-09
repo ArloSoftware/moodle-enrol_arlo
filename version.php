@@ -27,7 +27,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin            = new stdClass();
-$plugin->version   = 2019091800;
+$plugin->version   = 2019091802;
 $plugin->requires  = 2017111300;        // See http://docs.moodle.org/dev/Moodle_Version
 $plugin->component = 'enrol_arlo';      // Full name of the plugin (used for diagnostics).
 $plugin->release   = '3.7.2-alpha';     // Human-friendly version name.
