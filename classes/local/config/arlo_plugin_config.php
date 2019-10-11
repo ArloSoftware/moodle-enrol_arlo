@@ -146,6 +146,10 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 0
             ],
+            'allowportalintegration' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
             'updatableregistrationproperties' => [
                 'type' => PARAM_TAGLIST,
                 'default' => 'LastActivityDateTime,Outcome,Grade,ProgressStatus,ProgressPercent'

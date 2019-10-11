@@ -30,6 +30,7 @@ require_once($CFG->dirroot . '/group/lib.php');
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\OnlineActivityStatus;
 use enrol_arlo\Arlo\AuthAPI\Enum\EventTemplateStatus;
+use enrol_arlo\local\external;
 use enrol_arlo\manager;
 use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\enum\arlo_type;
@@ -291,6 +292,13 @@ class enrol_arlo_plugin extends enrol_plugin {
             $collection,
             $persistent->get_time_norequests_after()
         );
+
+        // Add ContentUri on Arlo end.
+        if ($pluginconfig->get('allowportalintegration')) {
+            $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
+            external::update_contenturi($fields['customchar2'], $fields['customchar3'], $courseurl);
+        }
+
         return $instanceid;
     }
 
@@ -411,6 +419,14 @@ class enrol_arlo_plugin extends enrol_plugin {
             // Map group id to customint2.
             $data->customint2 = $groupid;
         }
+
+        // Add ContentUri on Arlo end.
+        $pluginconfig = new arlo_plugin_config();
+        if ($pluginconfig->get('allowportalintegration')) {
+            $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
+            external::update_contenturi($instance->customchar2, $instance->customchar3, $courseurl);
+        }
+
         return parent::update_instance($instance, $data);
     }
 
