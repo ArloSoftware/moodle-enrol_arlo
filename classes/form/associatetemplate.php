@@ -16,7 +16,7 @@
 
 namespace enrol_arlo\form;
 
-defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
+defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/formslib.php');
 
@@ -49,6 +49,7 @@ class associatetemplate extends \moodleform {
         $buttonarray = array();
         $buttonarray[0] = $form->createElement('submit', 'submitbuttonremove', get_string('remove', 'enrol_arlo'));
         $buttonarray[1] = $form->createElement('cancel');
+        $buttonarray[2] = $form->createElement('submit', 'submitbuttonsynchronize', get_string('synchronize', 'enrol_arlo'), [], false);
         $form->addGroup($buttonarray, 'buttonarray', '', array(''), false);
         $form->closeHeaderBefore('buttonarray');
     }
