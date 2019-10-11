@@ -35,10 +35,11 @@ if ($form->is_cancelled()) {
     redirect($returnurl);
 }
 if ($validateddata = $form->get_data()) {
+    if (isset($validateddata->submitbutton) || isset($validateddata->submitbuttonsynchronize)) {
+        enrol_arlo_associate_all($course, $validateddata->sourcetemplateguid);
+    }
     if (isset($validateddata->submitbuttonremove)) {
         enrol_arlo_unassociate_all($course, $validateddata->sourcetemplateguid);
-    } else {
-        enrol_arlo_associate_all($course, $validateddata->sourcetemplateguid);
     }
     redirect($returnurl);
 }
