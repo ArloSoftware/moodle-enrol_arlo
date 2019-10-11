@@ -282,7 +282,10 @@ class api {
      */
     public static function run_associate_all() {
         global $DB;
-        $records = $DB->get_records('enrol_arlo_templateassociate');
+        $sql = "SELECT eat.*
+                  FROM {enrol_arlo_templateassociate} eat
+                  JOIN {course} c ON c.id = eat.courseid AND c.visible = 1";
+        $records = $DB->get_records_sql($sql);
         foreach ($records as $record) {
             $course = get_course($record->courseid);
             enrol_arlo_associate_all($course, $record->sourcetemplateguid);

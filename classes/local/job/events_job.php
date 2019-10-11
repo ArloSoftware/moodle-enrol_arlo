@@ -127,6 +127,7 @@ class events_job extends job {
                             $jobpersistent->set('lastsourcetimemodified', $sourcemodified);
                             $jobpersistent->update();
                         } catch (moodle_exception $exception) {
+                            debugging($exception->getMessage(), DEBUG_DEVELOPER);
                             $this->add_error($exception->getMessage());
                         }
                     }
@@ -134,6 +135,7 @@ class events_job extends job {
                 $hasnext = (bool) $collection->hasNext();
             }
         } catch (moodle_exception $exception) {
+            debugging($exception->getMessage(), DEBUG_DEVELOPER);
             $this->add_error($exception->getMessage());
             return false;
         }
