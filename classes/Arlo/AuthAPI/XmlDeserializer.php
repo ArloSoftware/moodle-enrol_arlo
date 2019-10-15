@@ -115,6 +115,8 @@ class XmlDeserializer {
                     $this->setValue($link, $attributeName, $attributeValue);
                 }
             }
+            // Add Link attributes.
+            $this->setValue($classInstance, 'Link', $link);
         }
         // Deal with Link that has expansions.
         if ($node->hasChildNodes()) {
