@@ -280,9 +280,13 @@ class memberships_job extends job {
                 if ($user->get('id') > 0 && $user->get('deleted') != 1) {
                     $plugin->unenrol($enrolmentinstance, $user->to_record());
                 }
+            } else {
+                $contact->delete();
             }
             // Cleanup registration.
             $registration->delete();
+            // Return back to caller.
+            return true;
         }
         // Process enrolment.
         if (in_array($registration->get('sourcestatus'), [RegistrationStatus::APPROVED, RegistrationStatus::COMPLETED])) {

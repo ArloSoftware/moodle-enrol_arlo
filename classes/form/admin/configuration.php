@@ -125,10 +125,10 @@ class configuration extends \moodleform {
         $form->setDefault('allowunenrolaccessedui', 0);
         $form->addHelpButton('allowunenrolaccessedui', 'allowunenrolaccessedui', 'enrol_arlo');
 
-        $form->addElement('advcheckbox', 'allowportalintegration',
-            get_string('allowportalintegration', 'enrol_arlo'), get_string('allowportalintegration_text', 'enrol_arlo'));
-        $form->setDefault('allowportalintegration', 0);
-        $form->addHelpButton('allowportalintegration', 'allowportalintegration', 'enrol_arlo');
+        //$form->addElement('advcheckbox', 'allowportalintegration',
+        //    get_string('allowportalintegration', 'enrol_arlo'), get_string('allowportalintegration_text', 'enrol_arlo'));
+        //$form->setDefault('allowportalintegration', 0);
+        //$form->addHelpButton('allowportalintegration', 'allowportalintegration', 'enrol_arlo');
 
         $form->addElement('header', 'cleanup', get_string('cleanup', 'enrol_arlo'));
         $form->setExpanded('cleanup', true);

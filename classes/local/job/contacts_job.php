@@ -27,6 +27,7 @@ namespace enrol_arlo\local\job;
 defined('MOODLE_INTERNAL') || die();
 
 use enrol_arlo\api;
+use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
@@ -140,6 +141,10 @@ class contacts_job extends job {
                     if ($collection->count() > 0) {
                         foreach ($collection as $resource) {
                             try {
+                                // No need to process cancelled registrations.
+                                if ($resource->Status == RegistrationStatus::CANCELLED) {
+                                    continue;
+                                }
                                 $contactresource = $resource->getContact();
                                 if (empty($contactresource)) {
                                     throw new coding_exception(get_string('contactresourcemissing', 'enrol_arlo'));
