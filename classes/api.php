@@ -273,6 +273,10 @@ class api {
             // Delete email queue information.
             $DB->delete_records('enrol_arlo_emailqueue', $conditions);
         }
+        //Clean up orphaned contacts.
+        $time = time() - (86400);
+        $select = "userid = 0 AND timecreated < ?";
+        $DB->delete_records_select('enrol_arlo_contact', $select, [$time]);
     }
 
     /**
