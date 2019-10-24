@@ -5,7 +5,7 @@ use Exception;
 use GuzzleHttp\Psr7\Uri;
 use UnexpectedValueException;
 
-class EventIntegrationData implements ResourceInterface {
+class EventIntegrationData {
 
     private $editUri;
 
