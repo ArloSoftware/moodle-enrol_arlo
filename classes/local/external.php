@@ -149,16 +149,16 @@ class external {
         if ($type == arlo_type::EVENT) {
             $eventpersistent = event_persistent::get_record(['sourceguid' => $guid]);
             $collection = 'events';
-            $id = $eventpersistent->get('id');
+            $id = $eventpersistent->get('sourceid'); // EventID.
             $resource = static::get_resource($collection, $id);
         }
         if ($type == arlo_type::ONLINEACTIVITY) {
             $onlineactivitypersistent = online_activity_persistent::get_record(['sourceguid' => $guid]);
             $collection = 'onlineactivities';
-            $id = $onlineactivitypersistent->get('id');
-            $resource = static::get_resource($collection, $id);
+            $id = $onlineactivitypersistent->get('sourceid');
+            $resource = static::get_resource($collection, $id); // OnlineActvityID.
         }
-        if ($resource->ContentUri != $contenturi) {
+        if (!is_null($resource) && ($resource->ContentUri != $contenturi)) {
             $data['ContentUri'] = $contenturi;
             static::patch_resource($collection, $id, $resource, $data);
         }
@@ -179,7 +179,7 @@ class external {
         // Build URL for editing an enrolment instance.
         $manageurl = new moodle_url(
             '/enrol/editinstance.php',
-            ['id' => $instance->id, 'courseid' => $instance->courseid, 'type' => $instance->type]
+            ['id' => $instance->id, 'courseid' => $instance->courseid, 'type' => $instance->enrol]
         );
 
         $integrationdata = null;
