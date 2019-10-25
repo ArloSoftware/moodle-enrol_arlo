@@ -19,6 +19,10 @@ namespace enrol_arlo\local;
 use coding_exception;
 use DOMDocument;
 use DOMElement;
+use enrol_arlo\Arlo\AuthAPI\Resource\Event;
+use enrol_arlo\Arlo\AuthAPI\Resource\EventIntegrationData;
+use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
+use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivityIntegrationData;
 use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\persistent\event_persistent;
 use enrol_arlo\local\persistent\online_activity_persistent;
@@ -33,6 +37,7 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
 use moodle_url;
 use ReflectionClass;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -60,10 +65,10 @@ class external {
         }
         $pluginconfig = new arlo_plugin_config();
         $client = client::get_instance();
-        $uri = new RequestUri();
-        $uri->setHost($pluginconfig->get('platform'));
-        $uri->setResourcePath("registrations/{$id}/");
-        $request = new Request('GET', $uri->output(true));
+        $requesturi = new RequestUri();
+        $requesturi->setHost($pluginconfig->get('platform'));
+        $requesturi->setResourcePath("registrations/{$id}/");
+        $request = new Request('GET', $requesturi->output(true));
         $response = $client->send_request($request);
         $resource = response_processor::process($response);
         return $resource;
@@ -84,10 +89,10 @@ class external {
         }
         $pluginconfig = new arlo_plugin_config();
         $client = client::get_instance();
-        $uri = new RequestUri();
-        $uri->setHost($pluginconfig->get('platform'));
-        $uri->setResourcePath("{$collection}/{$id}/");
-        $request = new Request('GET', $uri->output(true));
+        $requesturi = new RequestUri();
+        $requesturi->setHost($pluginconfig->get('platform'));
+        $requesturi->setResourcePath("{$collection}/{$id}/");
+        $request = new Request('GET', $requesturi->output(true));
         try {
             $response = $client->send($request);
             $statuscode = $response->getStatusCode();
@@ -105,7 +110,7 @@ class external {
             // Log request.
             $requestlog = new request_log_persistent();
             $requestlog->set('timelogged', time());
-            $requestlog->set('uri', $uri->output(true));
+            $requestlog->set('uri', $requesturi->output(true));
             if (isset($statuscode)) {
                 $requestlog->set('status', $statuscode);
             }
@@ -144,18 +149,119 @@ class external {
         if ($type == arlo_type::EVENT) {
             $eventpersistent = event_persistent::get_record(['sourceguid' => $guid]);
             $collection = 'events';
-            $id = $eventpersistent->get('id');
+            $id = $eventpersistent->get('sourceid'); // EventID.
             $resource = static::get_resource($collection, $id);
         }
         if ($type == arlo_type::ONLINEACTIVITY) {
             $onlineactivitypersistent = online_activity_persistent::get_record(['sourceguid' => $guid]);
             $collection = 'onlineactivities';
-            $id = $onlineactivitypersistent->get('id');
-            $resource = static::get_resource($collection, $id);
+            $id = $onlineactivitypersistent->get('sourceid');
+            $resource = static::get_resource($collection, $id); // OnlineActvityID.
         }
-        if ($resource->ContentUri != $contenturi) {
+        if (!is_null($resource) && ($resource->ContentUri != $contenturi)) {
             $data['ContentUri'] = $contenturi;
             static::patch_resource($collection, $id, $resource, $data);
+        }
+    }
+
+    /**
+     * @param $type
+     * @param string $guid
+     * @param stdClass $instance
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \moodle_exception
+     * @throws coding_exception
+     */
+    public static function update_manageuri($type, string $guid, stdClass $instance) {
+        if (!in_array($type, [arlo_type::EVENT, arlo_type::ONLINEACTIVITY])) {
+            throw new InvalidArgumentException('Only arlo_type::EVENT, arlo_type::ONLINEACTIVITY are valid');
+        }
+        // Build URL for editing an enrolment instance.
+        $manageurl = new moodle_url(
+            '/enrol/editinstance.php',
+            ['id' => $instance->id, 'courseid' => $instance->courseid, 'type' => $instance->enrol]
+        );
+
+        $integrationdata = null;
+        $resourcename = null;
+        if ($type == arlo_type::EVENT) {
+            $eventpersistent = event_persistent::get_record(['sourceguid' => $guid]);
+            if (!$eventpersistent) {
+                throw new coding_exception('Record not found.');
+            }
+            $event = new Event();
+            $event->EventID = $eventpersistent->get('sourceid');
+            $integrationdata = new EventIntegrationData($event);
+            $resourcename = 'EventIntegrationData';
+            $integrationdata->setEditUri($manageurl->out(false));
+        }
+        if ($type == arlo_type::ONLINEACTIVITY) {
+            $onlineactivitypersistent = online_activity_persistent::get_record(['sourceguid' => $guid]);
+            if (!$onlineactivitypersistent) {
+                throw new coding_exception('Record not found.');
+            }
+            $onlineactivity = new OnlineActivity();
+            $onlineactivity->OnlineActivityID = $onlineactivitypersistent->get('sourceid');
+            $integrationdata = new OnlineActivityIntegrationData($onlineactivity);
+            $resourcename = 'OnlineActivityIntegrationData';
+            $integrationdata->setEditUri($manageurl->out(false));
+        }
+
+        $pluginconfig = new arlo_plugin_config();
+        $requesturi = new RequestUri();
+        $requesturi->setHost($pluginconfig->get('platform'));
+        $requesturi->setResourcePath($integrationdata->buildResourcePath());
+        $dom = new DOMDocument('1.0', 'utf-8');
+        $root = $dom->appendChild(new DOMElement($resourcename));
+        $root->appendChild($dom->createElement('VendorID', $integrationdata->getVendorID()));
+        $edituri = htmlspecialchars($integrationdata->getEditUri());
+        $root->appendChild($dom->createElement('EditUri', $edituri));
+        // Link
+        $link = $dom->createElement('Link');
+        $attr = $dom->createAttribute('rel');
+        $attr->value = 'self' ;
+        $link->appendChild($attr);
+        $root->appendChild($link);
+        $attr = $dom->createAttribute('type');
+        $attr->value = 'application/xml' ;
+        $link->appendChild($attr);
+        $root->appendChild($link);
+        $attr = $dom->createAttribute('href');
+        $attr->value = htmlspecialchars($requesturi->output(true));
+        $link->appendChild($attr);
+        $root->appendChild($link);
+        // Generate XML Payload.
+        $xmlbody = $dom->saveXML();
+        // Get HTTP client and create the request.
+        $client = client::get_instance();
+        $request = new Request(
+            'PUT',
+            $requesturi->output(true),
+            ['Content-type' => 'application/xml; charset=utf-8'],
+            $xmlbody
+        );
+        try {
+            $response = $client->send($request);
+            $statuscode = $response->getStatusCode();
+        } catch (Exception $ex) {
+            $statuscode = $ex->getCode();
+            $message = $ex->getMessage();
+            debugging($message, DEBUG_DEVELOPER);
+        } finally {
+            if (isset($statuscode)) {
+                $pluginconfig->set('apistatus', $statuscode);
+            }
+            // Log request.
+            $requestlog = new request_log_persistent();
+            $requestlog->set('timelogged', time());
+            $requestlog->set('uri', $requesturi->output(true));
+            if (isset($statuscode)) {
+                $requestlog->set('status', $statuscode);
+            }
+            if (isset($message)) {
+                $requestlog->set('extra', $message);
+            }
+            $requestlog->save();
         }
     }
 
@@ -181,9 +287,9 @@ class external {
         $resourcename = ucfirst($reflection->getShortName());
         $pluginconfig = new arlo_plugin_config();
         $client = client::get_instance();
-        $uri = new RequestUri();
-        $uri->setHost($pluginconfig->get('platform'));
-        $uri->setResourcePath("{$collection}/{$id}/");
+        $requesturi = new RequestUri();
+        $requesturi->setHost($pluginconfig->get('platform'));
+        $requesturi->setResourcePath("{$collection}/{$id}/");
         $dom = new DOMDocument('1.0', 'utf-8');
         $root = $dom->appendChild(new DOMElement('diff'));
         foreach ($data as $key => $value) {
@@ -204,7 +310,7 @@ class external {
         $xmlbody = $dom->saveXML();
         $request = new Request(
             'PATCH',
-            $uri->output(true),
+            $requesturi->output(true),
             ['Content-type' => 'application/xml; charset=utf-8'],
             $xmlbody
         );
@@ -223,7 +329,7 @@ class external {
             // Log request.
             $requestlog = new request_log_persistent();
             $requestlog->set('timelogged', time());
-            $requestlog->set('uri', $uri->output(true));
+            $requestlog->set('uri', $requesturi->output(true));
             if (isset($statuscode)) {
                 $requestlog->set('status', $statuscode);
             }
@@ -253,9 +359,9 @@ class external {
         $pluginconfig = new arlo_plugin_config();
         $updatableproperties = explode(',', $pluginconfig->get('updatableregistrationproperties'));
         $client = client::get_instance();
-        $uri = new RequestUri();
-        $uri->setHost($pluginconfig->get('platform'));
-        $uri->setResourcePath("registrations/{$id}/");
+        $requesturi = new RequestUri();
+        $requesturi->setHost($pluginconfig->get('platform'));
+        $requesturi->setResourcePath("registrations/{$id}/");
         $dom = new DOMDocument('1.0', 'utf-8');
         $root = $dom->appendChild(new DOMElement('diff'));
         foreach ($data as $key => $value) {
@@ -278,7 +384,7 @@ class external {
         $xmlbody = $dom->saveXML();
         $request = new Request(
             'PATCH',
-            $uri->output(true),
+            $requesturi->output(true),
             ['Content-type' => 'application/xml; charset=utf-8'],
             $xmlbody
         );
@@ -301,7 +407,7 @@ class external {
             // Log request.
             $requestlog = new request_log_persistent();
             $requestlog->set('timelogged', time());
-            $requestlog->set('uri', $uri->output(true));
+            $requestlog->set('uri', $requesturi->output(true));
             if (isset($statuscode)) {
                 $requestlog->set('status', $statuscode);
             }

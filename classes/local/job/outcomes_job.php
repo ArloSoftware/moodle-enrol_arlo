@@ -147,12 +147,16 @@ class outcomes_job extends job {
                     $sourceregistration = external::get_registration_resource($registrationid);
                     $learnerprogress = new learner_progress($course, $user);
                     $data = $learnerprogress->get_keyed_data_for_arlo();
+                    debugging(implode(',', $data), DEBUG_DEVELOPER);
                     if (!empty($data)) {
                         external::patch_registration_resource($sourceregistration, $data);
                     }
-                    // Reset update flag.
-                    $registrationpersistent->set('updatesource', 0);
-                    $registrationpersistent->save();
+                    // Daily and regular completion tasks may not have run yet.
+                    if ($learnerprogress->get_datestarted() != null) {
+                        // Reset update flag.
+                        $registrationpersistent->set('updatesource', 0);
+                        $registrationpersistent->save();
+                    }
                 } catch (moodle_exception $exception) {
                     debugging($exception->getMessage(), DEBUG_DEVELOPER);
                     $this->add_error($exception->getMessage());

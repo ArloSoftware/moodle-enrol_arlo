@@ -206,6 +206,8 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @param object $course
      * @param array|null $fields
      * @return int
+     * @throws ReflectionException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws coding_exception
      * @throws dml_exception
      * @throws moodle_exception
@@ -293,12 +295,13 @@ class enrol_arlo_plugin extends enrol_plugin {
             $persistent->get_time_norequests_after()
         );
 
-        // Add ContentUri on Arlo end.
+        // Update Content Uri and Manage Uri on Arlo.
         if ($pluginconfig->get('allowportalintegration')) {
             $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
             external::update_contenturi($fields['customchar2'], $fields['customchar3'], $courseurl);
+            $instance = $this-> get_instance_record($instanceid, MUST_EXIST);
+            external::update_manageuri($fields['customchar2'], $fields['customchar3'], $instance);
         }
-
         return $instanceid;
     }
 
@@ -366,8 +369,11 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @param stdClass $instance
      * @param stdClass $data
      * @return bool
+     * @throws ReflectionException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws coding_exception
      * @throws dml_exception
+     * @throws moodle_exception
      * @throws required_capability_exception
      */
     public function update_instance($instance, $data) {
@@ -420,14 +426,16 @@ class enrol_arlo_plugin extends enrol_plugin {
             $data->customint2 = $groupid;
         }
 
-        // Add ContentUri on Arlo end.
+        $updatestatus = parent::update_instance($instance, $data);
+
+        // Update Content Uri and Manage Uri on Arlo.
         $pluginconfig = new arlo_plugin_config();
         if ($pluginconfig->get('allowportalintegration')) {
             $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
             external::update_contenturi($instance->customchar2, $instance->customchar3, $courseurl);
+            external::update_manageuri($instance->customchar2, $instance->customchar3, $instance);
         }
-
-        return parent::update_instance($instance, $data);
+        return $updatestatus;
     }
 
     /**
