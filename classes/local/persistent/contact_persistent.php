@@ -95,11 +95,13 @@ class contact_persistent extends persistent {
             ],
             'sourcecreated' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'sourcemodified' => [
                 'type' => PARAM_TEXT,
-                'null' => NULL_ALLOWED
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'usercreationfailure' => [
                 'type' => PARAM_INT,

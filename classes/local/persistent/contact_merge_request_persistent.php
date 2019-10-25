@@ -64,7 +64,8 @@ class contact_merge_request_persistent extends persistent {
             ),
             'sourcecreated' => array(
                 'type' => PARAM_TEXT,
-
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'sourceuserid' => array(
                 'type' => PARAM_INT,
