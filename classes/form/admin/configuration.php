@@ -125,10 +125,16 @@ class configuration extends \moodleform {
         $form->setDefault('allowunenrolaccessedui', 0);
         $form->addHelpButton('allowunenrolaccessedui', 'allowunenrolaccessedui', 'enrol_arlo');
 
-        //$form->addElement('advcheckbox', 'allowportalintegration',
-        //    get_string('allowportalintegration', 'enrol_arlo'), get_string('allowportalintegration_text', 'enrol_arlo'));
-        //$form->setDefault('allowportalintegration', 0);
-        //$form->addHelpButton('allowportalintegration', 'allowportalintegration', 'enrol_arlo');
+        $form->addElement('advcheckbox', 'allowportalintegration',
+            get_string('allowportalintegration', 'enrol_arlo'), get_string('allowportalintegration_text', 'enrol_arlo'));
+        $form->setDefault('allowportalintegration', 0);
+        $form->addHelpButton('allowportalintegration', 'allowportalintegration', 'enrol_arlo');
+
+        $form->addElement('text', 'updatableregistrationproperties',
+            get_string('updatableregistrationproperties', 'enrol_arlo'));
+        $form->setType('updatableregistrationproperties', PARAM_TAGLIST);
+        $form->setDefault('updatableregistrationproperties', arlo_plugin_config::get_property_default('updatableregistrationproperties'));
+        $form->addHelpButton('updatableregistrationproperties', 'updatableregistrationproperties', 'enrol_arlo');
 
         $form->addElement('header', 'cleanup', get_string('cleanup', 'enrol_arlo'));
         $form->setExpanded('cleanup', true);

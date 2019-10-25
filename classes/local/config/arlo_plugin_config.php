@@ -128,7 +128,7 @@ class arlo_plugin_config extends plugin_config {
             ],
             'requestlogcleanup' => [
                 'type' => PARAM_INT,
-                'default' => 0
+                'default' => 7
             ],
             'throttlerequests' => [
                 'type' => PARAM_INT,
@@ -148,11 +148,11 @@ class arlo_plugin_config extends plugin_config {
             ],
             'allowportalintegration' => [
                 'type' => PARAM_INT,
-                'default' => 0
+                'default' => 1
             ],
             'updatableregistrationproperties' => [
                 'type' => PARAM_TAGLIST,
-                'default' => 'LastActivityDateTime,Outcome,Grade,ProgressStatus,ProgressPercent'
+                'default' => 'LastActivityDateTime,Outcome,Grade,ProgressStatus,ProgressPercent,DateTimeCompleted'
             ]
         ];
     }
@@ -199,6 +199,29 @@ class arlo_plugin_config extends plugin_config {
                 $this->raw_set('apistatus', $value);
                 $this->raw_set('apierrorcounter', 0);
         }
+    }
+
+    /**
+     * Updatable registration properties.
+     *
+     * @param $value
+     * @throws \coding_exception
+     */
+    protected function set_updatableregistrationproperties($value) {
+        $properties = explode(',', $value);
+        $defaults = explode(',', self::get_property_default('updatableregistrationproperties'));
+        $new = [];
+        if (!empty($properties)) {
+            foreach ($properties as $property) {
+                if (in_array($property, $defaults)) {
+                    $new[] = $property;
+                }
+            }
+        }
+        if (empty($new)) {
+            $new = $defaults;
+        }
+        $this->raw_set('updatableregistrationproperties', implode(',', $new));
     }
 
 }
