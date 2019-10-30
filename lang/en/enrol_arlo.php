@@ -418,4 +418,8 @@ $string['courseenrolment'] = 'Course enrolment';
 $string['cleanup'] = 'Cleanup';
 $string['usernamegeneration_desc'] = '<p>The order in which different username formats are used to generate a username for a new Moodle user account. If existing account found with same username as generated, the next format in order will be tried.</p><br>';
 $string['updatableregistrationproperties'] = 'Updatable result properties';
-$string['updatableregistrationproperties_help'] = 'Result and progress properties for an Arlo registration that can be updated by Moodle.';
+$string['updatableregistrationproperties_help'] = '
+Result and progress properties for an Arlo registration that can be updated by Moodle.
+
+Properties available: 
+LastActivityDateTime, Outcome, Grade, ProgressStatus, ProgressPercent, CompletedDateTime';
