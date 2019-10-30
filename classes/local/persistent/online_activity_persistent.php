@@ -76,10 +76,14 @@ class online_activity_persistent extends persistent {
                 'type' => PARAM_TEXT
             ],
             'sourcecreated' => [
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'sourcemodified' => [
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ],
             'sourcetemplateid' => [
                 'type' => PARAM_INT,

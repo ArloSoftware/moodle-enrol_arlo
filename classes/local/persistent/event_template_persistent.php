@@ -68,9 +68,13 @@ class event_template_persistent extends persistent {
             ),
             'sourcecreated' => array(
                 'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             ),
             'sourcemodified' => array(
-                'type' => PARAM_TEXT
+                'type' => PARAM_TEXT,
+                'null' => NULL_ALLOWED,
+                'default' => null
             )
         );
     }
