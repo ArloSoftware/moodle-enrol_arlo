@@ -193,7 +193,7 @@ class external {
             $event->EventID = $eventpersistent->get('sourceid');
             $integrationdata = new EventIntegrationData($event);
             $resourcename = 'EventIntegrationData';
-            $integrationdata->setEditUri($manageurl->out(false));
+            $integrationdata->setManageUri($manageurl->out(false));
         }
         if ($type == arlo_type::ONLINEACTIVITY) {
             $onlineactivitypersistent = online_activity_persistent::get_record(['sourceguid' => $guid]);
@@ -204,7 +204,7 @@ class external {
             $onlineactivity->OnlineActivityID = $onlineactivitypersistent->get('sourceid');
             $integrationdata = new OnlineActivityIntegrationData($onlineactivity);
             $resourcename = 'OnlineActivityIntegrationData';
-            $integrationdata->setEditUri($manageurl->out(false));
+            $integrationdata->setManageUri($manageurl->out(false));
         }
 
         $pluginconfig = new arlo_plugin_config();
@@ -214,8 +214,8 @@ class external {
         $dom = new DOMDocument('1.0', 'utf-8');
         $root = $dom->appendChild(new DOMElement($resourcename));
         $root->appendChild($dom->createElement('VendorID', $integrationdata->getVendorID()));
-        $edituri = htmlspecialchars($integrationdata->getEditUri());
-        $root->appendChild($dom->createElement('EditUri', $edituri));
+        $manageuri = htmlspecialchars($integrationdata->getManageUri());
+        $root->appendChild($dom->createElement('ManageUri', $manageuri));
         // Link
         $link = $dom->createElement('Link');
         $attr = $dom->createAttribute('rel');

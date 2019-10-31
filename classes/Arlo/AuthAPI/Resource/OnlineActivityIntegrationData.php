@@ -7,7 +7,7 @@ use UnexpectedValueException;
 
 class OnlineActivityIntegrationData {
 
-    private $editUri;
+    private $manageUri;
 
     private $onlineActivity;
 
@@ -19,15 +19,15 @@ class OnlineActivityIntegrationData {
         return IntegrationData::VendorID;
     }
 
-    public function getEditUri($toString = true) {
+    public function getManageUri($toString = true) {
         if ($toString) {
-            return (string) $this->editUri;
+            return (string) $this->manageUri;
         }
-        return $this->editUri;
+        return $this->manageUri;
     }
 
-    public function setEditUri(string $uri) {
-        $this->editUri = new Uri($uri);
+    public function setManageUri(string $uri) {
+        $this->manageUri = new Uri($uri);
     }
 
     public function setOnlineActivity($onlineActivity) {

@@ -7,7 +7,7 @@ use UnexpectedValueException;
 
 class EventIntegrationData {
 
-    private $editUri;
+    private $manageUri;
 
     private $event;
 
@@ -19,15 +19,15 @@ class EventIntegrationData {
         $this->setEvent($event);
     }
 
-    public function getEditUri($toString = true) {
+    public function getManageUri($toString = true) {
         if ($toString) {
-            return (string) $this->editUri;
+            return (string) $this->manageUri;
         }
-        return $this->editUri;
+        return $this->manageUri;
     }
 
-    public function setEditUri(string $uri) {
-        $this->editUri = new Uri($uri);
+    public function setManageUri(string $uri) {
+        $this->manageUri = new Uri($uri);
     }
 
     public function setEvent($event) {
