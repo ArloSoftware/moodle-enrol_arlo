@@ -427,5 +427,20 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
 
     }
 
+    // Upgrade v3.8.x
+    if ($oldversion < 2019111400) {
+
+        // Enable new functionality by default.
+        set_config('allowportalintegration', 1, 'enrol_arlo');
+        set_config(
+            'updatebleregistrationproperties',
+            'LastActivityDateTime,Outcome,Grade,ProgressStatus,ProgressPercent,CompletedDateTime',
+            'enrol_arlo'
+        );
+
+        // Arlo savepoint reached.
+        upgrade_plugin_savepoint(true, 2019111400, 'enrol', 'arlo');
+    }
+
     return true;
 }
