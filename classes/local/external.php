@@ -357,7 +357,7 @@ class external {
             throw new coding_exception('UnexpectedValueException');
         }
         $pluginconfig = new arlo_plugin_config();
-        $updatableproperties = explode(',', $pluginconfig->get('updatableregistrationproperties'));
+        $updatebleproperties = explode(',', $pluginconfig->get('updatebleregistrationproperties'));
         $client = client::get_instance();
         $requesturi = new RequestUri();
         $requesturi->setHost($pluginconfig->get('platform'));
@@ -366,7 +366,7 @@ class external {
         $root = $dom->appendChild(new DOMElement('diff'));
         foreach ($data as $key => $value) {
             if (!is_null($value)) {
-                if (in_array($key, $updatableproperties) && ($registration->{$key} != $value)) {
+                if (in_array($key, $updatebleproperties) && ($registration->{$key} != $value)) {
                     if (!is_null($registration->{$key})) {
                         $element = $dom->createElement('replace', $value);
                         $element->setAttribute("sel", "Registration/{$key}/text()[1]");

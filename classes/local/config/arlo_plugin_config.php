@@ -148,11 +148,11 @@ class arlo_plugin_config extends plugin_config {
             ],
             'allowportalintegration' => [
                 'type' => PARAM_INT,
-                'default' => 0
+                'default' => 1
             ],
-            'updatableregistrationproperties' => [
+            'updatebleregistrationproperties' => [
                 'type' => PARAM_TAGLIST,
-                'default' => 'LastActivityDateTime,Outcome,Grade,ProgressStatus,ProgressPercent',
+                'default' => 'LastActivityDateTime,Outcome,Grade,ProgressStatus,ProgressPercent,CompletedDateTime',
                 'choices' => [
                     'LastActivityDateTime',
                     'Outcome',
@@ -210,14 +210,14 @@ class arlo_plugin_config extends plugin_config {
     }
 
     /**
-     * Updatable registration properties.
+     * Updateble registration properties.
      *
      * @param $value
      * @throws \coding_exception
      */
-    protected function set_updatableregistrationproperties($value) {
+    protected function set_updatebleregistrationproperties($value) {
         $properties = explode(',', $value);
-        $choices = self::get_property_choices('updatableregistrationproperties');
+        $choices = self::get_property_choices('updatebleregistrationproperties');
         $new = [];
         if (!empty($properties)) {
             foreach ($properties as $property) {
@@ -227,9 +227,9 @@ class arlo_plugin_config extends plugin_config {
             }
         }
         if (empty($new)) {
-            $new = explode(',', self::get_property_default('updatableregistrationproperties'));
+            $new = explode(',', self::get_property_default('updatebleregistrationproperties'));
         }
-        $this->raw_set('updatableregistrationproperties', implode(',', $new));
+        $this->raw_set('updatebleregistrationproperties', implode(',', $new));
     }
 
 }
