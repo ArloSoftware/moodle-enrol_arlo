@@ -50,7 +50,6 @@ class daily extends scheduled_task {
         if (!enrol_is_enabled('arlo')) {
             return;
         }
-        api::run_associate_all();
         api::run_cleanup();
         return;
     }
