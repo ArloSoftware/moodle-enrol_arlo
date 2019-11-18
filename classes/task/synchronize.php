@@ -53,7 +53,8 @@ class synchronize extends scheduled_task {
         }
         api::run_site_jobs();
         api::run_associate_all();
-        api::run_scheduled_jobs();
+        api::run_scheduled_jobs('enrolment', 'memberships');
+        api::run_scheduled_jobs('enrolment', 'outcomes');
         $manager = new manager();
         $manager->process_expirations();
         $manager->process_email_queue();

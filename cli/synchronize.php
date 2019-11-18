@@ -89,7 +89,9 @@ if ($interactive) {
     }
 }
 enrol_arlo\api::run_site_jobs($trace);
-enrol_arlo\api::run_scheduled_jobs($time, null, $trace);
+enrol_arlo\api::run_scheduled_jobs('enrolment', 'memberships', $time, null, $trace);
+enrol_arlo\api::run_scheduled_jobs('enrolment', 'outcomes', $time, null, $trace);
+enrol_arlo\api::run_scheduled_jobs('enrolment', 'contacts', $time, null, $trace);
 enrol_arlo\api::run_cleanup();
 $manager = new enrol_arlo\manager();
 $manager->process_expirations();

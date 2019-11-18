@@ -37,6 +37,7 @@ use enrol_arlo_plugin;
 use moodle_exception;
 use progress_trace;
 use null_progress_trace;
+use UnexpectedValueException;
 
 /**
  * API Class
@@ -115,7 +116,7 @@ class api {
      * @throws \dml_exception
      * @throws moodle_exception
      */
-    public static function run_scheduled_jobs($time = null, $limit = 1000, progress_trace $trace = null) {
+    public static function run_scheduled_jobs($area, $type, $time = null, $limit = 1000, progress_trace $trace = null) {
         global $DB;
         if (!static::api_callable($trace)) {
             return false;
@@ -129,9 +130,12 @@ class api {
         if (is_null($trace)) {
             $trace = new null_progress_trace();
         }
-        $pluginconfig = static::get_enrolment_plugin()->get_plugin_config();
+        if (!in_array($area, ['site', 'enrolment'])) {
+            throw new UnexpectedValueException('Not a valid area');
+        }
         $conditions = [
-            'area' => 'site',
+            'area' => $area,
+            'type' => $type,
             'disabled' => 1,
             'timerequestnow' => $time,
             'timenorequest' => $time
@@ -139,10 +143,11 @@ class api {
         $timingdelaysql = "AND (timelastrequest + timenextrequestdelay) < :timerequestnow";
         $sql = "SELECT *
                   FROM {enrol_arlo_scheduledjob}
-                 WHERE area <> :area
+                 WHERE area = :area
+                   AND type = :type
                    AND disabled <> 1
                    $timingdelaysql
-                   AND (:timenorequest < (timenorequestsafter + timerequestsafterextension) OR timenorequestsafter = 0)";
+                   AND ((:timenorequest < (timenorequestsafter + timerequestsafterextension)) OR timelastrequest = 0)";
         $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
         if ($rs->valid()) {
             foreach ($rs as $record) {
