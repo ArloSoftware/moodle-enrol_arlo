@@ -108,6 +108,7 @@ class event_persistent extends persistent {
      */
     public function get_time_norequests_after() {
         $status = $this->get('sourcestatus');
+        $nowepoch = time();
         $finishdatetime = $this->get('finishdatetime');
         if (!empty($status) && !empty($finishdatetime)) {
             if ($status == EventStatus::ACTIVE) {
@@ -115,11 +116,13 @@ class event_persistent extends persistent {
                     $finishdatetime,
                     core_date::get_user_timezone_object()
                 );
-                return $finishdate->getTimestamp();
+                $finishepoch = $finishdate->getTimestamp();
+                if ($finishepoch > $nowepoch) {
+                    return $finishepoch;
+                }
             }
         }
-        return time();
-
+        return $nowepoch;
     }
 
     /**
