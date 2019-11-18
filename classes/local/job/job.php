@@ -46,7 +46,7 @@ abstract class job {
     const TIME_PERIOD_DELAY = 900; // 15 Minutes.
 
     /** @var int TIME_PERIOD_EXTENSION time in seconds to extend pass no more requests time. */
-    const TIME_PERIOD_EXTENSION = 259200; // 72 Hours.
+    const TIME_PERIOD_EXTENSION = 604800; // 7 Days.
 
     /** @var int TIME_LOCK_TIMEOUT time in seconds to wait for a lock before giving up. */
     const TIME_LOCK_TIMEOUT = 5; // 5 Seconds.
