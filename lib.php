@@ -34,10 +34,10 @@ use enrol_arlo\local\external;
 use enrol_arlo\manager;
 use enrol_arlo\local\config\arlo_plugin_config;
 use enrol_arlo\local\enum\arlo_type;
+use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\persistent\job_persistent;
 use enrol_arlo\local\persistent\event_persistent;
 use enrol_arlo\local\persistent\online_activity_persistent;
-use enrol_arlo\local\job\job;
 use enrol_arlo\local\job\memberships_job;
 use enrol_arlo\local\job\contacts_job;
 use enrol_arlo\local\job\outcomes_job;
@@ -400,6 +400,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         );
         $membershipsjob->reset_sync_state_information();
         $membershipsjob->set('timenorequestsafter', $timenorequestsafter);
+        $membershipsjob->set('timenextrequestdelay', enrol_arlo\local\job\job::TIME_PERIOD_DELAY);
+        $membershipsjob->set('timerequestsafterextension', enrol_arlo\local\job\job::TIME_PERIOD_EXTENSION);
         $membershipsjob->save();
 
         $outcomesjob = job_persistent::get_record(
@@ -407,6 +409,8 @@ class enrol_arlo_plugin extends enrol_plugin {
         );
         $outcomesjob->reset_sync_state_information();
         $outcomesjob->set('timenorequestsafter', $timenorequestsafter);
+        $outcomesjob->set('timenextrequestdelay', enrol_arlo\local\job\job::TIME_PERIOD_DELAY);
+        $outcomesjob->set('timerequestsafterextension', enrol_arlo\local\job\job::TIME_PERIOD_EXTENSION);
         $outcomesjob->save();
 
         $contactsjob = job_persistent::get_record(
@@ -414,6 +418,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         );
         $contactsjob->reset_sync_state_information();
         $contactsjob->set('timenorequestsafter', $timenorequestsafter);
+        $contactsjob->set('timenextrequestdelay', enrol_arlo\local\job\contacts_job::TIME_PERIOD_DELAY);
         $contactsjob->save();
 
         // Create a new course group if required.

@@ -175,10 +175,7 @@ class job_persistent extends persistent {
         $statefields = [
             'lastsourceid',
             'lastsourcetimemodified',
-            'timelastrequest',
-            'timenextrequestdelay',
-            'timenorequestsafter',
-            'timerequestsafterextension'
+            'timelastrequest'
         ];
         foreach ($statefields as $statefield) {
             if (isset($properties[$statefield]['default'])) {

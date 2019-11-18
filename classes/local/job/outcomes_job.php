@@ -140,31 +140,37 @@ class outcomes_job extends job {
                 ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1]
             );
             $course = get_course($enrolmentinstance->courseid);
-            foreach ($registrations as $registrationpersistent) {
-                try {
-                    $user = core_user::get_user($registrationpersistent->get('userid'));
-                    $registrationid = $registrationpersistent->get('sourceid');
-                    $sourceregistration = external::get_registration_resource($registrationid);
-                    $learnerprogress = new learner_progress($course, $user);
-                    $data = $learnerprogress->get_keyed_data_for_arlo();
-                    debugging(implode(',', $data), DEBUG_DEVELOPER);
-                    if (!empty($data)) {
-                        external::patch_registration_resource($sourceregistration, $data);
+            if (!$registrations) {
+                // Update scheduling information on persistent after successfull save.
+                $jobpersistent->set('timelastrequest', time());
+                $jobpersistent->save();
+            } else {
+                foreach ($registrations as $registrationpersistent) {
+                    try {
+                        $user = core_user::get_user($registrationpersistent->get('userid'));
+                        $registrationid = $registrationpersistent->get('sourceid');
+                        $sourceregistration = external::get_registration_resource($registrationid);
+                        $learnerprogress = new learner_progress($course, $user);
+                        $data = $learnerprogress->get_keyed_data_for_arlo();
+                        debugging(implode(',', $data), DEBUG_DEVELOPER);
+                        if (!empty($data)) {
+                            external::patch_registration_resource($sourceregistration, $data);
+                        }
+                        // Daily and regular completion tasks may not have run yet.
+                        if ($learnerprogress->get_datestarted() != null) {
+                            // Reset update flag.
+                            $registrationpersistent->set('updatesource', 0);
+                            $registrationpersistent->save();
+                        }
+                    } catch (moodle_exception $exception) {
+                        debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                        $this->add_error($exception->getMessage());
+                        $registrationpersistent->set('errormessage', $exception->getMessage());
+                    } finally {
+                        // Update scheduling information on persistent after successfull save.
+                        $jobpersistent->set('timelastrequest', time());
+                        $jobpersistent->save();
                     }
-                    // Daily and regular completion tasks may not have run yet.
-                    if ($learnerprogress->get_datestarted() != null) {
-                        // Reset update flag.
-                        $registrationpersistent->set('updatesource', 0);
-                        $registrationpersistent->save();
-                    }
-                } catch (moodle_exception $exception) {
-                    debugging($exception->getMessage(), DEBUG_DEVELOPER);
-                    $this->add_error($exception->getMessage());
-                    $registrationpersistent->set('errormessage', $exception->getMessage());
-                } finally {
-                    // Update scheduling information on persistent after successfull save.
-                    $jobpersistent->set('timelastrequest', time());
-                    $jobpersistent->save();
                 }
             }
             $lock->release();
