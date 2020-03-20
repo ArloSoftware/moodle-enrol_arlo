@@ -442,5 +442,54 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2019111400, 'enrol', 'arlo');
     }
 
+    if ($oldversion < 2020032000) {
+
+        // Changing precision of field errorcounter on table enrol_arlo_contact to (10).
+        $table = new xmldb_table('enrol_arlo_contact');
+        $field = new xmldb_field('errorcounter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'errormessage');
+
+        // Launch change of precision for field errorcounter.
+        $dbman->change_field_precision($table, $field);
+
+        // Define field usermodified to be dropped from enrol_arlo_templateassociate.
+        $table = new xmldb_table('enrol_arlo_templateassociate');
+        $field = new xmldb_field('modified');
+
+        // Conditionally launch drop field modified.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Define field usermodified to be added to enrol_arlo_templateassociate.
+        $table = new xmldb_table('enrol_arlo_templateassociate');
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'sourcetemplateguid');
+
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field timecreated to be added to enrol_arlo_templateassociate.
+        $table = new xmldb_table('enrol_arlo_templateassociate');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'usermodified');
+
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field timemodified to be added to enrol_arlo_templateassociate.
+        $table = new xmldb_table('enrol_arlo_templateassociate');
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timecreated');
+
+        // Conditionally launch add field timemodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Arlo savepoint reached.
+        upgrade_plugin_savepoint(true, 2020032000, 'enrol', 'arlo');
+    }
+
     return true;
 }
