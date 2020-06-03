@@ -106,6 +106,71 @@ class api {
     }
 
     /**
+     * Push result information to Arlo.
+     *
+     * @param int $limit
+     * @param progress_trace|null $trace
+     * @return bool
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws moodle_exception
+     */
+    public static function run_outcome_jobs($limit = 1000, progress_trace $trace = null) {
+        global $DB;
+        if (!static::api_callable($trace)) {
+            return false;
+        }
+        if (!is_number($limit) || $limit > 1000) {
+            $limit = 1000;
+        }
+        if (is_null($trace)) {
+            $trace = new null_progress_trace();
+        }
+        $sql = "SELECT *
+                  FROM {enrol_arlo_scheduledjob}
+                 WHERE area = :area
+                   AND type = :type
+                   AND disabled <> :disabled";
+        $conditions = [
+            'area' => 'enrolment',
+            'type' => 'outcomes',
+            'disabled' => 1,
+        ];
+        $rs = $DB->get_recordset_sql($sql, $conditions);
+        foreach ($rs as $record) {
+            try {
+                $jobpersistent = new job_persistent(0, $record);
+                $scheduledjob = job_factory::create_from_persistent($jobpersistent);
+                $trace->output($scheduledjob->get_job_run_identifier());
+                $scheduledjob->set_trace($trace);
+                if (!$scheduledjob->can_run()) {
+                    if ($scheduledjob->has_reasons()) {
+                        $trace->output('Cannot run for following reasons:', 1);
+                        foreach ($scheduledjob->get_reasons() as $reason) {
+                            $trace->output($reason, 2);
+                        }
+                    }
+                } else {
+                    $trace->output('Can run job', 1);
+                    $status = $scheduledjob->run();
+                    if (!$status) {
+                        if ($scheduledjob->has_errors()) {
+                            $trace->output('Failed with errors.', 1);
+                            $jobpersistent->set_errors($scheduledjob->get_errors());
+                            $jobpersistent->save();
+                        }
+                    } else {
+                        $trace->output('Completed', 1);
+                    }
+                }
+            } catch (Exception $exception) {
+                throw $exception;
+            }
+        }
+        $rs->close();
+    }
+
+    /**
      * Main method for running scheduled type jobs that call the Arlo API.
      *
      * @param null $time
@@ -164,6 +229,7 @@ class api {
                             }
                         }
                     } else {
+                        $trace->output('Can run job', 1);
                         $status = $scheduledjob->run();
                         if (!$status) {
                             if ($scheduledjob->has_errors()) {
@@ -171,7 +237,6 @@ class api {
                                 $jobpersistent->set_errors($scheduledjob->get_errors());
                                 $jobpersistent->save();
                             }
-
                         } else {
                             $trace->output('Completed', 1);
                         }
