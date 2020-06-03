@@ -28,6 +28,8 @@ namespace enrol_arlo\task;
 use core\task\scheduled_task;
 use enrol_arlo\api;
 use enrol_arlo\manager;
+use null_progress_trace;
+use text_progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -51,10 +53,14 @@ class synchronize extends scheduled_task {
         if (!enrol_is_enabled('arlo')) {
             return;
         }
+        $trace = new null_progress_trace();
+        if ($CFG->debug == DEBUG_DEVELOPER) {
+            $trace = new text_progress_trace();
+        }
         api::run_site_jobs();
         api::run_associate_all();
-        api::run_scheduled_jobs('enrolment', 'memberships');
-        api::run_scheduled_jobs('enrolment', 'outcomes');
+        api::run_scheduled_jobs('enrolment', 'memberships', null, 1000, $trace);
+        api::run_outcome_jobs(1000, $trace);
         $manager = new manager();
         $manager->process_expirations();
         $manager->process_email_queue();
