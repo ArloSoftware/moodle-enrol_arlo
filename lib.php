@@ -117,7 +117,10 @@ class enrol_arlo_plugin extends enrol_plugin {
         // Always update enrolment status, times and group.
         parent::enrol_user($instance,  $user->id, $instance->roleid, $timestart, $timeend, ENROL_USER_ACTIVE);
         if (!empty($instance->customint2) && $instance->customint2 != self::CREATE_GROUP) {
-            groups_add_member($instance->customint2, $user->id, 'enrol_arlo');
+            $exists = $DB->record_exists('groups', ['id' => $instance->customint2]);
+            if ($exists) {
+                groups_add_member($instance->customint2, $user->id, 'enrol_arlo');
+            }
         }
         // Do not send welcome email for users that have a user enrolment both active and inactive.
         if (!$existinguserenrolment) {

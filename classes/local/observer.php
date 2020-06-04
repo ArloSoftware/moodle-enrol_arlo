@@ -19,6 +19,7 @@ namespace enrol_arlo\local;
 defined('MOODLE_INTERNAL') || die();
 
 use core\event\course_completed;
+use core\event\course_viewed;
 use enrol_arlo\local\enum\arlo_type;
 
 /**
@@ -90,7 +91,7 @@ class observer {
      * @param $event
      * @throws \dml_exception
      */
-    public static function course_viewed($event) {
+    public static function course_viewed(course_viewed $event) {
         $courseid = $event->courseid;
         $userid   = $event->userid;
         static::set_update_source($courseid, $userid);

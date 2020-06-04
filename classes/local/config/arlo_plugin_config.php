@@ -161,7 +161,11 @@ class arlo_plugin_config extends plugin_config {
                     'ProgressPercent',
                     'CompletedDateTime'
                 ]
-            ]
+            ],
+            'outcomejobdefaultlimit' => [
+                'type' => PARAM_INT,
+                'default' => 100
+            ],
         ];
     }
 

@@ -296,25 +296,23 @@ class learner_progress {
         if ($this->get_datelastcourseaccess()) {
             $data['LastActivityDateTime'] = date('Y-m-d\TH:i:s.0000000+00:00', $this->get_datelastcourseaccess());
         }
-        if (!is_null($this->get_progressstatus())) {
+        if ($this->get_progressstatus()) {
             $data['ProgressStatus'] = $this->get_progressstatus();
         }
-        if (!is_null($this->get_datestarted())) {
-            if (!is_null($this->get_outcome())) {
-                $data['Outcome'] = $this->get_outcome();
-            }
-            if (!is_null($this->get_formattedgrade())) {
-                $data['Grade'] = $this->get_formattedgrade();
-            }
-            if (!is_null($this->get_progresspercentage())) {
-                $data['ProgressPercent'] = $this->get_progresspercentage();
-            }
-            if (!is_null($this->get_progressstatus())) {
-                $data['ProgressStatus'] = $this->get_progressstatus();
-            }
-            if (!is_null($this->get_datecompleted())) {
-                $data['CompletedDateTime'] = date('Y-m-d\TH:i:s.0000000+00:00', $this->get_datecompleted());
-            }
+        if ($this->get_outcome()) {
+            $data['Outcome'] = $this->get_outcome();
+        }
+        if ($this->get_formattedgrade()) {
+            $data['Grade'] = $this->get_formattedgrade();
+        }
+        if ($this->get_progresspercentage()) {
+            $data['ProgressPercent'] = $this->get_progresspercentage();
+        }
+        if ($this->get_progressstatus()) {
+            $data['ProgressStatus'] = $this->get_progressstatus();
+        }
+        if ($this->get_datecompleted()) {
+            $data['CompletedDateTime'] = date('Y-m-d\TH:i:s.0000000+00:00', $this->get_datecompleted());
         }
         return $data;
     }
