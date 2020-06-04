@@ -115,13 +115,13 @@ class api {
      * @throws \dml_exception
      * @throws moodle_exception
      */
-    public static function run_outcome_jobs($limit = 1000, progress_trace $trace = null) {
+    public static function run_outcome_jobs($limit = 100, progress_trace $trace = null) {
         global $DB;
         if (!static::api_callable($trace)) {
             return false;
         }
-        if (!is_number($limit) || $limit > 1000) {
-            $limit = 1000;
+        if (!is_number($limit) || $limit > 100) {
+            $limit = 100;
         }
         if (is_null($trace)) {
             $trace = new null_progress_trace();
