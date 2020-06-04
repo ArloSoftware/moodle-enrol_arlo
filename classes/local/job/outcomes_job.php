@@ -136,8 +136,10 @@ class outcomes_job extends job {
         $lockfactory = static::get_lock_factory();
         $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         if ($lock) {
+            $limit = $pluginconfig->get('outcomejobdefaultlimit');
             $registrations = registration_persistent::get_records(
-                ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1]
+                ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1],
+                'timelastrequest', 'ASC', 0, $limit
             );
             $course = get_course($enrolmentinstance->courseid);
             if (!$registrations) {
@@ -152,12 +154,10 @@ class outcomes_job extends job {
                         $sourceregistration = external::get_registration_resource($registrationid);
                         $learnerprogress = new learner_progress($course, $user);
                         $data = $learnerprogress->get_keyed_data_for_arlo();
-                        debugging(implode(',', $data), DEBUG_DEVELOPER);
                         if (!empty($data)) {
+                            $this->trace->output(implode(',', $data));
                             external::patch_registration_resource($sourceregistration, $data);
-                        }
-                        // Daily and regular completion tasks may not have run yet.
-                        if ($learnerprogress->get_datestarted() != null) {
+                            $registrationpersistent->set('timelastrequest', time());
                             // Reset update flag.
                             $registrationpersistent->set('updatesource', 0);
                             $registrationpersistent->save();
