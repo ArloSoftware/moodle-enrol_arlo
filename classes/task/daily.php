@@ -27,6 +27,8 @@ namespace enrol_arlo\task;
 
 use core\task\scheduled_task;
 use enrol_arlo\api;
+use null_progress_trace;
+use text_progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -50,7 +52,11 @@ class daily extends scheduled_task {
         if (!enrol_is_enabled('arlo')) {
             return;
         }
-        api::run_scheduled_jobs('enrolment', 'contacts');
+        $trace = new null_progress_trace();
+        if ($CFG->debug == DEBUG_DEVELOPER) {
+            $trace = new text_progress_trace();
+        }
+        api::run_scheduled_jobs('enrolment', 'contacts', null, 100, $trace);
         api::run_cleanup();
         return;
     }
