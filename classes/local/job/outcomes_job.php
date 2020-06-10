@@ -37,6 +37,7 @@ use enrol_arlo\local\client;
 use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\result;
+use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
 use coding_exception;
@@ -150,6 +151,9 @@ class outcomes_job extends job {
                 foreach ($registrations as $registrationpersistent) {
                     try {
                         $user = core_user::get_user($registrationpersistent->get('userid'));
+                        if (!$user) {
+                            throw new moodle_exception('moodleaccountdoesnotexist');
+                        }
                         $registrationid = $registrationpersistent->get('sourceid');
                         $sourceregistration = external::get_registration_resource($registrationid);
                         $learnerprogress = new learner_progress($course, $user);
@@ -157,16 +161,16 @@ class outcomes_job extends job {
                         if (!empty($data)) {
                             $this->trace->output(implode(',', $data));
                             external::patch_registration_resource($sourceregistration, $data);
-                            $registrationpersistent->set('timelastrequest', time());
-                            // Reset update flag.
-                            $registrationpersistent->set('updatesource', 0);
-                            $registrationpersistent->save();
                         }
-                    } catch (moodle_exception $exception) {
+                    } catch (Exception $exception) {
                         debugging($exception->getMessage(), DEBUG_DEVELOPER);
                         $this->add_error($exception->getMessage());
                         $registrationpersistent->set('errormessage', $exception->getMessage());
                     } finally {
+                        $registrationpersistent->set('timelastrequest', time());
+                        // Reset update flag.
+                        $registrationpersistent->set('updatesource', 0);
+                        $registrationpersistent->save();
                         // Update scheduling information on persistent after successfull save.
                         $jobpersistent->set('timelastrequest', time());
                         $jobpersistent->save();
