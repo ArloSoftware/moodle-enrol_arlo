@@ -34,14 +34,14 @@ use text_progress_trace;
 defined('MOODLE_INTERNAL') || die();
 
 
-class synchronize extends scheduled_task {
+class core extends scheduled_task {
 
     /**
      * @return string
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('synctask', 'enrol_arlo');
+        return get_string('coretask', 'enrol_arlo');
     }
 
     /**
@@ -62,7 +62,7 @@ class synchronize extends scheduled_task {
         $manager = new manager();
         $manager->process_expirations();
         $manager->process_email_queue();
-        return;
+        return true;
     }
 
 }

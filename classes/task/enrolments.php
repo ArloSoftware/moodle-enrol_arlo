@@ -14,37 +14,41 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Dialy scheduled task execution class. This is for running more intensive tasks.
- *
- * @author      Troy Williams
- * @package     enrol_arlo
- * @copyright   2019 LearningWorks Ltd {@link http://www.learningworks.co.nz}
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace enrol_arlo\task;
 
 use core\task\scheduled_task;
 use enrol_arlo\api;
+use enrol_arlo\manager;
 use null_progress_trace;
 use text_progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
-
-class daily extends scheduled_task {
+/**
+ * Create Moodle enrolments based off Arlo registrations.
+ *
+ * @package     enrol_arlo
+ * @copyright   2020 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class enrolments extends scheduled_task {
 
     /**
+     * Get schedule task human readable name.
+     *
      * @return string
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('dailytask', 'enrol_arlo');
+        return get_string('enrolmentstask', 'enrol_arlo');
     }
 
     /**
-     * Run.
+     * Execute the task.
+     *
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function execute() {
         global $CFG;
@@ -56,8 +60,10 @@ class daily extends scheduled_task {
         if ($CFG->debug == DEBUG_DEVELOPER) {
             $trace = new text_progress_trace();
         }
-        api::run_cleanup();
-        return;
+        api::run_scheduled_jobs('enrolment', 'memberships', null, 1000, $trace);
+        $manager = new manager();
+        $manager->process_email_queue();
+        return true;
     }
 
 }

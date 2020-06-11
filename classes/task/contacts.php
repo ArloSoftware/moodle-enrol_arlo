@@ -14,15 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Dialy scheduled task execution class. This is for running more intensive tasks.
- *
- * @author      Troy Williams
- * @package     enrol_arlo
- * @copyright   2019 LearningWorks Ltd {@link http://www.learningworks.co.nz}
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace enrol_arlo\task;
 
 use core\task\scheduled_task;
@@ -32,19 +23,31 @@ use text_progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
-
-class daily extends scheduled_task {
+/**
+ * Update contact details task.
+ *
+ * @package     enrol_arlo
+ * @copyright   2020 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class contacts extends scheduled_task {
 
     /**
+     * Get schedule task human readable name.
+     *
      * @return string
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('dailytask', 'enrol_arlo');
+        return get_string('updatecontactstask', 'enrol_arlo');
     }
 
     /**
-     * Run.
+     * Execute the task.
+     *
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public function execute() {
         global $CFG;
@@ -56,7 +59,7 @@ class daily extends scheduled_task {
         if ($CFG->debug == DEBUG_DEVELOPER) {
             $trace = new text_progress_trace();
         }
-        api::run_cleanup();
+        api::run_scheduled_jobs('enrolment', 'contacts', null, 1000, $trace);
         return;
     }
 
