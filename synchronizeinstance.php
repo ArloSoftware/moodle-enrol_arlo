@@ -27,6 +27,7 @@ require_once('../../config.php');
 
 $id = required_param('id', PARAM_INT);
 $confirm = optional_param('confirm', 0, PARAM_INT);
+$full = optional_param('full', 0, PARAM_INT);
 
 $instance = $DB->get_record('enrol', array('id' => $id, 'enrol' => 'arlo'), '*', MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $instance->courseid), '*', MUST_EXIST);
@@ -53,11 +54,13 @@ if (confirm_sesskey() and $confirm == true) {
                 'instanceid' => $instance->id
             ]
         );
-        $membershipsjobpersistent->set('lastsourceid', 0);
-        $membershipsjobpersistent->set('lastsourcetimemodified', '1970-01-01T00:00:00Z');
-        $membershipsjobpersistent->set('timelastrequest', 0);
-        $membershipsjobpersistent->save();
-        $DB->set_field('enrol_arlo_registration', 'updatesource', 1 , ['enrolid' => $instance->id]);
+        if ($full) {
+            $membershipsjobpersistent->set('lastsourceid', 0);
+            $membershipsjobpersistent->set('lastsourcetimemodified', '1970-01-01T00:00:00Z');
+            $membershipsjobpersistent->set('timelastrequest', 0);
+            $membershipsjobpersistent->save();
+            $DB->set_field('enrol_arlo_registration', 'updatesource', 1, ['enrolid' => $instance->id]);
+        }
         $membershipsjob = enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
         $status = $membershipsjob->run();
         // Run outcomes job.
@@ -79,7 +82,7 @@ if (confirm_sesskey() and $confirm == true) {
 } else if (confirm_sesskey()) {
     echo $OUTPUT->header();
     echo $OUTPUT->heading(get_string('synchroniseinstancefor', 'enrol_arlo', $instance->name));
-    $params = array('confirm' => true, 'sesskey' => sesskey(), 'id' => $instance->id);
+    $params = array('confirm' => true, 'full' => $full,'sesskey' => sesskey(), 'id' => $instance->id);
     $confirmurl = new moodle_url('/enrol/arlo/synchronizeinstance.php', $params);
     echo $OUTPUT->notification(
         get_string('manualsynchronisenotice', 'enrol_arlo'),
