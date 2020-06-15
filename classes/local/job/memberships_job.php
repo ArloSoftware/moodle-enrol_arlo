@@ -192,6 +192,12 @@ class memberships_job extends job {
                             } catch (moodle_exception $exception) {
                                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 $this->add_error($exception->getMessage());
+                                if ($registration) {
+                                    $registration->set('errormessage', $exception->getMessage());
+                                    $errorcounter = $registration->get('errorcounter');
+                                    $registration->set('errorcounter', ++$errorcounter);
+                                    $registration->update();
+                                }
                                 continue;
                             }
                         }
