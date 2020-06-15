@@ -27,10 +27,40 @@ defined('MOODLE_INTERNAL') || die();
 
 $tasks = [
     [
-        'classname' => 'enrol_arlo\task\synchronize',
+        'classname' => 'enrol_arlo\task\core',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '*/1',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*',
+        'disabled' => 0
+    ],
+    [
+        'classname' => 'enrol_arlo\task\enrolments',
         'blocking' => 0,
         'minute' => '*',
         'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*',
+        'disabled' => 0
+    ],
+    [
+        'classname' => 'enrol_arlo\task\outcomes',
+        'blocking' => 0,
+        'minute' => '*',
+        'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*',
+        'disabled' => 0
+    ],
+    [
+        'classname' => 'enrol_arlo\task\contacts',
+        'blocking' => 0,
+        'minute' => '*',
+        'hour' => '5',
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*',

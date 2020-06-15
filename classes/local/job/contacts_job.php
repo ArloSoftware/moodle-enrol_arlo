@@ -26,6 +26,7 @@ namespace enrol_arlo\local\job;
 
 defined('MOODLE_INTERNAL') || die();
 
+use Exception;
 use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
@@ -113,6 +114,7 @@ class contacts_job extends job {
      * @throws moodle_exception
      */
     public function run() {
+        global $DB;
         if (!$this->can_run()) {
             return false;
         }
@@ -151,11 +153,25 @@ class contacts_job extends job {
                                 }
                                 $sourceguid = $contactresource->UniqueIdentifier;
                                 $contact = contact_persistent::get_record(['sourceguid' => $sourceguid]);
-                                if (!$contact) {
-                                    throw new coding_exception(get_string('contactrecordmissing', 'enrol_arlo'));
-                                }
-                                if ($contact->get('userid') <= 0) {
-                                    throw new moodle_exception(get_string('noassociateduser', 'enrol_arlo'));
+                                if (!$contact || ($contact->get('userid') <= 0)) {
+                                    $registration = $DB->get_record_select(
+                                        'enrol_arlo_registration',
+                                        "sourcecontactguid = :sourcecontactguid AND userid > 0",
+                                        ['sourcecontactguid' => $sourceguid],
+                                        '*',
+                                        IGNORE_MULTIPLE
+                                    );
+                                    // Try to rebuild contact record from registration record.
+                                    if (!$registration) {
+                                        throw new coding_exception(get_string('contactrecordmissing', 'enrol_arlo'));
+                                    } else {
+                                        $contact = new contact_persistent();
+                                        $contact->set('userid', $registration->userid);
+                                        $contact->set('sourceid', $registration->sourcecontactid);
+                                        $contact->set('sourceguid', $registration->sourcecontactguid);
+                                        $contact->save();
+                                        $contact->read();
+                                    }
                                 }
                                 // Update contact record.
                                 $contact->set('firstname', $contactresource->FirstName);
@@ -167,9 +183,11 @@ class contacts_job extends job {
                                 $contact->set('sourcestatus', $contactresource->Status);
                                 $contact->set('sourcecreated', $contactresource->CreatedDateTime);
                                 $contact->set('sourcemodified', $contactresource->LastModifiedDateTime);
+                                $jobpersistent->set('lastsourceid', $contact->get('sourceid'));
+                                $jobpersistent->set('lastsourcetimemodified', $contact->get('sourcemodified'));
                                 // Update user record.
                                 $user = user_persistent::get_record_and_unset(['id' => $contact->get('userid')]);
-                                if ($user->get('id') <= 0) {
+                                if (!$user || ($user->get('id') <= 0)) {
                                     throw new moodle_exception(get_string('noassociateduser', 'enrol_arlo'));
                                 }
                                 $user->set('firstname', $contact->get('firstname'));
@@ -182,24 +200,24 @@ class contacts_job extends job {
                                 $contact->set('errormessage', '');
                                 $contact->set('errorcounter', 0);
                                 $contact->update();
-                                // Update scheduling information on persistent after successfull save.
-                                $jobpersistent->set('timelastrequest', time());
-                                $jobpersistent->set('lastsourceid', $contact->get('sourceid'));
-                                $jobpersistent->set('timenextrequestdelay', self::TIME_PERIOD_DELAY);
-                                $jobpersistent->set('lastsourcetimemodified', $contact->get('sourcemodified'));
-                                $jobpersistent->update();
-                            } catch (moodle_exception $exception) {
+                                $this->trace->output('Updated user id#' . $user->get('id'));
+                            } catch (Exception $exception) {
                                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 $this->add_error($exception->getMessage());
-                                continue;
+                            } finally {
+                                // Update scheduling information on persistent.
+                                $jobpersistent->set('timelastrequest', time());
+                                $jobpersistent->set('timenextrequestdelay', self::TIME_PERIOD_DELAY);
+                                $jobpersistent->save();
                             }
+
                         }
                         // See if need to get another page of records.
                         $hasnext = (bool) $collection->hasNext();
                     }
                 }
                 return true;
-            } catch (moodle_exception $exception) {
+            } catch (Exception $exception) {
                 debugging($exception->getMessage(), DEBUG_DEVELOPER);
                 $this->add_error($exception->getMessage());
                 return false;

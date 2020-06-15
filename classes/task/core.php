@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Dialy scheduled task execution class. This is for running more intensive tasks.
+ * Scheduled task execution class.
  *
  * @author      Troy Williams
- * @package     enrol_arlo
- * @copyright   2019 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @package     Frankenstyle {@link https://docs.moodle.org/dev/Frankenstyle}
+ * @copyright   2017 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,20 +27,21 @@ namespace enrol_arlo\task;
 
 use core\task\scheduled_task;
 use enrol_arlo\api;
+use enrol_arlo\manager;
 use null_progress_trace;
 use text_progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
 
-class daily extends scheduled_task {
+class core extends scheduled_task {
 
     /**
      * @return string
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('dailytask', 'enrol_arlo');
+        return get_string('coretask', 'enrol_arlo');
     }
 
     /**
@@ -56,8 +57,12 @@ class daily extends scheduled_task {
         if ($CFG->debug == DEBUG_DEVELOPER) {
             $trace = new text_progress_trace();
         }
-        api::run_cleanup();
-        return;
+        api::run_site_jobs();
+        api::run_associate_all();
+        $manager = new manager();
+        $manager->process_expirations();
+        $manager->process_email_queue();
+        return true;
     }
 
 }
