@@ -96,6 +96,12 @@ class provider implements
             ],
             'privacy:metadata:enrol_arlo_registration'
         );
+        $collection->add_database_table(
+            'enrol_arlo_templateassociate',
+            [
+                'usermodified' => 'privacy:metadata:field:usermodified'
+            ]
+        );
         $collection->add_subsystem_link('core_group', [], 'privacy:metadata:core_group');
         return $collection;
     }
