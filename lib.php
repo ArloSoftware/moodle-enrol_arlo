@@ -298,7 +298,12 @@ class enrol_arlo_plugin extends enrol_plugin {
             $persistent->get_time_norequests_after()
         );
 
-        // Update Content Uri and Manage Uri on Arlo.
+        // No external API call during PHPUnit test. Return immediately.
+        if (PHPUNIT_TEST) {
+            return $instanceid;
+        }
+
+        // Update Content Uri and Manage Uri on Arlo. @TODO move to EventAPI.
         if ($pluginconfig->get('allowportalintegration')) {
             $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
             external::update_contenturi($fields['customchar2'], $fields['customchar3'], $courseurl);
