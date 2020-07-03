@@ -307,7 +307,7 @@ class enrol_arlo_plugin extends enrol_plugin {
         if ($pluginconfig->get('allowportalintegration')) {
             $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
             external::update_contenturi($fields['customchar2'], $fields['customchar3'], $courseurl);
-            $instance = $this-> get_instance_record($instanceid, MUST_EXIST);
+            $instance = $this->get_instance_record($instanceid, MUST_EXIST);
             external::update_manageuri($fields['customchar2'], $fields['customchar3'], $instance);
         }
         return $instanceid;
