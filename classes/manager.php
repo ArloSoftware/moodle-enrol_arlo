@@ -254,22 +254,27 @@ class manager {
         $a->coursename = format_string($course->fullname, true, array('context' => $context));
         $a->courseurl = "$CFG->wwwroot/course/view.php?id=$course->id";
         $a->username = $user->username;
+        $a->firstname = $user->firstname;
+        $a->fullname = fullname($user);
+        $a->email = $user->email;
         $a->forgotpasswordurl = "$CFG->wwwroot/login/forgot_password.php";
         if (trim($instance->customtext1) !== '') {
             $message = $instance->customtext1;
             $key = array(
                 '{$a->coursename}',
                 '{$a->courseurl}',
+                '{$a->username}',
+                '{$a->firstname}',
                 '{$a->fullname}',
                 '{$a->email}',
-                '{$a->username}',
                 '{$a->forgotpasswordurl}');
             $value = array(
                 $a->coursename,
                 $a->courseurl,
-                fullname($user),
-                $user->email,
-                $user->username,
+                $a->username,
+                $a->firstname,
+                $a->fullname,
+                $a->email,
                 $a->forgotpasswordurl
             );
             $message = str_replace($key, $value, $message);

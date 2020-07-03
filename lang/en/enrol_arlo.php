@@ -86,6 +86,7 @@ The following placeholders may be included in the message:
 
 * Course name {$a->coursename}
 * Course url {$a->courseurl}
+* User firstname {$a->firstname}
 * User fullname {$a->fullname}
 * User username {$a->username}
 * Forgot password url {$a->forgotpasswordurl}';
