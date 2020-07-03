@@ -308,18 +308,48 @@ class api {
     /**
      * Main method for doing any clean up. Stale logs etc.
      *
+     * @param progress_trace|null $trace
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function run_cleanup() {
+    public static function run_cleanup(progress_trace $trace = null) {
         global $DB;
+        if (is_null($trace)) {
+            $trace = new null_progress_trace();
+        }
         $plugin = static::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         // Clean up stale request log entries.
         $period = $pluginconfig->get('requestlogcleanup');
         if ($period) {
-            $time = time() - (86400 * $period);
-            $DB->delete_records_select('enrol_arlo_requestlog', "timelogged < ?", [$time]);
+            $starttime = time();
+            $exittime = $starttime + 300; // 5 minutes plus in seconds.
+            $days = 86400 * $period; // Days as seconds.
+            $loglifetime = time() - $days;
+            $maximumdeletelimit = 100000;
+            while ($count = $DB->count_records_select(
+                'enrol_arlo_requestlog', "timelogged < ?", [$loglifetime]
+            )) {
+                if ($count > $maximumdeletelimit) {
+                    $trace->output("Log entry count {$count} over maximum delete limit.");
+                    $items = $DB->get_records_select(
+                        'enrol_arlo_requestlog', "timelogged < ?", [$loglifetime], 'timelogged', 'id', 0, 500
+                    );
+                    if ($items) {
+                        $trace->output("Deleting a chunk of " . count($items));
+                        $DB->delete_records_list('enrol_arlo_requestlog', 'id', array_keys($items));
+                    }
+                } else {
+                    $trace->output("Attempting to purge {$count} log entries");
+                    $DB->delete_records_select('enrol_arlo_requestlog', "timelogged < ?", [$loglifetime]);
+                    break;
+                }
+                // Do not churn on log deletion for too long each run.
+                if (time() > $exittime) {
+                    $trace->output("Exiting log purge due to exit time passing.");
+                    break;
+                }
+            }
         }
 
         // Clean up orphaned registrations.
