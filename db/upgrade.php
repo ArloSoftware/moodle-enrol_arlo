@@ -491,5 +491,20 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020032000, 'enrol', 'arlo');
     }
 
+    if ($oldversion < 2020070315) {
+
+        // Define key usermodified (foreign) to be added to enrol_arlo_templateassociate.
+        $table = new xmldb_table('enrol_arlo_templateassociate');
+        $key = new xmldb_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+
+
+        // Launch add key usermodified.
+        $dbman->add_key($table, $key);
+
+        // Arlo savepoint reached.
+        upgrade_plugin_savepoint(true, 2020070315, 'enrol', 'arlo');
+    }
+
+
     return true;
 }
