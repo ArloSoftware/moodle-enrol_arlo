@@ -26,6 +26,8 @@ require_once($CFG->dirroot . '/grade/querylib.php');
 use coding_exception;
 use completion_completion;
 use completion_info;
+use core_date;
+use DateTime;
 use grade_item;
 use stdClass;
 
@@ -293,8 +295,11 @@ class learner_progress {
      */
     public function get_keyed_data_for_arlo() {
         $data = [];
+        $tz = core_date::get_user_timezone_object();
         if ($this->get_datelastcourseaccess()) {
-            $data['LastActivityDateTime'] = date('Y-m-d\TH:i:s.0000000+00:00', $this->get_datelastcourseaccess());
+            $lastactivitydate = new DateTime(null, $tz);
+            $lastactivitydate->setTimestamp($this->get_datelastcourseaccess());
+            $data['LastActivityDateTime'] = $lastactivitydate->format(ENROL_ARLO_DATETIME_OFFSET_FORMAT);
         }
         if ($this->get_progressstatus()) {
             $data['ProgressStatus'] = $this->get_progressstatus();
@@ -312,7 +317,9 @@ class learner_progress {
             $data['ProgressStatus'] = $this->get_progressstatus();
         }
         if ($this->get_datecompleted()) {
-            $data['CompletedDateTime'] = date('Y-m-d\TH:i:s.0000000+00:00', $this->get_datecompleted());
+            $completedatetime = new DateTime(null, $tz);
+            $completedatetime->setTimestamp($this->get_datecompleted());
+            $data['CompletedDateTime'] = $completedatetime->format(ENROL_ARLO_DATETIME_OFFSET_FORMAT);
         }
         return $data;
     }
