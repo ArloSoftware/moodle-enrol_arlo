@@ -135,7 +135,7 @@ class outcomes_job extends job {
         $plugin = api::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
-        $lock = $lockfactory->get_lock($this->get_lock_resource(), 1);
+        $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         if ($lock) {
             $limit = $pluginconfig->get('outcomejobdefaultlimit');
             $registrations = registration_persistent::get_records(
