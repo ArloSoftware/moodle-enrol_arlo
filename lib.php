@@ -43,6 +43,14 @@ use enrol_arlo\local\job\contacts_job;
 use enrol_arlo\local\job\outcomes_job;
 
 /**
+ * DateTimeOffset format yyyy-mm-ddThh:mm:ss.fffffffzzzz.
+ *
+ * API requires 7 digits of precision for microtime however PHP supports 6 digits
+ * of precision so we pad the 7th with a zero.
+ */
+define('ENROL_ARLO_DATETIME_OFFSET_FORMAT', 'Y-m-d\TH:i:s.u0P');
+
+/**
  * Arlo enrolment plugin class.
  *
  * @package     enrol_arlo {@link https://docs.moodle.org/dev/Frankenstyle}

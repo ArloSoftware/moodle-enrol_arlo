@@ -174,6 +174,7 @@ class outcomes_job extends job {
                         // Update scheduling information on persistent after successfull save.
                         $jobpersistent->set('timelastrequest', time());
                         $jobpersistent->save();
+                        $lock->release();
                     }
                 }
             }
