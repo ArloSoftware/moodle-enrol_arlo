@@ -33,7 +33,7 @@ class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provide
     /**
      * @throws coding_exception
      */
-    public function setUp() {
+    public function setUp() : void {
         global $CFG;
 
         require_once($CFG->dirroot . '/enrol/arlo/lib.php');
