@@ -33,7 +33,7 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
 
     protected $plugingenerator;
 
-    public function setUp() {
+    public function setUp() : void {
         global $CFG;
         require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 
