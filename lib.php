@@ -164,7 +164,7 @@ class enrol_arlo_plugin extends enrol_plugin {
             parent::unenrol_user($instance, $user->id);
         }
         if ($unenrolaction == ENROL_EXT_REMOVED_SUSPENDNOROLES) {
-            parent::suspend_and_remove_roles($instance, $user->id);
+            $this->suspend_and_remove_roles($instance, $user->id);
         }
     }
 
