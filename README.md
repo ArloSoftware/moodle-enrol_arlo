@@ -34,6 +34,10 @@ Then click the Uninstall link opposite the Arlo plugin.
 4. Use a file manager to remove/delete the actual plugin directory as instructed, otherwise Moodle will reinstall it next 
 time you access the site administration.
 
+## Release Notes
+### Version 3.9.2 (2020073112)
+* Bugfig issue #154. Incorrect scope error prevented enrolment task from completing in some instances resulting in enrolments 
+  not being added.
 
 ## Support
 
