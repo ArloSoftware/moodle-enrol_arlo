@@ -405,6 +405,7 @@ $string['privacy:metadata:enrol_arlo_registration:progressstatus'] = 'The progre
 $string['privacy:metadata:enrol_arlo_registration:progresspercent'] = 'The decimal value representing a progress associated with Arlo registration.';
 $string['privacy:metadata:enrol_arlo_registration:sourcecontactid'] = 'The ID of the Arlo contact.';
 $string['privacy:metadata:enrol_arlo_registration:sourcecontactguid'] = 'The GUID of the Arlo contact.';
+$string['privacy:metadata:enrol_arlo_templateassociate'] = 'Information about Arlo event Template associated with Moodle course';
 $string['privacy:metadata:field:usermodified'] = 'The ID of user who modified the record.';
 
 $string['firstnamelastnamerandomnumber'] = 'First name, last name and random number';
