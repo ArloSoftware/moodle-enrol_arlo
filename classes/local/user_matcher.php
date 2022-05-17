@@ -51,6 +51,9 @@ class user_matcher {
         if ($matchuseraccountsby == user_matching::MATCH_BY_USER_DETAILS) {
             return static::match_against_user_details($firstname, $lastname, $email);
         }
+        if ($matchuseraccountsby == user_matching::MATCH_BY_USER_EMAIL) {
+            return static::match_against_user_email($email);
+        }
         // Match by code primary.
         if ($matchuseraccountsby == user_matching::MATCH_BY_CODE_PRIMARY) {
             return static::match_against_idnumber($idnumber);
@@ -96,6 +99,29 @@ class user_matcher {
         $conditions = [
             'firstname' => $firstname,
             'lastname' => $lastname,
+            'email' => $email,
+            'deleted' => 1
+        ];
+        return $DB->get_records_select('user', $select, $conditions);
+    }
+
+    /**
+     * Match against Email information. Uses LOWER to case insensitive matching.
+     *
+     * @param $email
+     * @return array
+     * @throws \dml_exception
+     * @throws coding_exception
+     */
+    public static function match_against_user_email($email) {
+        global $DB;
+        $email      = clean_param($email, PARAM_EMAIL);
+        if (empty($email)) {
+            throw new coding_exception('Email parameter is empty after being cleaned.');
+        }
+        $select = "LOWER(email) = LOWER(:email) AND
+                   deleted <> :deleted";
+        $conditions = [
             'email' => $email,
             'deleted' => 1
         ];
