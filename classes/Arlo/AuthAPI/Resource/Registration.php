@@ -31,6 +31,11 @@ class Registration extends AbstractResource {
     public $Comments;
 
     /**
+     * @var OrderLine $OrderLine Reference to the OrderLine resource for this registration, if associated with a purchase order.
+     */
+    protected $OrderLine;
+
+    /**
      * @var Contact associated resource.
      */
     protected $Contact;
@@ -44,6 +49,24 @@ class Registration extends AbstractResource {
      * @var OnlineActivity associated resource.
      */
     protected $OnlineActivity;
+
+    /**
+     * Set the OrderLine data for this Registration.
+     *
+     * @param OrderLine $orderline The order line resource.
+     */
+    public function setOrderLine(OrderLine $orderline) {
+        $this->OrderLine = $orderline;
+    }
+
+    /**
+     * Get the OrderLine resource.
+     *
+     * @return OrderLine
+     */
+    public function getOrderLine() {
+        return $this->OrderLine;
+    }
 
     /**
      * @return mixed
