@@ -154,6 +154,15 @@ class outcomes_job extends job {
                         if (!$user) {
                             throw new moodle_exception('moodleaccountdoesnotexist');
                         }
+                        // Check payment status.
+                        try {
+                            $orderline = external::get_order_line_resource($registrationpersistent->get('sourceid'));
+                        } catch (\moodle_exception $exception) {
+                            if ($exception->getMessage() == 'error/httpstatus:404') {
+                                // No order line resource. Carry on.
+                            }
+                        }
+
                         $registrationid = $registrationpersistent->get('sourceid');
                         $sourceregistration = external::get_registration_resource($registrationid);
                         $learnerprogress = new learner_progress($course, $user);

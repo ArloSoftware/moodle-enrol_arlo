@@ -23,6 +23,7 @@ use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\Arlo\AuthAPI\Resource\EventIntegrationData;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivityIntegrationData;
+use enrol_arlo\Arlo\AuthAPI\Resource\OrderLine;
 use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\persistent\event_persistent;
 use enrol_arlo\local\persistent\online_activity_persistent;
@@ -49,6 +50,30 @@ defined('MOODLE_INTERNAL') || die();
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class external {
+
+    /**
+     * Get a single order line from Arlo and deserialize to resource object.
+     *
+     * @param int $id Arlo registration source id
+     * @return OrderLine Arlo OrderLine resource.
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \moodle_exception
+     * @throws coding_exception
+     */
+    public static function get_order_line_resource(int $id) : OrderLine {
+        if ($id <= 0) {
+            throw new coding_exception('UnexpectedValueException');
+        }
+        $pluginconfig = new arlo_plugin_config();
+        $client = client::get_instance();
+        $requesturi = new RequestUri();
+        $requesturi->setHost($pluginconfig->get('platform'));
+        $requesturi->setResourcePath("registrations/$id");
+        $requesturi->addExpand('OrderLine/Order');
+        $request = new Request('GET', $requesturi->output(true));
+        $response = $client->send_request($request);
+        return response_processor::process($response);
+    }
 
     /**
      * Get a single registration from Arlo and deserialize to resource object.
