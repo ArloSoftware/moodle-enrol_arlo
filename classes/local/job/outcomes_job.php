@@ -154,7 +154,6 @@ class outcomes_job extends job {
                         if (!$user) {
                             throw new moodle_exception('moodleaccountdoesnotexist');
                         }
-
                         $registrationid = $registrationpersistent->get('sourceid');
                         $sourceregistration = external::get_registration_resource($registrationid);
                         $learnerprogress = new learner_progress($course, $user);
