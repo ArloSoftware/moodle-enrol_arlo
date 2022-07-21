@@ -98,6 +98,10 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 1
             ],
+            'donotpushunpaidorders' => [
+                'type' => PARAM_INT,
+                'default' => 1
+            ],
             'emailsendnewaccountdetails' => [
                 'type' => PARAM_INT,
                 'default' => 1
