@@ -161,19 +161,18 @@ class outcomes_job extends job {
                         $data = $learnerprogress->get_keyed_data_for_arlo();
                         if (!empty($data)) {
                             $this->trace->output(implode(',', $data));
-                            try {
-                                // Check payment status.
-                                $orderline = external::get_order_line_resource($registrationpersistent->get('sourceid'));
-
-                                if ($pluginconfig->get('donotpatchunpaidorders') &&
-                                        empty($orderline->Order->MarkedAsPaidDateTime)) {
-                                    // Have a helpful message showing the contact, registration, and order line that is not paid.
-                                    throw new \moodle_exception('error/ordernotpaid');
-                                }
-                            } catch (\moodle_exception $exception) {
-                                if ($exception->getMessage() !== 'error/httpstatus:404') {
-                                    // Some other exception happened. 404 errors mean that there is no order to worry about.
-                                    throw $exception;
+                            if ($pluginconfig->get('donotpushunpaidorders')) {
+                                try {
+                                    // Check payment status.
+                                    $orderline = external::get_order_line_resource($registrationpersistent->get('sourceid'));
+                                    if (empty($orderline->Order->MarkedAsPaidDateTime)) {
+                                        throw new \moodle_exception('error/ordernotpaid');
+                                    }
+                                } catch (\moodle_exception $exception) {
+                                    if ($exception->getMessage() !== 'error/httpstatus:404') {
+                                        // 404's are registrations that do not have an order. Anything else is thrown.
+                                        throw $exception;
+                                    }
                                 }
                             }
                             external::patch_registration_resource($sourceregistration, $data);
