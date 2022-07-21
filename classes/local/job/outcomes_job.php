@@ -154,14 +154,6 @@ class outcomes_job extends job {
                         if (!$user) {
                             throw new moodle_exception('moodleaccountdoesnotexist');
                         }
-                        // Check payment status.
-                        try {
-                            $orderline = external::get_order_line_resource($registrationpersistent->get('sourceid'));
-                        } catch (\moodle_exception $exception) {
-                            if ($exception->getMessage() == 'error/httpstatus:404') {
-                                // No order line resource. Carry on.
-                            }
-                        }
 
                         $registrationid = $registrationpersistent->get('sourceid');
                         $sourceregistration = external::get_registration_resource($registrationid);
@@ -169,6 +161,21 @@ class outcomes_job extends job {
                         $data = $learnerprogress->get_keyed_data_for_arlo();
                         if (!empty($data)) {
                             $this->trace->output(implode(',', $data));
+                            try {
+                                // Check payment status.
+                                $orderline = external::get_order_line_resource($registrationpersistent->get('sourceid'));
+
+                                if ($pluginconfig->get('donotpatchunpaidorders') &&
+                                        empty($orderline->Order->MarkedAsPaidDateTime)) {
+                                    // Have a helpful message showing the contact, registration, and order line that is not paid.
+                                    throw new \moodle_exception('error/ordernotpaid');
+                                }
+                            } catch (\moodle_exception $exception) {
+                                if ($exception->getMessage() !== 'error/httpstatus:404') {
+                                    // Some other exception happened. 404 errors mean that there is no order to worry about.
+                                    throw $exception;
+                                }
+                            }
                             external::patch_registration_resource($sourceregistration, $data);
                         }
                     } catch (Exception $exception) {
