@@ -233,6 +233,11 @@ $string['pushonlineactivityresults'] = 'Push Online Activity results';
 $string['pushonlineactivityresults_help'] = 'Push result information from enrolment instances mapped to <strong>OnlineActivities</strong> back to Arlo';
 $string['pusheventresults'] = 'Push Event results';
 $string['pusheventresults_help'] = 'Push result information from enrolment instances mapped to <strong>Events</strong> back to Arlo';
+$string['pushpaidorders'] = 'Push results for paid Orders (if an Order exists)';
+$string['pushpaidorders_help'] = '
+Push result information from an enrolment instance that has a <strong>Registration</strong> with an <strong>Order</strong> that has been paid for back to Arlo. 
+<br><br>
+Results for any <strong>Registration</strong> that does not have an <strong>Order</strong> are pushed back to Arlo.';
 $string['pluginname'] = 'Arlo enrolment';
 $string['pluginname_desc'] = '<p>These enrolments are managed by local_arlo</p>';
 $string['pluginstatus'] = 'Status';

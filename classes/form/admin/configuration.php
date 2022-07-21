@@ -100,6 +100,10 @@ class configuration extends \moodleform {
         $form->setDefault('pusheventresults', 1);
         $form->addHelpButton('pusheventresults', 'pusheventresults', 'enrol_arlo');
 
+        $form->addElement('advcheckbox', 'pushpaidorders', get_string('pushpaidorders', 'enrol_arlo'));
+        $form->setDefault('pushpaidorders', 0);
+        $form->addHelpButton('pushpaidorders', 'pushpaidorders', 'enrol_arlo');
+
         $form->addElement('header', 'other', get_string('other'));
         $form->setExpanded('other', true);
 

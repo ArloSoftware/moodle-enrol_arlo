@@ -161,7 +161,7 @@ class outcomes_job extends job {
                         $data = $learnerprogress->get_keyed_data_for_arlo();
                         if (!empty($data)) {
                             $this->trace->output(implode(',', $data));
-                            if ($pluginconfig->get('donotpushunpaidorders')) {
+                            if ($pluginconfig->get('pushpaidorders')) {
                                 try {
                                     // Check payment status.
                                     $orderline = external::get_order_line_resource($registrationpersistent->get('sourceid'));

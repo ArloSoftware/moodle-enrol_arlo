@@ -98,9 +98,9 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 1
             ],
-            'donotpushunpaidorders' => [
+            'pushpaidorders' => [
                 'type' => PARAM_INT,
-                'default' => 1
+                'default' => 0
             ],
             'emailsendnewaccountdetails' => [
                 'type' => PARAM_INT,
