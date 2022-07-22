@@ -183,7 +183,13 @@ class outcomes_job extends job {
                     } finally {
                         $registrationpersistent->set('timelastrequest', time());
                         // Reset update flag.
-                        $registrationpersistent->set('updatesource', 0);
+                        if (isset($exception) && $exception instanceof Exception &&
+                                $exception->getMessage() == 'error/ordernotpaid') {
+                            // Ensure that this result will keep trying until it is paid.
+                            $registrationpersistent->set('updatesource', 1);
+                        } else {
+                            $registrationpersistent->set('updatesource', 0);
+                        }
                         $registrationpersistent->save();
                         // Update scheduling information on persistent after successfull save.
                         $jobpersistent->set('timelastrequest', time());
