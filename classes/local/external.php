@@ -23,7 +23,7 @@ use enrol_arlo\Arlo\AuthAPI\Resource\Event;
 use enrol_arlo\Arlo\AuthAPI\Resource\EventIntegrationData;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivity;
 use enrol_arlo\Arlo\AuthAPI\Resource\OnlineActivityIntegrationData;
-use enrol_arlo\Arlo\AuthAPI\Resource\OrderLine;
+use enrol_arlo\Arlo\AuthAPI\Resource\Order;
 use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\persistent\event_persistent;
 use enrol_arlo\local\persistent\online_activity_persistent;
@@ -55,36 +55,30 @@ class external {
      * Get a single order line from Arlo and deserialize to resource object.
      *
      * @param int $id Arlo registration source id
-     * @return OrderLine Arlo OrderLine resource.
+     * @return Order Arlo Order resource.
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \moodle_exception
      * @throws coding_exception
      */
-    public static function get_order_line_resource(int $id) : OrderLine {
+    public static function get_order_resource(int $id): Order {
         if ($id <= 0) {
             throw new coding_exception('UnexpectedValueException');
         }
-        $pluginconfig = new arlo_plugin_config();
-        $client = client::get_instance();
-        $requesturi = new RequestUri();
-        $requesturi->setHost($pluginconfig->get('platform'));
-        $requesturi->setResourcePath("registrations/$id");
-        $requesturi->addExpand('OrderLine/Order');
-        $request = new Request('GET', $requesturi->output(true));
-        $response = $client->send_request($request);
-        return response_processor::process($response);
+        $registrationresource = self::get_registration_resource($id, 'OrderLine/Order');
+        return $registrationresource->getOrderLine()->Order;
     }
 
     /**
      * Get a single registration from Arlo and deserialize to resource object.
      *
      * @param int $id
+     * @param string $expand
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \moodle_exception
      * @throws coding_exception
      */
-    public static function get_registration_resource(int $id) {
+    public static function get_registration_resource(int $id, string $expand = '') {
         if ($id <= 0) {
             throw new coding_exception('UnexpectedValueException');
         }
@@ -93,6 +87,9 @@ class external {
         $requesturi = new RequestUri();
         $requesturi->setHost($pluginconfig->get('platform'));
         $requesturi->setResourcePath("registrations/{$id}/");
+        if (!empty($expand)) {
+            $requesturi->addExpand($expand);
+        }
         $request = new Request('GET', $requesturi->output(true));
         $response = $client->send_request($request);
         $resource = response_processor::process($response);
