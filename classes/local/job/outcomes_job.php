@@ -163,9 +163,9 @@ class outcomes_job extends job {
                             if ($pluginconfig->get('pushpaidorders')) {
                                 try {
                                     // Check payment status.
-                                    $orderline = external::get_order_line_resource($registrationpersistent->get('sourceid'));
-                                    if (empty($orderline->Order->MarkedAsPaidDateTime)) {
-                                        throw new \moodle_exception('error/ordernotpaid');
+                                    $order = external::get_order_resource($registrationpersistent->get('sourceid'));
+                                    if (empty($order->MarkedAsPaidDateTime)) {
+                                        throw new \moodle_exception('ordernotpaid');
                                     }
                                 } catch (\moodle_exception $exception) {
                                     if ($exception->getMessage() !== 'error/httpstatus:404') {
