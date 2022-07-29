@@ -133,7 +133,9 @@ class learner_progress {
                 } else {
                     switch ($this->courseprogresscalculation) {
                         case self::CALCULATE_USING_COURSE_COMPLETION:
-                            $modules = $completion->get_completions($this->user->id);
+                            // ARLO-1:
+                            // $modules = $completion->get_completions($this->user->id);
+                            $modules = $completion->get_criteria();
                             break;
                         case self::CALCULATE_USING_ALL_ACTIVITIES:
                             $modules = $completion->get_activities();
@@ -145,6 +147,10 @@ class learner_progress {
                     if ($count) {
                         $completed = 0;
                         foreach ($modules as $module) {
+                            if(isset($module->moduleinstance) && $module->moduleinstance) {
+                                // ARLO-1: will be executed for CALCULATE_USING_COURSE_COMPLETION case
+                                $module = get_coursemodule_from_id(null, $module->moduleinstance, $this->course->id);
+                            }
                             $modulecompletiondata = $completion->get_data($module, true, $this->user->id);
                             $completed += $modulecompletiondata->completionstate == COMPLETION_INCOMPLETE ? 0 : 1;
                         }
