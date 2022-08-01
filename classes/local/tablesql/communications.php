@@ -44,7 +44,12 @@ class communications extends table_sql {
         $this->sort_default_order  = SORT_DESC;
         $this->set_count_sql('SELECT COUNT(*) FROM {enrol_arlo_emailqueue}', array());
         $fields = 'eq.id,';
-        $fields .= get_all_user_name_fields(true, 'u');
+        $flds = [];
+        $usernamefields = \core_user\fields::get_name_fields();
+        foreach ($usernamefields as $usernamefield) {
+            $flds[$usernamefield] = 'u.' . $usernamefield;
+        }
+        $fields .= implode(', ', $flds);
         $fields .= ',eq.userid,eq.type,eq.status,eq.timemodified';
         $from = "{enrol_arlo_emailqueue} eq JOIN {user} u ON u.id = eq.userid";
         $this->set_sql($fields, $from, 'eq.id <> 0');
