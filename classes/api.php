@@ -181,7 +181,7 @@ class api {
      * @throws \dml_exception
      * @throws moodle_exception
      */
-    public static function run_scheduled_jobs($area, $type, $time = null, $limit = 1000, progress_trace $trace = null) {
+    public static function run_scheduled_jobs($area, $type, $time = null, $limit = 50, progress_trace $trace = null) {
         global $DB;
         if (!static::api_callable($trace)) {
             return false;
@@ -203,7 +203,8 @@ class api {
             'type' => $type,
             'disabled' => 1,
             'timerequestnow' => $time,
-            'timenorequest' => $time
+            'timenorequest' => $time,
+            'lastenrolmentjob' => 0
         ];
         $timingdelaysql = "AND (timelastrequest + timenextrequestdelay) < :timerequestnow";
         $sql = "SELECT *
@@ -212,10 +213,24 @@ class api {
                    AND type = :type
                    AND disabled <> 1
                    $timingdelaysql
-                   AND ((:timenorequest < (timenorequestsafter + timerequestsafterextension)) OR timelastrequest = 0)";
+                   AND ((:timenorequest < (timenorequestsafter + timerequestsafterextension)) OR timelastrequest = 0)
+                   AND id > :lastenrolmentjob";
+        $lastenrolmentjob = get_config('enrol_arlo', 'lastenrolmentjob');
+        if ($lastenrolmentjob) {
+            $conditions['lastenrolmentjob'] = $lastenrolmentjob;
+        }
         $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
+        if (!$rs->valid()) {
+            // No jobs found, if limitfrom is greater than 0, reset config value and check again from the beginning.
+            if ($lastenrolmentjob > 0) {
+                set_config('lastenrolmentjob', 0, 'enrol_arlo');
+                $conditions['lastenrolmentjob'] = 0;
+                $rs = $DB->get_recordset_sql($sql, $conditions, 0, $limit);
+            }
+        }
         if ($rs->valid()) {
             foreach ($rs as $record) {
+                $currentid = $record->id;
                 try {
                     $jobpersistent = new job_persistent(0, $record);
                     $scheduledjob = job_factory::create_from_persistent($jobpersistent);
@@ -245,10 +260,12 @@ class api {
                     if ($exception->getMessage() == 'error/locktimeout') {
                         $trace->output('Operation is currently locked by another process.');
                     } else {
+                        set_config('lastenrolmentjob', $currentid, 'enrol_arlo');
                         throw $exception;
                     }
                 }
             }
+            set_config('lastenrolmentjob', $currentid, 'enrol_arlo');
         }
         $rs->close();
     }
