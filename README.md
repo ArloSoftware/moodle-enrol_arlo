@@ -35,6 +35,10 @@ Then click the Uninstall link opposite the Arlo plugin.
 time you access the site administration.
 
 ## Release Notes
+### Version 3.11.0 (2022083100)
+* Moodle 3.11 compatibility. (ARLO-1)
+* Improvements for sites with very large numbers of enrollment methods. (DEF-110)
+
 ### Version 3.9.2 (2020073112)
 * Bugfig issue #154. Incorrect scope error prevented enrolment task from completing in some instances resulting in enrolments 
   not being added.
