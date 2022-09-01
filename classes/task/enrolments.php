@@ -60,7 +60,7 @@ class enrolments extends scheduled_task {
         if ($CFG->debug == DEBUG_DEVELOPER) {
             $trace = new text_progress_trace();
         }
-        api::run_scheduled_jobs('enrolment', 'memberships', null, 1000, $trace);
+        api::run_scheduled_jobs('enrolment', 'memberships', null, 50, $trace);
         $manager = new manager();
         $manager->process_email_queue();
         return true;
