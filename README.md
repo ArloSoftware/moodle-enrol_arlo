@@ -35,6 +35,9 @@ Then click the Uninstall link opposite the Arlo plugin.
 time you access the site administration.
 
 ## Release Notes
+### Version 3.11.1 (2022090100)
+* Add additional information to logs on PATCH failure. (ARLO-5)
+
 ### Version 3.11.0 (2022083100)
 * Moodle 3.11 compatibility. (ARLO-1)
 * Improvements for sites with very large numbers of enrollment methods. (DEF-110)
