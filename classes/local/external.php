@@ -394,7 +394,7 @@ class external {
         } catch (Exception $ex) {
             if ($ex instanceof ClientException || $ex instanceof ServerException) {
                 $statuscode = $ex->getCode();
-                $message = $ex->getMessage();
+                $message = $xmlbody . ' ' . $ex->getMessage();
                 $persistent = registration_persistent::get_record(['sourceguid' => $registration->UniqueIdentifier]);
                 $persistent->add_error_message($message);
                 $persistent->save();
