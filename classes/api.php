@@ -214,7 +214,8 @@ class api {
                    AND disabled <> 1
                    $timingdelaysql
                    AND ((:timenorequest < (timenorequestsafter + timerequestsafterextension)) OR timelastrequest = 0)
-                   AND id > :lastenrolmentjob";
+                   AND id > :lastenrolmentjob
+                   ORDER BY id ASC";
         $lastenrolmentjob = get_config('enrol_arlo', 'lastenrolmentjob');
         if ($lastenrolmentjob) {
             $conditions['lastenrolmentjob'] = $lastenrolmentjob;
