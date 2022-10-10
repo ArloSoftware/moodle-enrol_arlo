@@ -35,6 +35,9 @@ Then click the Uninstall link opposite the Arlo plugin.
 time you access the site administration.
 
 ## Release Notes
+### Version 3.11.2 (2022101000)
+* Sort scheduled jobs to improve behavior on PostgreSQL systems. (ARLO-6)
+
 ### Version 3.11.1 (2022090100)
 * Add additional information to logs on PATCH failure. (ARLO-5)
 
