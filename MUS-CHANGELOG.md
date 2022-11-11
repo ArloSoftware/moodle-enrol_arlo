@@ -1,4 +1,4 @@
-### May 13 2022
+### Nov 10 2022 - ARLO-7
 Changed the enrolment task.
 #### Old Behavior
 The task would query the Arlo remote API for each enrollment instance checking for new registrations on each one.
