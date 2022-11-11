@@ -18,6 +18,7 @@ namespace enrol_arlo\task;
 
 use core\task\scheduled_task;
 use enrol_arlo\api;
+use enrol_arlo\local\job\memberships_job;
 use enrol_arlo\manager;
 use null_progress_trace;
 use text_progress_trace;
@@ -60,7 +61,7 @@ class enrolments extends scheduled_task {
         if ($CFG->debug == DEBUG_DEVELOPER) {
             $trace = new text_progress_trace();
         }
-        api::run_scheduled_jobs('enrolment', 'memberships', null, 50, $trace);
+        memberships_job::sync_memberships($trace);
         $manager = new manager();
         $manager->process_email_queue();
         return true;
