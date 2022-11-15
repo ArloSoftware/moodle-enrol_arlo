@@ -253,6 +253,8 @@ class memberships_job extends job {
             while ($hasnext) {
                 $hasnext = false; // Break paging by default.
                 // Update contact merge requests records every page.
+                $contactmergerequestsjob = job_factory::get_job(['type' => 'contact_merge_requests']);
+                $contactmergerequestsjob->run();
                 $uri = new RequestUri();
                 $uri->setHost($pluginconfig->get('platform'));
                 $uri->setResourcePath('registrations/');
