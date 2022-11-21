@@ -245,6 +245,34 @@ class memberships_job extends job {
             $trace = new \null_progress_trace();
         }
         try {
+            // Loop through any previously skipped enrollment instances and check to see if they exist now.
+            $missedevents = get_config('enrol_arlo', 'missedevent');
+            if ($missedevents) {
+                $missedevents = explode(',', $missedevents);
+                foreach ($missedevents as $missedevent) {
+                    if ($enrolmentinstance = $DB->get_record('enrol', [
+                        'customchar2' => arlo_type::EVENT,
+                        'customchar3' => $missedevent
+                    ])) {
+                        api::run_instance_jobs($enrolmentinstance->id);
+                        self::remove_missed_resource(arlo_type::EVENT, $missedevent);
+                    }
+                }
+            }
+
+            $missedonlines = get_config('enrol_arlo', 'missedonlineactivity');
+            if ($missedonlines) {
+                $missedonlines = explode(',', $missedonlines);
+                foreach ($missedonlines as $missedonline) {
+                    if ($enrolmentinstance = $DB->get_record('enrol', [
+                        'customchar2' => arlo_type::EVENT,
+                        'customchar3' => $missedonline
+                    ])) {
+                        api::run_instance_jobs($enrolmentinstance->id);
+                        self::remove_missed_resource(arlo_type::ONLINEACTIVITY, $missedonline);
+                    }
+                }
+            }
             // We don't know how many records we will be retrieving it maybe 5 it maybe 5000,
             // and the page size limit is 250. So we have to keep calling the endpoint and
             // adjusting and the filter each call so we get all records and don't end up
@@ -287,6 +315,7 @@ class memberships_job extends job {
                             ]);
                             if (!$persistent) {
                                 $trace->output("Missing event record for Registration {$resource->UniqueIdentifier}");
+                                self::add_missed_resource($type, $event->UniqueIdentifier);
                                 continue;
                             }
                         } else if ($onlineactivity = $resource->getOnlineActivity()) {
@@ -296,6 +325,7 @@ class memberships_job extends job {
                             ]);
                             if (!$persistent) {
                                 $trace->output("Missing online activity record for Registration {$resource->UniqueIdentifier}");
+                                self::add_missed_resource($type, $onlineactivity->UniqueIdentifier);
                                 continue;
                             }
                         } else {
@@ -308,6 +338,7 @@ class memberships_job extends job {
                         ]);
                         if (!$enrolmentinstance) {
                             $trace->output("Missing enrolment instance for Registration {$resource->UniqueIdentifier}");
+                            self::add_missed_resource($type, $persistent->get('sourceguid'));
                             continue;
                         }
 
@@ -336,6 +367,51 @@ class memberships_job extends job {
             debugging($exception->getMessage(), DEBUG_DEVELOPER);
             return false;
         }
+    }
+
+    /**
+     * If a registration can't be synced because an enrollment instance doesn't exist yet, it can be added here to be
+     * synced later.
+     *
+     * @param $type
+     * @param $uniqueid
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function add_missed_resource($type, $uniqueid) {
+        $config = 'missed' . $type;
+        if ($missed = get_config('enrol_arlo', $config)) {
+            $missed = explode(',', $missed);
+        } else {
+            $missed = [];
+        }
+
+        if (!empty($uniqueid) && !in_array($uniqueid, $missed)) {
+            $missed[] = $uniqueid;
+            $missed = implode(',', $missed);
+            set_config($config, $missed, 'enrol_arlo');
+        }
+    }
+
+    /**
+     * After an enrollment instance has been synced, this function removes it from the missed list.
+     *
+     * @param $type
+     * @param $uniqueid
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function remove_missed_resource($type, $uniqueid) {
+        $config = 'missed' . $type;
+        $missed = get_config('enrol_arlo', $config);
+        $missed = explode(',', $missed);
+        foreach ($missed as $key => $item) {
+            if ($item == $uniqueid) {
+                unset($missed[$key]);
+            }
+        }
+        $missed = implode(',', $missed);
+        set_config($config, $missed, 'enrol_arlo');
     }
 
     /**
