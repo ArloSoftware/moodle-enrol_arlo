@@ -414,4 +414,44 @@ class api {
         }
     }
 
+    /**
+     * Runs the membership and outcome jobs for an enrolment instance
+     *
+     * @param $instanceid
+     * @param $full
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
+    public static function run_instance_jobs($instanceid, $full = false) {
+        global $DB;
+
+        $membershipsjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+            [
+                'area' => 'enrolment',
+                'type' => 'memberships',
+                'instanceid' => $instanceid
+            ]
+        );
+        if ($full) {
+            $membershipsjobpersistent->set('lastsourceid', 0);
+            $membershipsjobpersistent->set('lastsourcetimemodified', '1970-01-01T00:00:00Z');
+            $membershipsjobpersistent->set('timelastrequest', 0);
+            $membershipsjobpersistent->save();
+            $DB->set_field('enrol_arlo_registration', 'updatesource', 1, ['enrolid' => $instanceid]);
+        }
+        $membershipsjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
+        $status = $membershipsjob->run();
+        // Run outcomes job.
+        $outcomesjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+            [
+                'area' => 'enrolment',
+                'type' => 'outcomes',
+                'instanceid' => $instanceid
+            ]
+        );
+        $outcomesjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($outcomesjobpersistent);
+        $status = $outcomesjob->run();
+    }
+
 }
