@@ -31,9 +31,12 @@ use enrol_arlo\api;
 use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\local\administrator_notification;
 use enrol_arlo\local\config\arlo_plugin_config;
+use enrol_arlo\local\enum\arlo_type;
 use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\generator\username_generator;
 use enrol_arlo\local\handler\contact_merge_requests_handler;
+use enrol_arlo\local\persistent\event_persistent;
+use enrol_arlo\local\persistent\online_activity_persistent;
 use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\local\user_matcher;
 use enrol_arlo\persistent;
@@ -164,42 +167,7 @@ class memberships_job extends job {
                     $collection = response_processor::process($response);
                     if ($collection->count() > 0) {
                         foreach ($collection as $resource) {
-                            try {
-                                // Save Arlo registration information into Moodle persistents.
-                                list($registration, $contact) = static::save_resource_information_to_persistents(
-                                    $this->enrolmentinstance,
-                                    $resource
-                                );
-                                // Invoke enrolment processing for this registration.
-                                $result = static::process_enrolment_registration(
-                                    $this->enrolmentinstance,
-                                    $registration,
-                                    $contact
-                                );
-                                if (!$result) {
-                                    $jobpersistent->set('timelastrequest', time());
-                                    $jobpersistent->update();
-                                    $this->add_error(get_string('enrolmentfailure', 'enrol_arlo'));
-                                    continue;
-                                }
-                                // Update scheduling information on persistent after successfull save.
-                                $jobpersistent->set('timelastrequest', time());
-                                $jobpersistent->set('lastsourceid', $registration->get('sourceid'));
-                                $jobpersistent->set('lastsourcetimemodified', $registration->get('sourcemodified'));
-                                $jobpersistent->set('errormessage', '');
-                                $jobpersistent->set('errorcounter', 0);
-                                $jobpersistent->update();
-                            } catch (moodle_exception $exception) {
-                                debugging($exception->getMessage(), DEBUG_DEVELOPER);
-                                $this->add_error($exception->getMessage());
-                                if ($registration) {
-                                    $registration->set('errormessage', $exception->getMessage());
-                                    $errorcounter = $registration->get('errorcounter');
-                                    $registration->set('errorcounter', ++$errorcounter);
-                                    $registration->update();
-                                }
-                                continue;
-                            }
+                            $this->sync_resource($resource);
                         }
                         $hasnext = (bool) $collection->hasNext();
                     }
@@ -215,6 +183,235 @@ class memberships_job extends job {
         } else {
             throw new moodle_exception('locktimeout');
         }
+    }
+
+    /**
+     * Helper method for syncing a Registration resource from Arlo
+     *
+     * @param $resource
+     * @return void
+     */
+    public function sync_resource($resource) {
+        try {
+            $jobpersistent = $this->get_job_persistent();
+            // Save Arlo registration information into Moodle persistents.
+            list($registration, $contact) = static::save_resource_information_to_persistents(
+                $this->enrolmentinstance,
+                $resource
+            );
+            // Invoke enrolment processing for this registration.
+            $result = static::process_enrolment_registration(
+                $this->enrolmentinstance,
+                $registration,
+                $contact
+            );
+            if (!$result) {
+                $jobpersistent->set('timelastrequest', time());
+                $jobpersistent->update();
+                $this->add_error(get_string('enrolmentfailure', 'enrol_arlo'));
+            } else {
+                // Update scheduling information on persistent after successfull save.
+                $jobpersistent->set('timelastrequest', time());
+                $jobpersistent->set('lastsourceid', $registration->get('sourceid'));
+                $jobpersistent->set('lastsourcetimemodified', $registration->get('sourcemodified'));
+                $jobpersistent->set('errormessage', '');
+                $jobpersistent->set('errorcounter', 0);
+                $jobpersistent->update();
+            }
+        } catch (moodle_exception $exception) {
+            debugging($exception->getMessage(), DEBUG_DEVELOPER);
+            $this->add_error($exception->getMessage());
+            if ($registration) {
+                $registration->set('errormessage', $exception->getMessage());
+                $errorcounter = $registration->get('errorcounter');
+                $registration->set('errorcounter', ++$errorcounter);
+                $registration->update();
+            }
+        }
+    }
+
+    /**
+     * @param $trace
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public static function sync_memberships($trace) {
+        global $DB;
+
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+
+        if (is_null($trace)) {
+            $trace = new \null_progress_trace();
+        }
+        try {
+            // Loop through any previously skipped enrollment instances and check to see if they exist now.
+            $missedevents = get_config('enrol_arlo', 'missedevent');
+            if ($missedevents) {
+                $missedevents = explode(',', $missedevents);
+                foreach ($missedevents as $missedevent) {
+                    if ($enrolmentinstance = $DB->get_record('enrol', [
+                        'customchar2' => arlo_type::EVENT,
+                        'customchar3' => $missedevent
+                    ])) {
+                        api::run_instance_jobs($enrolmentinstance->id);
+                        self::remove_missed_resource(arlo_type::EVENT, $missedevent);
+                    }
+                }
+            }
+
+            $missedonlines = get_config('enrol_arlo', 'missedonlineactivity');
+            if ($missedonlines) {
+                $missedonlines = explode(',', $missedonlines);
+                foreach ($missedonlines as $missedonline) {
+                    if ($enrolmentinstance = $DB->get_record('enrol', [
+                        'customchar2' => arlo_type::EVENT,
+                        'customchar3' => $missedonline
+                    ])) {
+                        api::run_instance_jobs($enrolmentinstance->id);
+                        self::remove_missed_resource(arlo_type::ONLINEACTIVITY, $missedonline);
+                    }
+                }
+            }
+            // We don't know how many records we will be retrieving it maybe 5 it maybe 5000,
+            // and the page size limit is 250. So we have to keep calling the endpoint and
+            // adjusting and the filter each call so we get all records and don't end up
+            // getting same 250 each call.
+            $hasnext = true;
+            while ($hasnext) {
+                $hasnext = false; // Break paging by default.
+                // Update contact merge requests records every page.
+                $contactmergerequestsjob = job_factory::get_job(['type' => 'contact_merge_requests']);
+                $contactmergerequestsjob->run();
+                $uri = new RequestUri();
+                $uri->setHost($pluginconfig->get('platform'));
+                $uri->setResourcePath('registrations/');
+                $uri->addExpand('Registration');
+                $uri->addExpand('Registration/Event');
+                $uri->addExpand('Registration/OnlineActivity');
+                $uri->addExpand('Registration/Contact');
+                $uri->setPagingTop(250);
+                $timemodified = get_config('enrol_arlo', 'lastregtimemodified');
+                $timemodified = empty($timemodified) ? date('c', 0) : $timemodified;
+                $lastregid = get_config('enrol_arlo', 'lastregid');
+                $filter = "(LastModifiedDateTime gt datetime('" . $timemodified . "'))";
+                if ($lastregid) {
+                    $filter .= " OR ";
+                    $filter .= "(LastModifiedDateTime eq datetime('" . $timemodified . "')";
+                    $filter .= " AND ";
+                    $filter .= "RegistrationID gt " . $lastregid . ")";
+                }
+                $uri->setFilterBy($filter);
+                $uri->setOrderBy("LastModifiedDateTime ASC,RegistrationID ASC");
+                $request = new Request('GET', $uri->output(true));
+                $response = client::get_instance()->send_request($request);
+                $collection = response_processor::process($response);
+                if ($collection->count() > 0) {
+                    foreach ($collection as $resource) {
+                        if ($event = $resource->getEvent()) {
+                            $type = arlo_type::EVENT;
+                            $persistent = event_persistent::get_record([
+                                'sourceguid' => $event->UniqueIdentifier
+                            ]);
+                            if (!$persistent) {
+                                $trace->output("Missing event record for Registration {$resource->UniqueIdentifier}");
+                                self::add_missed_resource($type, $event->UniqueIdentifier);
+                                continue;
+                            }
+                        } else if ($onlineactivity = $resource->getOnlineActivity()) {
+                            $type = arlo_type::ONLINEACTIVITY;
+                            $persistent = online_activity_persistent::get_record([
+                                'sourceguid' => $onlineactivity->UniqueIdentifier
+                            ]);
+                            if (!$persistent) {
+                                $trace->output("Missing online activity record for Registration {$resource->UniqueIdentifier}");
+                                self::add_missed_resource($type, $onlineactivity->UniqueIdentifier);
+                                continue;
+                            }
+                        } else {
+                            continue;
+                        }
+
+                        $enrolmentinstance = $DB->get_record('enrol', [
+                            'customchar2' => $type,
+                            'customchar3' => $persistent->get('sourceguid')
+                        ]);
+                        if (!$enrolmentinstance) {
+                            $trace->output("Missing enrolment instance for Registration {$resource->UniqueIdentifier}");
+                            self::add_missed_resource($type, $persistent->get('sourceguid'));
+                            continue;
+                        }
+
+                        $membershipsjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+                            [
+                                'area' => 'enrolment',
+                                'type' => 'memberships',
+                                'instanceid' => $enrolmentinstance->id
+                            ]
+                        );
+                        $membershipsjob = job_factory::create_from_persistent($membershipsjobpersistent);
+                        $trace->output("Syncing Registration {$resource->UniqueIdentifier}");
+                        $membershipsjob->sync_resource($resource);
+                        if ($membershipsjob->has_errors()) {
+                            $trace->output("Registration {$resource->UniqueIdentifier} failed with errors.", 1);
+                            $trace->output(implode('\n', $membershipsjob->get_errors()));
+                        }
+                    }
+                    set_config('lastregtimemodified', $resource->LastModifiedDateTime, 'enrol_arlo');
+                    set_config('lastregid', $resource->RegistrationID,  'enrol_arlo');
+                    $hasnext = (bool) $collection->hasNext();
+                }
+            }
+            return true;
+        } catch (moodle_exception $exception) {
+            debugging($exception->getMessage(), DEBUG_DEVELOPER);
+            return false;
+        }
+    }
+
+    /**
+     * If a registration can't be synced because an enrollment instance doesn't exist yet, it can be added here to be
+     * synced later.
+     *
+     * @param $type
+     * @param $uniqueid
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function add_missed_resource($type, $uniqueid) {
+        $config = 'missed' . $type;
+        if ($missed = get_config('enrol_arlo', $config)) {
+            $missed = explode(',', $missed);
+        } else {
+            $missed = [];
+        }
+
+        if (!empty($uniqueid) && !in_array($uniqueid, $missed)) {
+            $missed[] = $uniqueid;
+            $missed = implode(',', $missed);
+            set_config($config, $missed, 'enrol_arlo');
+        }
+    }
+
+    /**
+     * After an enrollment instance has been synced, this function removes it from the missed list.
+     *
+     * @param $type
+     * @param $uniqueid
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function remove_missed_resource($type, $uniqueid) {
+        $config = 'missed' . $type;
+        $missed = get_config('enrol_arlo', $config);
+        $missed = explode(',', $missed);
+        foreach ($missed as $key => $item) {
+            if ($item == $uniqueid) {
+                unset($missed[$key]);
+            }
+        }
+        $missed = implode(',', $missed);
+        set_config($config, $missed, 'enrol_arlo');
     }
 
     /**

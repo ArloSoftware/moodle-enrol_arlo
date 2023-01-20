@@ -35,6 +35,9 @@ Then click the Uninstall link opposite the Arlo plugin.
 time you access the site administration.
 
 ## Release Notes
+### Version 3.11.3 (2023012000)
+* Sync efficiency improvements using api registration based calls instead of event based api calls (ARLO-7)
+
 ### Version 3.11.2 (2022101000)
 * Sort scheduled jobs to improve behavior on PostgreSQL systems. (ARLO-6)
 
