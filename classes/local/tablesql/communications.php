@@ -45,7 +45,6 @@ class communications extends table_sql {
         $this->set_count_sql('SELECT COUNT(*) FROM {enrol_arlo_emailqueue}', array());
         $fields = 'eq.id,';
 
-        // In 4.1 it is mandatory to use \core_user\fields.
         $flds = [];
         $usernamefields = \core_user\fields::get_name_fields();
         foreach ($usernamefields as $usernamefield) {
