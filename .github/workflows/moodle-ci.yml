@@ -20,13 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '7.3'
-            moodle-branch: 'MOODLE_39_STABLE'
-          - php: '7.3'
-            moodle-branch: 'MOODLE_310_STABLE'
-          - php: '7.4'
-            moodle-branch: 'MOODLE_311_STABLE'
-
+          - php: '8.0'
+            moodle-branch: 'MOODLE_401_STABLE'
+            
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
