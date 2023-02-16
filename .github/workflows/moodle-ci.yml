@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:9.6
+        image: postgres:12.0
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -22,7 +22,7 @@ jobs:
         include:
           - php: '8.0'
             moodle-branch: 'MOODLE_401_STABLE'
-            
+
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
