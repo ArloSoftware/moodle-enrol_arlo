@@ -131,29 +131,27 @@ class learner_progress {
                     $this->datecompleted = $coursecompletion->timecompleted;
                     $this->progressstatus = get_string('completed', 'enrol_arlo');
                 } else {
-                    $completed = 0;
                     switch ($this->courseprogresscalculation) {
                         case self::CALCULATE_USING_COURSE_COMPLETION:
-                            $modules = $completion->get_completions($this->user->id);
-                            foreach ($modules as $module) {
-                                if(isset($module->timecompleted) && $module->timecompleted) {
-                                    $completed += 1;
-                                }
-                            }
+                            $modules = $completion->get_criteria();
                             break;
                         case self::CALCULATE_USING_ALL_ACTIVITIES:
                             $modules = $completion->get_activities();
-                            foreach ($modules as $module) {
-                                $modulecompletiondata = $completion->get_data($module, true, $this->user->id);
-                                $completed += $modulecompletiondata->completionstate == COMPLETION_INCOMPLETE ? 0 : 1;
-                            }
                             break;
                         default:
                             throw new coding_exception('Unsupported progress cacluation');
                     }
                     $count = count($modules);
                     if ($count) {
-                        $this->progresspercentage =  ROUND(($completed / $count) * 100, 2);
+                        $completed = 0;
+                        foreach ($modules as $module) {
+                            if(isset($module->moduleinstance) && $module->moduleinstance) {
+                                $module = get_coursemodule_from_id(null, $module->moduleinstance, $this->course->id);
+                            }
+                            $modulecompletiondata = $completion->get_data($module, true, $this->user->id);
+                            $completed += $modulecompletiondata->completionstate == COMPLETION_INCOMPLETE ? 0 : 1;
+                        }
+                        $this->progresspercentage =  ($completed / $count) * 100;
                         if ($coursecompletion->timestarted) {
                             $this->dateenrolled = $coursecompletion->timeenrolled;
                             $this->datestarted = $coursecompletion->timestarted;
