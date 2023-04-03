@@ -35,6 +35,8 @@ Then click the Uninstall link opposite the Arlo plugin.
 time you access the site administration.
 
 ## Release Notes
+### Version 4.1 (2023021500)
+
 ### Version 3.11.3 (2023012000)
 * Sync efficiency improvements using api registration based calls instead of event based api calls (ARLO-7)
 

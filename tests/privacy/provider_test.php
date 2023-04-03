@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
+namespace enrol_arlo\privacy;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\writer;
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_testcase {
+class provider_test extends \core_privacy\tests\provider_testcase {
 
     protected $plugingenerator;
 
@@ -72,11 +72,11 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
         $contextlist = provider::get_contexts_for_userid($user1->id);
         foreach ($contextlist->get_contexts() as $currentcontext) {
             if ($currentcontext instanceof context_user) {
-                $usercontext = context_user::instance($user1->id);
+                $usercontext = \context_user::instance($user1->id);
                 $this->assertEquals($usercontext->id, $currentcontext->id);
             }
             if ($currentcontext instanceof context_course) {
-                $coursecontext = context_course::instance($course1->id);
+                $coursecontext = \context_course::instance($course1->id);
                 $this->assertEquals($coursecontext->id, $currentcontext->id);
             }
         }
@@ -158,7 +158,7 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
                    JOIN {groups} g ON gm.groupid = g.id
                   WHERE g.courseid = ? ";
         $this->assertEquals(2, $DB->count_records_sql($sql, [$course1->id]));
-        $coursecontext1 = context_course::instance($course1->id);
+        $coursecontext1 = \context_course::instance($course1->id);
         provider::delete_data_for_all_users_in_context($coursecontext1);
         $this->assertEquals(0, $DB->count_records_sql($sql, [$course1->id]));
     }
@@ -214,7 +214,7 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
 
         $this->assertEquals(3, $DB->count_records_sql($sql, [$course1->id]));
 
-        $coursecontext1 = context_course::instance($course1->id);
+        $coursecontext1 = \context_course::instance($course1->id);
         $approvedcontextlist = new approved_contextlist($user1, 'enrol_arlo', [$coursecontext1->id]);
         provider::delete_data_for_user($approvedcontextlist);
         // Check for 2 users in groups because user1 was deleted.
@@ -275,7 +275,7 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
                    JOIN {groups} g ON gm.groupid = g.id
                   WHERE g.courseid = ? ";
         $this->assertEquals(3, $DB->count_records_sql($sql, [$course1->id]));
-        $coursecontext1 = context_course::instance($course1->id);
+        $coursecontext1 = \context_course::instance($course1->id);
         $approveduserlist = new approved_userlist(
             $coursecontext1,
             'enrol_arlo',
@@ -333,10 +333,10 @@ class enrol_arlo_privacy_provider_testcase extends \core_privacy\tests\provider_
         $manualplugin = enrol_get_plugin('manual');
         $manualplugin->enrol_user($manualinstance, $user3->id);
 
-        $context1 = context_course::instance($course1->id);;
-        $userlist = new core_privacy\local\request\userlist($context1, 'enrol_arlo');
+        $context1 = \context_course::instance($course1->id);;
+        $userlist = new \core_privacy\local\request\userlist($context1, 'enrol_arlo');
 
-        enrol_arlo\privacy\provider::get_users_in_context($userlist);
+        \enrol_arlo\privacy\provider::get_users_in_context($userlist);
 
         $userids = $userlist->get_userids();
         asort($userids);
