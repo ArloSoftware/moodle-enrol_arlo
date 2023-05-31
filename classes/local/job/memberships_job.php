@@ -349,7 +349,7 @@ class memberships_job extends job {
                                 'instanceid' => $enrolmentinstance->id
                             ]
                         );
-                        if(!is_object($membershipsjobpersistent) || $membershipsjobpersistent === false) {
+                        if (!$membershipsjobpersistent) {
                             continue;
                         }
                         $membershipsjob = job_factory::create_from_persistent($membershipsjobpersistent);
