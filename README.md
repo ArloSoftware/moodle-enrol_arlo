@@ -35,6 +35,11 @@ Then click the Uninstall link opposite the Arlo plugin.
 time you access the site administration.
 
 ## Release Notes
+
+### Version 4.1.1 (2023062000)
+* Fix enrollments task processing (ARLO-20)
+* Improvement completion task processing (ARLO-10)
+
 ### Version 4.1 (2023021500)
 
 ### Version 3.11.3 (2023012000)
