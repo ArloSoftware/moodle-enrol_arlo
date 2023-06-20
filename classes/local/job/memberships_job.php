@@ -349,6 +349,9 @@ class memberships_job extends job {
                                 'instanceid' => $enrolmentinstance->id
                             ]
                         );
+                        if (!$membershipsjobpersistent) {
+                            continue;
+                        }
                         $membershipsjob = job_factory::create_from_persistent($membershipsjobpersistent);
                         $trace->output("Syncing Registration {$resource->UniqueIdentifier}");
                         $membershipsjob->sync_resource($resource);
