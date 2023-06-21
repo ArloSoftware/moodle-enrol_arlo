@@ -473,8 +473,6 @@ class user_persistent extends persistent {
     protected function after_create() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $newuserid = $this->get('id');
-        // Create a context for this user.
-        context_user::instance($newuserid);
         // Send email. TODO refactor messaging.
         $manager = new manager();
         if ($pluginconfig->get('emailsendnewaccountdetails')) {

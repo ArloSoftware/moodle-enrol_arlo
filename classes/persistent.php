@@ -479,8 +479,8 @@ abstract class persistent {
 
         $record = $this->to_record();
         unset($record->id);
-
-        $id = $DB->insert_record(static::TABLE, $record);
+        
+        $id = user_create_user($record, true, false);
         $this->raw_set('id', $id);
 
         // We ensure that this is flagged as validated.
@@ -538,10 +538,9 @@ abstract class persistent {
 
         $record = $this->to_record();
         unset($record->timecreated);
-        $record = (array) $record;
 
         // Save the record.
-        $result = $DB->update_record(static::TABLE, $record);
+        $result = user_update_user($record, true, false);
 
         // We ensure that this is flagged as validated.
         $this->validated = true;
