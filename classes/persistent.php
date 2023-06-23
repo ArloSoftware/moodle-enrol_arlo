@@ -456,7 +456,7 @@ abstract class persistent {
      * @return persistent
      */
     final public function create() {
-        global $DB, $USER, $CFG;
+        global $DB, $USER;
 
         if ($this->raw_get('id')) {
             // The validation methods rely on the ID to know if we're updating or not, the ID should be
@@ -479,9 +479,8 @@ abstract class persistent {
 
         $record = $this->to_record();
         unset($record->id);
-        
-        require_once($CFG->dirroot . '/user/lib.php');
-        $id = \user_create_user($record, true, false);
+
+        $id = $DB->insert_record(static::TABLE, $record);
         $this->raw_set('id', $id);
 
         // We ensure that this is flagged as validated.
@@ -522,7 +521,7 @@ abstract class persistent {
      * @return bool True on success.
      */
     final public function update() {
-        global $DB, $USER, $CFG;
+        global $DB, $USER;
 
         if ($this->raw_get('id') <= 0) {
             throw new coding_exception('id is required to update');
@@ -539,10 +538,10 @@ abstract class persistent {
 
         $record = $this->to_record();
         unset($record->timecreated);
+        $record = (array) $record;
 
-        require_once($CFG->dirroot . '/user/lib.php');
         // Save the record.
-        $result = \user_update_user($record, true, false);
+        $result = $DB->update_record(static::TABLE, $record);
 
         // We ensure that this is flagged as validated.
         $this->validated = true;
