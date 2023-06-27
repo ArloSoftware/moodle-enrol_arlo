@@ -161,16 +161,16 @@ class outcomes_job extends job {
                         if (!empty($data)) {
                             $this->trace->output(implode(',', $data));
                             external::patch_registration_resource($sourceregistration, $data);
+                            $registrationpersistent->set('timelastrequest', time());
+                            // Reset update flag.
+                            $registrationpersistent->set('updatesource', 0);
+                            $registrationpersistent->save();
                         }
                     } catch (Exception $exception) {
                         debugging($exception->getMessage(), DEBUG_DEVELOPER);
                         $this->add_error($exception->getMessage());
                         $registrationpersistent->set('errormessage', $exception->getMessage());
-                    } finally {
-                        $registrationpersistent->set('timelastrequest', time());
-                        // Reset update flag.
-                        $registrationpersistent->set('updatesource', 0);
-                        $registrationpersistent->save();
+                    } finally {                        
                         // Update scheduling information on persistent after successfull save.
                         $jobpersistent->set('timelastrequest', time());
                         $jobpersistent->save();
