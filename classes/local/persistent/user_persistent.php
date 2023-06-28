@@ -465,6 +465,47 @@ class user_persistent extends persistent {
     }
 
     /**
+     * Creates the user data
+     * 
+     */
+    public function create_user() {
+        global $CFG, $USER;
+        if ($this->raw_get('id')) {
+            // The validation methods rely on the ID to know if we're updating or not, the ID should be
+            // falsy whenever we are creating an object.
+            throw new coding_exception('Cannot create an object that has an ID defined.');
+        }
+
+        if (!$this->is_valid()) {
+            throw new invalid_persistent_exception($this->get_errors());
+        }
+
+        // Before create hook.
+        $this->before_create();
+
+        // We can safely set those values bypassing the validation because we know what we're doing.
+        $now = time();
+        $this->raw_set('timecreated', $now);
+        $this->raw_set('timemodified', $now);
+        $this->raw_set('usermodified', $USER->id);
+
+        $record = $this->to_record();
+        unset($record->id);
+
+        require_once($CFG->dirroot . '/user/lib.php');
+        $id = user_create_user($record, true, false);
+        $this->raw_set('id', $id);
+
+        // We ensure that this is flagged as validated.
+        $this->validated = true;
+
+        // After create hook.
+        $this->after_create();
+
+        return $this;
+    }
+
+    /**
      * Set user context, email and trigger new user event.
      *
      * @throws \dml_exception
@@ -473,8 +514,6 @@ class user_persistent extends persistent {
     protected function after_create() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $newuserid = $this->get('id');
-        // Create a context for this user.
-        context_user::instance($newuserid);
         // Send email. TODO refactor messaging.
         $manager = new manager();
         if ($pluginconfig->get('emailsendnewaccountdetails')) {
@@ -490,6 +529,43 @@ class user_persistent extends persistent {
         }
         // Trigger new user event.
         \core\event\user_created::create_from_userid($newuserid)->trigger();
+    }
+
+    /**
+     * Update the existing record in the DB.
+     *
+     * @return bool True on success.
+     */
+    public function update_user() {
+        global $USER, $CFG;
+
+        if ($this->raw_get('id') <= 0) {
+            throw new coding_exception('id is required to update');
+        } else if (!$this->is_valid()) {
+            throw new invalid_persistent_exception($this->get_errors());
+        }
+
+        // Before update hook.
+        $this->before_update();
+
+        // We can safely set those values after the validation because we know what we're doing.
+        $this->raw_set('timemodified', time());
+        $this->raw_set('usermodified', $USER->id);
+
+        $record = $this->to_record();
+        unset($record->timecreated);
+
+        require_once($CFG->dirroot . '/user/lib.php');
+        // Save the record.
+        $result = user_update_user($record, true, false);
+
+        // We ensure that this is flagged as validated.
+        $this->validated = true;
+
+        // After update hook.
+        $this->after_update($result);
+
+        return $result;
     }
 
     /**
