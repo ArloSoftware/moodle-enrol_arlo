@@ -265,9 +265,17 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                 );
                 $contactmergerequest = reset($contactmergerequests);
                 $sourcecontact = $contactmergerequest->get_source_contact();
-                $sourceenrolments = $sourcecontact->get_associated_user()->has_course_enrolments();
-                $destinationenrolments = $contact->get_associated_user()->has_course_enrolments();
-                if (!($sourceenrolments && $destinationenrolments)) {
+
+                // Merge failed errors are misbehaving and sometimes have no source contact.
+                // Minor patch while that is fixed.
+                $sourceenrolments = false;
+                $destinationenrolments = false;
+                if (!empty($sourcecontact)) {
+                    $sourceenrolments = $sourcecontact->get_associated_user()->has_course_enrolments();
+                    $destinationenrolments = $contact->get_associated_user()->has_course_enrolments();
+                }
+                
+                if (empty($sourcecontact) || !($sourceenrolments && $destinationenrolments)) {
                     $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php');
                     $url->param('id', $values->id);
                     $text = get_string('reattemptenrolment', 'enrol_arlo');
