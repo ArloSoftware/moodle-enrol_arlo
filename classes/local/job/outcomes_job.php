@@ -137,12 +137,23 @@ class outcomes_job extends job {
         $lockfactory = static::get_lock_factory();
         $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         if ($lock) {
-            $limit = $pluginconfig->get('outcomejobdefaultlimit');
-            $registrations = registration_persistent::get_records(
-                ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1],
-                'timelastrequest', 'ASC', 0, $limit
-            );
-            $course = get_course($enrolmentinstance->courseid);
+            try {
+                $limit = $pluginconfig->get('outcomejobdefaultlimit');
+                $registrations = registration_persistent::get_records(
+                    ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1],
+                    'timelastrequest', 'ASC', 0, $limit
+                );
+                $course = get_course($enrolmentinstance->courseid);
+            } catch (Exception $exception) {
+                // Update scheduling information on persistent after successfull save.
+                $jobpersistent->set('timelastrequest', time());
+                $jobpersistent->save();
+                // Log error and release lock. Rethrow exception.
+                $this->add_error($exception->getMessage());
+                $lock->release();
+                throw $exception;
+            }
+            
             if (!$registrations) {
                 // Update scheduling information on persistent after successfull save.
                 $jobpersistent->set('timelastrequest', time());
@@ -174,7 +185,7 @@ class outcomes_job extends job {
                         // Update scheduling information on persistent after successfull save.
                         $jobpersistent->set('timelastrequest', time());
                         $jobpersistent->save();
-                        $lock->release();
+                        // DO NOT release lock here. This is a foreach loop!
                     }
                 }
             }
