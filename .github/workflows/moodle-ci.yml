@@ -19,9 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        php: ['8.0', '8.1']
         include:
-          - php: '8.0'
-            moodle-branch: 'MOODLE_401_STABLE'
+          - moodle-branch: 'MOODLE_401_STABLE'
 
     steps:
       - name: Check out repository code
