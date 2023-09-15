@@ -224,7 +224,7 @@ class registration_persistent extends persistent {
      * @throws coding_exception
      */
     protected function set_progresspercent($value) {
-        return $this->raw_set('progresspercent', round($value, 0));
+        return $this->raw_set('progresspercent', round($value ?? 0, 0));
     }
 
     /**
