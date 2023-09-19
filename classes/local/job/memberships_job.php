@@ -547,7 +547,7 @@ class memberships_job extends job {
                         }
                         $user->set('phone1', $contact->get('phonemobile'));
                         $user->set('phone2', $contact->get('phonework'));
-                        $user->create();
+                        $user->create_user();
                         // Important must associate user with contact.
                         $contact->set('userid', $user->get('id'));
                         $contact->save();
@@ -575,7 +575,7 @@ class memberships_job extends job {
                 }
                 $user->set('phone1', $contact->get('phonemobile'));
                 $user->set('phone2', $contact->get('phonework'));
-                $user->update();
+                $user->update_user();
 
             }
             // Important must associate user with registration.
