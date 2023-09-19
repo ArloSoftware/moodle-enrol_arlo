@@ -258,7 +258,7 @@ class manager {
         $a->fullname = fullname($user);
         $a->email = $user->email;
         $a->forgotpasswordurl = "$CFG->wwwroot/login/forgot_password.php";
-        if (trim($instance->customtext1) !== '') {
+        if (isset($instance->customtext1) && trim($instance->customtext1) !== '') {
             $message = $instance->customtext1;
             $key = array(
                 '{$a->coursename}',
