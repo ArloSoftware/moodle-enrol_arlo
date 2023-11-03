@@ -28,7 +28,6 @@
  * @copyright   2015 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/adminlib.php');
@@ -67,6 +66,23 @@ if ($hassiteconfig) {
 
     $name = get_string('apipassword', 'enrol_arlo');
     $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, $description, ''));
+
+    $description = get_string('enablewebhook_desc', 'enrol_arlo');
+    $name = get_string('enablewebhook', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/enablewebhook', $name, $description, 0));
+
+    $description = get_string('useadhoctask_desc', 'enrol_arlo');
+    $name = get_string('useadhoctask', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/useadhoctask', $name, $description, 0));
+
+    $description = get_string('webhooksecret_desc', 'enrol_arlo');
+    $name = get_string('webhooksecret', 'enrol_arlo');
+    $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/webhooksecret', $name, $description, ''));
+
+    $description = get_string('webhookapiurl_desc', 'enrol_arlo');
+    $name = get_string('webhookapiurl', 'enrol_arlo');
+    $settings->add(new admin_setting_configtext('enrol_arlo/webhookapiurl', $name, $description, 
+        '/api/2012-02-01/auth/resources/webhookendpoints'));
 
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
@@ -123,5 +139,7 @@ if ($hassiteconfig) {
                 'moodle/site:config', true)
         );
     }
-
+    $ADMIN->add('enrolments', new admin_externalpage('webhookstatusonfiguration', 
+    get_string('webhookstatus', 'enrol_arlo'),
+    new moodle_url('/enrol/arlo/admin/webhook_status.php')));
 }
