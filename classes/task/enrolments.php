@@ -61,7 +61,10 @@ class enrolments extends scheduled_task {
         if ($CFG->debug == DEBUG_DEVELOPER) {
             $trace = new text_progress_trace();
         }
-        memberships_job::sync_memberships($trace);
+        $useweebhooks = get_config('enrol_arlo', 'enablewebhook');
+        if (empty($useweebhooks)) {
+            memberships_job::sync_memberships($trace);
+        }
         $manager = new manager();
         $manager->process_email_queue();
         return true;

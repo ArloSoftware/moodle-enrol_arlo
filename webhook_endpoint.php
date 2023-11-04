@@ -27,6 +27,7 @@ require_once(__DIR__ . '/../../config.php');
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the request body
+   
     $webhookhandler = new enrol_arlo\input\webhook_handler();
     if (!$webhookhandler->webhook_is_enable()) {
         http_response_code(401);
@@ -35,7 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $requestbody = file_get_contents('php://input');
     $signature = $_SERVER['HTTP_X_ARLO_SIGNATURE'];
-    $webhookhandler->validatesignature($signature, $requestbody);
+    if (!$webhookhandler->validatesignature($signature, $requestbody)) {
+        http_response_code(401);
+        echo 'Unauthorized';
+        exit;
+    }
     $webhookhandler->process_events(json_decode($requestbody)->events);
 
     http_response_code(200);

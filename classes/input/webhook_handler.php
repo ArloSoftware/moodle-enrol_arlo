@@ -145,12 +145,7 @@ class webhook_handler {
         $hmacsignature = hash_hmac('sha512', $body, $secretkeystring, true);
         // Base64 encode the signature
         $hmacsignaturebase64 = base64_encode($hmacsignature);
-        var_dump($hmacsignaturebase64);
-        if ($hmacsignaturebase64 != $signature) {
-            http_response_code(401);
-            echo 'Unauthorized';
-            exit;
-        }
+        return hash_equals($signature, $hmacsignaturebase64);
     }
 
     /**
