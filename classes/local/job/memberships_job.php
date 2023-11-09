@@ -167,7 +167,20 @@ class memberships_job extends job {
                     $collection = response_processor::process($response);
                     if ($collection->count() > 0) {
                         foreach ($collection as $resource) {
-                            $this->sync_resource($resource);
+                            $lockfactory = static::get_lock_factory();
+                            $lock = $lockfactory->get_lock('Registration: ' . 
+                                $resource->RegistrationID, self::TIME_LOCK_TIMEOUT);
+                            if ($lock) {
+                                try{
+                                    $this->sync_resource($resource, $trace);
+                                } catch (moodle_exception $exception) {
+                                    debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                                } finally {
+                                    $lock->release();
+                                } 
+                            } else {
+                                $trace->output('Lock timeout');
+                            }
                         }
                         $hasnext = (bool) $collection->hasNext();
                     }
@@ -308,56 +321,19 @@ class memberships_job extends job {
                 $collection = response_processor::process($response);
                 if ($collection->count() > 0) {
                     foreach ($collection as $resource) {
-                        if ($event = $resource->getEvent()) {
-                            $type = arlo_type::EVENT;
-                            $persistent = event_persistent::get_record([
-                                'sourceguid' => $event->UniqueIdentifier
-                            ]);
-                            if (!$persistent) {
-                                $trace->output("Missing event record for Registration {$resource->UniqueIdentifier}");
-                                self::add_missed_resource($type, $event->UniqueIdentifier);
-                                continue;
-                            }
-                        } else if ($onlineactivity = $resource->getOnlineActivity()) {
-                            $type = arlo_type::ONLINEACTIVITY;
-                            $persistent = online_activity_persistent::get_record([
-                                'sourceguid' => $onlineactivity->UniqueIdentifier
-                            ]);
-                            if (!$persistent) {
-                                $trace->output("Missing online activity record for Registration {$resource->UniqueIdentifier}");
-                                self::add_missed_resource($type, $onlineactivity->UniqueIdentifier);
-                                continue;
+                        $lockfactory = static::get_lock_factory();
+                        $lock = $lockfactory->get_lock('Registration: ' . 
+                            $resource->RegistrationID, self::TIME_LOCK_TIMEOUT);
+                        if ($lock) {
+                            try{
+                                self::sync_membership($resource, $trace);
+                            } catch (moodle_exception $exception) {
+                                debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                            } finally {
+                                $lock->release();
                             }
                         } else {
-                            continue;
-                        }
-
-                        $enrolmentinstance = $DB->get_record('enrol', [
-                            'customchar2' => $type,
-                            'customchar3' => $persistent->get('sourceguid')
-                        ]);
-                        if (!$enrolmentinstance) {
-                            $trace->output("Missing enrolment instance for Registration {$resource->UniqueIdentifier}");
-                            self::add_missed_resource($type, $persistent->get('sourceguid'));
-                            continue;
-                        }
-
-                        $membershipsjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
-                            [
-                                'area' => 'enrolment',
-                                'type' => 'memberships',
-                                'instanceid' => $enrolmentinstance->id
-                            ]
-                        );
-                        if (!$membershipsjobpersistent) {
-                            continue;
-                        }
-                        $membershipsjob = job_factory::create_from_persistent($membershipsjobpersistent);
-                        $trace->output("Syncing Registration {$resource->UniqueIdentifier}");
-                        $membershipsjob->sync_resource($resource);
-                        if ($membershipsjob->has_errors()) {
-                            $trace->output("Registration {$resource->UniqueIdentifier} failed with errors.", 1);
-                            $trace->output(implode('\n', $membershipsjob->get_errors()));
+                            $trace->output('Lock timeout');
                         }
                     }
                     set_config('lastregtimemodified', $resource->LastModifiedDateTime, 'enrol_arlo');
@@ -366,6 +342,98 @@ class memberships_job extends job {
                 }
             }
             return true;
+        } catch (moodle_exception $exception) {
+            debugging($exception->getMessage(), DEBUG_DEVELOPER);
+            return false;
+        }
+    }
+
+    /**
+     * Sync current resource.
+     * 
+     * @param $resource
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public static function sync_membership($resource, $trace) {
+        global $DB;
+        
+        if ($event = $resource->getEvent()) {
+            $type = arlo_type::EVENT;
+            $persistent = event_persistent::get_record([
+                'sourceguid' => $event->UniqueIdentifier
+            ]);
+            if (!$persistent) {
+                $trace->output("Missing event record for Registration {$resource->UniqueIdentifier}");
+                self::add_missed_resource($type, $event->UniqueIdentifier);
+                return false;
+            }
+        } else if ($onlineactivity = $resource->getOnlineActivity()) {
+            $type = arlo_type::ONLINEACTIVITY;
+            $persistent = online_activity_persistent::get_record([
+                'sourceguid' => $onlineactivity->UniqueIdentifier
+            ]);
+            if (!$persistent) {
+                $trace->output("Missing online activity record for Registration {$resource->UniqueIdentifier}");
+                self::add_missed_resource($type, $onlineactivity->UniqueIdentifier);
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        $enrolmentinstance = $DB->get_record('enrol', [
+            'customchar2' => $type,
+            'customchar3' => $persistent->get('sourceguid')
+        ]);
+        if (!$enrolmentinstance) {
+            $trace->output("Missing enrolment instance for Registration {$resource->UniqueIdentifier}");
+            self::add_missed_resource($type, $persistent->get('sourceguid'));
+            return false;
+        }
+
+        $membershipsjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
+            [
+                'area' => 'enrolment',
+                'type' => 'memberships',
+                'instanceid' => $enrolmentinstance->id
+            ]
+        );
+        if (!$membershipsjobpersistent) {
+            return false;
+        }
+        $membershipsjob = job_factory::create_from_persistent($membershipsjobpersistent);
+        $trace->output("Syncing Registration {$resource->UniqueIdentifier}");
+        $membershipsjob->sync_resource($resource);
+        
+        if ($membershipsjob->has_errors()) {
+            $trace->output("Registration {$resource->UniqueIdentifier} failed with errors.", 1);
+            $trace->output(implode('\n', $membershipsjob->get_errors()));
+        }
+        return true;
+    }
+
+    /**
+     * Sync membership for a given resource registration id.
+     *
+     * @param $resourceid
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function process_registration_event($event, $trace) {
+        try {
+            $plugin = api::get_enrolment_plugin();
+            $pluginconfig = $plugin->get_plugin_config();
+            $uri = new RequestUri();
+            $uri->setHost($pluginconfig->get('platform'));
+            $uri->setResourcePath('registrations/' . $event->resourceId);
+            $uri->addExpand('Event');
+            $uri->addExpand('OnlineActivity');
+            $uri->addExpand('Contact');
+            $request = new Request('GET', $uri->output(true));
+            $response = client::get_instance()->send_request($request);
+            $resource = response_processor::process($response);
+            self::sync_membership($resource, $trace);
         } catch (moodle_exception $exception) {
             debugging($exception->getMessage(), DEBUG_DEVELOPER);
             return false;
