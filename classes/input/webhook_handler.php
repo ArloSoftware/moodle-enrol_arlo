@@ -106,7 +106,7 @@ class webhook_handler {
         $config = get_config('enrol_arlo');
         $this->platform = !empty($config->platform) ? $config->platform : false;
         $this->contact = !empty($config->apiusername) ? $config->apiusername : false;
-        $this->webhooksecretkey = !empty($config->webhooksecretkey) ? $config->webhooksecretkey : false;
+        $this->webhooksecretkey = !empty($config->webhooksecret) ? $config->webhooksecret : false;
         $this->webhookid = !empty($config->webhookid) ? $config->webhookid : false;
         $webhookapipath = !empty($config->webhookapipath) ? $config->webhookapipath : false;
         $this->webhookapiurl = $this->get_webhookapiurl($webhookapipath);
@@ -145,6 +145,7 @@ class webhook_handler {
         $hmacsignature = hash_hmac('sha512', $body, $secretkeystring, true);
         // Base64 encode the signature
         $hmacsignaturebase64 = base64_encode($hmacsignature);
+
         return hash_equals($signature, $hmacsignaturebase64);
     }
 
