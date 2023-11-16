@@ -419,11 +419,12 @@ class api {
      *
      * @param $instanceid
      * @param $full
-     * @return void
+     * @param $trace
+     * @return bool
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function run_instance_jobs($instanceid, $full = false) {
+    public static function run_instance_jobs($instanceid, $full = false, $trace = null) {
         global $DB;
 
         $membershipsjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
@@ -433,25 +434,37 @@ class api {
                 'instanceid' => $instanceid
             ]
         );
-        if ($full) {
-            $membershipsjobpersistent->set('lastsourceid', 0);
-            $membershipsjobpersistent->set('lastsourcetimemodified', '1970-01-01T00:00:00Z');
-            $membershipsjobpersistent->set('timelastrequest', 0);
-            $membershipsjobpersistent->save();
-            $DB->set_field('enrol_arlo_registration', 'updatesource', 1, ['enrolid' => $instanceid]);
+
+        if (!empty($membershipsjobpersistent)) {
+            if ($full) {
+                $membershipsjobpersistent->set('lastsourceid', 0);
+                $membershipsjobpersistent->set('lastsourcetimemodified', '1970-01-01T00:00:00Z');
+                $membershipsjobpersistent->set('timelastrequest', 0);
+                $membershipsjobpersistent->save();
+                $DB->set_field('enrol_arlo_registration', 'updatesource', 1, ['enrolid' => $instanceid]);
+            }
+            $membershipsjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
+            $membershipstatus = $membershipsjob->run();
+        } else {
+            if (!empty($trace)) {
+                $trace->output(get_string('nomembershipjobfound', 'enrol_arlo'));
+            } else {
+                throw new moodle_exception('nomembershipjobfound','enrol_arlo', '', $instanceid);
+            }
         }
-        $membershipsjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($membershipsjobpersistent);
-        $status = $membershipsjob->run();
-        // Run outcomes job.
-        $outcomesjobpersistent = \enrol_arlo\local\persistent\job_persistent::get_record(
-            [
-                'area' => 'enrolment',
-                'type' => 'outcomes',
-                'instanceid' => $instanceid
-            ]
-        );
-        $outcomesjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($outcomesjobpersistent);
-        $status = $outcomesjob->run();
+
+        
+        if (!empty($outcomesjobpersistent)) {
+            $outcomesjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($outcomesjobpersistent);
+            $outcomestatus = $outcomesjob->run();
+        } else {
+            if (!empty($trace)) {
+                $trace->output(get_string('nooutcomejobfound', 'enrol_arlo'));
+            } else {
+                throw new moodle_exception('nooutcomejobfound','enrol_arlo', '', $instanceid);
+            }         
+        }
+        return !empty($membershipstatus) && !empty($outcomestatus);
     }
 
 }

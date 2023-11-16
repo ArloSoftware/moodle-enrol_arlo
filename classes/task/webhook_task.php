@@ -16,23 +16,19 @@
 
 namespace enrol_arlo\task;
 
-use core\task\scheduled_task;
-use enrol_arlo\api;
-use enrol_arlo\local\job\memberships_job;
-use enrol_arlo\manager;
-use null_progress_trace;
-use text_progress_trace;
+use core\task\adhoc_task;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Create Moodle enrolments based off Arlo registrations.
+ * Processes Arlo webhooks events.
  *
  * @package     enrol_arlo
- * @copyright   2020 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @author      2023 Oscar Nadjar <oscar.nadjar@moodle.com>
+ * @copyright   Moodle US
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class enrolments extends scheduled_task {
+class webhook_task extends adhoc_task {
 
     /**
      * Get schedule task human readable name.
@@ -52,22 +48,22 @@ class enrolments extends scheduled_task {
      * @throws \moodle_exception
      */
     public function execute() {
-        global $CFG;
-        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
-        if (!enrol_is_enabled('arlo')) {
-            return;
-        }
-        $trace = new null_progress_trace();
-        if ($CFG->debug == DEBUG_DEVELOPER) {
-            $trace = new text_progress_trace();
-        }
-        $useweebhooks = get_config('enrol_arlo', 'enablewebhook');
-        if (empty($useweebhooks)) {
-            memberships_job::sync_memberships($trace);
-        }
-        $manager = new manager();
-        $manager->process_email_queue();
+
+        $event = $this->get_custom_data();
+        \enrol_arlo\input\webhook_handler::process_event($event);
+
         return true;
     }
-
+    
+    /**
+     * Queues this task to run ASAP.
+     * 
+     * @param string $registrationid
+     */
+    public static function queue_task(object $event) {
+        $task = new self();
+        $task->set_custom_data($event);
+        $task->set_next_run_time(time());
+        \core\task\manager::queue_adhoc_task($task);
+    }
 }

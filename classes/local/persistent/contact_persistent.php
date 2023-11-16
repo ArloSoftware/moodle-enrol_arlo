@@ -119,7 +119,15 @@ class contact_persistent extends persistent {
             'errorcounter' => array(
                 'type' => PARAM_INT,
                 'default' => 0
-            )
+            ),
+            'redirectcounter' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            ),
+            'cansendpatchrequests' => array(
+                'type' => PARAM_TEXT,
+                'default' => 'yes'
+            ),
         ];
     }
 
