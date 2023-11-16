@@ -28,14 +28,18 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace enrol_arlo\adminsettings;
+
 defined('MOODLE_INTERNAL') || die();
+
+require_once("$CFG->libdir/adminlib.php");
 
 /**
  * Locked text field, allows unlocking of text to edit
  *
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class enrol_arlo_admin_setting_configlockedtext extends admin_setting_configtext {
+class configlockedtext extends \admin_setting_configtext {
     /**
      * Constructor
      * @param string $name unique name, 'mysetting' for settings that in config, 'myplugin/mysetting' for ones in config_plugins.
@@ -107,6 +111,28 @@ class enrol_arlo_admin_setting_configlockedtext extends admin_setting_configtext
      * @throws dml_exception
      */
     public function write_setting($data) {
+        // Fix user input for Arlo platform URL.
+        global $USER;
+        $replace = '/^(https:\/\/)' . '|' . // Matches leading https://
+                   '^(http:\/\/)'   . '|' . // Matches leading http://
+                   '\/$/'                   // Matches trailing /
+        ;
+        if (preg_match($replace, $data)) {
+            $data = preg_replace($replace, "", $data);
+            // Notify user that their input was altered to adhere to standards
+            $message = new \core\message\message();
+            $message->component = 'enrol_arlo';
+            $message->name = 'administratornotification';
+            $message->userfrom = \core_user::get_noreply_user();
+            $message->userto = $USER->id;
+            $message->subject = get_string('platform_bad_input_domain_subject', 'enrol_arlo');
+            $message->fullmessage = get_string('platform_bad_input_domain', 'enrol_arlo');
+            $message->fullmessageformat = FORMAT_MARKDOWN;
+            $message->fullmessagehtml = '<p>' . get_string('platform_bad_input_domain', 'enrol_arlo') . '</p>';
+            $message->smallmessage = get_string('platform_bad_input_domain_small', 'enrol_arlo');
+            $messageid = message_send($message);
+        }
+
         $name = $this->name;
         $oldvalue = $this->get_setting();
         $newvalue = $data;
@@ -120,7 +146,7 @@ class enrol_arlo_admin_setting_configlockedtext extends admin_setting_configtext
         if (!empty($oldvalue)) {
             $event = \enrol_arlo\event\fqdn_updated::create(array(
                 'objectid' => 1,
-                'context' => context_system::instance(),
+                'context' => \context_system::instance(),
                 'other' => array(
                     'name' => $name,
                     'oldvalue' => $oldvalue,
@@ -140,113 +166,17 @@ class enrol_arlo_admin_setting_configlockedtext extends admin_setting_configtext
      * @throws coding_exception
      */
     public function validate($data) {
-        $cleaned = clean_param($data, PARAM_HOST);
-        if (empty($cleaned)) {
+        // Fix user input for Arlo platform URL.
+        $protocol = '/^(https:\/\/)' . '|' . // Matches leading https://
+                   '^(http:\/\/)'   . '|' . // Matches leading http://
+                   '\/$/'                   // Matches trailing /
+        ;
+        if (preg_match($protocol, $data)) {
             return get_string('validateerror', 'admin');
         }
-        return true;
-    }
-}
 
-/**
- * Displays current Arlo API status in admin settings page.
- */
-class enrol_arlo_admin_setting_configarlostatus extends admin_setting {
-    public function __construct($name, $visiblename) {
-        $this->nosave = true;
-        parent::__construct($name, $visiblename, '', '');
-    }
-    /**
-     * Always returns true
-     * @return bool Always returns true
-     */
-    public function get_setting() {
-        return true;
-    }
-    /**
-     * Always returns true
-     * @return bool Always returns true
-     */
-    public function get_defaultsetting() {
-        return true;
-    }
-    /**
-     * Never write settings
-     * @return string Always returns an empty string
-     */
-    public function write_setting($data) {
-        // Do not write any setting.
-        return '';
-    }
-
-    /**
-     * Output the current Arlo API status.
-     *
-     * @param mixed $data
-     * @param string $query
-     * @return string
-     * @throws coding_exception
-     * @throws dml_exception
-     * @throws moodle_exception
-     */
-    public function output_html($data, $query = '') {
-        global $OUTPUT;
-        $apistatus = get_config('enrol_arlo', 'apistatus');
-        $apilastrequested = (int) get_config('enrol_arlo', 'apitimelastrequest');
-        $useimageiconclass = false;
-        if (class_exists('image_icon')) {
-            $useimageiconclass = true;
-        }
-        $statusicon = '';
-        $reason = '';
-        $description = '';
-        if (200 == $apistatus) {
-            if ($useimageiconclass) {
-                $statusicon = $OUTPUT->image_icon('t/go', get_string('ok', 'enrol_arlo'));
-            } else {
-                $statusicon = $OUTPUT->pix_icon('t/go', get_string('ok', 'enrol_arlo'));
-            }
-            $reason = get_string('apistatusok', 'enrol_arlo', userdate($apilastrequested));
-            $description = '';
-        } else if (0 == $apistatus || ($apistatus >= 400 && $apistatus < 499)) {
-            if ($useimageiconclass) {
-                $statusicon = $OUTPUT->image_icon('t/stop', get_string('notok', 'enrol_arlo'));
-            } else {
-                $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
-            }
-            $reason = get_string('apistatusclienterror', 'enrol_arlo');
-            $url = new moodle_url('/enrol/arlo/admin/apirequests.php');
-            $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
-        } else if ($apistatus >= 500 && $apistatus < 599) {
-            if ($useimageiconclass) {
-                $statusicon = $OUTPUT->image_icon('t/stop', get_string('notok', 'enrol_arlo'));
-            } else {
-                $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
-            }
-            $reason = get_string('apistatusservererror', 'enrol_arlo');
-            $url = new moodle_url('/enrol/arlo/admin/apirequests.php');
-            $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
-        } else {
-            return '';
-        }
-        $element = '<div class="form-text">'.$statusicon.'&nbsp;'.$reason.'</div>';
-        return format_admin_setting($this, '', $element, $description, false, '', null, $query);
-    }
-}
-
-/**
- * Extends config text to allow email validation.
- */
-class enrol_arlo_admin_setting_configemail extends admin_setting_configtext {
-    /**
-     * Validate email address.
-     *
-     * @param $data
-     * @return bool|mixed|string
-     * @throws coding_exception
-     */
-    public function validate($data) {
-        if (!validate_email($data)) {
+        $cleaned = clean_param($data, PARAM_HOST);
+        if (empty($cleaned)) {
             return get_string('validateerror', 'admin');
         }
         return true;

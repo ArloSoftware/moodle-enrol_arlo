@@ -94,10 +94,14 @@ class enrol_arlo_generator extends testing_module_generator {
      *
      * @throws coding_exception
      */
-    public function setup_plugin() {
+    public function setup_plugin($platformdomain = NULL) {
+        if ($platformdomain == NULL) {
+            $platformdomain = $this->get_platform();
+        }
+
         $pluginconfig = new arlo_plugin_config();
         $pluginconfig::install_defaults();
-        $pluginconfig->set('platform', $this->get_platform());
+        $pluginconfig->set('platform', $platformdomain);
         $pluginconfig->set('apiusername', 'phpunit@phpunit.arlo.co');
         $pluginconfig->set('apipassword', 'password1234');
     }
