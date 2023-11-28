@@ -444,3 +444,5 @@ $string['webhookinactive'] = '<div class="alert alert-warning" role="alert">Webh
 $string['webhookdisabled'] = '<div class="alert alert-danger" role="alert">Webhook is disabled.</div>';
 $string['webhookstatus'] = 'Webhook status';
 
+$string['nomembershipjobfound'] = 'No membership job found for enrolment instance {$a}';
+$string['nooutcomejobfound'] = 'No outcome job found for enrolment instance {$a}';
