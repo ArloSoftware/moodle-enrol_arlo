@@ -254,8 +254,10 @@ class memberships_job extends job {
                         'customchar2' => arlo_type::EVENT,
                         'customchar3' => $missedevent
                     ])) {
-                        api::run_instance_jobs($enrolmentinstance->id);
-                        self::remove_missed_resource(arlo_type::EVENT, $missedevent);
+                        $jobdone = api::run_instance_jobs($enrolmentinstance->id, false, $trace);
+                        if ($jobdone) {
+                            self::remove_missed_resource(arlo_type::EVENT, $missedevent);
+                        }
                     }
                 }
             }
@@ -268,8 +270,10 @@ class memberships_job extends job {
                         'customchar2' => arlo_type::EVENT,
                         'customchar3' => $missedonline
                     ])) {
-                        api::run_instance_jobs($enrolmentinstance->id);
-                        self::remove_missed_resource(arlo_type::ONLINEACTIVITY, $missedonline);
+                        $jobdone = api::run_instance_jobs($enrolmentinstance->id, false, $trace);
+                        if ($jobdone) {
+                            self::remove_missed_resource(arlo_type::ONLINEACTIVITY, $missedonline);
+                        }
                     }
                 }
             }
