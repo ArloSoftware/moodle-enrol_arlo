@@ -422,3 +422,6 @@ $string['useraccountcreation'] = 'User account creation';
 $string['courseenrolment'] = 'Course enrolment';
 $string['cleanup'] = 'Cleanup';
 $string['usernamegeneration_desc'] = '<p>The order in which different username formats are used to generate a username for a new Moodle user account. If existing account found with same username as generated, the next format in order will be tried.</p><br>';
+
+$string['nomembershipjobfound'] = 'No membership job found for enrolment instance {$a}';
+$string['nooutcomejobfound'] = 'No outcome job found for enrolment instance {$a}';
