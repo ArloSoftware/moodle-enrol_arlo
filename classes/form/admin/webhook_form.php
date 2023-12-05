@@ -15,21 +15,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information.
- *
- * @author    Troy Williams
- * @author    Corey Davis
+ * Form to configure the Arlo webhook.
+ * 
  * @package   enrol_arlo
- * @copyright 2015 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @author    2023 Oscar Nadjar <oscar.nadjar@moodle.com>
+ * @copyright Moodle US
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace enrol_arlo\form\admin;
+
+require_once($CFG->dirroot. '/lib/formslib.php');
 defined('MOODLE_INTERNAL') || die();
 
-$plugin            = new stdClass();
-$plugin->version   = 2023110900;
-$plugin->requires  = 2022112800;        // See http://docs.moodle.org/dev/Moodle_Version
-$plugin->component = 'enrol_arlo';      // Full name of the plugin (used for diagnostics).
-$plugin->release   = '4.1.4';          // Human-friendly version name.
-$plugin->maturity  = MATURITY_STABLE;   // This version's maturity level.
-$plugin->dependencies = [];
+class webhook_form extends \moodleform {
+
+    public function definition() {
+        $form = $this->_form;
+
+        $form->addElement('text', 'name', get_string('webhookname', 'enrol_arlo'));
+        $form->setType('name', PARAM_TEXT);
+
+        $form->addElement('text', 'contact', get_string('technicalcontact', 'enrol_arlo'));
+        $form->setType('contact', PARAM_TEXT);
+
+        $form->addElement('hidden', 'format', 'Json_2019_11_01');
+        $form->setType('format', PARAM_TEXT);
+
+        $this->add_action_buttons(false, get_string('createwebhook', 'enrol_arlo'));
+    }
+}
