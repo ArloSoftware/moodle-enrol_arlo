@@ -39,21 +39,8 @@ class webhook_form extends \moodleform {
         $form->addElement('text', 'contact', get_string('technicalcontact', 'enrol_arlo'));
         $form->setType('contact', PARAM_TEXT);
 
-        $form->addElement('select', 'status', get_string('status'), array(
-            'Active' => get_string('active'),
-            'Disabled' => get_string('disable')
-        ));
-        $form->setDefault('status', 'Active');
-
         $form->addElement('hidden', 'format', 'Json_2019_11_01');
         $form->setType('format', PARAM_TEXT);
-
-        $select = $form->addElement('select', 'eventtypes', get_string('eventtypes', 'enrol_arlo'),
-        [
-            'RegistrationCreated' => get_string('regcreated', 'enrol_arlo'),
-            'RegistrationUpdated' => get_string('regupdated', 'enrol_arlo'),
-        ]);
-        $select->setMultiple(true);
 
         $this->add_action_buttons(false, get_string('createwebhook', 'enrol_arlo'));
     }
