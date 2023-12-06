@@ -166,9 +166,9 @@ class webhook_handler {
         $webhook->Name = $data->name;
         $webhook->Endpoint = $this->moodle_endpoint;
         $webhook->TechnicalContact = !empty($data->contact) ? $data->contact : $this->contact;
-        $webhook->Status = $data->status;
+        $webhook->Status = 'Active';
         $webhook->PayloadSchema = $data->format;
-        $webhook->EventTypes = implode(',', $data->eventtypes);
+        $webhook->EventTypes = 'RegistrationCreated,RegistrationUpdated';
         $xmlbody = $this->converttoxml($webhook);
         
         $request = new Request('POST', $url, ['Content-type' => 'application/xml; charset=utf-8'], $xmlbody);
