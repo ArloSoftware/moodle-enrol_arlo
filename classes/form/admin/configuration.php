@@ -53,11 +53,13 @@ class configuration extends \moodleform {
         $form->setDefault('matchuseraccountsby', $default);
         $form->addHelpButton('matchuseraccountsby', 'matchuseraccountsby', 'enrol_arlo');
 
+        // User account creation
         $form->addElement('header', 'useraccountcreation', get_string('useraccountcreation', 'enrol_arlo'));
         $form->setExpanded('useraccountcreation', true);
 
         $form->addElement('html', static::get_username_generation_table_html());
 
+        // Course enrolment
         $form->addElement('header', 'courseenrolment', get_string('courseenrolment', 'enrol_arlo'));
         $form->setExpanded('courseenrolment', true);
 
@@ -87,6 +89,7 @@ class configuration extends \moodleform {
         $form->setDefault('expiredaction', ENROL_EXT_REMOVED_SUSPEND);
         $form->addHelpButton('expiredaction', 'expiredaction', 'enrol_arlo');
 
+        // Resulting
         $form->addElement('header', 'resulting', get_string('resulting', 'enrol_arlo'));
         $form->setExpanded('resulting', true);
 
@@ -100,6 +103,7 @@ class configuration extends \moodleform {
         $form->setDefault('pusheventresults', 1);
         $form->addHelpButton('pusheventresults', 'pusheventresults', 'enrol_arlo');
 
+        // Other
         $form->addElement('header', 'other', get_string('other'));
         $form->setExpanded('other', true);
 
@@ -125,6 +129,7 @@ class configuration extends \moodleform {
         $form->setDefault('allowunenrolaccessedui', 0);
         $form->addHelpButton('allowunenrolaccessedui', 'allowunenrolaccessedui', 'enrol_arlo');
 
+        // Cleanup
         $form->addElement('header', 'cleanup', get_string('cleanup', 'enrol_arlo'));
         $form->setExpanded('cleanup', true);
 
