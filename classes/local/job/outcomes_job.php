@@ -170,6 +170,7 @@ class outcomes_job extends job {
                         // Check if the current record has been redirected too often.
                         $redirectcounter = $registrationpersistent->get('redirectcounter');
                         $maxredirects = $pluginconfig->get('retriesperrecord');
+                        $retrylog = new retry_log_persistent();
                         if ( $redirectcounter >= $maxredirects && $cansendpatchrequests !== 'one' ) {
                             // Bar user from this job until Admin action is taken.
                             $cansendpatchrequests = 'no';
@@ -178,7 +179,6 @@ class outcomes_job extends job {
                             // Display retry error to admin on job page
                             $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
                             // Create and save a log of the failure
-                            $retrylog = new retry_log_persistent();
                             $retrylog->set('timelogged', time());
                             $retrylog->set('userid', $user->id);
                             $retrylog->set('participantname', "$user->lastname, $user->firstname");
@@ -207,11 +207,13 @@ class outcomes_job extends job {
                                         }
                                     } else {
                                         $registrationpersistent->set('redirectcounter', 0);
+                                        $retrylog->set('cansendpatchrequests', 'yes');
                                         $registrationpersistent->set('cansendpatchrequests', 'yes');
                                     }
                                     $registrationpersistent->set('timelastrequest', time());
                                     // Reset update flag.
                                     $registrationpersistent->set('updatesource', 0);
+                                    $retrylog->save();
                                     $registrationpersistent->save();
                                 }
                             } catch (Exception $exception) {
