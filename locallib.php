@@ -287,3 +287,21 @@ function enrol_arlo_add_associated($arlotype, $eventdata) {
     $plugin->add_instance($course, $fields);
 }
 
+/**
+ * Function to check for new entries in the Arlo API retry log.
+ *
+ * @return array Array of new entries in the retry log.
+ */
+function check_arlo_api_retry_log() {
+
+    global $DB;
+
+    $lastchecktime = strtotime('-1 day');
+    // Query the database for new entries since the last check.
+    $sql = "SELECT * FROM {enrol_arlo_retrylog} WHERE timelogged > :lastchecktime";
+    $params = ['lastchecktime' => $lastchecktime];
+
+    $newentries = $DB->get_records_sql($sql, $params);
+
+    return $newentries;
+}
