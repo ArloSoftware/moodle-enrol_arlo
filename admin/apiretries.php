@@ -46,6 +46,11 @@ if ($action === 'resubmit') {
         $log->save();
     }
 }
+if ($action === 'enable_communication') {
+    set_config('communication_enabled', 1, 'enrol_arlo');
+
+    redirect(new moodle_url($PAGE->url), get_string('communication_enabled_message', 'enrol_arlo'), null, \core\output\notification::NOTIFY_SUCCESS);
+}
 $report = new apiretries('enrolsettingsarloapiretries');
 
 echo $OUTPUT->header();
@@ -53,4 +58,6 @@ echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
 $url = new moodle_url($PAGE->url, ['action'=>'resubmit']);
 echo $OUTPUT->single_button($url, "Allow record resubmission", 'get');
+$url = new moodle_url($PAGE->url, ['action' => 'enable_communication']);
+echo $OUTPUT->single_button($url, "Enable communication", 'get');
 echo $OUTPUT->footer();

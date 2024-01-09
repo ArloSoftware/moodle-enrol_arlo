@@ -74,6 +74,10 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 0
             ],
+            'enablecommunication' => [
+                'type' => PARAM_INT,
+                'default' => 1
+            ],
             'authplugin' => [
                 'type' => PARAM_TEXT,
                 'default' => 'manual'
