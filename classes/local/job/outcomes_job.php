@@ -118,6 +118,10 @@ class outcomes_job extends job {
             $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
             return false;
         }
+        if ($pluginconfig->get('redirectcount')>=5 && !$pluginconfig->get('enablecommunication')) {
+            $this->add_reasons(get_string('redirectcountmaxlimit', 'enrol_arlo'));
+            return false;
+        }
         return true;
     }
 
