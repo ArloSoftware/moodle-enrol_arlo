@@ -461,3 +461,6 @@ $string['webhookdisabled'] = '<div class="alert alert-danger" role="alert">Webho
 $string['webhookstatus'] = 'Webhook status';
 $string['nomembershipjobfound'] = 'No membership job found for enrolment instance {$a}';
 $string['nooutcomejobfound'] = 'No outcome job found for enrolment instance {$a}';
+$string['api_retry_notification'] = 'API Retry Log Notification';
+$string['arlo_retry_log_subject'] = 'Arlo API Retry Log Notification';
+$string['arlo_retry_log_message'] = '<div><p>New entries have been detected in the Arlo API retry log. Please review the log for details.</p> <br><p>To view the API retry log, click on the following link:</p><a href="{$a}">{$a}</a></div>';
