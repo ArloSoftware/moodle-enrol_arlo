@@ -47,7 +47,8 @@ if ($action === 'resubmit') {
     }
 }
 if ($action === 'enable_communication') {
-    set_config('communication_enabled', 1, 'enrol_arlo');
+    set_config('enablecommunication', 1, 'enrol_arlo');
+    set_config('redirectcount', 0, 'enrol_arlo');
 
     redirect(new moodle_url($PAGE->url), get_string('communication_enabled_message', 'enrol_arlo'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
