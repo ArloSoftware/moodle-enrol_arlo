@@ -119,7 +119,7 @@ class outcomes_job extends job {
             return false;
         }
         $maxpluginredirects = 5;
-        if ($pluginconfig->get('redirectcount')>=$maxpluginredirects && $pluginconfig->get('enablecommunication')) {
+        if ($pluginconfig->get('redirectcount')>=$maxpluginredirects) {
             $this->add_reasons(get_string('redirectcountmaxlimit', 'enrol_arlo'));
             set_config('enablecommunication', 0, 'enrol_arlo');
             return false;
