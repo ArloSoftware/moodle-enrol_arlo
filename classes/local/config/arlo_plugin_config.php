@@ -222,7 +222,6 @@ class arlo_plugin_config extends plugin_config {
             default:
                 $this->raw_set('apistatus', $value);
                 $this->raw_set('apierrorcounter', 0);
-                $this->raw_set('redirectcount', 0);
         }
     }
 

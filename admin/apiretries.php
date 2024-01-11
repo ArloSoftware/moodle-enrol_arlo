@@ -23,6 +23,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\api;
 use enrol_arlo\local\tablesql\apiretries;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\local\persistent\retry_log_persistent;
@@ -47,10 +48,14 @@ if ($action === 'resubmit') {
     }
 }
 if ($action === 'enable_communication') {
+    $plugin = api::get_enrolment_plugin();
+    $pluginconfig = $plugin->get_plugin_config();
     set_config('enablecommunication', 1, 'enrol_arlo');
+    $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
     set_config('redirectcount', 0, 'enrol_arlo');
-
-    redirect(new moodle_url($PAGE->url), get_string('communication_enabled_message', 'enrol_arlo'), null, \core\output\notification::NOTIFY_SUCCESS);
+    $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
+    $pluginconfig->save();
+    echo $output->notification('success','success');
 }
 $report = new apiretries('enrolsettingsarloapiretries');
 
