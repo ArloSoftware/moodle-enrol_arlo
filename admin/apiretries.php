@@ -23,6 +23,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\api;
 use enrol_arlo\local\tablesql\apiretries;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\local\persistent\retry_log_persistent;
@@ -33,6 +34,8 @@ require_once($CFG->libdir . '/tablelib.php');
 
 admin_externalpage_setup('enrolsettingsarloapiretries');
 $action = optional_param('action', null, PARAM_ALPHA);
+echo $OUTPUT->header();
+echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
 if ($action === 'resubmit') {
     // Parse info in table. Set their cansendpatchrequests attribute to 'one'
     $registrations = registration_persistent::get_records(['cansendpatchrequests' => 'no']);
@@ -46,11 +49,20 @@ if ($action === 'resubmit') {
         $log->save();
     }
 }
+if ($action === 'enablecommunication') {
+    $plugin = api::get_enrolment_plugin();
+    $pluginconfig = $plugin->get_plugin_config();
+    set_config('enablecommunication', 1, 'enrol_arlo');
+    $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
+    set_config('redirectcount', 0, 'enrol_arlo');
+    $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
+    echo $OUTPUT->notification(get_string('communication_enabled_message', 'enrol_arlo'),\core\output\notification::NOTIFY_SUCCESS);
+}
 $report = new apiretries('enrolsettingsarloapiretries');
-
-echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
 $url = new moodle_url($PAGE->url, ['action'=>'resubmit']);
+
 echo $OUTPUT->single_button($url, "Allow record resubmission", 'get');
+$url = new moodle_url($PAGE->url, ['action' => 'enablecommunication']);
+echo $OUTPUT->single_button($url, "Enable communication", 'get');
 echo $OUTPUT->footer();

@@ -118,6 +118,23 @@ class outcomes_job extends job {
             $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
             return false;
         }
+        $maxpluginredirects = 5;
+        $this->trace->output('redirects are '.$pluginconfig->get('redirectcount'));
+
+        $this->trace->output('enabled is '.$pluginconfig->get('enablecommunication'));
+
+        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects && $pluginconfig->get('enablecommunication') == 1 ) {
+            $this->add_reasons(get_string('redirectcountmaxlimit', 'enrol_arlo'));
+            //sychronize the plugin config persistent settings with the current database values.
+            $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
+            set_config('enablecommunication', 0, 'enrol_arlo');
+            $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
+            return false;
+        }
+        if($pluginconfig->get('enablecommunication') == 0) {
+            $this->add_reasons(get_string('communication_disabled_message', 'enrol_arlo'));
+            return false;
+        }
         return true;
     }
 
@@ -202,6 +219,9 @@ class outcomes_job extends job {
                                     $apistatus = $pluginconfig->get('apistatus');
                                     if ($apistatus >= 300 && $apistatus <= 399) {
                                         $registrationpersistent->set('redirectcounter', ++$redirectcounter);
+                                        $pluginredirectcount = $pluginconfig->get('redirectcount');
+                                        $pluginconfig->set('redirectcount', ++$pluginredirectcount);
+
                                         if ($cansendpatchrequests === 'one') {
                                             $registrationpersistent->set('cansendpatchrequests', 'no');
                                         }
