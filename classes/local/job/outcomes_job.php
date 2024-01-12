@@ -129,7 +129,6 @@ class outcomes_job extends job {
             $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
             set_config('enablecommunication', 0, 'enrol_arlo');
             $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
-            $pluginconfig->save();
             return false;
         }
         if($pluginconfig->get('enablecommunication') == 0) {
@@ -222,7 +221,7 @@ class outcomes_job extends job {
                                         $registrationpersistent->set('redirectcounter', ++$redirectcounter);
                                         $pluginredirectcount = $pluginconfig->get('redirectcount');
                                         $pluginconfig->set('redirectcount', ++$pluginredirectcount);
-                                        $pluginconfig->save();
+
                                         if ($cansendpatchrequests === 'one') {
                                             $registrationpersistent->set('cansendpatchrequests', 'no');
                                         }
