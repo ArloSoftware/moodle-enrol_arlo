@@ -56,7 +56,7 @@ if ($action === 'enablecommunication') {
     $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
     set_config('redirectcount', 0, 'enrol_arlo');
     $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
-    echo $OUTPUT->notification('success',\core\output\notification::NOTIFY_SUCCESS);
+    echo $OUTPUT->notification(get_string('communication_enabled_message', 'enrol_arlo'),\core\output\notification::NOTIFY_SUCCESS);
 }
 $report = new apiretries('enrolsettingsarloapiretries');
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
