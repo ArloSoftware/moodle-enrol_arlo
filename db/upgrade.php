@@ -546,7 +546,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                     // update records with preg_replace()
                     // print_object($record);
                     $newvalue = preg_replace($replace, "", $record->platform);
-    
+
                     // Update fields with new records
                     $selectsql = "id = $record->id";
                     $tablename = substr($table, 1, -1);
@@ -565,7 +565,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Conditionally launch add field redirectcounter.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
-        } 
+        }
 
         // Define field cansendpatchrequests to be added to enrol_arlo_registration.
         $table = new xmldb_table('enrol_arlo_registration');
@@ -574,7 +574,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Conditionally launch add field cansendpatchrequests.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
-        } 
+        }
 
         // Define table enrol_arlo_retrylog to be created.
         $table = new xmldb_table('enrol_arlo_retrylog');
@@ -599,6 +599,9 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
 
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2023121800, 'enrol', 'arlo');
+    }
+    if ($oldversion < 2024011100) {
+        set_config('enablecommunication',1,'enrol_arlo');
     }
     return true;
 }
