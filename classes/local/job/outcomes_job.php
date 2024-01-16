@@ -31,6 +31,7 @@ use core_user;
 use enrol_arlo\api;
 use enrol_arlo\local\external;
 use enrol_arlo\local\learner_progress;
+use enrol_arlo\manager;
 use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\local\client;
@@ -118,11 +119,25 @@ class outcomes_job extends job {
             $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
             return false;
         }
-        $maxpluginredirects = 5;
+        $maxpluginredirects = get_config('enrol_arlo','maxpluginredirects');
         $this->trace->output('redirects are '.$pluginconfig->get('redirectcount'));
 
         $this->trace->output('enabled is '.$pluginconfig->get('enablecommunication'));
+        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects){
+            // Notify about failure
+            require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+            $siteinfo = (object) [
+                    'shortname' => format_string($SITE->shortname),
+                    'url' => $CFG->wwwroot
+            ];
+            $admins = \core_user::get_admins();
+            $manager = new \enrol_arlo\manager();
+            $manager->add_max_redirect_notification_to_queue();
+            foreach ($admins as $admin) {
+                sendfailurenotification($siteinfo, $admin, $maxpluginredirects);
+            }
 
+        }
         if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects && $pluginconfig->get('enablecommunication') == 1 ) {
             $this->add_reasons(get_string('redirectcountmaxlimit', 'enrol_arlo'));
             //sychronize the plugin config persistent settings with the current database values.

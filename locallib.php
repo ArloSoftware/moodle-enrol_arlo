@@ -305,3 +305,26 @@ function check_arlo_api_retry_log() {
 
     return $newentries;
 }
+
+function sendfailurenotification( $admininfo) {
+    global $CFG, $SITE;
+    $noreplyuser = \core_user::get_noreply_user();
+    $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
+    $siteinfo = $SITE;
+    $maxpluginredirects = get_config('maxpluginredirects','enrol_arlo');
+    // Subject of the email
+    $emailsubject = get_string('emailsubject', 'enrol_arlo', $siteinfo->shortname);
+
+    // Body of the email
+    $emailbody = get_string('emailbody', 'enrol_arlo', [
+            'fullname' => $admininfo->fullname,
+            'shortname' => $siteinfo->shortname,
+            'url' => $siteinfo->url,
+            'maxpluginredirects' => $maxpluginredirects,
+            'reportlink' => $apiretrylogurl->out()
+    ]);
+
+    // Send the email
+    email_to_user($admininfo, $noreplyuser, $emailsubject, $emailbody);
+}
+
