@@ -317,14 +317,14 @@ function sendfailurenotification( $admininfo) {
 
     // Body of the email
     $emailbody = get_string('emailbody', 'enrol_arlo', [
-            'fullname' => $admininfo->fullname,
+            'fullname' => $admininfo->firstname . ' ' . $admininfo->lastname,
             'shortname' => $siteinfo->shortname,
-            'url' => $siteinfo->url,
             'maxpluginredirects' => $maxpluginredirects,
             'reportlink' => $apiretrylogurl->out()
     ]);
 
     // Send the email
     email_to_user($admininfo, $noreplyuser, $emailsubject, $emailbody);
+    return ('Email sent to ' . $admininfo->email);
 }
 

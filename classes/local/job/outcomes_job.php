@@ -125,16 +125,21 @@ class outcomes_job extends job {
         $this->trace->output('enabled is '.$pluginconfig->get('enablecommunication'));
         if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects){
             // Notify about failure
+            global $CFG, $SITE;
             require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
-            $siteinfo = (object) [
-                    'shortname' => format_string($SITE->shortname),
-                    'url' => $CFG->wwwroot
-            ];
-            $admins = \core_user::get_admins();
+
+
+            $admins = get_admins();
+            $allVariables = get_defined_vars();
+
+// Display the list
+            //$this->trace->output(json_encode($allVariables));
             $manager = new \enrol_arlo\manager();
             $manager->add_max_redirect_notification_to_queue();
             foreach ($admins as $admin) {
-                sendfailurenotification($siteinfo, $admin, $maxpluginredirects);
+                //$this->trace->output(json_encode($admin));
+
+                $this->trace->output(sendfailurenotification($admin));
             }
 
         }

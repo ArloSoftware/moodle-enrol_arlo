@@ -193,7 +193,7 @@ class manager {
         }
         $rs->close();
         self::trace("Process Max Plugin Redirects emails.");
-        process_max_redirects_notification();
+        $this->process_max_redirects_notification();
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
@@ -437,12 +437,8 @@ class manager {
     public function add_max_redirect_notification_to_queue($status = self::EMAIL_STATUS_QUEUED) {
         global $DB;
 
-        // Ensure the type is supported
-        if ($type !== self::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS) {
-            return false;
-        }
+        $type = self::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS;
 
-        // You might need to customize these parameters based on your needs
         $admins = get_admins();
         foreach ($admins as $admin) {
             $record               = new \stdClass();
@@ -455,7 +451,6 @@ class manager {
             $record->timemodified = time();
             $record->id           = $DB->insert_record('enrol_arlo_emailqueue', $record);
         }
-
         return $record->id;
     }
 
@@ -481,7 +476,7 @@ class manager {
 
             // Update email status in the queue
             $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
-            self::update_email_status_queue('site', SITEID, $admin->id, self::maxpluginredirectsEMAIL_TYPE_NOTIFY_MAX_REDIRECTS, $deliverystatus);
+            self::update_email_status_queue('site', SITEID, $admin->id, self::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS, $deliverystatus);
         }
 
         $rs->close();
