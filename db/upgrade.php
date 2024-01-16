@@ -21,6 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\api;
+
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 function xmldb_enrol_arlo_upgrade($oldversion) {
@@ -600,8 +602,13 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2023121800, 'enrol', 'arlo');
     }
-    if ($oldversion < 2024011100) {
+    if ($oldversion < 2024011600) {
         set_config('enablecommunication',1,'enrol_arlo');
+        set_config('maxpluginredirects',5,'enrol_arlo');
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
+        $pluginconfig->set('maxpluginredirects', get_config('enrol_arlo','maxpluginredirects'));
     }
     return true;
 }
