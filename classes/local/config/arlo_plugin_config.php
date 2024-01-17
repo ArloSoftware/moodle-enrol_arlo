@@ -74,6 +74,14 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => 0
             ],
+            'maxpluginredirects' => [
+                'type' => PARAM_INT,
+                'default' => 5
+            ],
+            'enablecommunication' => [
+                'type' => PARAM_INT,
+                'default' => 1
+            ],
             'authplugin' => [
                 'type' => PARAM_TEXT,
                 'default' => 'manual'
@@ -218,7 +226,6 @@ class arlo_plugin_config extends plugin_config {
             default:
                 $this->raw_set('apistatus', $value);
                 $this->raw_set('apierrorcounter', 0);
-                $this->raw_set('redirectcount', 0);
         }
     }
 

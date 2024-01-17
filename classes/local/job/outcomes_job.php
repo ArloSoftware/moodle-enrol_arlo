@@ -31,6 +31,7 @@ use core_user;
 use enrol_arlo\api;
 use enrol_arlo\local\external;
 use enrol_arlo\local\learner_progress;
+use enrol_arlo\manager;
 use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\local\client;
@@ -118,6 +119,42 @@ class outcomes_job extends job {
             $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
             return false;
         }
+        $maxpluginredirects = get_config('enrol_arlo','maxpluginredirects');
+        $this->trace->output('redirects are '.$pluginconfig->get('redirectcount'));
+
+        $this->trace->output('enabled is '.$pluginconfig->get('enablecommunication'));
+        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects){
+            // Notify about failure
+            global $CFG, $SITE;
+            require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+
+
+            $admins = get_admins();
+            $allVariables = get_defined_vars();
+
+// Display the list
+            //$this->trace->output(json_encode($allVariables));
+            $manager = new \enrol_arlo\manager();
+            $manager->add_max_redirect_notification_to_queue();
+            foreach ($admins as $admin) {
+                //$this->trace->output(json_encode($admin));
+
+                $this->trace->output(sendfailurenotification($admin));
+            }
+
+        }
+        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects && $pluginconfig->get('enablecommunication') == 1 ) {
+            $this->add_reasons(get_string('redirectcountmaxlimit', 'enrol_arlo'));
+            //sychronize the plugin config persistent settings with the current database values.
+            $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
+            set_config('enablecommunication', 0, 'enrol_arlo');
+            $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
+            return false;
+        }
+        if($pluginconfig->get('enablecommunication') == 0) {
+            $this->add_reasons(get_string('communication_disabled_message', 'enrol_arlo'));
+            return false;
+        }
         return true;
     }
 
@@ -170,6 +207,7 @@ class outcomes_job extends job {
                         // Check if the current record has been redirected too often.
                         $redirectcounter = $registrationpersistent->get('redirectcounter');
                         $maxredirects = $pluginconfig->get('retriesperrecord');
+                        $retrylog = new retry_log_persistent();
                         if ( $redirectcounter >= $maxredirects && $cansendpatchrequests !== 'one' ) {
                             // Bar user from this job until Admin action is taken.
                             $cansendpatchrequests = 'no';
@@ -178,7 +216,6 @@ class outcomes_job extends job {
                             // Display retry error to admin on job page
                             $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
                             // Create and save a log of the failure
-                            $retrylog = new retry_log_persistent();
                             $retrylog->set('timelogged', time());
                             $retrylog->set('userid', $user->id);
                             $retrylog->set('participantname', "$user->lastname, $user->firstname");
@@ -202,16 +239,21 @@ class outcomes_job extends job {
                                     $apistatus = $pluginconfig->get('apistatus');
                                     if ($apistatus >= 300 && $apistatus <= 399) {
                                         $registrationpersistent->set('redirectcounter', ++$redirectcounter);
+                                        $pluginredirectcount = $pluginconfig->get('redirectcount');
+                                        $pluginconfig->set('redirectcount', ++$pluginredirectcount);
+
                                         if ($cansendpatchrequests === 'one') {
                                             $registrationpersistent->set('cansendpatchrequests', 'no');
                                         }
                                     } else {
                                         $registrationpersistent->set('redirectcounter', 0);
+                                        $retrylog->set('cansendpatchrequests', 'yes');
                                         $registrationpersistent->set('cansendpatchrequests', 'yes');
                                     }
                                     $registrationpersistent->set('timelastrequest', time());
                                     // Reset update flag.
                                     $registrationpersistent->set('updatesource', 0);
+                                    $retrylog->save();
                                     $registrationpersistent->save();
                                 }
                             } catch (Exception $exception) {

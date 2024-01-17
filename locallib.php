@@ -287,3 +287,44 @@ function enrol_arlo_add_associated($arlotype, $eventdata) {
     $plugin->add_instance($course, $fields);
 }
 
+/**
+ * Function to check for new entries in the Arlo API retry log.
+ *
+ * @return array Array of new entries in the retry log.
+ */
+function check_arlo_api_retry_log() {
+
+    global $DB;
+
+    $lastchecktime = strtotime('-1 day');
+    // Query the database for new entries since the last check.
+    $sql = "SELECT * FROM {enrol_arlo_retrylog} WHERE timelogged > :lastchecktime";
+    $params = ['lastchecktime' => $lastchecktime];
+
+    $newentries = $DB->get_records_sql($sql, $params);
+
+    return $newentries;
+}
+
+function sendfailurenotification( $admininfo) {
+    global $CFG, $SITE;
+    $noreplyuser = \core_user::get_noreply_user();
+    $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
+    $siteinfo = $SITE;
+    $maxpluginredirects = get_config('maxpluginredirects','enrol_arlo');
+    // Subject of the email
+    $emailsubject = get_string('emailsubject', 'enrol_arlo', $siteinfo->shortname);
+
+    // Body of the email
+    $emailbody = get_string('emailbody', 'enrol_arlo', [
+            'fullname' => $admininfo->firstname . ' ' . $admininfo->lastname,
+            'shortname' => $siteinfo->shortname,
+            'maxpluginredirects' => $maxpluginredirects,
+            'reportlink' => $apiretrylogurl->out()
+    ]);
+
+    // Send the email
+    email_to_user($admininfo, $noreplyuser, $emailsubject, $emailbody);
+    return ('Email sent to ' . $admininfo->email);
+}
+

@@ -21,6 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\api;
+
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 function xmldb_enrol_arlo_upgrade($oldversion) {
@@ -546,7 +548,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
                     // update records with preg_replace()
                     // print_object($record);
                     $newvalue = preg_replace($replace, "", $record->platform);
-    
+
                     // Update fields with new records
                     $selectsql = "id = $record->id";
                     $tablename = substr($table, 1, -1);
@@ -565,7 +567,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Conditionally launch add field redirectcounter.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
-        } 
+        }
 
         // Define field cansendpatchrequests to be added to enrol_arlo_registration.
         $table = new xmldb_table('enrol_arlo_registration');
@@ -574,7 +576,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         // Conditionally launch add field cansendpatchrequests.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
-        } 
+        }
 
         // Define table enrol_arlo_retrylog to be created.
         $table = new xmldb_table('enrol_arlo_retrylog');
@@ -599,6 +601,14 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
 
         // Arlo savepoint reached.
         upgrade_plugin_savepoint(true, 2023121800, 'enrol', 'arlo');
+    }
+    if ($oldversion < 2024011600) {
+        set_config('enablecommunication',1,'enrol_arlo');
+        set_config('maxpluginredirects',5,'enrol_arlo');
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
+        $pluginconfig->set('maxpluginredirects', get_config('enrol_arlo','maxpluginredirects'));
     }
     return true;
 }
