@@ -24,6 +24,7 @@ class manager {
     const EMAIL_TYPE_NEW_ACCOUNT    = 'newaccount';
     const EMAIL_TYPE_COURSE_WELCOME = 'coursewelcome';
     const EMAIL_TYPE_NOTIFY_EXPIRY  = 'notifyexpiry';
+    const EMAIL_TYPE_NOTIFY_MAX_REDIRECTS = 'notifymaxredirects';
     const EMAIL_STATUS_QUEUED       = 100;
     const EMAIL_STATUS_DELIVERED    = 200;
     const EMAIL_STATUS_FAILED       = 500;
@@ -132,7 +133,7 @@ class manager {
         // Process new account emails.
         $conditions = array('type' => self::EMAIL_TYPE_NEW_ACCOUNT, 'status' => self::EMAIL_STATUS_QUEUED);
         $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
-            0, self::EMAIL_PROCESSING_LIMIT);
+                0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
             $user = $DB->get_record('user', array('id' => $record->userid));
             if (!$user) {
@@ -149,7 +150,7 @@ class manager {
         self::trace('Process course welcome emails');
         $conditions = array('type' => self::EMAIL_TYPE_COURSE_WELCOME, 'status' => self::EMAIL_STATUS_QUEUED);
         $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
-            0, self::EMAIL_PROCESSING_LIMIT);
+                0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
             $instance = $DB->get_record('enrol', array('id' => $record->enrolid));
             if (!$instance) {
@@ -172,7 +173,7 @@ class manager {
         self::trace('Process course expiration emails');
         $conditions = array('type' => self::EMAIL_TYPE_NOTIFY_EXPIRY, 'status' => self::EMAIL_STATUS_QUEUED);
         $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*',
-            0, self::EMAIL_PROCESSING_LIMIT);
+                0, self::EMAIL_PROCESSING_LIMIT);
         foreach ($rs as $record) {
             $instance = $DB->get_record('enrol', array('id' => $record->enrolid));
             if (!$instance) {
@@ -191,6 +192,8 @@ class manager {
             self::update_email_status_queue('enrolment', $instance->id, $user->id, self::EMAIL_TYPE_NOTIFY_EXPIRY, $deliverystatus);
         }
         $rs->close();
+        self::trace("Process Max Plugin Redirects emails.");
+        $this->process_max_redirects_notification();
         $timefinish = microtime();
         $difftime = microtime_diff($timestart, $timefinish);
         self::trace("Execution took {$difftime} seconds");
@@ -261,21 +264,21 @@ class manager {
         if (isset($instance->customtext1) && trim($instance->customtext1) !== '') {
             $message = $instance->customtext1;
             $key = array(
-                '{$a->coursename}',
-                '{$a->courseurl}',
-                '{$a->username}',
-                '{$a->firstname}',
-                '{$a->fullname}',
-                '{$a->email}',
-                '{$a->forgotpasswordurl}');
+                    '{$a->coursename}',
+                    '{$a->courseurl}',
+                    '{$a->username}',
+                    '{$a->firstname}',
+                    '{$a->fullname}',
+                    '{$a->email}',
+                    '{$a->forgotpasswordurl}');
             $value = array(
-                $a->coursename,
-                $a->courseurl,
-                $a->username,
-                $a->firstname,
-                $a->fullname,
-                $a->email,
-                $a->forgotpasswordurl
+                    $a->coursename,
+                    $a->courseurl,
+                    $a->username,
+                    $a->firstname,
+                    $a->fullname,
+                    $a->email,
+                    $a->forgotpasswordurl
             );
             $message = str_replace($key, $value, $message);
             if (strpos($message, '<') === false) {
@@ -285,7 +288,7 @@ class manager {
             } else {
                 // This is most probably the tag/newline soup known as FORMAT_MOODLE.
                 $messagehtml = format_text($message, FORMAT_MOODLE,
-                    array('context' => $context, 'para' => false, 'newlines' => true, 'filter' => true));
+                        array('context' => $context, 'para' => false, 'newlines' => true, 'filter' => true));
                 $messagetext = html_to_text($messagehtml);
             }
         } else {
@@ -294,7 +297,7 @@ class manager {
         }
 
         $subject = get_string('welcometocourse', 'enrol_arlo',
-            format_string($course->fullname, true, array('context' => $context)));
+                format_string($course->fullname, true, array('context' => $context)));
 
         $status = email_to_user($user, $noreplyuser, $subject, $messagetext, $messagehtml);
         $deliverystatus = get_string('delivered', 'enrol_arlo');
@@ -353,12 +356,12 @@ class manager {
                 if (!self::$plugin->roles_protected()) {
                     // Let's just guess what roles should be removed.
                     $count = $DB->count_records('role_assignments',
-                        array('userid' => $userenrolment->userid, 'contextid' => $userenrolment->contextid));
+                            array('userid' => $userenrolment->userid, 'contextid' => $userenrolment->contextid));
                     if ($count == 1) {
                         role_unassign_all(array('userid' => $userenrolment->userid,
-                            'contextid' => $userenrolment->contextid,
-                            'component' => '',
-                            'itemid' => 0));
+                                'contextid' => $userenrolment->contextid,
+                                'component' => '',
+                                'itemid' => 0));
 
                     } else if ($count > 1 and $instance->roleid) {
                         role_unassign($instance->roleid, $userenrolment->userid, $userenrolment->contextid, '', 0);
@@ -366,15 +369,15 @@ class manager {
                 }
                 // In any case remove all roles that belong to this instance and user.
                 role_unassign_all(array('userid' => $userenrolment->userid,
-                    'contextid' => $userenrolment->contextid,
-                    'component' => 'enrol_arlo',
-                    'itemid' => $instance->id), true);
+                        'contextid' => $userenrolment->contextid,
+                        'component' => 'enrol_arlo',
+                        'itemid' => $instance->id), true);
                 // Final cleanup of subcontexts if there are no more course roles.
                 if (0 == $DB->count_records('role_assignments', ['userid' => $userenrolment->userid, 'contextid' => $userenrolment->contextid])) {
                     role_unassign_all(array('userid' => $userenrolment->userid,
-                        'contextid' => $userenrolment->contextid,
-                        'component' => '',
-                        'itemid' => 0), true);
+                            'contextid' => $userenrolment->contextid,
+                            'component' => '',
+                            'itemid' => 0), true);
                 }
             }
             // Update the users enrolment status.
@@ -398,10 +401,10 @@ class manager {
                  WHERE ue.timeend > 0 AND ue.timeend < :now
                    AND ue.status = :useractive";
         $conditions = array(
-            'now' => time(),
-            'courselevel' => CONTEXT_COURSE,
-            'useractive' => ENROL_USER_ACTIVE,
-            'enrol' => 'arlo'
+                'now' => time(),
+                'courselevel' => CONTEXT_COURSE,
+                'useractive' => ENROL_USER_ACTIVE,
+                'enrol' => 'arlo'
         );
         $rs = $DB->get_recordset_sql($sql, $conditions);
         foreach ($rs as $ue) {
@@ -422,6 +425,61 @@ class manager {
      */
     private function trace($message, $depth = 0) {
         self::$trace->output($message, $depth);
+    }
+
+    /**
+     * Add a new email to the queue for notifying admins about max plugin redirect.
+     *
+     * @param $status
+     * @return bool|int
+     * @throws \dml_exception
+     */
+    public function add_max_redirect_notification_to_queue($status = self::EMAIL_STATUS_QUEUED) {
+        global $DB;
+
+        $type = self::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS;
+
+        $admins = get_admins();
+        foreach ($admins as $admin) {
+            $record               = new \stdClass();
+            $record->area         = 'site'; // Assuming this is a site-wide notification
+            $record->instanceid   = SITEID;
+            $record->userid       = $admin->id;
+            $record->type         = self::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS;
+            $record->status       = $status;
+            $record->timecreated  = time();
+            $record->timemodified = time();
+            $record->id           = $DB->insert_record('enrol_arlo_emailqueue', $record);
+        }
+        return $record->id;
+    }
+
+    /**
+     * Process the email queue for max redirects notification.
+     */
+    public function process_max_redirects_notification() {
+        global $DB;
+
+        $conditions = array('type' => self::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS, 'status' => self::EMAIL_STATUS_QUEUED);
+        $rs = $DB->get_recordset('enrol_arlo_emailqueue', $conditions, 'modified', '*', 0, self::EMAIL_PROCESSING_LIMIT);
+
+        foreach ($rs as $record) {
+            // Customize the notification message and subject based on your requirements
+            $subject = "Notification: Max Plugin redirects Reached";
+            $message = "The max plugin redirects have been reached. Review the apiretrylog and click the enable communication button to reset the plugin redirect count.";
+
+            // Get admin user
+            $admin = $DB->get_record('user', array('id' => $record->userid));
+
+            // Send email
+            $status = email_to_user($admin, $USER, $subject, $message);
+
+            // Update email status in the queue
+            $deliverystatus = ($status) ? self::EMAIL_STATUS_DELIVERED : self::EMAIL_STATUS_FAILED;
+            self::update_email_status_queue('site', SITEID, $admin->id, self::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS, $deliverystatus);
+        }
+
+        $rs->close();
     }
 
 }

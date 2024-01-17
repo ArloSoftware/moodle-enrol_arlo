@@ -75,5 +75,14 @@ $tasks = [
         'dayofweek' => '*',
         'month' => '*',
         'disabled' => 0
+    ],
+    [
+        'classname' => 'enrol_arlo\task\api_retry_notification',
+        'blocking' => 0,
+        'minute' => '0', // Specifies that the task should run when the minute is 0 (midnight).
+        'hour' => '0', // Specifies that the task should run when the hour is 0 (midnight).
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
     ]
 ];

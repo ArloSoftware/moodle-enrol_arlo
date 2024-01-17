@@ -385,7 +385,10 @@ class external {
         $request = new Request(
             'PATCH',
             $requesturi->output(true),
-            ['Content-type' => 'application/xml; charset=utf-8'],
+            [
+                'Content-type' => 'application/xml; charset=utf-8',
+                'track_redirects' => true
+            ],
             $xmlbody
         );
         try {

@@ -253,8 +253,13 @@ class RequestUri {
         if (!is_string($host)) {
             throw new \Exception('Must be a string');
         }
+        // Remove protocol
+        $replace = '/^(https:\/\/)' . '|' . // Matches leading https://
+                   '^(http:\/\/)/'          // Matches leading http://
+        ;
+        $removedprotocolhost = preg_replace($replace, "", $host);
         // Clean host.
-        $cleanedhost = preg_replace('/[^\.\d\w-]/', '', $host);
+        $cleanedhost = preg_replace('/[^\.\d\w-]/', '', $removedprotocolhost);
         if ($cleanedhost == '') {
             throw new \Exception("Invalid: $host");
         }

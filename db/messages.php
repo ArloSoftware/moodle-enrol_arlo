@@ -31,6 +31,13 @@ $messageproviders = [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED
         ]
+    ],
+    'arlo_retry_log_notification' => [
+        'capability' => 'moodle/site:config',
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED
+        ]
     ]
 ];
 
