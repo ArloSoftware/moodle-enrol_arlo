@@ -55,18 +55,20 @@ class api_retry_notification extends \core\task\scheduled_task {
             // Notify all Moodle administrators about the new entries.
             $admins = get_admins();
             $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
+
             $manager = new \enrol_arlo\manager();
-            $manager->add_max_redirect_notification_to_queue();
+            $manager->add_max_redirect_notification_to_queue()
+            $message = new message();
+            $message->component = 'enrol_arlo';
+            $message->name = 'arlo_retry_log_notification';
+            $message->userfrom = \core_user::get_noreply_user();
+            $message->subject = get_string('arlo_retry_log_subject', 'enrol_arlo');
+            $message->fullmessage = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
+            $message->fullmessageformat = FORMAT_PLAIN;
+            $message->fullmessagehtml   = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
+
             foreach ($admins as $admin) {
-                $message = new message();
-                $message->component = 'enrol_arlo';
-                $message->name = 'arlo_retry_log_notification';
-                $message->userfrom = \core_user::get_noreply_user();
                 $message->userto = $admin;
-                $message->subject = get_string('arlo_retry_log_subject', 'enrol_arlo');
-                $message->fullmessage = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
-                $message->fullmessageformat = FORMAT_PLAIN;
-                $message->fullmessagehtml   = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
                 message_send($message);
                 sendfailurenotification($admin);
             }
