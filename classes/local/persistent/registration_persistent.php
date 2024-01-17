@@ -159,11 +159,7 @@ class registration_persistent extends persistent {
             'redirectcounter' => array(
                 'type' => PARAM_INT,
                 'default' => 0
-            ),
-            'cansendpatchrequests' => array(
-                'type' => PARAM_TEXT,
-                'default' => 'yes'
-            ),
+            )
         );
     }
 

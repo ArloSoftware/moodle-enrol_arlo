@@ -36,19 +36,7 @@ admin_externalpage_setup('enrolsettingsarloapiretries');
 $action = optional_param('action', null, PARAM_ALPHA);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
-if ($action === 'resubmit') {
-    // Parse info in table. Set their cansendpatchrequests attribute to 'one'
-    $registrations = registration_persistent::get_records(['cansendpatchrequests' => 'no']);
-    $retrylogs = retry_log_persistent::get_records(['cansendpatchrequests' => 'no']);
-    foreach ($registrations as $registration) {
-        $registration->set('cansendpatchrequests', 'one');
-        $registration->save();
-    }
-    foreach ($retrylogs as $log) {
-        $log->set('cansendpatchrequests', 'one');
-        $log->save();
-    }
-}
+
 if ($action === 'enablecommunication') {
     $plugin = api::get_enrolment_plugin();
     $pluginconfig = $plugin->get_plugin_config();

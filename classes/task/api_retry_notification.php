@@ -55,6 +55,8 @@ class api_retry_notification extends \core\task\scheduled_task {
             // Notify all Moodle administrators about the new entries.
             $admins = get_admins();
             $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
+            $manager = new \enrol_arlo\manager();
+            $manager->add_max_redirect_notification_to_queue();
             $message = new message();
             $message->component = 'enrol_arlo';
             $message->name = 'arlo_retry_log_notification';

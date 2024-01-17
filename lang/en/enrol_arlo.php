@@ -41,7 +41,6 @@ $string['allowhiddencourses_help'] = ' Note: You will need to disable course wel
 $string['allowportalintegration'] = 'Allow portal integration';
 $string['allowportalintegration_text'] = 'Allow integration with Arlo portal.';
 $string['allowportalintegration_help'] = 'Will push course homepage and enrolment instance URL\'s to Arlo for use in portal.';
-$string['apicansendpatchrequests'] = "User can send PATCH requests";
 $string['apirequests'] = 'API requests';
 $string['apiretries'] = 'API retries';
 $string['apiretryerrorpt1'] = 'User with id:';
