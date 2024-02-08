@@ -39,8 +39,8 @@ $tasks = [
     [
         'classname' => 'enrol_arlo\task\enrolments',
         'blocking' => 0,
-        'minute' => '*',
-        'hour' => '*',
+        'minute' => '59',
+        'hour' => '23',
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*',
