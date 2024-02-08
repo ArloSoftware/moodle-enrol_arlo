@@ -66,6 +66,22 @@ class arlo_plugin_config extends plugin_config {
                 'type' => PARAM_INT,
                 'default' => user_matching::MATCH_BY_DEFAULT
             ],
+            'retriesperrecord' => [
+                'type' => PARAM_INT,
+                'default' => 5
+            ],
+            'redirectcount' => [
+                'type' => PARAM_INT,
+                'default' => 0
+            ],
+            'maxpluginredirects' => [
+                'type' => PARAM_INT,
+                'default' => 5
+            ],
+            'enablecommunication' => [
+                'type' => PARAM_INT,
+                'default' => 1
+            ],
             'authplugin' => [
                 'type' => PARAM_TEXT,
                 'default' => 'manual'
