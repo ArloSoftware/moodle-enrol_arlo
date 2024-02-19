@@ -67,14 +67,28 @@ if ($hassiteconfig) {
     $name = get_string('apipassword', 'enrol_arlo');
     $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, $description, ''));
 
+    $description = get_string('onlyactive_desc', 'enrol_arlo');
+    $name = get_string('onlyactive', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
+
+    $description = get_string('disableskip_desc', 'enrol_arlo');
+    $name = get_string('disableskip', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
+
     $description = get_string('enablewebhook_desc', 'enrol_arlo');
     $name = get_string('enablewebhook', 'enrol_arlo');
     $settings->add(new admin_setting_configcheckbox('enrol_arlo/enablewebhook', $name, $description, 0));
 
-    $description = get_string('useadhoctask_desc', 'enrol_arlo');
-    $name = get_string('useadhoctask', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/useadhoctask', $name, $description, 0));
+    $webhookenable = get_config('enrol_arlo', 'enablewebhook');
+    if ($webhookenable) {
+        $description = get_string('useadhoctask_desc', 'enrol_arlo');
+        $name = get_string('useadhoctask', 'enrol_arlo');
+        $settings->add(new admin_setting_configcheckbox('enrol_arlo/useadhoctask', $name, $description, 0));
 
+        $description = get_string('enable_multisync_desc', 'enrol_arlo');
+        $name = get_string('enable_multisync', 'enrol_arlo');
+        $settings->add(new admin_setting_configcheckbox('enrol_arlo/enable_multisync', $name, $description, 0));
+    }
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
         $name = get_string('managearlo', 'enrol_arlo');
