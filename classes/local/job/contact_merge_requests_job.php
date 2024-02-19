@@ -69,6 +69,8 @@ class contact_merge_requests_job extends job {
     public function run() {
         $pluginconfig = new arlo_plugin_config();
         $jobpersistent = $this->get_job_persistent();
+        $disableskip = get_config('enrol_arlo', 'disableskip');
+        $lastime = empty($disableskip) ? $jobpersistent->get('lastsourcetimemodified') : 0;
         try {
             $hasnext = true;
             while ($hasnext) {
@@ -77,7 +79,11 @@ class contact_merge_requests_job extends job {
                 $uri->setHost($pluginconfig->get('platform'));
                 $uri->setResourcePath('contactmergerequests/');
                 $uri->addExpand('ContactMergeRequest');
-                $filter = "(CreatedDateTime gt datetime('" . $jobpersistent->get('lastsourcetimemodified') . "'))";
+                if (!empty($lastime)) {
+                    $filter = "(CreatedDateTime gt datetime('" . $lastime . "'))";
+                } else {
+                    $filter = "";
+                }
                 $uri->setFilterBy($filter);
                 $uri->setOrderBy('CreatedDateTime ASC');
                 $request = new Request('GET', $uri->output(true));
@@ -109,6 +115,7 @@ class contact_merge_requests_job extends job {
                             // Update scheduling information on persistent after successfull save.
                             // Note, lastsourceid doesn't get updated as is a GUID.
                             $jobpersistent->set('timelastrequest', time());
+                            $lastime = time();
                             $jobpersistent->set('lastsourcetimemodified', $sourcecreated);
                             $jobpersistent->update();
                         } catch (moodle_exception $exception) {
