@@ -123,6 +123,10 @@ class contact_persistent extends persistent {
             'redirectcounter' => array(
                 'type' => PARAM_INT,
                 'default' => 0
+            ),
+            'redirectcounter' => array(
+                'type' => PARAM_INT,
+                'default' => 0
             )
         ];
     }

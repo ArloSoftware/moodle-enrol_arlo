@@ -77,24 +77,7 @@ if ($hassiteconfig) {
     $description = get_string('maxretires_email_desc', 'enrol_arlo');
     $default = 'moodleconnections@arlo.co';
     $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
-
-    $description = get_string('enablewebhook_desc', 'enrol_arlo');
-    $name = get_string('enablewebhook', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/enablewebhook', $name, $description, 0));
-
-    $description = get_string('useadhoctask_desc', 'enrol_arlo');
-    $name = get_string('useadhoctask', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/useadhoctask', $name, $description, 0));
-
-    $name = get_string('maxretries', 'enrol_arlo');
-    $description = get_string('maxretries_desc', 'enrol_arlo');
-    $settings->add(new admin_setting_configtext('enrol_arlo/retriesperrecord', $name, $description, 5, PARAM_INT));
-
-    $name = get_string('maxretires_email', 'enrol_arlo');
-    $description = get_string('maxretires_email_desc', 'enrol_arlo');
-    $default = 'moodleconnections@arlo.co';
-    $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
-
+  
     $description = get_string('enablewebhook_desc', 'enrol_arlo');
     $name = get_string('enablewebhook', 'enrol_arlo');
     $settings->add(new admin_setting_configcheckbox('enrol_arlo/enablewebhook', $name, $description, 0));
