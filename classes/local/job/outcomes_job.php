@@ -204,15 +204,15 @@ class outcomes_job extends job {
                     $redirectcounter = $registrationpersistent->get('redirectcounter');
                     $maxredirects = $pluginconfig->get('retriesperrecord');
                     $retrylog = new retry_log_persistent();
+                    $retrylog->set('timelogged', time());
+                    $retrylog->set('userid', $user->id);
+                    $retrylog->set('participantname', "$user->lastname, $user->firstname");
+                    $retrylog->set('courseid', $course->id);
+                    $retrylog->set('coursename', $course->fullname);
                     if ( $redirectcounter >= $maxredirects) {
                         // Display retry error to admin on job page
                         $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
                         // Create and save a log of the failure
-                        $retrylog->set('timelogged', time());
-                        $retrylog->set('userid', $user->id);
-                        $retrylog->set('participantname', "$user->lastname, $user->firstname");
-                        $retrylog->set('courseid', $course->id);
-                        $retrylog->set('coursename', $course->fullname);
                         $retrylog->save();
                     } else {
                         try {
