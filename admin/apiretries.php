@@ -25,8 +25,6 @@
 
 use enrol_arlo\api;
 use enrol_arlo\local\tablesql\apiretries;
-use enrol_arlo\local\persistent\registration_persistent;
-use enrol_arlo\local\persistent\retry_log_persistent;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
@@ -50,7 +48,6 @@ $report = new apiretries('enrolsettingsarloapiretries');
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
 $url = new moodle_url($PAGE->url, ['action'=>'resubmit']);
 
-echo $OUTPUT->single_button($url, "Allow record resubmission", 'get');
 $url = new moodle_url($PAGE->url, ['action' => 'enablecommunication']);
 echo $OUTPUT->single_button($url, "Enable communication", 'get');
 echo $OUTPUT->footer();
