@@ -63,11 +63,7 @@ class retry_log_persistent extends persistent {
             'coursename' => [
                 'type' => PARAM_TEXT,
                 'default' => ''
-            ],
-            'cansendpatchrequests' => array(
-                'type' => PARAM_TEXT,
-                'default' => 'yes'
-            ),
+            ]
         ];
     }
 }

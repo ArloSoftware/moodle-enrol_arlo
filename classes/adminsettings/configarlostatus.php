@@ -102,7 +102,7 @@ class configarlostatus extends \admin_setting {
                 $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
             }
             $reason = get_string('apistatusclienterror', 'enrol_arlo');
-            $url = new moodle_url('/enrol/arlo/admin/apirequests.php');
+            $url = new \moodle_url('/enrol/arlo/admin/apirequests.php');
             $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
         } else if ($apistatus >= 500 && $apistatus < 599) {
             if ($useimageiconclass) {

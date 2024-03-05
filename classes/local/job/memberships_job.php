@@ -295,6 +295,9 @@ class memberships_job extends job {
             // adjusting and the filter each call so we get all records and don't end up
             // getting same 250 each call.
             $hasnext = true;
+            $disableskip = get_config('enrol_arlo', 'disableskip');
+            $lastime = empty($disableskip) ? get_config('enrol_arlo', 'lastregtimemodified') : date('c', 0); 
+            $lastregid = empty($disableskip) ? get_config('enrol_arlo', 'lastregid') : 0;
             while ($hasnext) {
                 $hasnext = false; // Break paging by default.
                 // Update contact merge requests records every page.
@@ -308,9 +311,7 @@ class memberships_job extends job {
                 $uri->addExpand('Registration/OnlineActivity');
                 $uri->addExpand('Registration/Contact');
                 $uri->setPagingTop(250);
-                $timemodified = get_config('enrol_arlo', 'lastregtimemodified');
-                $timemodified = empty($timemodified) ? date('c', 0) : $timemodified;
-                $lastregid = get_config('enrol_arlo', 'lastregid');
+                $timemodified = empty($lastime) ? date('c', 0) : $lastime;
                 $filter = "(LastModifiedDateTime gt datetime('" . $timemodified . "'))";
                 if ($lastregid) {
                     $filter .= " OR ";
@@ -340,8 +341,10 @@ class memberships_job extends job {
                             $trace->output('Lock timeout');
                         }
                     }
-                    set_config('lastregtimemodified', $resource->LastModifiedDateTime, 'enrol_arlo');
-                    set_config('lastregid', $resource->RegistrationID,  'enrol_arlo');
+                    $lastregid = $resource->RegistrationID;
+                    $lastime = $resource->LastModifiedDateTime;
+                    set_config('lastregtimemodified', $lastime, 'enrol_arlo');
+                    set_config('lastregid', $lastregid,  'enrol_arlo');
                     $hasnext = (bool) $collection->hasNext();
                 }
             }
@@ -361,8 +364,11 @@ class memberships_job extends job {
      */
     public static function sync_membership($resource, $trace) {
         global $DB;
-        
+        $onlyactive = get_config('enrol_arlo', 'onlyactive');
         if ($event = $resource->getEvent()) {
+            if ($onlyactive && $event->Status != 'Active') {
+                return true;
+            }
             $type = arlo_type::EVENT;
             $persistent = event_persistent::get_record([
                 'sourceguid' => $event->UniqueIdentifier
@@ -373,6 +379,9 @@ class memberships_job extends job {
                 return false;
             }
         } else if ($onlineactivity = $resource->getOnlineActivity()) {
+            if ($onlyactive && $onlineactivity->Status != 'Active') {
+                return true;
+            }
             $type = arlo_type::ONLINEACTIVITY;
             $persistent = online_activity_persistent::get_record([
                 'sourceguid' => $onlineactivity->UniqueIdentifier

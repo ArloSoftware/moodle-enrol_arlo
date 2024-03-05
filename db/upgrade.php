@@ -610,5 +610,22 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
         $pluginconfig->set('maxpluginredirects', get_config('enrol_arlo','maxpluginredirects'));
     }
+
+    if ($oldversion < 2024030102) {
+        // Define field cansendpatchrequests to be added to enrol_arlo_registration.
+        $field = new xmldb_field('cansendpatchrequests', XMLDB_TYPE_CHAR, '3' , null, XMLDB_NOTNULL, null, 'yes', 'redirectcounter');
+        
+        $table = new xmldb_table('enrol_arlo_registration');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $table = new xmldb_table('enrol_arlo_retrylog');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2024030102, 'enrol', 'arlo');
+    }
     return true;
 }

@@ -42,14 +42,12 @@ class XmlDeserializer {
         }
 
         $internalErrors = libxml_use_internal_errors(true);
-        $disableEntities = libxml_disable_entity_loader(true);
         libxml_clear_errors();
 
         $dom = new \DOMDocument();
-        $dom->loadXML($data, $this->loadOptions);
+        $dom->loadXML($data, $this->loadOptions | LIBXML_NOENT);
 
         libxml_use_internal_errors($internalErrors);
-        libxml_disable_entity_loader($disableEntities);
 
         if ($error = libxml_get_last_error()) {
             libxml_clear_errors();

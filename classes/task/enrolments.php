@@ -62,7 +62,8 @@ class enrolments extends scheduled_task {
             $trace = new text_progress_trace();
         }
         $useweebhooks = get_config('enrol_arlo', 'enablewebhook');
-        if (empty($useweebhooks)) {
+        $multisync = get_config('enrol_arlo', 'enable_multisync');
+        if (empty($useweebhooks) || $multisync) {
             memberships_job::sync_memberships($trace);
         }
         $manager = new manager();

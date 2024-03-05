@@ -45,8 +45,6 @@ class apiretries extends table_sql {
         $headers[] = get_string('courseid', 'enrol_arlo');
         $columns[] = 'coursename';
         $headers[] = get_string('coursename', 'enrol_arlo');
-        $columns[] = 'cansendpatchrequests';
-        $headers[] = get_string('apicansendpatchrequests', 'enrol_arlo');
         $this->define_columns($columns);
         $this->define_headers($headers);
         $this->define_baseurl("/enrol/arlo/admin/apiretries.php");
