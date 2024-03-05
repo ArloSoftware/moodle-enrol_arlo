@@ -124,10 +124,10 @@ class contact_persistent extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0
             ),
-            'cansendpatchrequests' => array(
-                'type' => PARAM_TEXT,
-                'default' => 'yes'
-            ),
+            'redirectcounter' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            )
         ];
     }
 

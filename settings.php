@@ -85,7 +85,15 @@ if ($hassiteconfig) {
     $description = get_string('maxretires_email_desc', 'enrol_arlo');
     $default = 'moodleconnections@arlo.co';
     $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
-  
+
+    $description = get_string('onlyactive_desc', 'enrol_arlo');
+    $name = get_string('onlyactive', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
+
+    $description = get_string('disableskip_desc', 'enrol_arlo');
+    $name = get_string('disableskip', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
+
     $description = get_string('enablewebhook_desc', 'enrol_arlo');
     $name = get_string('enablewebhook', 'enrol_arlo');
     $settings->add(new admin_setting_configcheckbox('enrol_arlo/enablewebhook', $name, $description, 0));

@@ -65,7 +65,6 @@ class api_retry_notification extends \core\task\scheduled_task {
             $message->fullmessage = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
             $message->fullmessageformat = FORMAT_PLAIN;
             $message->fullmessagehtml   = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
-
             foreach ($admins as $admin) {
                 $message->userto = $admin;
                 message_send($message);
