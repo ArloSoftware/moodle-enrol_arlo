@@ -50,7 +50,7 @@ class communications extends table_sql {
         foreach ($usernamefields as $usernamefield) {
             $flds[$usernamefield] = 'u.' . $usernamefield;
         }
-        $fields .= implode(', ', $flds);       
+        $fields .= implode(', ', $flds);
 
         $fields .= ',eq.userid,eq.type,eq.status,eq.timemodified';
         $from = "{enrol_arlo_emailqueue} eq JOIN {user} u ON u.id = eq.userid";
@@ -83,6 +83,8 @@ class communications extends table_sql {
                 return get_string('coursewelcome', 'enrol_arlo');
             case \enrol_arlo\manager::EMAIL_TYPE_NOTIFY_EXPIRY:
                 return get_string('notifyexpiry', 'enrol_arlo');
+            case \enrol_arlo\manager::EMAIL_TYPE_NOTIFY_MAX_REDIRECTS:
+                return get_string('notifymaxredirects', 'enrol_arlo');
             default:
                 return get_string('unknown', 'enrol_arlo');
         }

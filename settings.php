@@ -30,13 +30,15 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/adminlib.php');
+use enrol_arlo\adminsettings\configarlostatus;
+use enrol_arlo\adminsettings\configemail;
+use enrol_arlo\adminsettings\configlockedtext;
 
 if ($hassiteconfig) {
     $name = get_string('arloconnection', 'enrol_arlo');
     $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
 
-    $settings->add(new enrol_arlo_admin_setting_configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
+    $settings->add(new configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
 
     $name = get_string('platform', 'enrol_arlo');
 
@@ -46,7 +48,7 @@ if ($hassiteconfig) {
     $url->param('utm_campaign', 'Moodle inproduct trial signup link');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
     $description = get_string('platform_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
-    $settings->add(new enrol_arlo_admin_setting_configlockedtext('enrol_arlo/platform', $name, $description, ''));
+    $settings->add(new configlockedtext('enrol_arlo/platform', $name, $description, ''));
 
     $name = get_string('apiusername', 'enrol_arlo');
     $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/115003692863');
@@ -55,7 +57,7 @@ if ($hassiteconfig) {
     $url->param('utm_campaign', 'Moodle inproduct config support link');
     $title = get_string('opennewtabtitle', 'enrol_arlo');
     $description = get_string('apiusername_desc', 'enrol_arlo', array('url' => $url->out(), 'title' => $title));
-    $settings->add(new enrol_arlo_admin_setting_configemail('enrol_arlo/apiusername', $name, $description, null));
+    $settings->add(new configemail('enrol_arlo/apiusername', $name, $description, null));
 
     $url = new moodle_url('https://support.arlo.co/hc/en-gb/articles/211902623');
     $url->param('utm_source', 'Moodle product');
@@ -66,6 +68,23 @@ if ($hassiteconfig) {
 
     $name = get_string('apipassword', 'enrol_arlo');
     $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, $description, ''));
+
+    $description = get_string('onlyactive_desc', 'enrol_arlo');
+    $name = get_string('onlyactive', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
+
+    $description = get_string('disableskip_desc', 'enrol_arlo');
+    $name = get_string('disableskip', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
+
+    $name = get_string('maxretries', 'enrol_arlo');
+    $description = get_string('maxretries_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configtext('enrol_arlo/retriesperrecord', $name, $description, 5, PARAM_INT));
+
+    $name = get_string('maxretires_email', 'enrol_arlo');
+    $description = get_string('maxretires_email_desc', 'enrol_arlo');
+    $default = 'moodleconnections@arlo.co';
+    $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
 
     $description = get_string('onlyactive_desc', 'enrol_arlo');
     $name = get_string('onlyactive', 'enrol_arlo');
@@ -101,6 +120,11 @@ if ($hassiteconfig) {
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapirequests',
             $name = get_string('apirequests', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/apirequests.php')));
+        
+        // Max retries error page
+        $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloapiretries',
+            $name = get_string('apiretries', 'enrol_arlo'),
+            new moodle_url('/enrol/arlo/admin/apiretries.php')));
 
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarlocommunications',
             $name = get_string('communications', 'enrol_arlo'),

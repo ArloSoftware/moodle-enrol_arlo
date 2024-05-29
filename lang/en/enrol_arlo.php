@@ -41,7 +41,11 @@ $string['allowhiddencourses_help'] = ' Note: You will need to disable course wel
 $string['allowportalintegration'] = 'Allow portal integration';
 $string['allowportalintegration_text'] = 'Allow integration with Arlo portal.';
 $string['allowportalintegration_help'] = 'Will push course homepage and enrolment instance URL\'s to Arlo for use in portal.';
+$string['apicansendpatchrequests'] = "User can send PATCH requests";
 $string['apirequests'] = 'API requests';
+$string['apiretries'] = 'API retries';
+$string['apiretryerrorpt1'] = 'User with id:';
+$string['apiretryerrorpt2'] = 'has been redirected by the API too often';
 $string['apistatusok'] = 'OK, last request was {$a}';
 $string['apistatusclienterror'] = 'Client connection error!';
 $string['apistatusservererror'] = 'Service currently unavailable';
@@ -77,6 +81,8 @@ $string['contactmergerequestfailures'] = 'Contact merge request failures';
 $string['contactmergefailurereport'] = 'Contact merge report';
 $string['communications'] = 'Communications';
 $string['completed'] = 'Completed';
+$string['courseid'] = 'Course ID';
+$string['coursename'] = 'Course name';
 $string['coursewelcome'] = 'Course welcome';
 $string['creategroup'] = 'Create new group';
 $string['customwelcomemessage'] = 'Custom welcome message';
@@ -150,6 +156,7 @@ $string['events'] = 'Events';
 $string['extra'] = 'Extra';
 $string['fail'] = 'Fail';
 $string['failed'] = 'Failed';
+$string['fullname'] = 'Full name';
 $string['inprogress'] = 'In progress';
 $string['instanceexists'] = 'Arlo is already synchronised with selected role';
 $string['longtime'] = 'This process can take a long time';
@@ -185,6 +192,11 @@ Will try <strong>Method 1</strong> if no match will then try <strong>Method 2</s
 <p>
 If no match is found using any of the Methods a Moodle user account will be created based on Arlo Contact details.
 </p>';
+$string['maxretries'] = 'Maxiumum retries per record';
+$string['maxretries_desc'] = 'Maximum number of retries per record allowed before halting API communication.';
+$string['maxretires_email'] = 'Maximum retries error email';
+$string['maxretires_email_desc'] = 'The email that error reports are sent to when a user reaches the maximum retires per record.';
+$string['maxretries_exception'] = 'Too many failed attempts, contact your admin.';
 $string['newaccountdetails'] = 'New account details';
 $string['newuserdefaultemail'] = 'New user default email';
 $string['newuserdefaultemail_help'] = 'New user default email';
@@ -229,6 +241,9 @@ $string['pleasecheckrequestlog'] = 'Please check <a href="{$a}">request log</a>'
 $string['pluginnotenabled'] = 'Plugin not enabled!';
 $string['platform'] = 'Arlo platform URL';
 $string['platform_desc'] = 'URL of your Arlo management platform \'yourplatform.arlo.co\' (excluding https:// and /). No Arlo platform? <a title="{$a->title}" href="{$a->url}" target="_blank">Create a free trial.</a>';
+$string['platform_bad_input_domain'] = 'Your input was changed to remove one of the following from the domain name: https://, http://, and/or /';
+$string['platform_bad_input_domain_small'] = 'There was a problem with your Arlo platform URL';
+$string['platform_bad_input_domain_subject'] = 'Changes were made to your Arlo platform URL';
 $string['pushonlineactivityresults'] = 'Push Online Activity results';
 $string['pushonlineactivityresults_help'] = 'Push result information from enrolment instances mapped to <strong>OnlineActivities</strong> back to Arlo';
 $string['pusheventresults'] = 'Push Event results';
@@ -269,6 +284,7 @@ $string['typeofevent'] = 'Type of Event';
 $string['unknown'] = 'Unknown';
 $string['unlock'] = 'Unlock';
 $string['uri'] = 'URI';
+$string['userid'] = 'User ID';
 $string['userassociationfailurereport'] = 'User association report';
 $string['usercreation'] = 'User creation';
 $string['welcometocourse'] = 'Welcome to {$a}';
@@ -451,3 +467,17 @@ $string['webhookdisabled'] = '<div class="alert alert-danger" role="alert">Webho
 $string['webhookstatus'] = 'Webhook status';
 $string['nomembershipjobfound'] = 'No membership job found for enrolment instance {$a}';
 $string['nooutcomejobfound'] = 'No outcome job found for enrolment instance {$a}';
+$string['api_retry_notification'] = 'API Retry Log Notification';
+$string['messageprovider:arlo_retry_log_notification'] = 'API Retry Log Notification';
+$string['arlo_retry_log_subject'] = 'Arlo API Retry Log Notification';
+$string['arlo_retry_log_message'] = '<div><p>New entries have been detected in the Arlo API retry log. Please review the log for details.</p> <br><p>To view the API retry log, click on the following link:</p><a href="{$a}">{$a}</a></div>';
+$string['redirectcountmaxlimit'] = 'The maximum redirect limit for API requests has been reached. Further attempts are currently restricted. Manual review is required. To re-enable communication see Arlo settings.';
+$string['communication_enabled_message'] = 'Communication has been successfully enabled.';
+$string['communication_disabled_message'] = 'Communication has been disabled.';
+$string['emailsubject'] = 'Alert: Maximum Retries Reached for PATCH Requests on {$a}';
+$string['emailbody'] = 'Dear {$a->fullname},\n\n' .
+        'The site "{$a->shortname}" ({$a->url}) has reached the maximum number of retries ({$a->maxretries}) for registration PATCH requests.\n' .
+        'Please review the issue as soon as possible.\n' .
+        'Report: {$a->reportlink}\n\n' .
+        'Regards,\nMoodle System';
+$string['notifymaxredirects'] = 'Notify on maximum redirects';

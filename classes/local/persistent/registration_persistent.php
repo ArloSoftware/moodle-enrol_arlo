@@ -156,6 +156,10 @@ class registration_persistent extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0
             ),
+            'redirectcounter' => array(
+                'type' => PARAM_INT,
+                'default' => 0
+            )
         );
     }
 
