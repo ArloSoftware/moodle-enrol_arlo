@@ -25,8 +25,6 @@
 
 use enrol_arlo\api;
 use enrol_arlo\local\tablesql\apiretries;
-use enrol_arlo\local\persistent\registration_persistent;
-use enrol_arlo\local\persistent\retry_log_persistent;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
@@ -36,19 +34,7 @@ admin_externalpage_setup('enrolsettingsarloapiretries');
 $action = optional_param('action', null, PARAM_ALPHA);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
-if ($action === 'resubmit') {
-    // Parse info in table. Set their cansendpatchrequests attribute to 'one'
-    $registrations = registration_persistent::get_records(['cansendpatchrequests' => 'no']);
-    $retrylogs = retry_log_persistent::get_records(['cansendpatchrequests' => 'no']);
-    foreach ($registrations as $registration) {
-        $registration->set('cansendpatchrequests', 'one');
-        $registration->save();
-    }
-    foreach ($retrylogs as $log) {
-        $log->set('cansendpatchrequests', 'one');
-        $log->save();
-    }
-}
+
 if ($action === 'enablecommunication') {
     $plugin = api::get_enrolment_plugin();
     $pluginconfig = $plugin->get_plugin_config();
@@ -62,7 +48,6 @@ $report = new apiretries('enrolsettingsarloapiretries');
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
 $url = new moodle_url($PAGE->url, ['action'=>'resubmit']);
 
-echo $OUTPUT->single_button($url, "Allow record resubmission", 'get');
 $url = new moodle_url($PAGE->url, ['action' => 'enablecommunication']);
 echo $OUTPUT->single_button($url, "Enable communication", 'get');
 echo $OUTPUT->footer();

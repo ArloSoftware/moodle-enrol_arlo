@@ -559,9 +559,6 @@ class user_persistent extends persistent {
         // Save the record.
         $result = user_update_user($record, true, false);
 
-        // We ensure that this is flagged as validated.
-        $this->validated = true;
-
         // After update hook.
         $this->after_update($result);
 
