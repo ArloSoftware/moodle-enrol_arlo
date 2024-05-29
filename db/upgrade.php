@@ -21,6 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use enrol_arlo\api;
+
 defined('MOODLE_INTERNAL') || die('Direct access to this script is forbidden.');
 
 function xmldb_enrol_arlo_upgrade($oldversion) {
@@ -505,6 +507,125 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020070315, 'enrol', 'arlo');
     }
 
+    // Update existing database entries to remove https:// and / from Arlo platform URLs
+    if ($oldversion < 2023121800) {
+        // All tables that reference "platform"
+        $tables = [
+            '{enrol_arlo_contact}',
+            '{enrol_arlo_contactmerge}',
+            '{enrol_arlo_event}',
+            '{enrol_arlo_onlineactivity}',
+            '{enrol_arlo_registration}',
+            '{enrol_arlo_scheduledjob}',
+            '{enrol_arlo_template}',
+            '{enrol_arlo_templateassociate}',
+            '{enrol_arlo_requestlog}',
+        ];
 
+        // Regex for removing improper platform values
+        $replace = '/^(https:\/\/)' . '|' . // Matches leading https://
+                   '^(http:\/\/)'   . '|' . // Matches leading http://
+                   '\/$/'                   // Matches trailing /
+        ;
+
+        // SQL regex for matching improper platform values
+        $sqllike = "'https://%'" . " OR platform LIKE " .
+                   "'http://%'"  . " OR platform LIKE " .
+                   "'%/'"
+        ;
+
+        // Start a transaction since this will alter many records.
+        $transaction = $DB->start_delegated_transaction();
+
+        foreach ($tables as $table) {
+            // Get records
+            $recordsetsql = "SELECT id, platform
+                               FROM {$table}
+                              WHERE platform LIKE {$sqllike}";
+            $rs = $DB->get_recordset_sql($recordsetsql);
+            if ($rs->valid()) {
+                foreach ($rs as $record) {
+                    // update records with preg_replace()
+                    // print_object($record);
+                    $newvalue = preg_replace($replace, "", $record->platform);
+
+                    // Update fields with new records
+                    $selectsql = "id = $record->id";
+                    $tablename = substr($table, 1, -1);
+                    $DB->set_field_select($tablename, 'platform', $newvalue, $selectsql);
+                }
+            }
+            $rs->close();
+        }
+        $transaction->allow_commit();
+
+        // Add redirectcounter to registration table
+        // Define field redirectcounter to be added to enrol_arlo_registration.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('redirectcounter', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timemodified');
+
+        // Conditionally launch add field redirectcounter.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field cansendpatchrequests to be added to enrol_arlo_registration.
+        $table = new xmldb_table('enrol_arlo_registration');
+        $field = new xmldb_field('cansendpatchrequests', XMLDB_TYPE_CHAR, '3' , null, XMLDB_NOTNULL, null, 'yes', 'redirectcounter');
+
+        // Conditionally launch add field cansendpatchrequests.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define table enrol_arlo_retrylog to be created.
+        $table = new xmldb_table('enrol_arlo_retrylog');
+
+        // Adding fields to table enrol_arlo_retrylog.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->setComment('Log for records who have been redirected by the API too many times.');
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timelogged', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('participantname', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('coursename', XMLDB_TYPE_CHAR, '40', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('cansendpatchrequests', XMLDB_TYPE_CHAR, '3', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table enrol_arlo_retrylog.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for enrol_arlo_retrylog.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Arlo savepoint reached.
+        upgrade_plugin_savepoint(true, 2023121800, 'enrol', 'arlo');
+    }
+    if ($oldversion < 2024011600) {
+        set_config('enablecommunication',1,'enrol_arlo');
+        set_config('maxpluginredirects',5,'enrol_arlo');
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
+        $pluginconfig->set('maxpluginredirects', get_config('enrol_arlo','maxpluginredirects'));
+    }
+
+    if ($oldversion < 2024030102) {
+        // Define field cansendpatchrequests to be added to enrol_arlo_registration.
+        $field = new xmldb_field('cansendpatchrequests', XMLDB_TYPE_CHAR, '3' , null, XMLDB_NOTNULL, null, 'yes', 'redirectcounter');
+        
+        $table = new xmldb_table('enrol_arlo_registration');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $table = new xmldb_table('enrol_arlo_retrylog');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2024030102, 'enrol', 'arlo');
+    }
     return true;
 }

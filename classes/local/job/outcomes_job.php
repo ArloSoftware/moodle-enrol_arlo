@@ -31,10 +31,13 @@ use core_user;
 use enrol_arlo\api;
 use enrol_arlo\local\external;
 use enrol_arlo\local\learner_progress;
+use enrol_arlo\manager;
 use enrol_arlo\persistent;
 use enrol_arlo\Arlo\AuthAPI\RequestUri;
 use enrol_arlo\local\client;
 use enrol_arlo\local\enum\arlo_type;
+use enrol_arlo\local\administrator_notification;
+use enrol_arlo\local\persistent\retry_log_persistent;
 use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\result;
 use Exception;
@@ -116,6 +119,42 @@ class outcomes_job extends job {
             $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
             return false;
         }
+        $maxpluginredirects = get_config('enrol_arlo','maxpluginredirects');
+        $this->trace->output('redirects are '.$pluginconfig->get('redirectcount'));
+
+        $this->trace->output('enabled is '.$pluginconfig->get('enablecommunication'));
+        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects){
+            // Notify about failure
+            global $CFG, $SITE;
+            require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+
+
+            $admins = get_admins();
+            $allVariables = get_defined_vars();
+
+// Display the list
+            //$this->trace->output(json_encode($allVariables));
+            $manager = new \enrol_arlo\manager();
+            $manager->add_max_redirect_notification_to_queue();
+            foreach ($admins as $admin) {
+                //$this->trace->output(json_encode($admin));
+
+                $this->trace->output(sendfailurenotification($admin));
+            }
+
+        }
+        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects && $pluginconfig->get('enablecommunication') == 1 ) {
+            $this->add_reasons(get_string('redirectcountmaxlimit', 'enrol_arlo'));
+            //sychronize the plugin config persistent settings with the current database values.
+            $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
+            set_config('enablecommunication', 0, 'enrol_arlo');
+            $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
+            return false;
+        }
+        if($pluginconfig->get('enablecommunication') == 0) {
+            $this->add_reasons(get_string('communication_disabled_message', 'enrol_arlo'));
+            return false;
+        }
         return true;
     }
 
@@ -153,39 +192,65 @@ class outcomes_job extends job {
                 $lock->release();
                 throw $exception;
             }
-            
             if (!$registrations) {
                 // Update scheduling information on persistent after successfull save.
                 $jobpersistent->set('timelastrequest', time());
                 $jobpersistent->save();
             } else {
                 foreach ($registrations as $registrationpersistent) {
-                    try {
-                        $user = core_user::get_user($registrationpersistent->get('userid'));
-                        if (!$user) {
-                            throw new moodle_exception('moodleaccountdoesnotexist');
+                    $user = core_user::get_user($registrationpersistent->get('userid'));
+                    $apiretryerrorpt1 = get_string('apiretryerrorpt1', 'enrol_arlo');
+                    $apiretryerrorpt2 = get_string('apiretryerrorpt2', 'enrol_arlo');
+                    $redirectcounter = $registrationpersistent->get('redirectcounter');
+                    $maxredirects = $pluginconfig->get('retriesperrecord');
+                    $retrylog = new retry_log_persistent();
+                    $retrylog->set('timelogged', time());
+                    $retrylog->set('userid', $user->id);
+                    $retrylog->set('participantname', "$user->lastname, $user->firstname");
+                    $retrylog->set('courseid', $course->id);
+                    $retrylog->set('coursename', $course->fullname);
+                    if ( $redirectcounter >= $maxredirects) {
+                        // Display retry error to admin on job page
+                        $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
+                        // Create and save a log of the failure
+                        $retrylog->save();
+                    } else {
+                        try {
+                            if (!$user) {
+                                throw new moodle_exception('moodleaccountdoesnotexist');
+                            }
+                            $registrationid = $registrationpersistent->get('sourceid');
+                            $sourceregistration = external::get_registration_resource($registrationid);
+                            $learnerprogress = new learner_progress($course, $user);
+                            $data = $learnerprogress->get_keyed_data_for_arlo();
+                            if (!empty($data)) {
+                                $this->trace->output(implode(',', $data));
+                                external::patch_registration_resource($sourceregistration, $data);
+                                // Check API status code. If it's a 3xx, increment the redirectcounter by 1
+                                $apistatus = $pluginconfig->get('apistatus');
+                                if ($apistatus >= 300 && $apistatus <= 399) {
+                                    $registrationpersistent->set('redirectcounter', ++$redirectcounter);
+                                    $pluginredirectcount = $pluginconfig->get('redirectcount');
+                                    $pluginconfig->set('redirectcount', ++$pluginredirectcount);
+                                } else {
+                                    $registrationpersistent->set('redirectcounter', 0);
+                                }
+                                $registrationpersistent->set('timelastrequest', time());
+                                // Reset update flag.
+                                $registrationpersistent->set('updatesource', 0);
+                                $retrylog->save();
+                                $registrationpersistent->save();
+                            }
+                        } catch (Exception $exception) {
+                            debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                            $this->add_error($exception->getMessage());
+                            $registrationpersistent->set('errormessage', $exception->getMessage());
+                        } finally {
+                            // Update scheduling information on persistent after successfull save.
+                            $jobpersistent->set('timelastrequest', time());
+                            $jobpersistent->save();
+                            // DO NOT release lock here. This is a foreach loop!
                         }
-                        $registrationid = $registrationpersistent->get('sourceid');
-                        $sourceregistration = external::get_registration_resource($registrationid);
-                        $learnerprogress = new learner_progress($course, $user);
-                        $data = $learnerprogress->get_keyed_data_for_arlo();
-                        if (!empty($data)) {
-                            $this->trace->output(implode(',', $data));
-                            external::patch_registration_resource($sourceregistration, $data);
-                            $registrationpersistent->set('timelastrequest', time());
-                            // Reset update flag.
-                            $registrationpersistent->set('updatesource', 0);
-                            $registrationpersistent->save();
-                        }
-                    } catch (Exception $exception) {
-                        debugging($exception->getMessage(), DEBUG_DEVELOPER);
-                        $this->add_error($exception->getMessage());
-                        $registrationpersistent->set('errormessage', $exception->getMessage());
-                    } finally {                        
-                        // Update scheduling information on persistent after successfull save.
-                        $jobpersistent->set('timelastrequest', time());
-                        $jobpersistent->save();
-                        // DO NOT release lock here. This is a foreach loop!
                     }
                 }
             }
