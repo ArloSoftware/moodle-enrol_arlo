@@ -167,17 +167,16 @@ class memberships_job extends job {
                     $collection = response_processor::process($response);
                     if ($collection->count() > 0) {
                         foreach ($collection as $resource) {
-                            $lockfactory = static::get_lock_factory();
-                            $lock = $lockfactory->get_lock('Registration: ' . 
+                            $reglock = $lockfactory->get_lock('Registration: ' . 
                                 $resource->RegistrationID, self::TIME_LOCK_TIMEOUT);
-                            if ($lock) {
+                            if ($reglock) {
                                 try{
                                     $this->sync_resource($resource, $trace);
                                 } catch (moodle_exception $exception) {
                                     debugging($exception->getMessage(), DEBUG_DEVELOPER);
                                 } finally {
-                                    $lock->release();
-                                } 
+                                    $reglock->release();
+                                }
                             } else {
                                 $trace->output('Lock timeout');
                             }
