@@ -213,8 +213,11 @@ class outcomes_job extends job {
                                         $retrylog->set('coursename', $course->fullname);
                                         $retrylog->save();
                                     }
-                                } elseif ($recordcounter > 0) {
-                                    $registrationpersistent->set('redirectcounter', 0);
+                                } else {
+                                    if ($recordcounter > 0) {
+                                        $registrationpersistent->set('redirectcounter', 0);
+                                    }
+                                    $pluginconfig->set('redirectcount', 0);
                                 }
                                 $apistatus == 200 ? $registrationpersistent->set('updatesource', 0) : null;
                                 $registrationpersistent->set('timelastrequest', time());
