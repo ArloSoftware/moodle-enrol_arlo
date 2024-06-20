@@ -29,25 +29,32 @@ use enrol_arlo\local\tablesql\apiretries;
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/tablelib.php');
+require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
 
 admin_externalpage_setup('enrolsettingsarloapiretries');
 $action = optional_param('action', null, PARAM_ALPHA);
+$course = optional_param('course', null, PARAM_INT);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
 
 if ($action === 'enablecommunication') {
-    $plugin = api::get_enrolment_plugin();
-    $pluginconfig = $plugin->get_plugin_config();
-    set_config('enablecommunication', 1, 'enrol_arlo');
-    $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
-    set_config('redirectcount', 0, 'enrol_arlo');
-    $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
+    enrol_arlo_enablecommunication();
     echo $OUTPUT->notification(get_string('communication_enabled_message', 'enrol_arlo'),\core\output\notification::NOTIFY_SUCCESS);
 }
+
+if ($action === 'resetredirects') {
+    enrol_arlo_reset_redirects();
+    echo $OUTPUT->notification(get_string('resetretries_message', 'enrol_arlo'),\core\output\notification::NOTIFY_SUCCESS);
+}
+
+// This will be hidden from the user interface, will only work if the params are set manually through the URL.
+if ($action === 'updateall' && !empty($course)) {
+    enrol_arlo_update_all_course_registrations($course);
+}
+
 $report = new apiretries('enrolsettingsarloapiretries');
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
-$url = new moodle_url($PAGE->url, ['action'=>'resubmit']);
 
-$url = new moodle_url($PAGE->url, ['action' => 'enablecommunication']);
-echo $OUTPUT->single_button($url, "Enable communication", 'get');
+echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'enablecommunication']), get_string('enablecommunication', 'enrol_arlo'));
+echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'resetredirects']), get_string('resetredirects', 'enrol_arlo'));
 echo $OUTPUT->footer();

@@ -192,8 +192,10 @@ Will try <strong>Method 1</strong> if no match will then try <strong>Method 2</s
 <p>
 If no match is found using any of the Methods a Moodle user account will be created based on Arlo Contact details.
 </p>';
-$string['maxretries'] = 'Maxiumum retries per record';
-$string['maxretries_desc'] = 'Maximum number of retries per record allowed before halting API communication.';
+$string['retriesperrecord'] = 'Maxiumum retries per record';
+$string['retriesperrecord_desc'] = 'Maximum number of retries per record allowed, when reached the record will not be processed further until the retries are reset.';
+$string['maxretries'] = 'Maxiumum retries permitted on the API';
+$string['maxretries_desc'] = 'The maximum number of retries allowed before the API communication is halted, see the API retries error report for more information or to reset the retries.';
 $string['maxretires_email'] = 'Maximum retries error email';
 $string['maxretires_email_desc'] = 'The email that error reports are sent to when a user reaches the maximum retires per record.';
 $string['maxretries_exception'] = 'Too many failed attempts, contact your admin.';
@@ -475,9 +477,12 @@ $string['redirectcountmaxlimit'] = 'The maximum redirect limit for API requests 
 $string['communication_enabled_message'] = 'Communication has been successfully enabled.';
 $string['communication_disabled_message'] = 'Communication has been disabled.';
 $string['emailsubject'] = 'Alert: Maximum Retries Reached for PATCH Requests on {$a}';
-$string['emailbody'] = 'Dear {$a->fullname},\n\n' .
-        'The site "{$a->shortname}" ({$a->url}) has reached the maximum number of retries ({$a->maxretries}) for registration PATCH requests.\n' .
-        'Please review the issue as soon as possible.\n' .
-        'Report: {$a->reportlink}\n\n' .
-        'Regards,\nMoodle System';
+$string['emailbody'] = 'Dear {$a->fullname},<br>' .
+        'The site "{$a->shortname}" {$a->url} has reached the maximum number of retries {$a->maxretries} for registration PATCH requests.<br>' .
+        'Please review the issue as soon as possible.<br>' .
+        'Report: {$a->reportlink}<br>' .
+        'Regards,<br>Moodle System';
 $string['notifymaxredirects'] = 'Notify on maximum redirects';
+$string['enablecommunication'] = 'Enable communication';
+$string['resetredirects'] = 'Reset redirects';
+$string['resetretries_message'] = 'The retries for registration PATCH requests have been reset.';
