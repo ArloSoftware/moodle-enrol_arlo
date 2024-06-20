@@ -189,6 +189,10 @@ Arlo CodePrimary - This will attempt a match between fields Arlo Contact CodePri
 <br>
 Will try <strong>Method 1</strong> if no match will then try <strong>Method 2</strong>.
 </p>
+<strong>Method 4</strong>
+<br>
+Will attempt a match using the email address in arlo against the email address in Moodle.
+</p>
 <p>
 If no match is found using any of the Methods a Moodle user account will be created based on Arlo Contact details.
 </p>';
