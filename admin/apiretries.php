@@ -55,6 +55,13 @@ if ($action === 'updateall' && !empty($course)) {
 $report = new apiretries('enrolsettingsarloapiretries');
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
 
-echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'enablecommunication']), get_string('enablecommunication', 'enrol_arlo'));
-echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'resetredirects']), get_string('resetredirects', 'enrol_arlo'));
+$plugin = api::get_enrolment_plugin();
+$pluginconfig = $plugin->get_plugin_config();
+if (empty($pluginconfig->get('enablecommunication'))) {
+    echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'enablecommunication']), get_string('enablecommunication', 'enrol_arlo'));
+}
+
+if (!empty($pluginconfig->get('redirectcount'))) {
+    echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'resetredirects']), get_string('resetredirects', 'enrol_arlo'));
+}
 echo $OUTPUT->footer();
