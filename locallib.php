@@ -368,12 +368,12 @@ function enrol_arlo_reset_redirects() {
  */
 function enrol_arlo_update_all_course_registrations($courseid) {
     global $DB;
-    $enrolid = $DB->get_field('enrol', 'id', ['enrol' => 'arlo', 'courseid' => $courseid]);
-    $sql = "SELECT * FROM {enrol_arlo_registration} 
-                    WHERE enrolid = :enrolid
-                          AND grade IS NULL
-                          AND outcome IS NULL";
-    $registrations = $DB->get_records_sql($sql, ['enrolid' => $enrolid]);
+    $sql = "SELECT ear.* FROM {enrol_arlo_registration} ear
+              JOIN {enrol} e ON e.enrol = 'arlo' AND e.courseid = :courseid
+             WHERE ear.enrolid = e.id
+                   AND ear.grade IS NULL
+                   AND ear.outcome IS NULL";
+    $registrations = $DB->get_records_sql($sql, ['courseid' => $courseid]);
     foreach ($registrations as $registration) {
         $registration->updatesource = 1;
         $DB->update_record('enrol_arlo_registration', $registration);
