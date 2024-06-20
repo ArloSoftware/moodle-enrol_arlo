@@ -175,7 +175,7 @@ class outcomes_job extends job {
                     $apiretryerrorpt1 = get_string('apiretryerrorpt1', 'enrol_arlo');
                     $apiretryerrorpt2 = get_string('apiretryerrorpt2', 'enrol_arlo');
                     $recordcounter = $registrationpersistent->get('redirectcounter');
-                    $maxrecordretries = $pluginconfig->get('retriesperrecord');
+                    $maxrecordretries = get_config('enrol_arlo', 'retriesperrecord');
                     if ($recordcounter >= $maxrecordretries) {
                         // Display retry error to admin on job page
                         $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
