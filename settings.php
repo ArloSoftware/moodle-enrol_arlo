@@ -77,9 +77,13 @@ if ($hassiteconfig) {
     $name = get_string('disableskip', 'enrol_arlo');
     $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
 
+    $name = get_string('retriesperrecord', 'enrol_arlo');
+    $description = get_string('retriesperrecord_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configtext('enrol_arlo/retriesperrecord', $name, $description, 5, PARAM_INT));
+
     $name = get_string('maxretries', 'enrol_arlo');
     $description = get_string('maxretries_desc', 'enrol_arlo');
-    $settings->add(new admin_setting_configtext('enrol_arlo/retriesperrecord', $name, $description, 5, PARAM_INT));
+    $settings->add(new admin_setting_configtext('enrol_arlo/maxretries', $name, $description, 500, PARAM_INT));
 
     $name = get_string('maxretires_email', 'enrol_arlo');
     $description = get_string('maxretires_email_desc', 'enrol_arlo');
