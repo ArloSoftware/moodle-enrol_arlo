@@ -2,7 +2,7 @@
     "name": "arlo/moodle-enrol_arlo",
     "description": "Arlo integration for Moodle",
     "require": {
-        "php": ">=7.0 <7.3",
+        "php": ">=7.0",
         "ext-curl": "*",
         "ext-date": "*",
         "ext-dom": "*",
@@ -21,3 +21,4 @@
         }
     ]
 }
+
