@@ -62,7 +62,7 @@ if ($action === 'enablecommunication') {
 }
 
 if ($action === 'resetredirects') {
-    enrol_arlo_reset_redirects();
+    enrol_arlo_reset_redirects($regid);
     echo $OUTPUT->notification(get_string('resetretries_message', 'enrol_arlo'),\core\output\notification::NOTIFY_SUCCESS);
 }
 
