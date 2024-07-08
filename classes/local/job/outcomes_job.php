@@ -195,11 +195,12 @@ class outcomes_job extends job {
                                 // Now we count the errors 4xx and 5xx globally, but we don't increase the registration retry counter.
                                 $apistatus = $pluginconfig->get('apistatus');
                                 if ($apistatus >= 300 && $apistatus <= 599) {
-                                    $pluginredirectcount = $pluginconfig->get('redirectcount');
+                                    $pluginredirectcount = $pluginconfig->get('redirectcount') + 1;
+                                    $pluginconfig->set('redirectcount', $pluginredirectcount);
                                     $pluginmaxredirects = $pluginconfig->get('maxretries');
-                                    $pluginconfig->set('redirectcount', ++$pluginredirectcount);
-                                    if ($apistatus >= 300 && $apistatus <= 399) {
-                                        $registrationpersistent->set('redirectcounter', ++$recordcounter);
+                                    if ($apistatus <= 399) {
+                                        $recordcounter++;
+                                        $registrationpersistent->set('redirectcounter', $recordcounter);
                                         if (!empty($maxrecordretries) && $recordcounter >= $maxrecordretries) {
                                             // Display retry error to admin on job page
                                             $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
@@ -214,7 +215,7 @@ class outcomes_job extends job {
                                         }
                                     }
                                     // We have reached the maximum number of errors allowed. Disable communication.
-                                    if (!empty($pluginmaxredirects) && ++$pluginredirectcount >= $pluginmaxredirects) {
+                                    if (!empty($pluginmaxredirects) && $pluginredirectcount >= $pluginmaxredirects) {
                                         $pluginconfig->set('enablecommunication', 0);
                                     }
                                 } else {
