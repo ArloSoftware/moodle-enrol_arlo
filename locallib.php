@@ -349,15 +349,16 @@ function enrol_arlo_enablecommunication() {
  */
 function enrol_arlo_reset_redirects($regid = false) {
     global $DB;
-    $plugin = api::get_enrolment_plugin();
-    $pluginconfig = $plugin->get_plugin_config();
-    $pluginconfig->set('redirectcount', 0);
+
     $params = [];
     $sql = "SELECT * FROM {enrol_arlo_registration}";
     if ($regid) {
         $sql .= " WHERE id = :regid";
         $params['regid'] = $regid;
     } else {
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $pluginconfig->set('redirectcount', 0);
         $sql .= " WHERE redirectcounter >= :maxretries";
         $params['maxretries'] = get_config('enrol_arlo', 'retriesperrecord');
     }
