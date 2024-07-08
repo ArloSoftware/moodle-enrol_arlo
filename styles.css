@@ -2672,3 +2672,7 @@
     float: none !important;
   }
 }
+
+.communication-buttons {
+  gap: 20px;
+}

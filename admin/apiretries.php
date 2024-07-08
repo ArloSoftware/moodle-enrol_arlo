@@ -25,6 +25,7 @@
 
 use enrol_arlo\api;
 use enrol_arlo\local\tablesql\apiretries;
+use enrol_arlo\adminsettings\configarlostatus;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
@@ -34,8 +35,25 @@ require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
 admin_externalpage_setup('enrolsettingsarloapiretries');
 $action = optional_param('action', null, PARAM_ALPHA);
 $course = optional_param('course', null, PARAM_INT);
+$regid = optional_param('regid', null, PARAM_INT);
+
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
+
+[$arlostatus, $desc] = configarlostatus::api_status_render();
+echo '<div class="communication-buttons d-flex align-items-center mb-3">';
+echo '<span>Connection Status: </span>' . $arlostatus;
+
+$plugin = api::get_enrolment_plugin();
+$pluginconfig = $plugin->get_plugin_config();
+if (empty($pluginconfig->get('enablecommunication'))) {
+    echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'enablecommunication']), get_string('enablecommunication', 'enrol_arlo'));
+}
+
+if (!empty($pluginconfig->get('redirectcount'))) {
+    echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'resetredirects']), get_string('resetredirects', 'enrol_arlo'));
+}
+echo '</div>';
 
 if ($action === 'enablecommunication') {
     enrol_arlo_enablecommunication();
@@ -55,13 +73,4 @@ if ($action === 'updateall' && !empty($course)) {
 $report = new apiretries('enrolsettingsarloapiretries');
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
 
-$plugin = api::get_enrolment_plugin();
-$pluginconfig = $plugin->get_plugin_config();
-if (empty($pluginconfig->get('enablecommunication'))) {
-    echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'enablecommunication']), get_string('enablecommunication', 'enrol_arlo'));
-}
-
-if (!empty($pluginconfig->get('redirectcount'))) {
-    echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'resetredirects']), get_string('resetredirects', 'enrol_arlo'));
-}
 echo $OUTPUT->footer();

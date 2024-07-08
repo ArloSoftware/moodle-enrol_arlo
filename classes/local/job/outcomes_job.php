@@ -191,27 +191,31 @@ class outcomes_job extends job {
                             if (!empty($data)) {
                                 $this->trace->output(implode(',', $data));
                                 external::patch_registration_resource($sourceregistration, $data);
-                                // Check API status code. If it's a 3xx, increment the redirectcounter by 1.
+                                // Check API status code. If it's a 3xx, increment the registration counter by 1.
+                                // Now we count the errors 4xx and 5xx as well. But this don't increase the counter of the registration.
                                 $apistatus = $pluginconfig->get('apistatus');
-                                if ($apistatus >= 300 && $apistatus <= 399) {
-                                    $registrationpersistent->set('redirectcounter', ++$recordcounter);
+                                if ($apistatus >= 300 && $apistatus <= 599) {
                                     $pluginredirectcount = $pluginconfig->get('redirectcount');
                                     $pluginmaxredirects = get_config('enrol_arlo', 'maxretries');
                                     $pluginconfig->set('redirectcount', ++$pluginredirectcount);
+                                    if ($apistatus >= 300 && $apistatus <= 399) {
+                                        $registrationpersistent->set('redirectcounter', ++$recordcounter);
+                                        if (!empty($maxrecordretries) && $recordcounter >= $maxrecordretries) {
+                                            // Display retry error to admin on job page
+                                            $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
+                                            // Create and save a log of the failure
+                                            $retrylog = new retry_log_persistent();
+                                            $retrylog->set('timelogged', time());
+                                            $retrylog->set('userid', $user->id);
+                                            $retrylog->set('participantname', "$user->lastname, $user->firstname");
+                                            $retrylog->set('courseid', $course->id);
+                                            $retrylog->set('coursename', $course->fullname);
+                                            $retrylog->save();
+                                        }
+                                    }
+                                    // We have reached the maximum number of errors allowed. Disable communication.
                                     if (!empty($pluginmaxredirects) && ++$pluginredirectcount >= $pluginmaxredirects) {
                                         $pluginconfig->set('enablecommunication', 0);
-                                    }
-                                    if (!empty($maxrecordretries) && $recordcounter >= $maxrecordretries) {
-                                        // Display retry error to admin on job page
-                                        $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
-                                        // Create and save a log of the failure
-                                        $retrylog = new retry_log_persistent();
-                                        $retrylog->set('timelogged', time());
-                                        $retrylog->set('userid', $user->id);
-                                        $retrylog->set('participantname', "$user->lastname, $user->firstname");
-                                        $retrylog->set('courseid', $course->id);
-                                        $retrylog->set('coursename', $course->fullname);
-                                        $retrylog->save();
                                     }
                                 } else {
                                     if ($recordcounter > 0) {

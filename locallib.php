@@ -344,17 +344,24 @@ function enrol_arlo_enablecommunication() {
 
 /**
  * Reset the redirect counter for all registrations that have reached the maximum number of retries.
+ * 
+ * @param $regid
  */
-function enrol_arlo_reset_redirects() {
+function enrol_arlo_reset_redirects($regid = false) {
     global $DB;
     $plugin = api::get_enrolment_plugin();
     $pluginconfig = $plugin->get_plugin_config();
     $pluginconfig->set('redirectcount', 0);
-    $maxretries = get_config('enrol_arlo', 'retriesperrecord');
-    $sql = "SELECT * FROM {enrol_arlo_registration} 
-                    WHERE redirectcounter >= :maxretries
-                          AND updatesource = 1";
-    $registrations = $DB->get_records_sql($sql, ['maxretries' => $maxretries]);
+    $params = [];
+    $sql = "SELECT * FROM {enrol_arlo_registration}";
+    if ($regid) {
+        $sql .= " WHERE id = :regid";
+        $params['regid'] = $regid;
+    } else {
+        $sql .= " WHERE redirectcounter >= :maxretries";
+        $params['maxretries'] = get_config('enrol_arlo', 'retriesperrecord');
+    }
+    $registrations = $DB->get_records_sql($sql, $params);
     foreach ($registrations as $registration) {
         $registration->redirectcounter = 0;
         $DB->update_record('enrol_arlo_registration', $registration);
