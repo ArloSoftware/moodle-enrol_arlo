@@ -41,16 +41,17 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
 
 [$arlostatus, $desc] = configarlostatus::api_status_render();
-echo '<div class="communication-buttons d-flex align-items-center mb-3">';
-echo '<span>Connection Status: </span>' . $arlostatus;
-
 $plugin = api::get_enrolment_plugin();
 $pluginconfig = $plugin->get_plugin_config();
+echo '<div class="communication-buttons d-flex align-items-center mb-3">';
+echo get_string('connectionstatus', 'enrol_arlo') . $arlostatus;
+
 if (empty($pluginconfig->get('enablecommunication'))) {
     echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'enablecommunication']), get_string('enablecommunication', 'enrol_arlo'));
 }
 
 if (!empty($pluginconfig->get('redirectcount'))) {
+    echo get_string('apifails', 'enrol_arlo') . $pluginconfig->get('redirectcount');
     echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'resetredirects']), get_string('resetredirects', 'enrol_arlo'));
 }
 echo '</div>';

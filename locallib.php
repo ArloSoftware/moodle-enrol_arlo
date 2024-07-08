@@ -360,7 +360,7 @@ function enrol_arlo_reset_redirects($regid = false) {
         $pluginconfig = $plugin->get_plugin_config();
         $pluginconfig->set('redirectcount', 0);
         $sql .= " WHERE redirectcounter >= :maxretries";
-        $params['maxretries'] = get_config('enrol_arlo', 'retriesperrecord');
+        $params['maxretries'] = $pluginconfig->get('retriesperrecord');
     }
     $registrations = $DB->get_records_sql($sql, $params);
     foreach ($registrations as $registration) {

@@ -487,6 +487,9 @@ $string['emailbody'] = 'Dear {$a->fullname},<br>' .
         'Regards,<br>Moodle System';
 $string['notifymaxredirects'] = 'Notify on maximum redirects';
 $string['enablecommunication'] = 'Re-stablish communication';
-$string['resetredirects'] = 'Retry all';
+$string['resetredirects'] = 'Reset all fail counters';
 $string['resetretries_message'] = 'The retries for registration PATCH requests have been reset.';
 $string['retry_sync'] = 'Retry sync';
+$string['connectionstatus'] = '<span>Connection Status: </span>';
+$string['apifails'] = '<span>Global API fails: </span>';
+

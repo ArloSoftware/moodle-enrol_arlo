@@ -175,7 +175,7 @@ class outcomes_job extends job {
                     $apiretryerrorpt1 = get_string('apiretryerrorpt1', 'enrol_arlo');
                     $apiretryerrorpt2 = get_string('apiretryerrorpt2', 'enrol_arlo');
                     $recordcounter = $registrationpersistent->get('redirectcounter');
-                    $maxrecordretries = get_config('enrol_arlo', 'retriesperrecord');
+                    $maxrecordretries = $pluginconfig->get('retriesperrecord');
                     if ($recordcounter >= $maxrecordretries) {
                         // Display retry error to admin on job page
                         $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
@@ -191,12 +191,12 @@ class outcomes_job extends job {
                             if (!empty($data)) {
                                 $this->trace->output(implode(',', $data));
                                 external::patch_registration_resource($sourceregistration, $data);
-                                // Check API status code. If it's a 3xx, increment the registration counter by 1.
-                                // Now we count the errors 4xx and 5xx as well. But this don't increase the counter of the registration.
+                                // Check API status code. If it's a 3xx, increment the registration and global retry counter.
+                                // Now we count the errors 4xx and 5xx globally, but we don't increase the registration retry counter.
                                 $apistatus = $pluginconfig->get('apistatus');
                                 if ($apistatus >= 300 && $apistatus <= 599) {
                                     $pluginredirectcount = $pluginconfig->get('redirectcount');
-                                    $pluginmaxredirects = get_config('enrol_arlo', 'maxretries');
+                                    $pluginmaxredirects = $pluginconfig->get('maxretries');
                                     $pluginconfig->set('redirectcount', ++$pluginredirectcount);
                                     if ($apistatus >= 300 && $apistatus <= 399) {
                                         $registrationpersistent->set('redirectcounter', ++$recordcounter);
