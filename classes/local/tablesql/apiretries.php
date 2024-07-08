@@ -45,6 +45,9 @@ class apiretries extends table_sql {
         $headers[] = get_string('courseid', 'enrol_arlo');
         $columns[] = 'coursename';
         $headers[] = get_string('coursename', 'enrol_arlo');
+        $columns[] = 'action';
+        $headers[] = get_string('action');
+
         $this->define_columns($columns);
         $this->define_headers($headers);
         $this->define_baseurl("/enrol/arlo/admin/apiretries.php");
@@ -57,5 +60,22 @@ class apiretries extends table_sql {
     }
     public function col_timelogged($values) {
         return userdate($values->timelogged);
+    }
+
+    public function col_action($values) {
+        global $DB, $OUTPUT;
+        $sql = "SELECT r.id, r.redirectcounter 
+                  FROM {enrol_arlo_registration} r 
+                  JOIN {enrol} e ON e.id = r.enrolid 
+                 WHERE r.userid = :userid 
+                       AND e.courseid = :courseid";
+        $params = ['userid' => $values->userid, 'courseid' => $values->courseid];
+        $record = $DB->get_record_sql($sql, $params);
+        $retry = get_string('retry_sync', 'enrol_arlo');
+        $moodeurl = new \moodle_url('/enrol/arlo/admin/apiretries.php', ['action' => 'resetredirects', 'regid' => $record->id]);
+        $maxretries = get_config('enrol_arlo', 'retriesperrecord');
+        $renderlink = !empty($record->redirectcounter) && ($record->redirectcounter >= $maxretries);
+        $output = $renderlink ? '<a href="' . $moodeurl . '">' . $retry . '</a>' : '';
+        return $output;
     }
 }
