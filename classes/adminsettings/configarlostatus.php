@@ -77,6 +77,16 @@ class configarlostatus extends \admin_setting {
      * @throws moodle_exception
      */
     public function output_html($data, $query = '') {
+        [$element, $description] = self::api_status_render();
+        return format_admin_setting($this, '', $element, $description, false, '', null, $query);
+    }
+
+    /**
+     * Render the API status.
+     *
+     * @return array An array containing the status element and description.
+     */
+    public static function api_status_render() {
         global $OUTPUT;
         $apistatus = get_config('enrol_arlo', 'apistatus');
         $apilastrequested = (int) get_config('enrol_arlo', 'apitimelastrequest');
@@ -94,7 +104,6 @@ class configarlostatus extends \admin_setting {
                 $statusicon = $OUTPUT->pix_icon('t/go', get_string('ok', 'enrol_arlo'));
             }
             $reason = get_string('apistatusok', 'enrol_arlo', userdate($apilastrequested));
-            $description = '';
         } else if (0 == $apistatus || ($apistatus >= 400 && $apistatus < 499)) {
             if ($useimageiconclass) {
                 $statusicon = $OUTPUT->image_icon('t/stop', get_string('notok', 'enrol_arlo'));
@@ -111,12 +120,11 @@ class configarlostatus extends \admin_setting {
                 $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
             }
             $reason = get_string('apistatusservererror', 'enrol_arlo');
-            $url = new moodle_url('/enrol/arlo/admin/apirequests.php');
+            $url = new \moodle_url('/enrol/arlo/admin/apirequests.php');
             $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
         } else {
-            return '';
+            return ['', ''];
         }
-        $element = '<div class="form-text">'.$statusicon.'&nbsp;'.$reason.'</div>';
-        return format_admin_setting($this, '', $element, $description, false, '', null, $query);
+        return ['<div class="form-text">'.$statusicon.'&nbsp;'.$reason.'</div>', $description];
     }
 }

@@ -296,12 +296,14 @@ function check_arlo_api_retry_log() {
 
     global $DB;
 
-    $lastchecktime = strtotime('-1 day');
+    $lastchecktime = get_config('enrol_arlo', 'lastapiretrychecktime');
+
     // Query the database for new entries since the last check.
     $sql = "SELECT * FROM {enrol_arlo_retrylog} WHERE timelogged > :lastchecktime";
     $params = ['lastchecktime' => $lastchecktime];
 
     $newentries = $DB->get_records_sql($sql, $params);
+    set_config('lastapiretrychecktime', time(), 'enrol_arlo');
 
     return $newentries;
 }
@@ -311,7 +313,8 @@ function sendfailurenotification( $admininfo) {
     $noreplyuser = \core_user::get_noreply_user();
     $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
     $siteinfo = $SITE;
-    $maxpluginredirects = get_config('maxpluginredirects','enrol_arlo');
+    $maxpluginredirects = get_config('enrol_arlo', 'maxretries');
+
     // Subject of the email
     $emailsubject = get_string('emailsubject', 'enrol_arlo', $siteinfo->shortname);
 
@@ -319,7 +322,8 @@ function sendfailurenotification( $admininfo) {
     $emailbody = get_string('emailbody', 'enrol_arlo', [
             'fullname' => $admininfo->firstname . ' ' . $admininfo->lastname,
             'shortname' => $siteinfo->shortname,
-            'maxpluginredirects' => $maxpluginredirects,
+            'url' => $CFG->wwwroot,
+            'maxretries' => $maxpluginredirects,
             'reportlink' => $apiretrylogurl->out()
     ]);
 
@@ -328,3 +332,58 @@ function sendfailurenotification( $admininfo) {
     return ('Email sent to ' . $admininfo->email);
 }
 
+/**
+ * Enable communication with Arlo and reset the redirect counter of the plugin.
+ */
+function enrol_arlo_enablecommunication() {
+    $plugin = api::get_enrolment_plugin();
+    $pluginconfig = $plugin->get_plugin_config();
+    $pluginconfig->set('enablecommunication', 1);
+    $pluginconfig->set('redirectcount', 0);
+}	
+
+/**
+ * Reset the redirect counter for all registrations that have reached the maximum number of retries.
+ * 
+ * @param $regid
+ */
+function enrol_arlo_reset_redirects($regid = false) {
+    global $DB;
+
+    $params = [];
+    $sql = "SELECT * FROM {enrol_arlo_registration}";
+    if ($regid) {
+        $sql .= " WHERE id = :regid";
+        $params['regid'] = $regid;
+    } else {
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $pluginconfig->set('redirectcount', 0);
+        $sql .= " WHERE redirectcounter >= :maxretries";
+        $params['maxretries'] = $pluginconfig->get('retriesperrecord');
+    }
+    $registrations = $DB->get_records_sql($sql, $params);
+    foreach ($registrations as $registration) {
+        $registration->redirectcounter = 0;
+        $DB->update_record('enrol_arlo_registration', $registration);
+    }
+}
+
+/**
+ * Update all registrations in a course that have not been graded or have no outcome.
+ *
+ * @param $courseid
+ */
+function enrol_arlo_update_all_course_registrations($courseid) {
+    global $DB;
+    $sql = "SELECT ear.* FROM {enrol_arlo_registration} ear
+              JOIN {enrol} e ON e.enrol = 'arlo' AND e.courseid = :courseid
+             WHERE ear.enrolid = e.id
+                   AND ear.grade IS NULL
+                   AND ear.outcome IS NULL";
+    $registrations = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+    foreach ($registrations as $registration) {
+        $registration->updatesource = 1;
+        $DB->update_record('enrol_arlo_registration', $registration);
+    }
+}

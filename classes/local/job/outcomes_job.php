@@ -119,38 +119,11 @@ class outcomes_job extends job {
             $this->add_reasons(get_string('onlineactivityresultpushingdisabled', 'enrol_arlo'));
             return false;
         }
-        $maxpluginredirects = get_config('enrol_arlo','maxpluginredirects');
-        $this->trace->output('redirects are '.$pluginconfig->get('redirectcount'));
 
-        $this->trace->output('enabled is '.$pluginconfig->get('enablecommunication'));
-        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects){
-            // Notify about failure
-            global $CFG, $SITE;
-            require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+        $redirectcount = $pluginconfig->get('redirectcount');
+        $this->trace->output('redirects are '. $redirectcount);
+        $this->trace->output('enabled is '. $pluginconfig->get('enablecommunication'));
 
-
-            $admins = get_admins();
-            $allVariables = get_defined_vars();
-
-// Display the list
-            //$this->trace->output(json_encode($allVariables));
-            $manager = new \enrol_arlo\manager();
-            $manager->add_max_redirect_notification_to_queue();
-            foreach ($admins as $admin) {
-                //$this->trace->output(json_encode($admin));
-
-                $this->trace->output(sendfailurenotification($admin));
-            }
-
-        }
-        if (get_config('enrol_arlo', 'redirectcount')>=$maxpluginredirects && $pluginconfig->get('enablecommunication') == 1 ) {
-            $this->add_reasons(get_string('redirectcountmaxlimit', 'enrol_arlo'));
-            //sychronize the plugin config persistent settings with the current database values.
-            $pluginconfig->set('redirectcount', get_config('enrol_arlo','redirectcount'));
-            set_config('enablecommunication', 0, 'enrol_arlo');
-            $pluginconfig->set('enablecommunication', get_config('enrol_arlo','enablecommunication'));
-            return false;
-        }
         if($pluginconfig->get('enablecommunication') == 0) {
             $this->add_reasons(get_string('communication_disabled_message', 'enrol_arlo'));
             return false;
@@ -201,19 +174,11 @@ class outcomes_job extends job {
                     $user = core_user::get_user($registrationpersistent->get('userid'));
                     $apiretryerrorpt1 = get_string('apiretryerrorpt1', 'enrol_arlo');
                     $apiretryerrorpt2 = get_string('apiretryerrorpt2', 'enrol_arlo');
-                    $redirectcounter = $registrationpersistent->get('redirectcounter');
-                    $maxredirects = $pluginconfig->get('retriesperrecord');
-                    $retrylog = new retry_log_persistent();
-                    $retrylog->set('timelogged', time());
-                    $retrylog->set('userid', $user->id);
-                    $retrylog->set('participantname', "$user->lastname, $user->firstname");
-                    $retrylog->set('courseid', $course->id);
-                    $retrylog->set('coursename', $course->fullname);
-                    if ( $redirectcounter >= $maxredirects) {
+                    $recordcounter = $registrationpersistent->get('redirectcounter');
+                    $maxrecordretries = $pluginconfig->get('retriesperrecord');
+                    if ($recordcounter >= $maxrecordretries) {
                         // Display retry error to admin on job page
                         $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
-                        // Create and save a log of the failure
-                        $retrylog->save();
                     } else {
                         try {
                             if (!$user) {
@@ -226,19 +191,41 @@ class outcomes_job extends job {
                             if (!empty($data)) {
                                 $this->trace->output(implode(',', $data));
                                 external::patch_registration_resource($sourceregistration, $data);
-                                // Check API status code. If it's a 3xx, increment the redirectcounter by 1
+                                // Check API status code. If it's a 3xx, increment the registration and global retry counter.
+                                // Now we count the errors 4xx and 5xx globally, but we don't increase the registration retry counter.
                                 $apistatus = $pluginconfig->get('apistatus');
-                                if ($apistatus >= 300 && $apistatus <= 399) {
-                                    $registrationpersistent->set('redirectcounter', ++$redirectcounter);
-                                    $pluginredirectcount = $pluginconfig->get('redirectcount');
-                                    $pluginconfig->set('redirectcount', ++$pluginredirectcount);
+                                if ($apistatus >= 300 && $apistatus <= 599) {
+                                    $pluginredirectcount = $pluginconfig->get('redirectcount') + 1;
+                                    $pluginconfig->set('redirectcount', $pluginredirectcount);
+                                    $pluginmaxredirects = $pluginconfig->get('maxretries');
+                                    if ($apistatus <= 399) {
+                                        $recordcounter++;
+                                        $registrationpersistent->set('redirectcounter', $recordcounter);
+                                        if (!empty($maxrecordretries) && $recordcounter >= $maxrecordretries) {
+                                            // Display retry error to admin on job page
+                                            $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
+                                            // Create and save a log of the failure
+                                            $retrylog = new retry_log_persistent();
+                                            $retrylog->set('timelogged', time());
+                                            $retrylog->set('userid', $user->id);
+                                            $retrylog->set('participantname', "$user->lastname, $user->firstname");
+                                            $retrylog->set('courseid', $course->id);
+                                            $retrylog->set('coursename', $course->fullname);
+                                            $retrylog->save();
+                                        }
+                                    }
+                                    // We have reached the maximum number of errors allowed. Disable communication.
+                                    if (!empty($pluginmaxredirects) && $pluginredirectcount >= $pluginmaxredirects) {
+                                        $pluginconfig->set('enablecommunication', 0);
+                                    }
                                 } else {
-                                    $registrationpersistent->set('redirectcounter', 0);
+                                    if ($recordcounter > 0) {
+                                        $registrationpersistent->set('redirectcounter', 0);
+                                    }
+                                    $pluginconfig->set('redirectcount', 0);
                                 }
+                                $apistatus == 200 ? $registrationpersistent->set('updatesource', 0) : null;
                                 $registrationpersistent->set('timelastrequest', time());
-                                // Reset update flag.
-                                $registrationpersistent->set('updatesource', 0);
-                                $retrylog->save();
                                 $registrationpersistent->save();
                             }
                         } catch (Exception $exception) {

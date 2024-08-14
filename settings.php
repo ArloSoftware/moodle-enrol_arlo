@@ -35,8 +35,11 @@ use enrol_arlo\adminsettings\configemail;
 use enrol_arlo\adminsettings\configlockedtext;
 
 if ($hassiteconfig) {
-    $name = get_string('arloconnection', 'enrol_arlo');
+    $name = get_string('arlosettings', 'enrol_arlo');
     $settings = new admin_settingpage('enrolsettingsarlo', $name, 'moodle/site:config', $enrol->is_enabled() === false);
+
+    $name = get_string('arloconnection', 'enrol_arlo');
+    $settings->add(new admin_setting_heading('enrol_arlo/arloconnection', $name, ''));
 
     $settings->add(new configarlostatus('apistatus', get_string('pluginstatus', 'enrol_arlo')));
 
@@ -69,30 +72,8 @@ if ($hassiteconfig) {
     $name = get_string('apipassword', 'enrol_arlo');
     $settings->add(new admin_setting_configpasswordunmask('enrol_arlo/apipassword', $name, $description, ''));
 
-    $description = get_string('onlyactive_desc', 'enrol_arlo');
-    $name = get_string('onlyactive', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
-
-    $description = get_string('disableskip_desc', 'enrol_arlo');
-    $name = get_string('disableskip', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
-
-    $name = get_string('maxretries', 'enrol_arlo');
-    $description = get_string('maxretries_desc', 'enrol_arlo');
-    $settings->add(new admin_setting_configtext('enrol_arlo/retriesperrecord', $name, $description, 5, PARAM_INT));
-
-    $name = get_string('maxretires_email', 'enrol_arlo');
-    $description = get_string('maxretires_email_desc', 'enrol_arlo');
-    $default = 'moodleconnections@arlo.co';
-    $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
-
-    $description = get_string('onlyactive_desc', 'enrol_arlo');
-    $name = get_string('onlyactive', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
-
-    $description = get_string('disableskip_desc', 'enrol_arlo');
-    $name = get_string('disableskip', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
+    $name = get_string('webhooks', 'enrol_arlo');
+    $settings->add(new admin_setting_heading('enrol_arlo/webhooks', $name, ''));
 
     $description = get_string('enablewebhook_desc', 'enrol_arlo');
     $name = get_string('enablewebhook', 'enrol_arlo');
@@ -108,6 +89,34 @@ if ($hassiteconfig) {
         $name = get_string('enable_multisync', 'enrol_arlo');
         $settings->add(new admin_setting_configcheckbox('enrol_arlo/enable_multisync', $name, $description, 0));
     }
+
+    $name = get_string('errorhandling', 'enrol_arlo');
+    $settings->add(new admin_setting_heading('enrol_arlo/errorhandling', $name, ''));
+
+    $name = get_string('retriesperrecord', 'enrol_arlo');
+    $description = get_string('retriesperrecord_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configtext('enrol_arlo/retriesperrecord', $name, $description, 5, PARAM_INT));
+
+    $name = get_string('maxretries', 'enrol_arlo');
+    $description = get_string('maxretries_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configtext('enrol_arlo/maxretries', $name, $description, 500, PARAM_INT));
+
+    $name = get_string('maxretires_email', 'enrol_arlo');
+    $description = get_string('maxretires_email_desc', 'enrol_arlo');
+    $default = 'moodleconnections@arlo.co';
+    $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
+
+    $name = get_string('syncsettings', 'enrol_arlo');
+    $settings->add(new admin_setting_heading('enrol_arlo/syncsettings', $name, ''));
+
+    $description = get_string('onlyactive_desc', 'enrol_arlo');
+    $name = get_string('onlyactive', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
+
+    $description = get_string('disableskip_desc', 'enrol_arlo');
+    $name = get_string('disableskip', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
+
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
         $name = get_string('managearlo', 'enrol_arlo');
