@@ -54,6 +54,7 @@ $string['apiusername_desc'] = 'Important: Your Arlo user account must be API ena
 $string['apipassword'] = 'Arlo password';
 $string['apipassword_desc'] = 'Forgot your password? <a title="{$a->title}" href="{$a->url}" target="_blank">Learn how to reset it.</a>';
 $string['arloconnection'] = 'Arlo connection';
+$string['arlosettings'] = 'Arlo settings';
 $string['arlocontact'] = 'Arlo contact';
 $string['arlocoursecode'] = 'Arlo course code';
 $string['arloenrolment'] = 'Arlo enrolment';
@@ -192,10 +193,12 @@ Will try <strong>Method 1</strong> if no match will then try <strong>Method 2</s
 <p>
 If no match is found using any of the Methods a Moodle user account will be created based on Arlo Contact details.
 </p>';
-$string['maxretries'] = 'Maxiumum retries per record';
-$string['maxretries_desc'] = 'Maximum number of retries per record allowed before halting API communication.';
+$string['retriesperrecord'] = 'Maxiumum retries per record';
+$string['retriesperrecord_desc'] = 'Maximum number of retries per record allowed before halting API communication for that record.';
+$string['maxretries'] = 'Maxiumum retries permitted on the API';
+$string['maxretries_desc'] = 'Maximum number of retries your connection is allowed before halting API communication.';
 $string['maxretires_email'] = 'Maximum retries error email';
-$string['maxretires_email_desc'] = 'The email that error reports are sent to when a user reaches the maximum retires per record.';
+$string['maxretires_email_desc'] = 'The email that error reports are sent to when your connection reaches the maximum retries.';
 $string['maxretries_exception'] = 'Too many failed attempts, contact your admin.';
 $string['newaccountdetails'] = 'New account details';
 $string['newuserdefaultemail'] = 'New user default email';
@@ -443,16 +446,15 @@ $string['webhooksecret_desc'] = 'Arlo webhook secret for validating webhook requ
 $string['webhookapiurl'] = 'Arlo webhook API URL';
 $string['webhookapiurl_desc'] = 'Arlo webhook API URL for webhook requests.';
 $string['enablewebhook'] = 'Enable webhook';
-$string['enablewebhook_desc'] = 'Enable webhook for Arlo.';
+$string['enablewebhook_desc'] = ' Webhooks allows real-time synchronisation between Arlo and Moodle.';
 $string['useadhoctask'] = 'Use webhook adhoc task';
-$string['useadhoctask_desc'] = 'Use adhoc task for Arlo weebhook events.';
+$string['useadhoctask_desc'] = 'Enable this if you are planning to perform a large synchronisation between Arlo and Moodle (e.g. 100+ records at once).';
 $string['onlyactive'] = 'Only active events';
-$string['onlyactive_desc'] = 'Only process registrations for active events and online activities.';
+$string['onlyactive_desc'] = 'Only process registrations for active Arlo courses and online activities.';
 $string['disableskip'] = 'Disable registration skip';
-$string['disableskip_desc'] = 'Disable the ability to skip process of old registrations(The task will run sync for all registrations even the ones already processed).';
+$string['disableskip_desc'] = 'Disables the ability to skip processing  old registrations (A sync will run for all registrations even the ones already processed).';
 $string['enable_multisync'] = 'Enable multisync';
-$string['enable_multisync_desc'] = 'Enable sync task when webhook is enabled.';
-$string['webhookname'] = 'Arlo webhook name';
+$string['enable_multisync_desc'] = 'When the webhook is enabled the sync is done only trough the webhooks. This setting allows to run the sync through the scheduled task as well.';
 $string['technicalcontact'] = 'Contact email';
 $string['regcreated'] = 'Registration created';
 $string['regupdated'] = 'Registration updated';
@@ -465,6 +467,9 @@ $string['webhookenabled'] = '<div class="alert alert-success" role="alert">Webho
 $string['webhookinactive'] = '<div class="alert alert-warning" role="alert">Webhook not configured or inactive.</div>';
 $string['webhookdisabled'] = '<div class="alert alert-danger" role="alert">Webhook is disabled.</div>';
 $string['webhookstatus'] = 'Webhook status';
+$string['errorhandling'] = 'Error handling';
+$string['syncsettings'] = 'Sync settings';
+$string['webhooks'] = 'Webhooks';
 $string['nomembershipjobfound'] = 'No membership job found for enrolment instance {$a}';
 $string['nooutcomejobfound'] = 'No outcome job found for enrolment instance {$a}';
 $string['api_retry_notification'] = 'API Retry Log Notification';
@@ -475,9 +480,16 @@ $string['redirectcountmaxlimit'] = 'The maximum redirect limit for API requests 
 $string['communication_enabled_message'] = 'Communication has been successfully enabled.';
 $string['communication_disabled_message'] = 'Communication has been disabled.';
 $string['emailsubject'] = 'Alert: Maximum Retries Reached for PATCH Requests on {$a}';
-$string['emailbody'] = 'Dear {$a->fullname},\n\n' .
-        'The site "{$a->shortname}" ({$a->url}) has reached the maximum number of retries ({$a->maxretries}) for registration PATCH requests.\n' .
-        'Please review the issue as soon as possible.\n' .
-        'Report: {$a->reportlink}\n\n' .
-        'Regards,\nMoodle System';
+$string['emailbody'] = 'Dear {$a->fullname},<br>' .
+        'The site "{$a->shortname}" {$a->url} has reached the maximum number of retries {$a->maxretries} for registration PATCH requests.<br>' .
+        'Please review the issue as soon as possible.<br>' .
+        'Report: {$a->reportlink}<br>' .
+        'Regards,<br>Moodle System';
 $string['notifymaxredirects'] = 'Notify on maximum redirects';
+$string['enablecommunication'] = 'Re-stablish communication';
+$string['resetredirects'] = 'Reset all fail counters';
+$string['resetretries_message'] = 'The retries for registration PATCH requests have been reset.';
+$string['retry_sync'] = 'Retry sync';
+$string['connectionstatus'] = '<span>Connection Status: </span>';
+$string['apifails'] = '<span>Global API fails: </span>';
+
