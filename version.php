@@ -34,3 +34,4 @@ $plugin->component = 'enrol_arlo';      // Full name of the plugin (used for dia
 $plugin->release   = '4.1.9';          // Human-friendly version name.
 $plugin->maturity  = MATURITY_STABLE;   // This version's maturity level.
 $plugin->dependencies = [];
+$plugin->supported = [401,403,404];     // Supported Moodle versions.
