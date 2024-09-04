@@ -24,7 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/vendor/autoload.php');
+if (!class_exists('GuzzleHttp\Client')) {
+    require_once(__DIR__ . '/vendor/autoload.php');
+}
+
 require_once($CFG->dirroot . '/group/lib.php');
 
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
