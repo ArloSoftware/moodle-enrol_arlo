@@ -51,16 +51,16 @@ class user_persistent extends persistent {
 
     protected static function define_properties() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
-        return  [
+        return [
             'auth' => [
                 'type' => PARAM_TEXT,
-                'default' => function() use($pluginconfig) {
+                'default' => function () use ($pluginconfig) {
                     return $pluginconfig->get('authplugin');
                 }
             ],
             'mnethostid' => [
                 'type' => PARAM_INT,
-                'default' => function() {
+                'default' => function () {
                     return get_config('core', 'mnet_localhost_id');
                 }
             ],
@@ -156,6 +156,14 @@ class user_persistent extends persistent {
             'lastaccess' => [
                 'type' => PARAM_INT,
                 'default' => 0
+            ],
+            'profile_field_BirthDate' => [
+                'type' => PARAM_TEXT,
+                'default' => 0
+            ],
+            'profile_field_passportnumber' => [
+                'type' => PARAM_TEXT,
+                'default' => ''
             ]
         ];
     }
@@ -310,6 +318,12 @@ class user_persistent extends persistent {
         }
         return $this->raw_set('idnumber', $value);
     }
+    protected function set_profile_field_BirthDate($value) {
+        return $this->raw_set('profile_field_BirthDate', $value);
+    }
+    protected function set_profile_field_passportnumber($value) {
+        return $this->raw_set('profile_field_passportnumber', $value);
+    }
 
     /**
      * Deleted property is read-only.
@@ -374,7 +388,7 @@ class user_persistent extends persistent {
         $params = ['siteid' => SITEID, 'userid' => $userid];
         if ($onlyactive) {
             $subwhere = "WHERE ue.status = :active AND e.status = :enabled";
-            $params['active']  = ENROL_USER_ACTIVE;
+            $params['active'] = ENROL_USER_ACTIVE;
             $params['enabled'] = ENROL_INSTANCE_ENABLED;
         } else {
             $subwhere = "";
@@ -423,7 +437,7 @@ class user_persistent extends persistent {
         $subwheres = [];
         if ($onlyactive) {
             $subwheres[] = "ue.status = :active AND e.status = :enabled";
-            $params['active']  = ENROL_USER_ACTIVE;
+            $params['active'] = ENROL_USER_ACTIVE;
             $params['enabled'] = ENROL_INSTANCE_ENABLED;
         }
         if ($onlyarlo) {
@@ -434,11 +448,11 @@ class user_persistent extends persistent {
         if ($subwheres) {
             $subwhere = "WHERE " . implode(" AND ", $subwheres);
         }
-        $coursefields = 'c.' .join(',c.', $coursefields);
+        $coursefields = 'c.' . join(',c.', $coursefields);
         $ccselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
         $ccjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = :contextlevel)";
         $params['contextlevel'] = CONTEXT_COURSE;
-        $params['ulauserid']  = $userid;
+        $params['ulauserid'] = $userid;
         // SQL sub select due to Oracle and MS limitations.
         $sql = "SELECT $coursefields $ccselect, ula.timeaccess
                   FROM {course} c
@@ -556,6 +570,8 @@ class user_persistent extends persistent {
         unset($record->timecreated);
 
         require_once($CFG->dirroot . '/user/lib.php');
+        require_once($CFG->dirroot . '/user/profile/lib.php');
+        profile_save_data($record);
         // Save the record.
         $result = user_update_user($record, true, false);
 

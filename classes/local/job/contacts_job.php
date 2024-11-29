@@ -39,6 +39,9 @@ use enrol_arlo\local\response_processor;
 use GuzzleHttp\Psr7\Request;
 use coding_exception;
 use moodle_exception;
+use enrol_arlo\Arlo\AuthAPI\XmlDeserializer;
+use DOMDocument;
+use enrol_arlo\Arlo\AuthAPI\Resource\Field;
 
 /**
  * Job using to update contact information. Updates contacts in an active enrolment instance.
@@ -73,7 +76,59 @@ class contacts_job extends job {
         $plugin = api::get_enrolment_plugin();
         $this->enrolmentinstance = $plugin::get_instance_record($jobpersistent->get('instanceid'));
     }
+    /**
+     * Process the custom fields of a contact and return the filtered results.
+     * 
+     * @param \enrol_arlo\Arlo\AuthAPI\Resource\Contact $contactresource
+     * @param array $filterfields
+     * @return array
+     * @throws moodle_exception
+     */
+    public function process_customfields_for_contact($contactresource, $filterfields = ['BirthDate', 'passportnumber']) {
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $uri = new RequestUri();
+        $uri->setHost($pluginconfig->get('platform'));
+        $uri->setResourcePath('contacts/' . $contactresource->ContactID . '/customfields');
+        $request = new Request('GET', $uri->output(true));
+        $response = client::get_instance()->send_request($request);
+        $statuscode = $response->getStatusCode();
+        if ($statuscode != 200) {
+            throw new moodle_exception('httpstatus:' . $statuscode);
+        }
+        $contenttype = $response->getHeaderLine('content-type');
+        if (strpos($contenttype, 'application/xml') === false) {
+            throw new moodle_exception('httpstatus:415', 'enrol_arlo');
+        }
+        $deserializer = new XmlDeserializer("enrol_arlo\\Arlo\\AuthAPI\\Resource\\");
+        $stream = $response->getBody();
+        $contents = $stream->getContents();
+        if ($stream->eof()) {
+            $stream->rewind();
+        }
+        $doc = new DOMDocument();
+        $doc->loadXML($contents);
 
+        $fields = $doc->getElementsByTagName('Field');
+
+        foreach ($fields as $field) {
+            $name = $field->getElementsByTagName('Name')->item(0)->nodeValue;
+            $value = $field->getElementsByTagName('Value')->item(0)->nodeValue;
+            $field_resource = new Field();
+            if (!empty($filterfields) && !in_array($name, $filterfields)) {
+                continue;
+            }
+            $field_resource->Name = $name;
+            $field_resource->Value = $value;
+            $fieldResources[] = $field_resource;
+            // Store the name and value in the Field Resource
+            // ...
+        }
+        // $content looks like <CustomFields><Field><Name><Value></Field><Field><Name><Value></Field>
+        // Process each field's name and value and store it in the Field Resource.
+
+        return $fieldResources;
+    }
     /**
      * Check if config allows this job to be processed.
      *
@@ -134,7 +189,8 @@ class contacts_job extends job {
                     $uri->setPagingTop(250);
                     $uri->setResourcePath($jobpersistent->get('endpoint'));
                     $uri->addExpand('Registration/Contact');
-                    $filter = "Contact/LastModifiedDateTime gt datetime('". $jobpersistent->get('lastsourcetimemodified') ."')";
+                    //$uri->addExpand('Registration/CustomFields');
+                    $filter = "Contact/LastModifiedDateTime gt datetime('" . $jobpersistent->get('lastsourcetimemodified') . "')";
                     $uri->setFilterBy($filter);
                     $uri->setOrderBy('Contact/LastModifiedDateTime ASC');
                     $request = new Request('GET', $uri->output(true));
@@ -151,6 +207,9 @@ class contacts_job extends job {
                                 if (empty($contactresource)) {
                                     throw new coding_exception(get_string('contactresourcemissing', 'enrol_arlo'));
                                 }
+                                // From the contactresource run another api call and get the custom fields.
+                                $customfields = $this->process_customfields_for_contact($contactresource);
+
                                 $sourceguid = $contactresource->UniqueIdentifier;
                                 $contact = contact_persistent::get_record(['sourceguid' => $sourceguid]);
                                 if (!$contact || ($contact->get('userid') <= 0)) {
@@ -195,7 +254,16 @@ class contacts_job extends job {
                                 $user->set('email', $contact->get('email'));
                                 $user->set('phone1', $contact->get('phonemobile'));
                                 $user->set('phone2', $contact->get('phonework'));
+                                // Update the custom fields here.
+                                foreach ($customfields as $customfield) {
+                                    //if Name is BirthDate, then try and convert it to unixtime.
+                                    if ($customfield->Name == 'BirthDate') {
+                                        $customfield->Value = strtotime($customfield->Value);
+                                    }
+                                    $user->set('profile_field_' . $customfield->Name, $customfield->Value);
+                                }
                                 $user->update();
+                                $user->update_user();
                                 // Clear errors on contact and update.
                                 $contact->set('errormessage', '');
                                 $contact->set('errorcounter', 0);
