@@ -44,6 +44,7 @@ class configuration extends \moodleform {
         $options[user_matching::MATCH_BY_USER_DETAILS] = get_string('matchbyarlouserdetails', 'enrol_arlo');
         $options[user_matching::MATCH_BY_CODE_PRIMARY] = get_string('matchbyarlocodeprimary', 'enrol_arlo');
         $options[user_matching::MATCH_BY_AUTO] = get_string('matchbyauto', 'enrol_arlo');
+        $options[user_matching::MATCH_BY_USER_EMAIL] = get_string('matchbyemail', 'enrol_arlo');
 
         $form->addElement('header', 'useraccountmatching', get_string('useraccountmatching', 'enrol_arlo'));
         $form->setExpanded('useraccountmatching', true);

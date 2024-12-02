@@ -35,6 +35,10 @@ class user_matching {
     /** @var int MATCH_BY_AUTO match using MATCH_BY_USER_DETAILS then MATCH_BY_CODE_PRIMARY */
     const MATCH_BY_AUTO = 3;
 
+    /** @var MATCH_BY_USER_EMAIL match by email */
+    const MATCH_BY_USER_EMAIL = 4;
+
     /** @var int MATCH_BY_DEFAULT default user match method to use. */
     const MATCH_BY_DEFAULT = 2;
+
 }
