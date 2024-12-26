@@ -51,9 +51,6 @@ abstract class job {
     /** @var int TIME_LOCK_TIMEOUT time in seconds to wait for a lock before giving up. */
     const TIME_LOCK_TIMEOUT = 5; // 5 Seconds.
 
-    /** @var int TIME_LOCK_OUTCOMEJOB time in seconds to wait for a lock before giving up. */
-    const TIME_LOCK_OUTCOMEJOB = 600; // 600 Seconds.
-
     /** @var string area */
     const AREA = null;
 

@@ -25,24 +25,21 @@
 
 namespace enrol_arlo\local\job;
 
+use enrol_arlo\local\persistent\job_persistent;
+use stdClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 use core_user;
 use enrol_arlo\api;
 use enrol_arlo\local\external;
 use enrol_arlo\local\learner_progress;
-use enrol_arlo\manager;
 use enrol_arlo\persistent;
-use enrol_arlo\Arlo\AuthAPI\RequestUri;
-use enrol_arlo\local\client;
 use enrol_arlo\local\enum\arlo_type;
-use enrol_arlo\local\administrator_notification;
 use enrol_arlo\local\persistent\retry_log_persistent;
 use enrol_arlo\local\persistent\registration_persistent;
-use enrol_arlo\result;
+use enrol_arlo\task\outcome_adhoc;
 use Exception;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Psr7\Request;
 use coding_exception;
 use moodle_exception;
 
@@ -147,7 +144,7 @@ class outcomes_job extends job {
         $plugin = api::get_enrolment_plugin();
         $pluginconfig = $plugin->get_plugin_config();
         $lockfactory = static::get_lock_factory();
-        $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_OUTCOMEJOB);
+        $lock = $lockfactory->get_lock($this->get_lock_resource(), self::TIME_LOCK_TIMEOUT);
         if ($lock) {
             try {
                 $limit = $pluginconfig->get('outcomejobdefaultlimit');
@@ -155,7 +152,6 @@ class outcomes_job extends job {
                     ['enrolid' => $enrolmentinstance->id, 'updatesource' => 1],
                     'timelastrequest', 'ASC', 0, $limit
                 );
-                $course = get_course($enrolmentinstance->courseid);
             } catch (Exception $exception) {
                 // Update scheduling information on persistent after successfull save.
                 $jobpersistent->set('timelastrequest', time());
@@ -171,74 +167,12 @@ class outcomes_job extends job {
                 $jobpersistent->save();
             } else {
                 foreach ($registrations as $registrationpersistent) {
-                    $user = core_user::get_user($registrationpersistent->get('userid'));
-                    $apiretryerrorpt1 = get_string('apiretryerrorpt1', 'enrol_arlo');
-                    $apiretryerrorpt2 = get_string('apiretryerrorpt2', 'enrol_arlo');
-                    $recordcounter = $registrationpersistent->get('redirectcounter');
-                    $maxrecordretries = $pluginconfig->get('retriesperrecord');
-                    if ($recordcounter >= $maxrecordretries) {
-                        // Display retry error to admin on job page
-                        $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
-                    } else {
-                        try {
-                            if (!$user) {
-                                throw new moodle_exception('moodleaccountdoesnotexist');
-                            }
-                            $registrationid = $registrationpersistent->get('sourceid');
-                            $sourceregistration = external::get_registration_resource($registrationid);
-                            $learnerprogress = new learner_progress($course, $user);
-                            $data = $learnerprogress->get_keyed_data_for_arlo();
-                            if (!empty($data)) {
-                                $this->trace->output(implode(',', $data));
-                                external::patch_registration_resource($sourceregistration, $data);
-                                // Check API status code. If it's a 3xx, increment the registration and global retry counter.
-                                // Now we count the errors 4xx and 5xx globally, but we don't increase the registration retry counter.
-                                $apistatus = $pluginconfig->get('apistatus');
-                                if ($apistatus >= 300 && $apistatus <= 599) {
-                                    $pluginredirectcount = $pluginconfig->get('redirectcount') + 1;
-                                    $pluginconfig->set('redirectcount', $pluginredirectcount);
-                                    $pluginmaxredirects = $pluginconfig->get('maxretries');
-                                    if ($apistatus <= 399) {
-                                        $recordcounter++;
-                                        $registrationpersistent->set('redirectcounter', $recordcounter);
-                                        if (!empty($maxrecordretries) && $recordcounter >= $maxrecordretries) {
-                                            // Display retry error to admin on job page
-                                            $this->trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
-                                            // Create and save a log of the failure
-                                            $retrylog = new retry_log_persistent();
-                                            $retrylog->set('timelogged', time());
-                                            $retrylog->set('userid', $user->id);
-                                            $retrylog->set('participantname', "$user->lastname, $user->firstname");
-                                            $retrylog->set('courseid', $course->id);
-                                            $retrylog->set('coursename', $course->fullname);
-                                            $retrylog->save();
-                                        }
-                                    }
-                                    // We have reached the maximum number of errors allowed. Disable communication.
-                                    if (!empty($pluginmaxredirects) && $pluginredirectcount >= $pluginmaxredirects) {
-                                        $pluginconfig->set('enablecommunication', 0);
-                                    }
-                                } else {
-                                    if ($recordcounter > 0) {
-                                        $registrationpersistent->set('redirectcounter', 0);
-                                    }
-                                    $pluginconfig->set('redirectcount', 0);
-                                }
-                                $apistatus == 200 ? $registrationpersistent->set('updatesource', 0) : null;
-                                $registrationpersistent->set('timelastrequest', time());
-                                $registrationpersistent->save();
-                            }
-                        } catch (Exception $exception) {
-                            debugging($exception->getMessage(), DEBUG_DEVELOPER);
-                            $this->add_error($exception->getMessage());
-                            $registrationpersistent->set('errormessage', $exception->getMessage());
-                        } finally {
-                            // Update scheduling information on persistent after successfull save.
-                            $jobpersistent->set('timelastrequest', time());
-                            $jobpersistent->save();
-                            // DO NOT release lock here. This is a foreach loop!
-                        }
-                    }
+                    $registrationinfo = new stdClass();
+                    $registrationinfo->id = $registrationpersistent->get('id');
+                    $registrationinfo->courseid = $enrolmentinstance->courseid;
+                    $outcomeadhoctask = new outcome_adhoc();
+                    $outcomeadhoctask->set_custom_data($registrationinfo);
+                    \core\task\manager::queue_adhoc_task($outcomeadhoctask);
                 }
             }
             $lock->release();
@@ -247,6 +181,105 @@ class outcomes_job extends job {
             // Job may not have completed in time. Just return false.
             $this->add_error('locktimeout');
             return false;
+        }
+    }
+
+    /**
+     * Process a single outcome.
+     *
+     * @param stdClass $registrationinfo
+     * @param progress_trace $trace
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function process_single_outcome($registrationinfo, $trace) {
+        global $DB;
+       
+        $course = get_course($registrationinfo->courseid);
+        $registrationid = $registrationinfo->id;
+        $plugin = api::get_enrolment_plugin();
+        $pluginconfig = $plugin->get_plugin_config();
+        $registrationpersistent = new registration_persistent($registrationid);
+        $user = core_user::get_user($registrationpersistent->get('userid'));
+        $apiretryerrorpt1 = get_string('apiretryerrorpt1', 'enrol_arlo');
+        $apiretryerrorpt2 = get_string('apiretryerrorpt2', 'enrol_arlo');
+        $recordcounter = $registrationpersistent->get('redirectcounter');
+        $maxrecordretries = $pluginconfig->get('retriesperrecord');
+
+        if ($recordcounter >= $maxrecordretries) {
+            // Display retry error to admin on job page
+            $trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
+        } else {
+            try {
+                if (!$user) {
+                    throw new moodle_exception('moodleaccountdoesnotexist');
+                }
+                $registrationid = $registrationpersistent->get('sourceid');
+                $sourceregistration = external::get_registration_resource($registrationid);
+
+                $learnerprogress = new learner_progress($course, $user);
+                $data = $learnerprogress->get_keyed_data_for_arlo();
+
+                if (!empty($data)) {
+                    $trace->output(implode(',', $data));
+                    external::patch_registration_resource($sourceregistration, $data);
+                    // Check API status code. If it's a 3xx, increment the registration and global retry counter.
+                    // Now we count the errors 4xx and 5xx globally, but we don't increase the registration retry counter.
+                    $apistatus = $pluginconfig->get('apistatus');
+                    if ($apistatus >= 300 && $apistatus <= 599) {
+                        $pluginredirectcount = $pluginconfig->get('redirectcount') + 1;
+                        $pluginconfig->set('redirectcount', $pluginredirectcount);
+                        $pluginmaxredirects = $pluginconfig->get('maxretries');
+                        if ($apistatus <= 399) {
+                            $recordcounter++;
+                            $registrationpersistent->set('redirectcounter', $recordcounter);
+                            if (!empty($maxrecordretries) && $recordcounter >= $maxrecordretries) {
+                                // Display retry error to admin on job page
+                                $trace->output("$apiretryerrorpt1 $user->id $apiretryerrorpt2");
+                                // Create and save a log of the failure
+                                $retrylog = new retry_log_persistent();
+                                $retrylog->set('timelogged', time());
+                                $retrylog->set('userid', $user->id);
+                                $retrylog->set('participantname', "$user->lastname, $user->firstname");
+                                $retrylog->set('courseid', $course->id);
+                                $retrylog->set('coursename', $course->fullname);
+                                $retrylog->save();
+                            }
+                        }
+                        // We have reached the maximum number of errors allowed. Disable communication.
+                        if (!empty($pluginmaxredirects) && $pluginredirectcount >= $pluginmaxredirects) {
+                            $pluginconfig->set('enablecommunication', 0);
+                        }
+                    } else {
+                        if ($recordcounter > 0) {
+                            $registrationpersistent->set('redirectcounter', 0);
+                        }
+                        $pluginconfig->set('redirectcount', 0);
+                    }
+                    $apistatus == 200 ? $registrationpersistent->set('updatesource', 0) : null;
+                    $registrationpersistent->set('timelastrequest', time());
+                    $registrationpersistent->save();
+                }
+            } catch (Exception $exception) {
+                debugging($exception->getMessage(), DEBUG_DEVELOPER);
+                $registrationpersistent->set('errormessage', $exception->getMessage());
+            } finally {
+                $sql = "SELECT *
+                          FROM {enrol_arlo_scheduledjob}
+                         WHERE area = :area
+                               AND type = :type
+                               AND disabled <> :disabled";
+                $conditions = [
+                    'area' => 'enrolment',
+                    'type' => 'outcomes',
+                    'disabled' => 1,
+                ];
+                $job = $DB->get_record_sql($sql, $conditions);
+                // Update scheduling information on persistent after successfull save.
+                $jobpersistent = new job_persistent(0, $job);
+                $jobpersistent->set('timelastrequest', time());
+                $jobpersistent->save();
+            }
         }
     }
 }
