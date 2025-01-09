@@ -5,7 +5,7 @@ import {get_string as getString} from 'core/str';
 export const init = (linkSelector, formClass) => {
     let syncbutton = document.querySelector(linkSelector);
 
-    syncbutton.addEventListener('click', async (e) => {
+    syncbutton.addEventListener('click', async(e) => {
         e.preventDefault();
 
         const form = new ModalForm(({
