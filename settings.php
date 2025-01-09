@@ -106,6 +106,10 @@ if ($hassiteconfig) {
     $default = 'moodleconnections@arlo.co';
     $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
 
+    $name = get_string('resetregretries', 'enrol_arlo');
+    $description = get_string('resetregretries_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/resetregretries', $name, $description, 0));
+
     $name = get_string('syncsettings', 'enrol_arlo');
     $settings->add(new admin_setting_heading('enrol_arlo/syncsettings', $name, ''));
 

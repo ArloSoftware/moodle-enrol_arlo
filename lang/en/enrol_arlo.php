@@ -496,3 +496,6 @@ $string['syncsince'] = 'Sync since';
 $string['syncsince_help'] = 'Sync registrations since selected date.';
 $string['invalidstartdate'] = 'Date must be in the past';
 $string['taskqueued'] = 'Syncronisation task has been queued.';
+$string['resetregretries'] = 'Reset registration retries';
+$string['resetregretries_desc'] = 'Reset registration retries error counter along with the overall error counter.';
+$string['reset_retries_task'] = 'Reset registration retries';

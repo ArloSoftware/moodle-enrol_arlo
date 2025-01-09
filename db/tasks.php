@@ -84,5 +84,15 @@ $tasks = [
         'day' => '*',
         'month' => '*',
         'dayofweek' => '*',
-    ]
+    ],
+    [
+        'classname' => 'enrol_arlo\task\reset_retries_task',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '0',
+        'day' => '*',
+        'dayofweek' => '1',
+        'month' => '*',
+        'disabled' => 0
+    ],
 ];
