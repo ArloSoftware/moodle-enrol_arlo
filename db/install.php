@@ -36,6 +36,9 @@ function xmldb_enrol_arlo_install() {
         $enabled[] = 'arlo';
     }
     set_config('enrol_plugins_enabled', implode(',', $enabled));
+    //Adding this as a default setting.
+    set_config('onlyactive', 1, plugin: 'enrol_arlo');
+    set_config('enable_multisync', 1, 'enrol_arlo');
     core_plugin_manager::reset_caches();
     context_system::instance()->mark_dirty(); // Resets all enrol caches.
     return true;
