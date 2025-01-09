@@ -84,10 +84,6 @@ if ($hassiteconfig) {
         $description = get_string('useadhoctask_desc', 'enrol_arlo');
         $name = get_string('useadhoctask', 'enrol_arlo');
         $settings->add(new admin_setting_configcheckbox('enrol_arlo/useadhoctask', $name, $description, 0));
-
-        $description = get_string('enable_multisync_desc', 'enrol_arlo');
-        $name = get_string('enable_multisync', 'enrol_arlo');
-        $settings->add(new admin_setting_configcheckbox('enrol_arlo/enable_multisync', $name, $description, 0));
     }
 
     $name = get_string('errorhandling', 'enrol_arlo');
