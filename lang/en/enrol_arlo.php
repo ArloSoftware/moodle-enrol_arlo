@@ -499,3 +499,5 @@ $string['taskqueued'] = 'Syncronisation task has been queued.';
 $string['resetregretries'] = 'Reset registration retries';
 $string['resetregretries_desc'] = 'Reset registration retries error counter along with the overall error counter.';
 $string['reset_retries_task'] = 'Reset registration retries';
+$string['enrolmentstaskadhoc'] = 'Create and update enrolments based off Arlo registration information';
+$string['outcomesadhoctask'] = 'Push outcome and process information to Arlo registrations';
