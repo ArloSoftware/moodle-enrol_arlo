@@ -26,6 +26,7 @@
 use enrol_arlo\api;
 use enrol_arlo\local\tablesql\apiretries;
 use enrol_arlo\adminsettings\configarlostatus;
+use enrol_arlo\form\syncold;
 
 require_once(__DIR__ . '/../../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
@@ -36,6 +37,7 @@ admin_externalpage_setup('enrolsettingsarloapiretries');
 $action = optional_param('action', null, PARAM_ALPHA);
 $course = optional_param('course', null, PARAM_INT);
 $regid = optional_param('regid', null, PARAM_INT);
+$message = optional_param('message', null, PARAM_TEXT);
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('apiretries', 'enrol_arlo'));
@@ -48,6 +50,10 @@ echo get_string('connectionstatus', 'enrol_arlo') . $arlostatus;
 
 if (empty($pluginconfig->get('enablecommunication'))) {
     echo $OUTPUT->single_button(new moodle_url($PAGE->url, ['action' => 'enablecommunication']), get_string('enablecommunication', 'enrol_arlo'));
+}
+
+if (!enrol_arlo_sync_adhoc_queued()) {
+    echo $OUTPUT->single_button('', get_string('synoldreg', 'enrol_arlo'), '', ['data-action' => 'syncold']);
 }
 
 if (!empty($pluginconfig->get('redirectcount'))) {
@@ -72,6 +78,10 @@ if ($action === 'updateall' && !empty($course)) {
 }
 
 $report = new apiretries('enrolsettingsarloapiretries');
+if ($message) {
+    echo $OUTPUT->notification(get_string($message, 'enrol_arlo'), \core\output\notification::NOTIFY_INFO);
+}
 $report->out(apiretries::PAGINATION_MAX_LIMIT, false);
+$PAGE->requires->js_call_amd('enrol_arlo/syncold', 'init', ['[data-action="syncold"]', syncold::class]);
 
 echo $OUTPUT->footer();

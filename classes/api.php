@@ -453,7 +453,6 @@ class api {
             }
         }
 
-        
         if (!empty($outcomesjobpersistent)) {
             $outcomesjob = \enrol_arlo\local\factory\job_factory::create_from_persistent($outcomesjobpersistent);
             $outcomestatus = $outcomesjob->run();

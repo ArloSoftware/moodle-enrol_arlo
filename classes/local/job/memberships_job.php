@@ -247,7 +247,7 @@ class memberships_job extends job {
      * @return bool
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public static function sync_memberships($trace) {
+    public static function sync_memberships($trace, $timetosync = null) {
         global $DB;
 
         $plugin = api::get_enrolment_plugin();
@@ -294,14 +294,13 @@ class memberships_job extends job {
             // adjusting and the filter each call so we get all records and don't end up
             // getting same 250 each call.
             $hasnext = true;
-            $disableskip = get_config('enrol_arlo', 'disableskip');
-            $lastime = empty($disableskip) ? get_config('enrol_arlo', 'lastregtimemodified') : date('c', 0); 
-            $lastregid = empty($disableskip) ? get_config('enrol_arlo', 'lastregid') : 0;
+            $lastime = empty($timetosync) ? get_config('enrol_arlo', 'lastregtimemodified') : date('c', $timetosync);
+            $lastregid = empty($timetosync) ? get_config('enrol_arlo', 'lastregid') : 0;
             while ($hasnext) {
                 $hasnext = false; // Break paging by default.
                 // Update contact merge requests records every page.
                 $contactmergerequestsjob = job_factory::get_job(['type' => 'contact_merge_requests']);
-                $contactmergerequestsjob->run();
+                $contactmergerequestsjob->run($timetosync);
                 $uri = new RequestUri();
                 $uri->setHost($pluginconfig->get('platform'));
                 $uri->setResourcePath('registrations/');
