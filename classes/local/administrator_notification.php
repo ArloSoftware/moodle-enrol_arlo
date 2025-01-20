@@ -145,22 +145,22 @@ class administrator_notification {
         }
         $url = new moodle_url('/user/profile.php', ['id' => $usersuspended->id]);
         $params = ['fullname' => fullname($usersuspended), 'profileurl' => $url->out()];
-            $message                    = new message();
-            $message->component         = 'enrol_arlo';
-            $message->name              = 'administratornotification';
-            $message->userfrom          = core_user::get_noreply_user();
-            $message->userto            = $admin;
-            $message->subject           = get_string('suspendeduser_subject', 'enrol_arlo');
-            $message->fullmessage       = get_string('suspendeduser_fullmessage', 'enrol_arlo', $params);
-            $message->fullmessageformat = FORMAT_PLAIN;
-            $message->fullmessagehtml   = get_string('suspendeduser_fullmessagehtml', 'enrol_arlo', $params);
-            $message->smallmessage      = get_string('suspendeduser_smallmessage', 'enrol_arlo', $params);
-            $message->notification      = 1;
-            if ($extendedproperties) {
-                $message->courseid          = SITEID;
-                $message->contexturl        = $url->out();
-                $message->contexturlname    = get_string('browseuserprofile', 'enrol_arlo');
-            }
-            message_send($message);
+        $message                    = new message();
+        $message->component         = 'enrol_arlo';
+        $message->name              = 'administratornotification';
+        $message->userfrom          = core_user::get_noreply_user();
+        $message->userto            = $erroremail;
+        $message->subject           = get_string('suspendeduser_subject', 'enrol_arlo');
+        $message->fullmessage       = get_string('suspendeduser_fullmessage', 'enrol_arlo', $params);
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml   = get_string('suspendeduser_fullmessagehtml', 'enrol_arlo', $params);
+        $message->smallmessage      = get_string('suspendeduser_smallmessage', 'enrol_arlo', $params);
+        $message->notification      = 1;
+        if ($extendedproperties) {
+            $message->courseid          = SITEID;
+            $message->contexturl        = $url->out();
+            $message->contexturlname    = get_string('browseuserprofile', 'enrol_arlo');
         }
+        message_send($message);
+    }
 }
