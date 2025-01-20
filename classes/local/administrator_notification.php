@@ -61,8 +61,8 @@ class administrator_notification {
      * @throws \moodle_exception
      */
     public static function send_unsuccessful_enrolment_message() {
-        $admins = get_admins();
-        if (empty($admins)) {
+        $erroremail = get_config('enrol_arlo', 'apierroremail');
+        if (empty($getemail)) {
             return;
         }
         $extendedproperties = true;
@@ -71,25 +71,23 @@ class administrator_notification {
         }
         $url = new moodle_url('/enrol/arlo/admin/unsuccessfulenrolments.php');
         $params = ['report' => $url->out()];
-        foreach ($admins as $admin) {
-            $message                    = new message();
-            $message->component         = 'enrol_arlo';
-            $message->name              = 'administratornotification';
-            $message->userfrom          = core_user::get_noreply_user();
-            $message->userto            = $admin;
-            $message->subject           = get_string('unsuccessfulenrolment_subject', 'enrol_arlo');
-            $message->fullmessage       = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', $params);
-            $message->fullmessageformat = FORMAT_PLAIN;
-            $message->fullmessagehtml   = get_string('unsuccessfulenrolment_fullmessagehtml', 'enrol_arlo', $params);
-            $message->smallmessage      = get_string('unsuccessfulenrolment_smallmessage', 'enrol_arlo', $params);
-            $message->notification      = 1;
-            if ($extendedproperties) {
-                $message->courseid          = SITEID;
-                $message->contexturl        = $url;
-                $message->contexturlname    = 'Report';
-            }
-            message_send($message);
+        $message                    = new message();
+        $message->component         = 'enrol_arlo';
+        $message->name              = 'administratornotification';
+        $message->userfrom          = core_user::get_noreply_user();
+        $message->userto            = $erroremail;
+        $message->subject           = get_string('unsuccessfulenrolment_subject', 'enrol_arlo');
+        $message->fullmessage       = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', $params);
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml   = get_string('unsuccessfulenrolment_fullmessagehtml', 'enrol_arlo', $params);
+        $message->smallmessage      = get_string('unsuccessfulenrolment_smallmessage', 'enrol_arlo', $params);
+        $message->notification      = 1;
+        if ($extendedproperties) {
+            $message->courseid          = SITEID;
+            $message->contexturl        = $url;
+            $message->contexturlname    = 'Report';
         }
+        message_send($message);
     }
 
     /**
@@ -99,8 +97,8 @@ class administrator_notification {
      * @throws \moodle_exception
      */
     public static function send_invalid_credentials_message() {
-        $admins = get_admins();
-        if (empty($admins)) {
+
+        if (empty($erroremail)) {
             return;
         }
         $extendedproperties = true;
@@ -109,25 +107,24 @@ class administrator_notification {
         }
         $url = new moodle_url('/admin/settings.php', ['section' => 'enrolsettingsarlo']);
         $params = ['url' => $url->out()];
-        foreach ($admins as $admin) {
-            $message                    = new message();
-            $message->component         = 'enrol_arlo';
-            $message->name              = 'administratornotification';
-            $message->userfrom          = core_user::get_noreply_user();
-            $message->userto            = $admin;
-            $message->subject           = get_string('invalidcredentials_subject', 'enrol_arlo');
-            $message->fullmessage       = get_string('invalidcredentials_fullmessage', 'enrol_arlo', $params);
-            $message->fullmessageformat = FORMAT_PLAIN;
-            $message->fullmessagehtml   = get_string('invalidcredentials_fullmessagehtml', 'enrol_arlo', $params);
-            $message->smallmessage      = get_string('invalidcredentials_smallmessage', 'enrol_arlo', $params);
-            $message->notification      = 1;
-            if ($extendedproperties) {
-                $message->courseid          = SITEID;
-                $message->contexturl        = $url;
-                $message->contexturlname    = 'Connection';
-            }
-            message_send($message);
+
+        $message                    = new message();
+        $message->component         = 'enrol_arlo';
+        $message->name              = 'administratornotification';
+        $message->userfrom          = core_user::get_noreply_user();
+        $message->userto            = $erroremail;
+        $message->subject           = get_string('invalidcredentials_subject', 'enrol_arlo');
+        $message->fullmessage       = get_string('invalidcredentials_fullmessage', 'enrol_arlo', $params);
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml   = get_string('invalidcredentials_fullmessagehtml', 'enrol_arlo', $params);
+        $message->smallmessage      = get_string('invalidcredentials_smallmessage', 'enrol_arlo', $params);
+        $message->notification      = 1;
+        if ($extendedproperties) {
+            $message->courseid          = SITEID;
+            $message->contexturl        = $url;
+            $message->contexturlname    = 'Connection';
         }
+        message_send($message);
     }
 
     /**
@@ -138,8 +135,8 @@ class administrator_notification {
      * @throws \moodle_exception
      */
     public static function send_user_account_suspended_message(stdClass $usersuspended) {
-        $admins = get_admins();
-        if (empty($admins)) {
+        $erroremail = get_config('enrol_arlo', 'apierroremail');
+        if (empty($erroremail)) {
             return;
         }
         $extendedproperties = true;
@@ -148,7 +145,6 @@ class administrator_notification {
         }
         $url = new moodle_url('/user/profile.php', ['id' => $usersuspended->id]);
         $params = ['fullname' => fullname($usersuspended), 'profileurl' => $url->out()];
-        foreach ($admins as $admin) {
             $message                    = new message();
             $message->component         = 'enrol_arlo';
             $message->name              = 'administratornotification';
@@ -167,6 +163,4 @@ class administrator_notification {
             }
             message_send($message);
         }
-    }
-
 }
