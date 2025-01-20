@@ -62,9 +62,10 @@ class administrator_notification {
      */
     public static function send_unsuccessful_enrolment_message() {
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        if (empty($getemail)) {
+        if (empty($erroremail)) {
             return;
         }
+
         $extendedproperties = true;
         if (moodle_major_version() < 3.4) {
             $extendedproperties = false;
@@ -97,10 +98,11 @@ class administrator_notification {
      * @throws \moodle_exception
      */
     public static function send_invalid_credentials_message() {
-
+        $erroremail = get_config('enrol_arlo', 'apierroremail');
         if (empty($erroremail)) {
             return;
         }
+
         $extendedproperties = true;
         if (moodle_major_version() < 3.4) {
             $extendedproperties = false;
@@ -139,6 +141,7 @@ class administrator_notification {
         if (empty($erroremail)) {
             return;
         }
+
         $extendedproperties = true;
         if (moodle_major_version() < 3.4) {
             $extendedproperties = false;
