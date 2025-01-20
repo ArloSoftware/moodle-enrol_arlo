@@ -36,6 +36,7 @@ use enrol_arlo\api;
 use enrol_arlo\manager;
 use enrol_arlo\persistent;
 use stdClass;
+use enrol_arlo\invalid_persistent_exception;
 
 /**
  * User persistent.
