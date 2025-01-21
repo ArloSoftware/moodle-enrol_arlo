@@ -58,7 +58,7 @@ class api_retry_notification extends \core\task\scheduled_task {
         }
         $user = create_user_for_email($erroremail);
 
-        if (!empty($newentries) || true) {
+        if (!empty($newentries)) {
             // Notify the error email address.
             $plugin = api::get_enrolment_plugin();
             $pluginconfig = $plugin->get_plugin_config();
