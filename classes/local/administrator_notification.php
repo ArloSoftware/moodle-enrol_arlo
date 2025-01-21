@@ -61,8 +61,10 @@ class administrator_notification {
      * @throws \moodle_exception
      */
     public static function send_unsuccessful_enrolment_message() {
+        global $DB;
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        if (empty($erroremail)) {
+        $user = $DB->get_record('user', ['email' => $erroremail]);
+        if (empty($user)) {
             return;
         }
 
@@ -76,7 +78,7 @@ class administrator_notification {
         $message->component         = 'enrol_arlo';
         $message->name              = 'administratornotification';
         $message->userfrom          = core_user::get_noreply_user();
-        $message->userto            = $erroremail;
+        $message->userto            = $user;
         $message->subject           = get_string('unsuccessfulenrolment_subject', 'enrol_arlo');
         $message->fullmessage       = get_string('unsuccessfulenrolment_fullmessage', 'enrol_arlo', $params);
         $message->fullmessageformat = FORMAT_PLAIN;
@@ -88,7 +90,6 @@ class administrator_notification {
             $message->contexturl        = $url;
             $message->contexturlname    = 'Report';
         }
-        message_send($message);
     }
 
     /**
@@ -98,10 +99,13 @@ class administrator_notification {
      * @throws \moodle_exception
      */
     public static function send_invalid_credentials_message() {
+        global $DB;
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        if (empty($erroremail)) {
+        $user = $DB->get_record('user', ['email' => $erroremail]);
+        if (empty($user)) {
             return;
         }
+
 
         $extendedproperties = true;
         if (moodle_major_version() < 3.4) {
@@ -137,8 +141,10 @@ class administrator_notification {
      * @throws \moodle_exception
      */
     public static function send_user_account_suspended_message(stdClass $usersuspended) {
+        global $DB;
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        if (empty($erroremail)) {
+        $user = $DB->get_record('user', ['email' => $erroremail]);
+        if (empty($user)) {
             return;
         }
 
@@ -152,7 +158,7 @@ class administrator_notification {
         $message->component         = 'enrol_arlo';
         $message->name              = 'administratornotification';
         $message->userfrom          = core_user::get_noreply_user();
-        $message->userto            = $erroremail;
+        $message->userto            = $user;
         $message->subject           = get_string('suspendeduser_subject', 'enrol_arlo');
         $message->fullmessage       = get_string('suspendeduser_fullmessage', 'enrol_arlo', $params);
         $message->fullmessageformat = FORMAT_PLAIN;
