@@ -308,7 +308,7 @@ function check_arlo_api_retry_log() {
     return $newentries;
 }
 
-function sendfailurenotification( $admininfo) {
+function sendfailurenotification($admininfo) {
     global $CFG, $SITE;
     $noreplyuser = \core_user::get_noreply_user();
     $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');

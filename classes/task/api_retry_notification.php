@@ -49,19 +49,21 @@ class api_retry_notification extends \core\task\scheduled_task {
     public function execute() {
         global $CFG;
         require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+
         $newentries = check_arlo_api_retry_log();
-        global $DB;
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        $user = $DB->get_record('user', ['email' => $erroremail]);
-        if (empty($user)) {
+        if (empty($erroremail)) {
             return;
         }
-        if (!empty($newentries)) {
+        $user = create_user_for_email($erroremail);
+
+        if (!empty($newentries) || true) {
             // Notify the error email address.
             $plugin = api::get_enrolment_plugin();
             $pluginconfig = $plugin->get_plugin_config();
             if ($pluginconfig->get('enablecommunication') == 0) {
-                sendfailurenotification($admin);
+                sendfailurenotification($user);
             } else {
                 $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
                 $manager = new \enrol_arlo\manager();

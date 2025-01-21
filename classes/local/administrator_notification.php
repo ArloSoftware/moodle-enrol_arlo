@@ -26,6 +26,7 @@ namespace enrol_arlo\local;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot . '/enrol/arlo/lib.php');
 use core_user;
 use core\message\message;
 use moodle_url;
@@ -63,10 +64,10 @@ class administrator_notification {
     public static function send_unsuccessful_enrolment_message() {
         global $DB;
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        $user = $DB->get_record('user', ['email' => $erroremail]);
-        if (empty($user)) {
+        if (empty($erroremail)) {
             return;
         }
+        $user = create_user_for_email($erroremail);
 
         $extendedproperties = true;
         if (moodle_major_version() < 3.4) {
@@ -101,11 +102,10 @@ class administrator_notification {
     public static function send_invalid_credentials_message() {
         global $DB;
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        $user = $DB->get_record('user', ['email' => $erroremail]);
-        if (empty($user)) {
+        if (empty($erroremail)) {
             return;
         }
-
+        $user = create_user_for_email($erroremail);
 
         $extendedproperties = true;
         if (moodle_major_version() < 3.4) {
@@ -118,7 +118,7 @@ class administrator_notification {
         $message->component         = 'enrol_arlo';
         $message->name              = 'administratornotification';
         $message->userfrom          = core_user::get_noreply_user();
-        $message->userto            = $erroremail;
+        $message->userto            = $user;
         $message->subject           = get_string('invalidcredentials_subject', 'enrol_arlo');
         $message->fullmessage       = get_string('invalidcredentials_fullmessage', 'enrol_arlo', $params);
         $message->fullmessageformat = FORMAT_PLAIN;
@@ -143,10 +143,10 @@ class administrator_notification {
     public static function send_user_account_suspended_message(stdClass $usersuspended) {
         global $DB;
         $erroremail = get_config('enrol_arlo', 'apierroremail');
-        $user = $DB->get_record('user', ['email' => $erroremail]);
-        if (empty($user)) {
+        if (empty($erroremail)) {
             return;
         }
+        $user = create_user_for_email($erroremail);
 
         $extendedproperties = true;
         if (moodle_major_version() < 3.4) {
