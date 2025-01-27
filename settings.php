@@ -84,10 +84,6 @@ if ($hassiteconfig) {
         $description = get_string('useadhoctask_desc', 'enrol_arlo');
         $name = get_string('useadhoctask', 'enrol_arlo');
         $settings->add(new admin_setting_configcheckbox('enrol_arlo/useadhoctask', $name, $description, 0));
-
-        $description = get_string('enable_multisync_desc', 'enrol_arlo');
-        $name = get_string('enable_multisync', 'enrol_arlo');
-        $settings->add(new admin_setting_configcheckbox('enrol_arlo/enable_multisync', $name, $description, 0));
     }
 
     $name = get_string('errorhandling', 'enrol_arlo');
@@ -106,16 +102,16 @@ if ($hassiteconfig) {
     $default = 'moodleconnections@arlo.co';
     $settings->add(new configemail('enrol_arlo/apierroremail', $name, $description, $default));
 
+    $name = get_string('resetregretries', 'enrol_arlo');
+    $description = get_string('resetregretries_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/resetregretries', $name, $description, 0));
+
     $name = get_string('syncsettings', 'enrol_arlo');
     $settings->add(new admin_setting_heading('enrol_arlo/syncsettings', $name, ''));
 
     $description = get_string('onlyactive_desc', 'enrol_arlo');
     $name = get_string('onlyactive', 'enrol_arlo');
     $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
-
-    $description = get_string('disableskip_desc', 'enrol_arlo');
-    $name = get_string('disableskip', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
 
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
