@@ -990,3 +990,20 @@ function enrol_arlo_extend_navigation_course($navigation, $course, $context) {
         }
     }
 }
+
+/**
+ * Create a fake user to use on the email_to_user function.
+ *
+ * @param mixed $email
+ * @return stdClass
+ */
+function create_user_for_email($email) {
+    global $DB;
+    $mainadmin = get_admin();
+    $mainadmin->email = $email;
+    $emailname = explode('@', $email);
+    $mainadmin->firstname = $emailname[0];
+    $mainadmin->lastname = $emailname[1];
+
+    return $mainadmin;
+}
