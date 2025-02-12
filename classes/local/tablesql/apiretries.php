@@ -54,6 +54,7 @@ class apiretries extends table_sql {
         $this->is_collapsible = false;
         $this->sort_default_column = 'timelogged';
         $this->sort_default_order  = SORT_DESC;
+        $this->no_sorting('action');
         $this->set_count_sql('SELECT COUNT(*) FROM {enrol_arlo_retrylog}', array());
         $this->set_sql('*', "{enrol_arlo_retrylog}", 'timelogged <> 0');
         $this->pageable(true);
@@ -71,6 +72,9 @@ class apiretries extends table_sql {
                        AND e.courseid = :courseid";
         $params = ['userid' => $values->userid, 'courseid' => $values->courseid];
         $record = $DB->get_record_sql($sql, $params);
+        if (empty($record)) {
+            return '';
+        }
         $retry = get_string('retry_sync', 'enrol_arlo');
         $moodeurl = new \moodle_url('/enrol/arlo/admin/apiretries.php', ['action' => 'resetredirects', 'regid' => $record->id]);
         $maxretries = get_config('enrol_arlo', 'retriesperrecord');
