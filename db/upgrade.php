@@ -634,7 +634,7 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
         set_config('onlyactive', 1, plugin: 'enrol_arlo');
         set_config('enable_multisync', 1, 'enrol_arlo');
 
-        upgrade_plugin_savepoint(true, 2025010900, 'enrol', 'arlo');
+        upgrade_plugin_savepoint(true, 2025010901, 'enrol', 'arlo');
     }
     return true;
 }
