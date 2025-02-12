@@ -111,7 +111,7 @@ if ($hassiteconfig) {
 
     $description = get_string('onlyactive_desc', 'enrol_arlo');
     $name = get_string('onlyactive', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
+    $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 1));
 
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
