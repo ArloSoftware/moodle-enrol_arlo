@@ -387,3 +387,14 @@ function enrol_arlo_update_all_course_registrations($courseid) {
         $DB->update_record('enrol_arlo_registration', $registration);
     }
 }
+
+/**
+ * Check if there are any adhoc syncs queued.
+ *
+ * @return bool
+ */
+function enrol_arlo_sync_adhoc_queued() {
+    global $DB;
+    $sql = "SELECT * FROM {task_adhoc} WHERE classname = '\\enrol_arlo\\task\\enrolments_adhoc'";
+    return $DB->record_exists_sql($sql);
+}

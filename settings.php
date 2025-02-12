@@ -113,10 +113,6 @@ if ($hassiteconfig) {
     $name = get_string('onlyactive', 'enrol_arlo');
     $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 0));
 
-    $description = get_string('disableskip_desc', 'enrol_arlo');
-    $name = get_string('disableskip', 'enrol_arlo');
-    $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableskip', $name, $description, 0));
-
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
         $name = get_string('managearlo', 'enrol_arlo');
