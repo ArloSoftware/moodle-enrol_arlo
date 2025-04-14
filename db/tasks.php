@@ -50,7 +50,7 @@ $tasks = [
         'classname' => 'enrol_arlo\task\outcomes',
         'blocking' => 0,
         'minute' => '*',
-        'hour' => '*',
+        'hour' => '*/1',
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*',
@@ -84,5 +84,15 @@ $tasks = [
         'day' => '*',
         'month' => '*',
         'dayofweek' => '*',
-    ]
+    ],
+    [
+        'classname' => 'enrol_arlo\task\reset_retries_task',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '0',
+        'day' => '*',
+        'dayofweek' => '1',
+        'month' => '*',
+        'disabled' => 0
+    ],
 ];
