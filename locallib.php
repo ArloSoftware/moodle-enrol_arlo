@@ -308,7 +308,7 @@ function check_arlo_api_retry_log() {
     return $newentries;
 }
 
-function sendfailurenotification( $admininfo) {
+function sendfailurenotification($admininfo) {
     global $CFG, $SITE;
     $noreplyuser = \core_user::get_noreply_user();
     $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
@@ -386,4 +386,15 @@ function enrol_arlo_update_all_course_registrations($courseid) {
         $registration->updatesource = 1;
         $DB->update_record('enrol_arlo_registration', $registration);
     }
+}
+
+/**
+ * Check if there are any adhoc syncs queued.
+ *
+ * @return bool
+ */
+function enrol_arlo_sync_adhoc_queued() {
+    global $DB;
+    $sql = "SELECT * FROM {task_adhoc} WHERE classname = '\\enrol_arlo\\task\\enrolments_adhoc'";
+    return $DB->record_exists_sql($sql);
 }

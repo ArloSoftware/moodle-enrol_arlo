@@ -69,8 +69,7 @@ class contact_merge_requests_job extends job {
     public function run() {
         $pluginconfig = new arlo_plugin_config();
         $jobpersistent = $this->get_job_persistent();
-        $disableskip = get_config('enrol_arlo', 'disableskip');
-        $lastime = empty($disableskip) ? $jobpersistent->get('lastsourcetimemodified') : 0;
+        $lastime = $jobpersistent->get('lastsourcetimemodified');
         try {
             $hasnext = true;
             while ($hasnext) {
