@@ -176,4 +176,16 @@ if ($hassiteconfig) {
     $ADMIN->add('enrolments', new admin_externalpage('webhookstatusonfiguration', 
     get_string('webhookstatus', 'enrol_arlo'),
     new moodle_url('/enrol/arlo/admin/webhook_status.php')));
+
+    if (!empty($CFG->enable_arlo_auth_config)) {
+        $name = get_string('arloauthconfig', 'enrol_arlo');
+        $description = get_string('arloauthconfig_desc', 'enrol_arlo');
+        $authsavailable = core_component::get_plugin_list('auth');
+        $authplugins = [];
+        foreach ($authsavailable as $key => $plugin) {
+            $authplugin = get_auth_plugin($key);
+            $authplugins[$key] = $authplugin->get_title();
+        }
+        $settings->add(new admin_setting_configselect('enrol_arlo/arloauthconfig', $name, $description, 0, $authplugins));
+    }
 }
