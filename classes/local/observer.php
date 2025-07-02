@@ -21,6 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 use core\event\course_completed;
 use core\event\course_viewed;
 use enrol_arlo\local\enum\arlo_type;
+use enrol_arlo\manager;
 
 /**
  * Main Event API Observer class.
@@ -165,4 +166,18 @@ class observer {
         enrol_arlo_add_associated(arlo_type::ONLINEACTIVITY, $event->other);
     }
 
+    /**
+     * On Arlo authentication method changed, update the users auth method.
+     *
+     * @param $event
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     */
+    public static function arlo_auth_config_changed($event) {
+        // We only want to update the users auth method if the Arlo authentication method has changed.
+        if ($event->other['plugin'] === 'enrol_arlo' && $event->other['name'] === 'arloauthconfig') {
+            manager::update_arlo_users_auth_method();
+        }
+    }
 }

@@ -302,12 +302,9 @@ class learner_progress {
         $data = [];
         $tz = core_date::get_user_timezone_object();
         if ($this->get_datelastcourseaccess()) {
-            $lastactivitydate = new DateTime(null, $tz);
+            $lastactivitydate = new DateTime("now", $tz);
             $lastactivitydate->setTimestamp($this->get_datelastcourseaccess());
             $data['LastActivityDateTime'] = $lastactivitydate->format(ENROL_ARLO_DATETIME_OFFSET_FORMAT);
-        }
-        if ($this->get_progressstatus()) {
-            $data['ProgressStatus'] = $this->get_progressstatus();
         }
         if ($this->get_outcome()) {
             $data['Outcome'] = $this->get_outcome();
@@ -322,9 +319,11 @@ class learner_progress {
             $data['ProgressStatus'] = $this->get_progressstatus();
         }
         if ($this->get_datecompleted()) {
-            $completedatetime = new DateTime(null, $tz);
+            $completedatetime = new DateTime("now", $tz);
             $completedatetime->setTimestamp($this->get_datecompleted());
             $data['CompletedDateTime'] = $completedatetime->format(ENROL_ARLO_DATETIME_OFFSET_FORMAT);
+            // We need to ensure the progress status is set to completed when the completed date is set.
+            $data['ProgressStatus'] = get_string('completed', 'enrol_arlo');
         }
         return $data;
     }
