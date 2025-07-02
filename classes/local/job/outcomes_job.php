@@ -268,11 +268,13 @@ class outcomes_job extends job {
                           FROM {enrol_arlo_scheduledjob}
                          WHERE area = :area
                                AND type = :type
-                               AND disabled <> :disabled";
+                               AND disabled <> :disabled
+                               AND instanceid = :instanceid";
                 $conditions = [
                     'area' => 'enrolment',
                     'type' => 'outcomes',
                     'disabled' => 1,
+                    'instanceid' => $registrationpersistent->get('enrolid'),
                 ];
                 $job = $DB->get_record_sql($sql, $conditions);
                 // Update scheduling information on persistent after successfull save.
