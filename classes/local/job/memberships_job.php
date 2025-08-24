@@ -733,7 +733,7 @@ class memberships_job extends job {
             $registration = new registration_persistent();
             $registration->set('sourceid', $sourceid);
             $registration->set('sourceguid', $sourceguid);
-        } 
+        }
         $registration->set('enrolid', $enrolmentinstance->id);
         $registration->set('attendance', $resource->Attendance);
         $registration->set('outcome', $resource->Outcome);
