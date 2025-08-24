@@ -207,10 +207,14 @@ class memberships_job extends job {
         try {
             $jobpersistent = $this->get_job_persistent();
             // Save Arlo registration information into Moodle persistents.
-            list($registration, $contact) = static::save_resource_information_to_persistents(
+            list($registration, $contact, $skip) = static::save_resource_information_to_persistents(
                 $this->enrolmentinstance,
                 $resource
             );
+            // If the registration hasn't been modified since the last sync, we can skip it.
+            if ($skip) {
+                return;
+            }
             // Invoke enrolment processing for this registration.
             $result = static::process_enrolment_registration(
                 $this->enrolmentinstance,
@@ -316,7 +320,6 @@ class memberships_job extends job {
                     $filter .= "(LastModifiedDateTime eq datetime('" . $timemodified . "')";
                     $filter .= " AND ";
                     $filter .= "RegistrationID gt " . $lastregid . ")";
-                    $filter .= " AND Status not eq 'Cancelled'";
                 }
                 $uri->setFilterBy($filter);
                 $uri->setOrderBy("LastModifiedDateTime ASC,RegistrationID ASC");
@@ -710,6 +713,13 @@ class memberships_job extends job {
             $registration = new registration_persistent();
             $registration->set('sourceid', $sourceid);
             $registration->set('sourceguid', $sourceguid);
+        } else {
+            // We don't want to re-process the registrations if it hasn't been modified since the last sync.
+            $lastsourcemodifieddb = $registration->get('sourcemodified');
+            $lastsourcemodifiedapi = $resource->LastModifiedDateTime;
+            if ($lastsourcemodifieddb <= $lastsourcemodifiedapi) {
+                return [$registration, $contactresource, true];
+            }
         }
         $registration->set('enrolid', $enrolmentinstance->id);
         $registration->set('attendance', $resource->Attendance);
