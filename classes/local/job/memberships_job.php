@@ -316,6 +316,7 @@ class memberships_job extends job {
                     $filter .= "(LastModifiedDateTime eq datetime('" . $timemodified . "')";
                     $filter .= " AND ";
                     $filter .= "RegistrationID gt " . $lastregid . ")";
+                    $filter .= " AND Status not eq 'Cancelled'";
                 }
                 $uri->setFilterBy($filter);
                 $uri->setOrderBy("LastModifiedDateTime ASC,RegistrationID ASC");
