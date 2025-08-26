@@ -211,8 +211,9 @@ class memberships_job extends job {
                 $this->enrolmentinstance,
                 $resource
             );
+
             // If the registration hasn't been modified since the last sync, we can skip it.
-            if ($skip) {
+            if (!empty($skip)) {
                 return;
             }
             // Invoke enrolment processing for this registration.
@@ -710,17 +711,28 @@ class memberships_job extends job {
             ['sourceguid' => $sourceguid]
         );
         if (!$registration) {
+            // Now we try by user and enrolment instance.
+            $contact = contact_persistent::get_record(
+                ['sourceid' => $contactresource->ContactID]
+            );
+            if (!empty($contact)) {
+                $registration = registration_persistent::get_record(
+                    ['userid' => $contact->get('userid'), 'enrolid' => $enrolmentinstance->id]
+                );
+                if (!empty($registration)) {
+                    // We don't want to re-process the registrations if it hasn't been modified since the last sync.
+                    $lastsourcemodifieddb = $registration->get('sourcemodified');
+                    $lastsourcemodifiedapi = $resource->LastModifiedDateTime;
+                    if ($lastsourcemodifieddb <= $lastsourcemodifiedapi) {
+                        return [$registration, $contactresource, true];
+                    }
+                }
+            }
+
             $registration = new registration_persistent();
             $registration->set('sourceid', $sourceid);
             $registration->set('sourceguid', $sourceguid);
-        } else {
-            // We don't want to re-process the registrations if it hasn't been modified since the last sync.
-            $lastsourcemodifieddb = $registration->get('sourcemodified');
-            $lastsourcemodifiedapi = $resource->LastModifiedDateTime;
-            if ($lastsourcemodifieddb <= $lastsourcemodifiedapi) {
-                return [$registration, $contactresource, true];
-            }
-        }
+        } 
         $registration->set('enrolid', $enrolmentinstance->id);
         $registration->set('attendance', $resource->Attendance);
         $registration->set('outcome', $resource->Outcome);
