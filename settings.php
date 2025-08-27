@@ -112,13 +112,12 @@ if ($hassiteconfig) {
     $description = get_string('onlyactive_desc', 'enrol_arlo');
     $name = get_string('onlyactive', 'enrol_arlo');
     $settings->add(new admin_setting_configcheckbox('enrol_arlo/onlyactive', $name, $description, 1));
-
     // Only display management category if plugin enabled.
     if ($enrol->is_enabled()) {
         $name = get_string('managearlo', 'enrol_arlo');
         $category = new admin_category('enrolsettingsarlomanage', $name);
         $ADMIN->add('enrolments', $category);
-
+        $ADMIN->add('enrolsettingsarlomanage', $settings);
         $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('enrolsettingsarloconfiguration',
             $name = get_string('configuration', 'enrol_arlo'),
             new moodle_url('/enrol/arlo/admin/configuration.php')));
@@ -173,7 +172,20 @@ if ($hassiteconfig) {
                 'moodle/site:config', true)
         );
     }
-    $ADMIN->add('enrolments', new admin_externalpage('webhookstatusonfiguration', 
+    $ADMIN->add('enrolsettingsarlomanage', new admin_externalpage('webhookstatusonfiguration', 
     get_string('webhookstatus', 'enrol_arlo'),
     new moodle_url('/enrol/arlo/admin/webhook_status.php')));
+
+    if (!empty($CFG->enable_arlo_auth_config)) {
+        $name = get_string('arloauthconfig', 'enrol_arlo');
+        $description = get_string('arloauthconfig_desc', 'enrol_arlo');
+        $authsavailable = core_component::get_plugin_list('auth');
+        $authplugins = [];
+        foreach ($authsavailable as $key => $plugin) {
+            $authplugin = get_auth_plugin($key);
+            $authplugins[$key] = $authplugin->get_title();
+        }
+        $settings->add(new admin_setting_configselect('enrol_arlo/arloauthconfig', $name, $description, 0, $authplugins));
+    }
+    $settings = null;
 }

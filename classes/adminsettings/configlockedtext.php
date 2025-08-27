@@ -111,6 +111,9 @@ class configlockedtext extends \admin_setting_configtext {
      * @throws dml_exception
      */
     public function write_setting($data) {
+        if (empty($data)) {
+            return parent::write_setting('');
+        }
         // Fix user input for Arlo platform URL.
         global $USER;
         $replace = '/^(https:\/\/)' . '|' . // Matches leading https://
@@ -166,6 +169,9 @@ class configlockedtext extends \admin_setting_configtext {
      * @throws coding_exception
      */
     public function validate($data) {
+        if (empty($data)) {
+            return true;
+        }
         // Fix user input for Arlo platform URL.
         $protocol = '/^(https:\/\/)' . '|' . // Matches leading https://
                    '^(http:\/\/)'   . '|' . // Matches leading http://

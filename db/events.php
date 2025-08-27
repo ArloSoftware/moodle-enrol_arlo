@@ -87,6 +87,13 @@ $observers = [
         'includefile' => null,
         'internal'    => true,
         'priority'    => 9999
+    ],
+    // Plugin event: Arlo authentication method changed.
+    [
+        'eventname'   => '\core\event\config_log_created',
+        'callback'    => '\enrol_arlo\local\observer::arlo_auth_config_changed',
+        'includefile' => null,
+        'internal'    => true,
+        'priority'    => 9999
     ]
-
 ];

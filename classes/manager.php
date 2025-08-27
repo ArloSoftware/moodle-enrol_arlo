@@ -482,4 +482,21 @@ class manager {
         $rs->close();
     }
 
+    /**
+     * Update the users auth method to the one selected in the settings.
+     *
+     * @return void
+     * @throws \dml_exception
+     */
+    public static function update_arlo_users_auth_method() {
+        global $DB;
+
+        // We get the users pulled from Arlo and update their auth method to the one selected in the settings
+        $rs = $DB->get_recordset('enrol_arlo_contact');
+        $authmethod = get_config('enrol_arlo', 'arloauthconfig');
+        foreach ($rs as $arlouser) {
+            $DB->set_field('user', 'auth', $authmethod, array('email' => $arlouser->email));
+        }
+        $rs->close();
+    }
 }
