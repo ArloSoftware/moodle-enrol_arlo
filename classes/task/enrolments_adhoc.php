@@ -63,11 +63,13 @@ class enrolments_adhoc extends adhoc_task {
             $trace = new text_progress_trace();
         }
         $timetosync = $this->get_custom_data();
-        memberships_job::sync_memberships($trace, $timetosync);
-    
-        $manager = new manager();
-        $manager->process_email_queue();
-        return true;
+        try {
+            memberships_job::sync_memberships($trace, $timetosync);
+            $manager = new manager();
+            $manager->process_email_queue();
+        } catch (\Exception $e) {
+            $trace->output('Error syncing old registrations: ' . $e->getMessage());
+        }
     }
 
 }
