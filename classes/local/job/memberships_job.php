@@ -723,7 +723,8 @@ class memberships_job extends job {
                     // We don't want to re-process the registrations if it hasn't been modified since the last sync.
                     $lastsourcemodifieddb = $registration->get('sourcemodified');
                     $lastsourcemodifiedapi = $resource->LastModifiedDateTime;
-                    if ($lastsourcemodifieddb <= $lastsourcemodifiedapi) {
+                    // It must be newer, if has the same timestamp we already processed it.
+                    if ($lastsourcemodifieddb > $lastsourcemodifiedapi) {
                         return [$registration, $contactresource, true];
                     }
                 }
