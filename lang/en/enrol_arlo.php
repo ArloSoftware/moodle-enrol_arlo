@@ -53,6 +53,8 @@ $string['apiusername'] = 'Arlo username';
 $string['apiusername_desc'] = 'Important: Your Arlo user account must be API enabled, <a title="{$a->title}" href="{$a->url}" target="_blank">learn more.</a>';
 $string['apipassword'] = 'Arlo password';
 $string['apipassword_desc'] = 'Forgot your password? <a title="{$a->title}" href="{$a->url}" target="_blank">Learn how to reset it.</a>';
+$string['arloauthconfig'] = 'Arlo authentication method';
+$string['arloauthconfig_desc'] = 'Select the authentication method to use for Arlo enrolments.';
 $string['arloconnection'] = 'Arlo connection';
 $string['arlosettings'] = 'Arlo settings';
 $string['arlocontact'] = 'Arlo contact';

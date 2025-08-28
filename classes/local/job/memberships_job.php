@@ -626,6 +626,10 @@ class memberships_job extends job {
                         }
                         $user->set('phone1', $contact->get('phonemobile'));
                         $user->set('phone2', $contact->get('phonework'));
+                        $authmethod = get_config('enrol_arlo', 'arloauthconfig');
+                        if ($authmethod) {
+                            $user->set('auth', $authmethod);
+                        }
                         $user->create_user();
                         // Important must associate user with contact.
                         $contact->set('userid', $user->get('id'));
@@ -654,6 +658,10 @@ class memberships_job extends job {
                 }
                 $user->set('phone1', $contact->get('phonemobile'));
                 $user->set('phone2', $contact->get('phonework'));
+                $authmethod = get_config('enrol_arlo', 'arloauthconfig');
+                if ($authmethod) {
+                    $user->set('auth', $authmethod);
+                }
                 $user->update_user();
 
             }
