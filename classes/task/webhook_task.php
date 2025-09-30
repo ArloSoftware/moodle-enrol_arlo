@@ -37,7 +37,7 @@ class webhook_task extends adhoc_task {
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('enrolmentstask', 'enrol_arlo');
+        return get_string('webhooktask', 'enrol_arlo');
     }
 
     /**
@@ -51,8 +51,6 @@ class webhook_task extends adhoc_task {
 
         $event = $this->get_custom_data();
         \enrol_arlo\input\webhook_handler::process_event($event);
-
-        return true;
     }
     
     /**
