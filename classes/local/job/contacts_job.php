@@ -34,6 +34,8 @@ use enrol_arlo\invalid_persistent_exception;
 use enrol_arlo\local\client;
 use enrol_arlo\persistent;
 use enrol_arlo\local\persistent\contact_persistent;
+use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\persistent\registration_persistent;
 use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\local\response_processor;
 use GuzzleHttp\Psr7\Request;
@@ -219,6 +221,8 @@ class contacts_job extends job {
                         // See if need to get another page of records.
                         $hasnext = (bool) $collection->hasNext();
                     }
+                    // Clean up failed merge requests.
+                    self::clean_failed_contact_merges();
                 }
                 return true;
             } catch (Exception $exception) {
@@ -230,6 +234,52 @@ class contacts_job extends job {
             }
         } else {
             throw new moodle_exception('locktimeout');
+        }
+    }
+
+    /**
+     * Clean up stale merge requests that have been fixed manually.
+     * 
+     * Sometimes merge requests are resolved manually, but the merge request record
+     * remains in the system. This cleanup prevents users from accidentally deleting
+     * enrolments on the contact merge page when the merge is no longer needed.
+     */
+    public static function clean_failed_contact_merges() {
+        global $DB;
+
+        // Retrieve all failed merge requests.
+        $mergerequests = contact_merge_request_persistent::get_records(['mergefailed' => 1]);
+
+        // Check if merge requests are still needed by verifying associated users.
+        foreach ($mergerequests as $mergerequest) {
+            $sourcecontact = $mergerequest->get_source_contact();
+            $destinationcontact = $mergerequest->get_destination_contact();
+
+            // Check if the associated Moodle users still exist and are active.
+            $sourceuseractive = !empty($sourcecontact) ? $DB->record_exists('user',
+                ['id' => $sourcecontact->get('userid'), 'deleted' => 0]) : false;
+            $destinationuseractive = !empty($destinationcontact) ? $DB->record_exists('user',
+                ['id' => $destinationcontact->get('userid'), 'deleted' => 0]) : false;
+
+            // Now we check if the source and destination contacts have the same userid.
+            if ($sourcecontact->get('userid') == $destinationcontact->get('userid')) {
+                // We look for registrations associated with both contacts.
+                $sourcehasregistrations = $DB->record_exists('enrol_arlo_registration', ['sourcecontactguid' => $sourcecontact->get('sourceguid')]);
+                $destinationhasregistrations = $DB->record_exists('enrol_arlo_registration', ['sourcecontactguid' => $destinationcontact->get('sourceguid')]);
+
+                // We should only delete the contact if it has no registrations associated with it.
+                if (!$destinationhasregistrations || !$sourcehasregistrations) {
+                    // We delete the source contact.
+                    $sourcecontact->delete();
+                } else if ($destinationhasregistrations) {
+                    // We delete the destination contact.
+                    $destinationcontact->delete();
+                }
+                // That means the merge was done but the merge request is still showing.
+                // We clear the failed status as this merge request is no longer relevant.
+                $mergerequest->set('mergefailed', 0);
+                $mergerequest->update();
+            }
         }
     }
 }
