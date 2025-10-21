@@ -254,15 +254,11 @@ class contacts_job extends job {
         foreach ($mergerequests as $mergerequest) {
             $sourcecontact = $mergerequest->get_source_contact();
             $destinationcontact = $mergerequest->get_destination_contact();
-
-            // Check if the associated Moodle users still exist and are active.
-            $sourceuseractive = !empty($sourcecontact) ? $DB->record_exists('user',
-                ['id' => $sourcecontact->get('userid'), 'deleted' => 0]) : false;
-            $destinationuseractive = !empty($destinationcontact) ? $DB->record_exists('user',
-                ['id' => $destinationcontact->get('userid'), 'deleted' => 0]) : false;
+            $sourceuserid = !empty($mergerequest->get('sourceuserid')) ? $mergerequest->get('sourceuserid') : 0;
+            $destinationuserid = !empty($mergerequest->get('destinationuserid')) ? $mergerequest->get('destinationuserid') : 0;
 
             // Now we check if the source and destination contacts have the same userid.
-            if ($sourcecontact->get('userid') == $destinationcontact->get('userid')) {
+            if (!empty($sourceuserid) && !empty($destinationuserid) && $sourceuserid == $destinationuserid) {
                 // We look for registrations associated with both contacts.
                 $sourcehasregistrations = $DB->record_exists('enrol_arlo_registration', ['sourcecontactguid' => $sourcecontact->get('sourceguid')]);
                 $destinationhasregistrations = $DB->record_exists('enrol_arlo_registration', ['sourcecontactguid' => $destinationcontact->get('sourceguid')]);
