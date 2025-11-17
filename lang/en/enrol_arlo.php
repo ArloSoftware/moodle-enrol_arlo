@@ -506,3 +506,5 @@ $string['reset_retries_task'] = 'Reset registration retries';
 $string['enrolmentstaskadhoc'] = 'Create and update enrolments based off Arlo registration information (adhoc)';
 $string['webhooktask'] = 'Process Arlo webhooks events';
 $string['outcomesadhoctask'] = 'Push outcome and process information to Arlo registrations';
+$string['disableforcepasswordchange'] = 'Disable force password change';
+$string['disableforcepasswordchange_desc'] = 'Some auth methods doesn\'t use a password inside Moodle, so it may be better to disable the force password change feature.';

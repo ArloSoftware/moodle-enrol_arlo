@@ -515,6 +515,10 @@ class user_persistent extends persistent {
     protected function after_create() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $newuserid = $this->get('id');
+        // Some auth methods doesn't use a password inside Moodle, but we are forcing a password change.
+        if (get_config('enrol_arlo', 'disableforcepasswordchange')) {
+            set_user_preferences(['auth_forcepasswordchange' => 0], $newuserid);
+        }
         // Send email. TODO refactor messaging.
         $manager = new manager();
         if ($pluginconfig->get('emailsendnewaccountdetails')) {
