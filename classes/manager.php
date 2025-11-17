@@ -240,6 +240,32 @@ class manager {
         return $status;
     }
 
+    /** Email new account without new password
+     * @param $user
+     * @return bool
+     */
+    public function email_newaccountdetails_without_password($user) {
+        global $CFG;
+        $noreplyuser = \core_user::get_noreply_user();
+        $site  = get_site();
+        $a = new \stdClass();
+        $a->firstname   = fullname($user, true);
+        $a->sitename    = format_string($site->fullname);
+        $a->username    = $user->username;
+        $a->link        = $CFG->wwwroot .'/login/';
+        $a->signoff     = generate_email_signoff();
+
+        $message = get_string('newuserexternallogin', 'enrol_arlo', $a);
+        $subject = format_string($site->fullname) .': '. get_string('newuserexternalloginsubj', 'enrol_arlo', $a);
+        $status = email_to_user($user, $noreplyuser, $subject, $message);
+        $deliverystatus = get_string('delivered', 'enrol_arlo');
+        if (!$status) {
+            $deliverystatus = get_string('failed', 'enrol_arlo');
+        }
+        self::trace(sprintf("New account details email to user %s %s", $user->id, $deliverystatus));
+        return $status;
+    }
+
     /**
      * Send course welcome email to specified user.
      *

@@ -297,7 +297,7 @@ $string['welcometocoursetext'] = 'Welcome to {$a->coursename}!
 
 Your username: {$a->username}
 
-Forgotten your password?
+Forgotten your password? (Only if you are not using external authentication method)
 
 You can reset your password using following url:
 
@@ -508,3 +508,5 @@ $string['webhooktask'] = 'Process Arlo webhooks events';
 $string['outcomesadhoctask'] = 'Push outcome and process information to Arlo registrations';
 $string['disableforcepasswordchange'] = 'Disable force password change';
 $string['disableforcepasswordchange_desc'] = 'Some auth methods doesn\'t use a password inside Moodle, so it may be better to disable the force password change feature.';
+$string['newuserexternallogin'] = 'Hi {$a->firstname}, a new account has been created for you at <a href="{$a->link}">{$a->sitename}</a> reach out to your administrator to get your login details.';
+$string['newuserexternalloginsubj'] = 'New account details for {$a->firstname} at {$a->sitename}';

@@ -489,12 +489,13 @@ class user_persistent extends persistent {
         $this->raw_set('timecreated', $now);
         $this->raw_set('timemodified', $now);
         $this->raw_set('usermodified', $USER->id);
-
+        
         $record = $this->to_record();
         unset($record->id);
 
         require_once($CFG->dirroot . '/user/lib.php');
-        $id = user_create_user($record, true, false);
+        $updatepassword = get_config('enrol_arlo', 'disableforcepasswordchange') ? false : true;
+        $id = user_create_user($record, $updatepassword, false);
         $this->raw_set('id', $id);
 
         // We ensure that this is flagged as validated.
@@ -515,18 +516,17 @@ class user_persistent extends persistent {
     protected function after_create() {
         $pluginconfig = api::get_enrolment_plugin()->get_plugin_config();
         $newuserid = $this->get('id');
-        // Some auth methods doesn't use a password inside Moodle, but we are forcing a password change.
-        if (get_config('enrol_arlo', 'disableforcepasswordchange')) {
-            set_user_preferences(['auth_forcepasswordchange' => 0], $newuserid);
-        }
         // Send email. TODO refactor messaging.
+        $updatepassword = get_config('enrol_arlo', 'disableforcepasswordchange') ? false : true;
         $manager = new manager();
         if ($pluginconfig->get('emailsendnewaccountdetails')) {
-            if ($pluginconfig->get('emailsendimmediately')) {
+            if ($pluginconfig->get('emailsendimmediately') && $updatepassword) {
                 $status = $manager->email_newaccountdetails(null, $this->to_record());
                 $deliverystatus = ($status) ? manager::EMAIL_STATUS_DELIVERED : manager::EMAIL_STATUS_FAILED;
                 $manager->add_email_to_queue('site', SITEID, $this->to_record()->id,
                     manager::EMAIL_TYPE_NEW_ACCOUNT, $deliverystatus);
+            } else if (!$updatepassword) {
+                $manager->email_newaccountdetails_without_password($this->to_record());
             } else {
                 $manager->add_email_to_queue('site', SITEID, $this->to_record()->id,
                     manager::EMAIL_TYPE_NEW_ACCOUNT);
