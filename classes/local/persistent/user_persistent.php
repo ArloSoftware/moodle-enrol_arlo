@@ -465,6 +465,8 @@ class user_persistent extends persistent {
         $this->set('confirmed', 1);
     }
 
+    private $validated;
+
     /**
      * Creates the user data
      * 
