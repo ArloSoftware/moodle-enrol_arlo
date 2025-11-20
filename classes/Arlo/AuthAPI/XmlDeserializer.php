@@ -16,6 +16,8 @@ class XmlDeserializer {
      */
     private $ignoreMissingClasses = true;
 
+    private $loadOptions;
+
     /**
      * XmlDeserializer constructor.
      *
