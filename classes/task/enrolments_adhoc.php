@@ -17,18 +17,23 @@
 namespace enrol_arlo\task;
 
 use core\task\adhoc_task;
+use core\task\scheduled_task;
+use enrol_arlo\api;
+use enrol_arlo\local\job\memberships_job;
+use enrol_arlo\manager;
+use null_progress_trace;
+use text_progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Processes Arlo webhooks events.
+ * Create Moodle enrolments based off Arlo registrations adhoc.
  *
  * @package     enrol_arlo
- * @author      2023 Oscar Nadjar <oscar.nadjar@moodle.com>
- * @copyright   Moodle US
+ * @copyright   2020 LearningWorks Ltd {@link http://www.learningworks.co.nz}
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class webhook_task extends adhoc_task {
+class enrolments_adhoc extends adhoc_task {
 
     /**
      * Get schedule task human readable name.
@@ -37,7 +42,7 @@ class webhook_task extends adhoc_task {
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('webhooktask', 'enrol_arlo');
+        return get_string('enrolmentstaskadhoc', 'enrol_arlo');
     }
 
     /**
@@ -48,20 +53,23 @@ class webhook_task extends adhoc_task {
      * @throws \moodle_exception
      */
     public function execute() {
+        global $CFG;
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        if (!enrol_is_enabled('arlo')) {
+            return;
+        }
+        $trace = new null_progress_trace();
+        if ($CFG->debug == DEBUG_DEVELOPER) {
+            $trace = new text_progress_trace();
+        }
+        $timetosync = $this->get_custom_data();
+        try {
+            memberships_job::sync_memberships($trace, $timetosync);
+            $manager = new manager();
+            $manager->process_email_queue();
+        } catch (\Exception $e) {
+            $trace->output('Error syncing old registrations: ' . $e->getMessage());
+        }
+    }
 
-        $event = $this->get_custom_data();
-        \enrol_arlo\input\webhook_handler::process_event($event);
-    }
-    
-    /**
-     * Queues this task to run ASAP.
-     * 
-     * @param string $registrationid
-     */
-    public static function queue_task(object $event) {
-        $task = new self();
-        $task->set_custom_data($event);
-        $task->set_next_run_time(time());
-        \core\task\manager::queue_adhoc_task($task);
-    }
 }

@@ -49,30 +49,35 @@ class api_retry_notification extends \core\task\scheduled_task {
     public function execute() {
         global $CFG;
         require_once($CFG->dirroot . '/enrol/arlo/locallib.php');
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+
         $newentries = check_arlo_api_retry_log();
-        $admins = get_admins();
+        $erroremail = get_config('enrol_arlo', 'apierroremail');
+        if (empty($erroremail)) {
+            return;
+        }
+        $user = create_user_for_email($erroremail);
+
         if (!empty($newentries)) {
-            // Notify all Moodle administrators about the new entries.
-            foreach ($admins as $admin) {
-                $plugin = api::get_enrolment_plugin();
-                $pluginconfig = $plugin->get_plugin_config();
-                if ($pluginconfig->get('enablecommunication') == 0) {
-                    sendfailurenotification($admin);
-                } else {
-                    $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
-                    $manager = new \enrol_arlo\manager();
-                    $manager->add_max_redirect_notification_to_queue();
-                    $message = new message();
-                    $message->component = 'enrol_arlo';
-                    $message->name = 'arlo_retry_log_notification';
-                    $message->userfrom = \core_user::get_noreply_user();
-                    $message->subject = get_string('arlo_retry_log_subject', 'enrol_arlo');
-                    $message->fullmessage = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
-                    $message->fullmessageformat = FORMAT_PLAIN;
-                    $message->fullmessagehtml   = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
-                    $message->userto = $admin;
-                    message_send($message);
-                }
+            // Notify the error email address.
+            $plugin = api::get_enrolment_plugin();
+            $pluginconfig = $plugin->get_plugin_config();
+            if ($pluginconfig->get('enablecommunication') == 0) {
+                sendfailurenotification($user);
+            } else {
+                $apiretrylogurl = new \moodle_url('/enrol/arlo/admin/apiretries.php');
+                $manager = new \enrol_arlo\manager();
+                $manager->add_max_redirect_notification_to_queue();
+                $message = new message();
+                $message->component = 'enrol_arlo';
+                $message->name = 'arlo_retry_log_notification';
+                $message->userfrom = \core_user::get_noreply_user();
+                $message->subject = get_string('arlo_retry_log_subject', 'enrol_arlo');
+                $message->fullmessage = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
+                $message->fullmessageformat = FORMAT_PLAIN;
+                $message->fullmessagehtml   = get_string('arlo_retry_log_message', 'enrol_arlo', $apiretrylogurl->out());
+                $message->userto = $user;
+                message_send($message);
             }
         }
     }

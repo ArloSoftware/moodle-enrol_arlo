@@ -53,6 +53,8 @@ $string['apiusername'] = 'Arlo username';
 $string['apiusername_desc'] = 'Important: Your Arlo user account must be API enabled, <a title="{$a->title}" href="{$a->url}" target="_blank">learn more.</a>';
 $string['apipassword'] = 'Arlo password';
 $string['apipassword_desc'] = 'Forgot your password? <a title="{$a->title}" href="{$a->url}" target="_blank">Learn how to reset it.</a>';
+$string['arloauthconfig'] = 'Arlo authentication method';
+$string['arloauthconfig_desc'] = 'Select the authentication method to use for Arlo enrolments.';
 $string['arloconnection'] = 'Arlo connection';
 $string['arlosettings'] = 'Arlo settings';
 $string['arlocontact'] = 'Arlo contact';
@@ -197,8 +199,8 @@ $string['retriesperrecord'] = 'Maxiumum retries per record';
 $string['retriesperrecord_desc'] = 'Maximum number of retries per record allowed before halting API communication for that record.';
 $string['maxretries'] = 'Maxiumum retries permitted on the API';
 $string['maxretries_desc'] = 'Maximum number of retries your connection is allowed before halting API communication.';
-$string['maxretires_email'] = 'Maximum retries error email';
-$string['maxretires_email_desc'] = 'The email that error reports are sent to when your connection reaches the maximum retries.';
+$string['maxretires_email'] = 'Error email recipient';
+$string['maxretires_email_desc'] = 'The email that is notified when your connection fails or users cannot be synchronized due to duplicates or suspension.';
 $string['maxretries_exception'] = 'Too many failed attempts, contact your admin.';
 $string['newaccountdetails'] = 'New account details';
 $string['newuserdefaultemail'] = 'New user default email';
@@ -295,7 +297,7 @@ $string['welcometocoursetext'] = 'Welcome to {$a->coursename}!
 
 Your username: {$a->username}
 
-Forgotten your password?
+Forgotten your password? (Only if you are not using external authentication method)
 
 You can reset your password using following url:
 
@@ -445,14 +447,14 @@ $string['webhooksecret'] = 'Arlo webhook secret';
 $string['webhooksecret_desc'] = 'Arlo webhook secret for validating webhook requests.';
 $string['webhookapiurl'] = 'Arlo webhook API URL';
 $string['webhookapiurl_desc'] = 'Arlo webhook API URL for webhook requests.';
+$string['webhookname'] = 'Arlo webhook name';
+$string['webhookname_desc'] = 'Arlo webhook name for webhook requests.';
 $string['enablewebhook'] = 'Enable webhook';
 $string['enablewebhook_desc'] = ' Webhooks allows real-time synchronisation between Arlo and Moodle.';
 $string['useadhoctask'] = 'Use webhook adhoc task';
 $string['useadhoctask_desc'] = 'Enable this if you are planning to perform a large synchronisation between Arlo and Moodle (e.g. 100+ records at once).';
-$string['onlyactive'] = 'Only active events';
-$string['onlyactive_desc'] = 'Only process registrations for active Arlo courses and online activities.';
-$string['disableskip'] = 'Disable registration skip';
-$string['disableskip_desc'] = 'Disables the ability to skip processing  old registrations (A sync will run for all registrations even the ones already processed).';
+$string['onlyactive'] = 'Only active courses';
+$string['onlyactive_desc'] = 'Only process new Moodle registrations for active Arlo courses and online activities (exclude cancelled and completed courses).';
 $string['enable_multisync'] = 'Enable multisync';
 $string['enable_multisync_desc'] = 'When the webhook is enabled the sync is done only trough the webhooks. This setting allows to run the sync through the scheduled task as well.';
 $string['technicalcontact'] = 'Contact email';
@@ -492,4 +494,19 @@ $string['resetretries_message'] = 'The retries for registration PATCH requests h
 $string['retry_sync'] = 'Retry sync';
 $string['connectionstatus'] = '<span>Connection Status: </span>';
 $string['apifails'] = '<span>Global API fails: </span>';
-
+$string['synoldreg'] = 'Sync old registrations';
+$string['dateselector'] = 'Sync date selector';
+$string['syncsince'] = 'Sync since';
+$string['syncsince_help'] = 'Sync registrations since selected date.';
+$string['invalidstartdate'] = 'Date must be in the past';
+$string['taskqueued'] = 'Syncronisation task has been queued.';
+$string['resetregretries'] = 'Reset registration retries';
+$string['resetregretries_desc'] = 'Reset all registration API failures when resetting the API connection from the "API Retries" page.';
+$string['reset_retries_task'] = 'Reset registration retries';
+$string['enrolmentstaskadhoc'] = 'Create and update enrolments based off Arlo registration information (adhoc)';
+$string['webhooktask'] = 'Process Arlo webhooks events';
+$string['outcomesadhoctask'] = 'Push outcome and process information to Arlo registrations';
+$string['disableforcepasswordchange'] = 'Disable force password change';
+$string['disableforcepasswordchange_desc'] = 'Some auth methods doesn\'t use a password inside Moodle, so it may be better to disable the force password change feature.';
+$string['newuserexternallogin'] = 'Hi {$a->firstname}, a new account has been created for you at <a href="{$a->link}">{$a->sitename}</a> reach out to your administrator to get your login details.';
+$string['newuserexternalloginsubj'] = 'New account details for {$a->firstname} at {$a->sitename}';

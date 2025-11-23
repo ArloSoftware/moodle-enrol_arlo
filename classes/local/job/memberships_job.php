@@ -207,10 +207,15 @@ class memberships_job extends job {
         try {
             $jobpersistent = $this->get_job_persistent();
             // Save Arlo registration information into Moodle persistents.
-            list($registration, $contact) = static::save_resource_information_to_persistents(
+            list($registration, $contact, $skip) = static::save_resource_information_to_persistents(
                 $this->enrolmentinstance,
                 $resource
             );
+
+            // If the registration hasn't been modified since the last sync, we can skip it.
+            if (!empty($skip)) {
+                return;
+            }
             // Invoke enrolment processing for this registration.
             $result = static::process_enrolment_registration(
                 $this->enrolmentinstance,
@@ -247,7 +252,7 @@ class memberships_job extends job {
      * @return bool
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public static function sync_memberships($trace) {
+    public static function sync_memberships($trace, $timetosync = null) {
         global $DB;
 
         $plugin = api::get_enrolment_plugin();
@@ -294,14 +299,13 @@ class memberships_job extends job {
             // adjusting and the filter each call so we get all records and don't end up
             // getting same 250 each call.
             $hasnext = true;
-            $disableskip = get_config('enrol_arlo', 'disableskip');
-            $lastime = empty($disableskip) ? get_config('enrol_arlo', 'lastregtimemodified') : date('c', 0); 
-            $lastregid = empty($disableskip) ? get_config('enrol_arlo', 'lastregid') : 0;
+            $lastime = empty($timetosync) ? get_config('enrol_arlo', 'lastregtimemodified') : date('c', $timetosync);
+            $lastregid = empty($timetosync) ? get_config('enrol_arlo', 'lastregid') : 0;
             while ($hasnext) {
                 $hasnext = false; // Break paging by default.
                 // Update contact merge requests records every page.
                 $contactmergerequestsjob = job_factory::get_job(['type' => 'contact_merge_requests']);
-                $contactmergerequestsjob->run();
+                $contactmergerequestsjob->run($timetosync);
                 $uri = new RequestUri();
                 $uri->setHost($pluginconfig->get('platform'));
                 $uri->setResourcePath('registrations/');
@@ -627,6 +631,10 @@ class memberships_job extends job {
                         }
                         $user->set('phone1', $contact->get('phonemobile'));
                         $user->set('phone2', $contact->get('phonework'));
+                        $authmethod = get_config('enrol_arlo', 'arloauthconfig');
+                        if ($authmethod) {
+                            $user->set('auth', $authmethod);
+                        }
                         $user->create_user();
                         // Important must associate user with contact.
                         $contact->set('userid', $user->get('id'));
@@ -655,6 +663,10 @@ class memberships_job extends job {
                 }
                 $user->set('phone1', $contact->get('phonemobile'));
                 $user->set('phone2', $contact->get('phonework'));
+                $authmethod = get_config('enrol_arlo', 'arloauthconfig');
+                if ($authmethod) {
+                    $user->set('auth', $authmethod);
+                }
                 $user->update_user();
 
             }
@@ -699,10 +711,29 @@ class memberships_job extends job {
             ['sourceguid' => $sourceguid]
         );
         if (!$registration) {
+            // Now we try by user and enrolment instance.
+            $contact = contact_persistent::get_record(
+                ['sourceid' => $contactresource->ContactID]
+            );
+            if (!empty($contact)) {
+                $registration = registration_persistent::get_record(
+                    ['userid' => $contact->get('userid'), 'enrolid' => $enrolmentinstance->id]
+                );
+                if (!empty($registration)) {
+                    // We don't want to re-process the registrations if it hasn't been modified since the last sync.
+                    $lastsourcemodifieddb = $registration->get('sourcemodified');
+                    $lastsourcemodifiedapi = $resource->LastModifiedDateTime;
+                    // It must be newer, if has the same timestamp we already processed it.
+                    if ($lastsourcemodifieddb > $lastsourcemodifiedapi) {
+                        return [$registration, $contactresource, true];
+                    }
+                }
+            }
+
             $registration = new registration_persistent();
             $registration->set('sourceid', $sourceid);
             $registration->set('sourceguid', $sourceguid);
-        }
+        } 
         $registration->set('enrolid', $enrolmentinstance->id);
         $registration->set('attendance', $resource->Attendance);
         $registration->set('outcome', $resource->Outcome);

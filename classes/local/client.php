@@ -74,7 +74,9 @@ class client {
      */
     public static function get_user_agent() {
         global $CFG;
-        return 'Moodle/' . moodle_major_version() . ';' . $CFG->wwwroot;
+        $pluginversion = api::get_enrolment_plugin()->get_plugin_release();
+        $useragent = 'Moodle/' . moodle_major_version() . '/ArloPlugin/' . $pluginversion . ';' . $CFG->wwwroot;
+        return $useragent;
     }
 
     /**

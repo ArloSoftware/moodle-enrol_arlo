@@ -17,18 +17,21 @@
 namespace enrol_arlo\task;
 
 use core\task\adhoc_task;
+use enrol_arlo\local\job\outcomes_job;
+use null_progress_trace;
+use text_progress_trace;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Processes Arlo webhooks events.
+ * Processes Arlo Outcomes.
  *
  * @package     enrol_arlo
  * @author      2023 Oscar Nadjar <oscar.nadjar@moodle.com>
  * @copyright   Moodle US
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class webhook_task extends adhoc_task {
+class outcome_adhoc extends adhoc_task {
 
     /**
      * Get schedule task human readable name.
@@ -37,7 +40,7 @@ class webhook_task extends adhoc_task {
      * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('webhooktask', 'enrol_arlo');
+        return get_string('outcomesadhoctask', 'enrol_arlo');
     }
 
     /**
@@ -48,9 +51,20 @@ class webhook_task extends adhoc_task {
      * @throws \moodle_exception
      */
     public function execute() {
+        global $CFG;
 
-        $event = $this->get_custom_data();
-        \enrol_arlo\input\webhook_handler::process_event($event);
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        if (!enrol_is_enabled('arlo')) {
+            return;
+        }
+        $trace = new null_progress_trace();
+        if ($CFG->debug == DEBUG_DEVELOPER) {
+            $trace = new text_progress_trace();
+        }
+        $registrationinfo = $this->get_custom_data();
+        outcomes_job::process_single_outcome($registrationinfo, $trace);
+
+        return true;
     }
     
     /**

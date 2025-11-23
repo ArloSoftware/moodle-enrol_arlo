@@ -24,7 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/vendor/autoload.php');
+if (!class_exists('GuzzleHttp\Client')) {
+    require_once(__DIR__ . '/vendor/autoload.php');
+}
+
 require_once($CFG->dirroot . '/group/lib.php');
 
 use enrol_arlo\Arlo\AuthAPI\Enum\EventStatus;
@@ -986,4 +989,21 @@ function enrol_arlo_extend_navigation_course($navigation, $course, $context) {
             $navigation->add_node($settingsnode);
         }
     }
+}
+
+/**
+ * Create a fake user to use on the email_to_user function.
+ *
+ * @param mixed $email
+ * @return stdClass
+ */
+function create_user_for_email($email) {
+    global $DB;
+    $mainadmin = get_admin();
+    $mainadmin->email = $email;
+    $emailname = explode('@', $email);
+    $mainadmin->firstname = $emailname[0];
+    $mainadmin->lastname = $emailname[1];
+
+    return $mainadmin;
 }

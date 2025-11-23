@@ -16,52 +16,40 @@
 
 namespace enrol_arlo\task;
 
-use core\task\adhoc_task;
-
-defined('MOODLE_INTERNAL') || die();
-
 /**
- * Processes Arlo webhooks events.
+ * Arlo Retry counter reset Task
  *
- * @package     enrol_arlo
- * @author      2023 Oscar Nadjar <oscar.nadjar@moodle.com>
+ * Scheduled task class for resetting the Arlo retries error count.
+ *
  * @copyright   Moodle US
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     enrol_arlo
+ * @author      2025 Oscar Nadjar <oscar.nadjar@moodle.com>
  */
-class webhook_task extends adhoc_task {
+class reset_retries_task extends \core\task\scheduled_task {
 
     /**
-     * Get schedule task human readable name.
+     * Get the name of the task.
      *
      * @return string
-     * @throws \coding_exception
      */
     public function get_name() {
-        return get_string('webhooktask', 'enrol_arlo');
+        return get_string('reset_retries_task', 'enrol_arlo');
     }
 
     /**
      * Execute the task.
      *
-     * @throws \coding_exception
-     * @throws \dml_exception
-     * @throws \moodle_exception
+     * The tasks cleans the Arlo retries error count.
      */
     public function execute() {
+        global $DB;
 
-        $event = $this->get_custom_data();
-        \enrol_arlo\input\webhook_handler::process_event($event);
+        set_config('redirectcount', 0, 'enrol_arlo');
+        $resetregretretries = get_config('enrol_arlo', 'resetregretries');
+        if ($resetregretretries) {
+            $DB->set_field_select('enrol_arlo_registration', 'redirectcounter', 0, 'redirectcounter > 0');
+        }
     }
-    
-    /**
-     * Queues this task to run ASAP.
-     * 
-     * @param string $registrationid
-     */
-    public static function queue_task(object $event) {
-        $task = new self();
-        $task->set_custom_data($event);
-        $task->set_next_run_time(time());
-        \core\task\manager::queue_adhoc_task($task);
-    }
+        
 }

@@ -22,10 +22,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once(__DIR__ . '/../../../config.php');
+require_once($CFG->libdir . '/adminlib.php');
+
+admin_externalpage_setup('webhookstatusonfiguration',
+    null, null, '/enrol/arlo/admin/webhook_status.php');
+
 use enrol_arlo\form\admin\webhook_form;
 use enrol_arlo\input\webhook_handler;
-
-require_once(__DIR__ . '/../../../config.php');
 
 // Set up the page
 $PAGE->set_context(context_system::instance());

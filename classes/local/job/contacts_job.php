@@ -195,6 +195,10 @@ class contacts_job extends job {
                                 $user->set('email', $contact->get('email'));
                                 $user->set('phone1', $contact->get('phonemobile'));
                                 $user->set('phone2', $contact->get('phonework'));
+                                $authmethod = get_config('enrol_arlo', 'arloauthconfig');
+                                if ($authmethod) {
+                                    $user->set('auth', $authmethod);
+                                }
                                 $user->update();
                                 // Clear errors on contact and update.
                                 $contact->set('errormessage', '');
