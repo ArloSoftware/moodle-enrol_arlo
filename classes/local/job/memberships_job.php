@@ -207,10 +207,15 @@ class memberships_job extends job {
         try {
             $jobpersistent = $this->get_job_persistent();
             // Save Arlo registration information into Moodle persistents.
-            list($registration, $contact) = static::save_resource_information_to_persistents(
+            list($registration, $contact, $skip) = static::save_resource_information_to_persistents(
                 $this->enrolmentinstance,
                 $resource
             );
+
+            // If the registration hasn't been modified since the last sync, we can skip it.
+            if (!empty($skip)) {
+                return;
+            }
             // Invoke enrolment processing for this registration.
             $result = static::process_enrolment_registration(
                 $this->enrolmentinstance,
@@ -706,10 +711,29 @@ class memberships_job extends job {
             ['sourceguid' => $sourceguid]
         );
         if (!$registration) {
+            // Now we try by user and enrolment instance.
+            $contact = contact_persistent::get_record(
+                ['sourceid' => $contactresource->ContactID]
+            );
+            if (!empty($contact)) {
+                $registration = registration_persistent::get_record(
+                    ['userid' => $contact->get('userid'), 'enrolid' => $enrolmentinstance->id]
+                );
+                if (!empty($registration)) {
+                    // We don't want to re-process the registrations if it hasn't been modified since the last sync.
+                    $lastsourcemodifieddb = $registration->get('sourcemodified');
+                    $lastsourcemodifiedapi = $resource->LastModifiedDateTime;
+                    // It must be newer, if has the same timestamp we already processed it.
+                    if ($lastsourcemodifieddb > $lastsourcemodifiedapi) {
+                        return [$registration, $contactresource, true];
+                    }
+                }
+            }
+
             $registration = new registration_persistent();
             $registration->set('sourceid', $sourceid);
             $registration->set('sourceguid', $sourceguid);
-        }
+        } 
         $registration->set('enrolid', $enrolmentinstance->id);
         $registration->set('attendance', $resource->Attendance);
         $registration->set('outcome', $resource->Outcome);
