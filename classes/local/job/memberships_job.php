@@ -548,7 +548,7 @@ class memberships_job extends job {
      */
     public static function process_enrolment_registration(stdClass $enrolmentinstance,
                                                           registration_persistent $registration,
-                                                          contact_persistent $contact = null) {
+                                                          ?contact_persistent $contact = null) {
         // Load plugin class instance.
         $plugin = api::get_enrolment_plugin();
         // Get plugin config.
