@@ -171,7 +171,7 @@ class user_persistent extends persistent {
      * @throws \dml_exception
      * @throws coding_exception
      */
-    public function __construct($id = 0, stdClass $record = null) {
+    public function __construct($id = 0, ?stdClass $record = null) {
         global $DB;
 
         if ($id > 0) {

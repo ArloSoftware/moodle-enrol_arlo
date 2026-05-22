@@ -60,7 +60,7 @@ class api {
      * @throws \coding_exception
      * @throws moodle_exception
      */
-    public static function api_callable(progress_trace $trace = null) {
+    public static function api_callable(?progress_trace $trace = null) {
         if (is_null($trace)) {
             $trace = new null_progress_trace();
         }
@@ -115,7 +115,7 @@ class api {
      * @throws \dml_exception
      * @throws moodle_exception
      */
-    public static function run_outcome_jobs($limit = 100, progress_trace $trace = null) {
+    public static function run_outcome_jobs($limit = 100, ?progress_trace $trace = null) {
         global $DB;
         if (!static::api_callable($trace)) {
             return false;
@@ -181,7 +181,7 @@ class api {
      * @throws \dml_exception
      * @throws moodle_exception
      */
-    public static function run_scheduled_jobs($area, $type, $time = null, $limit = 50, progress_trace $trace = null) {
+    public static function run_scheduled_jobs($area, $type, $time = null, $limit = 50, ?progress_trace $trace = null) {
         global $DB;
         if (!static::api_callable($trace)) {
             return false;
@@ -281,7 +281,7 @@ class api {
      * @throws \dml_exception
      * @throws moodle_exception
      */
-    public static function run_site_jobs(progress_trace $trace = null) {
+    public static function run_site_jobs(?progress_trace $trace = null) {
         global $DB;
         if (!static::api_callable($trace)) {
             return false;
@@ -330,7 +330,7 @@ class api {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    public static function run_cleanup(progress_trace $trace = null) {
+    public static function run_cleanup(?progress_trace $trace = null) {
         global $DB;
         if (is_null($trace)) {
             $trace = new null_progress_trace();

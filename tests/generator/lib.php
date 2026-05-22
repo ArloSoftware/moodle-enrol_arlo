@@ -114,7 +114,7 @@ class enrol_arlo_generator extends testing_module_generator {
      * @throws \enrol_arlo\invalid_persistent_exception
      * @throws coding_exception
      */
-    public function create_contact(stdClass $data = null) {
+    public function create_contact(?stdClass $data = null) {
         $randomnumber = rand();
         $datetime = $this->get_arlo_type_datetime();
         $contact = new contact_persistent();
@@ -143,7 +143,7 @@ class enrol_arlo_generator extends testing_module_generator {
      * @return event_persistent
      * @throws coding_exception
      */
-    public function create_event(event_template_persistent $template, stdClass $data = null) {
+    public function create_event(event_template_persistent $template, ?stdClass $data = null) {
         $randomnumber = rand();
         $datetimeformat = $this->get_arlo_datetime_format();
         $date = new DateTime(
@@ -241,7 +241,7 @@ class enrol_arlo_generator extends testing_module_generator {
     public function create_event_registration(contact_persistent $contact,
                                               event_persistent $event,
                                               $enrolmentinstance = null,
-                                              stdClass $data = null) {
+                                              ?stdClass $data = null) {
         $randomnumber = rand();
         $datetime = $this->get_arlo_type_datetime();
         $registration = new registration_persistent();

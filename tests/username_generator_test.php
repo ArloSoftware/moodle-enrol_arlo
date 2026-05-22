@@ -23,7 +23,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class enrol_arlo_username_generator_testcase extends \core_privacy\tests\provider_testcase {
+class username_generator_test extends \core_privacy\tests\provider_testcase {
 
     /**
      *  @var enrol_arlo_generator $plugingenerator handle to plugin generator.
