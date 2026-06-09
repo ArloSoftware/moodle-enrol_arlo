@@ -134,17 +134,34 @@ class contacts_job extends job {
                     $uri->setPagingTop(250);
                     $uri->setResourcePath($jobpersistent->get('endpoint'));
                     $uri->addExpand('Registration/Contact');
-                    $filter = "Contact/LastModifiedDateTime gt datetime('". $jobpersistent->get('lastsourcetimemodified') ."')";
+                    $lastsourcetimemodified = $jobpersistent->get('lastsourcetimemodified');
+                    // Page using a (LastModifiedDateTime, ContactID) keyset cursor. The ContactID
+                    // tiebreaker matches the other sync jobs and stops the cursor stalling when more
+                    // than one page of contacts share the same LastModifiedDateTime.
+                    $filter = "(Contact/LastModifiedDateTime gt datetime('" . $lastsourcetimemodified . "'))";
+                    if ($jobpersistent->get('lastsourceid')) {
+                        $filter .= " OR (Contact/LastModifiedDateTime eq datetime('" . $lastsourcetimemodified . "')";
+                        $filter .= " AND Contact/ContactID gt " . $jobpersistent->get('lastsourceid') . ")";
+                    }
                     $uri->setFilterBy($filter);
-                    $uri->setOrderBy('Contact/LastModifiedDateTime ASC');
+                    $uri->setOrderBy('Contact/LastModifiedDateTime ASC,Contact/ContactID ASC');
                     $request = new Request('GET', $uri->output(true));
                     $response = client::get_instance()->send_request($request);
                     $collection = response_processor::process($response);
                     if ($collection->count() > 0) {
+                        $cursortimebefore = $jobpersistent->get('lastsourcetimemodified');
+                        $cursoridbefore = $jobpersistent->get('lastsourceid');
                         foreach ($collection as $resource) {
                             try {
-                                // No need to process cancelled registrations.
+                                // No need to process cancelled registrations, but still advance the
+                                // paging cursor so a page made up entirely of cancelled registrations
+                                // does not stall pagination and re-request the same page forever.
                                 if ($resource->Status == RegistrationStatus::CANCELLED) {
+                                    $cancelledcontact = $resource->getContact();
+                                    if (!empty($cancelledcontact) && !empty($cancelledcontact->LastModifiedDateTime)) {
+                                        $jobpersistent->set('lastsourceid', $cancelledcontact->ContactID);
+                                        $jobpersistent->set('lastsourcetimemodified', $cancelledcontact->LastModifiedDateTime);
+                                    }
                                     continue;
                                 }
                                 $contactresource = $resource->getContact();
@@ -218,6 +235,15 @@ class contacts_job extends job {
                         }
                         // See if need to get another page of records.
                         $hasnext = (bool) $collection->hasNext();
+                        // Safety net: if Arlo reports more pages but our paging cursor did not move
+                        // while processing this page, stop instead of re-requesting the identical page
+                        // forever (prevents runaway polling of the Arlo API).
+                        if ($hasnext
+                                && $jobpersistent->get('lastsourcetimemodified') === $cursortimebefore
+                                && $jobpersistent->get('lastsourceid') == $cursoridbefore) {
+                            $this->add_error(get_string('pagingnoprogress', 'enrol_arlo'));
+                            $hasnext = false;
+                        }
                     }
                 }
                 return true;

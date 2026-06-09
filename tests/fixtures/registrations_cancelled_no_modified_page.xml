@@ -1,0 +1,41 @@
+<Registrations>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/Registration" type="application/xml" title="Registration" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1101/">
+<Registration>
+<RegistrationID>1101</RegistrationID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000001101</UniqueIdentifier>
+<Status>Cancelled</Status>
+<CreatedDateTime>2023-02-01T09:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2023-02-10T09:00:00.0000000Z</LastModifiedDateTime>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/related/Contact" type="application/xml" title="Contact" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2101/">
+<Contact>
+<ContactID>2101</ContactID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000002101</UniqueIdentifier>
+<FirstName>Test</FirstName>
+<LastName>Nolmdone</LastName>
+<Email>nolmd1@example.com</Email>
+<Status>Active</Status>
+</Contact>
+</Link>
+</Registration>
+</Link>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/Registration" type="application/xml" title="Registration" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1102/">
+<Registration>
+<RegistrationID>1102</RegistrationID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000001102</UniqueIdentifier>
+<Status>Cancelled</Status>
+<CreatedDateTime>2023-03-01T09:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2023-03-10T09:00:00.0000000Z</LastModifiedDateTime>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/related/Contact" type="application/xml" title="Contact" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2102/">
+<Contact>
+<ContactID>2102</ContactID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000002102</UniqueIdentifier>
+<FirstName>Test</FirstName>
+<LastName>Nolmdtwo</LastName>
+<Email>nolmd2@example.com</Email>
+<Status>Active</Status>
+</Contact>
+</Link>
+</Registration>
+</Link>
+<Link rel="next" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/onlineactivities/36/registrations/?top=250&amp;expand=Registration,Registration/Contact"/>
+</Registrations>

@@ -331,6 +331,7 @@ $string['allowhiddencoursesdiabled'] = 'Allow hidden courses is disabled at site
 $string['contactresourcemissing'] = 'Contact resource missing from Registration.';
 $string['contactrecordmissing'] = 'Contact record missing.';
 $string['noassociateduser'] = 'No associated Moodle user account.';
+$string['pagingnoprogress'] = 'Paging halted: the sync cursor did not advance while more pages were reported. Stopped to avoid re-requesting the same page.';
 $string['unsuccessfulenrolment'] = 'Unsuccessful enrolment';
 $string['unsuccessfulenrolments'] = 'Unsuccessful enrolments';
 $string['unsuccessfulenrolmentscount'] = 'Unsuccessful enrolments: {$a}';
