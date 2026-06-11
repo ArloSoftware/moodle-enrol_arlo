@@ -29,7 +29,7 @@ use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\local\handler\contact_merge_requests_handler;
 
-class enrol_arlo_contact_merge_requests_testcase extends advanced_testcase {
+class contact_merge_requests_test extends advanced_testcase {
 
     public function test_no_merge_requests() {
         global $CFG, $DB;

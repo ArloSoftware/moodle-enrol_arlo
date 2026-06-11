@@ -227,7 +227,7 @@ class enrol_arlo_plugin extends enrol_plugin {
      * @throws moodle_exception
      * @throws required_capability_exception
      */
-    public function add_instance($course, array $fields = null) {
+    public function add_instance($course, ?array $fields = null) {
         $pluginconfig = new arlo_plugin_config();
         $fields['roleid'] = $pluginconfig->get('roleid');
         $fields['customchar1'] = $pluginconfig->get('platform');

@@ -548,7 +548,7 @@ class memberships_job extends job {
      */
     public static function process_enrolment_registration(stdClass $enrolmentinstance,
                                                           registration_persistent $registration,
-                                                          contact_persistent $contact = null) {
+                                                          ?contact_persistent $contact = null) {
         // Load plugin class instance.
         $plugin = api::get_enrolment_plugin();
         // Get plugin config.
@@ -706,34 +706,38 @@ class memberships_job extends job {
             throw new moodle_exception('missingresource',
                 null, null,  null, 'course'); // Course is Event ot Online Activity.
         }
-        // Check for existing registration record.
-        $registration = registration_persistent::get_record(
-            ['sourceguid' => $sourceguid]
-        );
-        if (!$registration) {
-            // Now we try by user and enrolment instance.
-            $contact = contact_persistent::get_record(
-                ['sourceid' => $contactresource->ContactID]
+        // ARLO-77: one registration row per (userid, enrolid). Look up by user+course when we
+        // already know the user, falling back to the incoming sourceguid.
+        $existingcontact = contact_persistent::get_record(['sourceid' => $contactresource->ContactID]);
+        $registration = null;
+        if ($existingcontact && $existingcontact->get('userid') > 0) {
+            $registration = registration_persistent::get_record(
+                ['userid' => $existingcontact->get('userid'), 'enrolid' => $enrolmentinstance->id]
             );
-            if (!empty($contact)) {
-                $registration = registration_persistent::get_record(
-                    ['userid' => $contact->get('userid'), 'enrolid' => $enrolmentinstance->id]
-                );
-                if (!empty($registration)) {
-                    // We don't want to re-process the registrations if it hasn't been modified since the last sync.
-                    $lastsourcemodifieddb = $registration->get('sourcemodified');
-                    $lastsourcemodifiedapi = $resource->LastModifiedDateTime;
-                    // It must be newer, if has the same timestamp we already processed it.
-                    if ($lastsourcemodifieddb > $lastsourcemodifiedapi) {
-                        return [$registration, $contactresource, true];
-                    }
-                }
-            }
+        }
+        $registration = $registration ?: registration_persistent::get_record(['sourceguid' => $sourceguid]);
 
+        if ($registration) {
+            // Nothing newer to apply - short-circuit so the outcomes-push -> memberships-poll
+            // loop doesn't re-run the enrolment pipeline every cycle.
+            if ($registration->get('sourcemodified') >= $resource->LastModifiedDateTime) {
+                return [$registration, $existingcontact, true];
+            }
+            // Pair switched to a new Arlo registration ID. Drop any orphan row already holding
+            // the incoming sourceguid (UNIQUE index) before updating in place.
+            if ($registration->get('sourceguid') !== $sourceguid) {
+                $orphan = registration_persistent::get_record(['sourceguid' => $sourceguid]);
+                if ($orphan && $orphan->get('id') != $registration->get('id')) {
+                    $orphan->delete();
+                }
+                $registration->set('sourceguid', $sourceguid);
+                $registration->set('sourceid', $sourceid);
+            }
+        } else {
             $registration = new registration_persistent();
             $registration->set('sourceid', $sourceid);
             $registration->set('sourceguid', $sourceguid);
-        } 
+        }
         $registration->set('enrolid', $enrolmentinstance->id);
         $registration->set('attendance', $resource->Attendance);
         $registration->set('outcome', $resource->Outcome);
@@ -754,8 +758,8 @@ class memberships_job extends job {
             $registration->set('sourceonlineactivityid', $onlineactivityresource->OnlineActivityID);
             $registration->set('sourceonlineactivityguid', $onlineactivityresource->UniqueIdentifier);
         }
-        // Check for existing contact record.
-        $contact = $registration->get_contact();
+        // Check for existing contact record. Reuse the lookup we did above when available.
+        $contact = $existingcontact ?: $registration->get_contact();
         // Create new contact.
         if (!$contact) {
             $contact = new contact_persistent();
@@ -785,8 +789,7 @@ class memberships_job extends job {
         $registration->set('errormessage', '');
         $registration->set('enrolmentfailure', 0);
         $registration->save();
-        // Return registration and contact persistents.
-        return array($registration, $contact);
+        return [$registration, $contact, false];
     }
 
 }

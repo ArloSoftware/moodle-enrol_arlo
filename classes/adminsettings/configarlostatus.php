@@ -99,25 +99,27 @@ class configarlostatus extends \admin_setting {
         $description = '';
         if (200 == $apistatus) {
             if ($useimageiconclass) {
-                $statusicon = $OUTPUT->image_icon('t/go', get_string('ok', 'enrol_arlo'));
+                $statusicon = $OUTPUT->image_icon('t/completion_complete', get_string('ok', 'enrol_arlo'));
+
             } else {
-                $statusicon = $OUTPUT->pix_icon('t/go', get_string('ok', 'enrol_arlo'));
+                $statusicon = $OUTPUT->pix_icon('t/completion_complete', get_string('ok', 'enrol_arlo'));
+ 
             }
             $reason = get_string('apistatusok', 'enrol_arlo', userdate($apilastrequested));
         } else if (0 == $apistatus || ($apistatus >= 400 && $apistatus < 499)) {
             if ($useimageiconclass) {
-                $statusicon = $OUTPUT->image_icon('t/stop', get_string('notok', 'enrol_arlo'));
+                $statusicon = $OUTPUT->image_icon('t/completion_fail', get_string('notok', 'enrol_arlo'), null);
             } else {
-                $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+                $statusicon = $OUTPUT->pix_icon('t/completion_fail', get_string('notok', 'enrol_arlo'));
             }
             $reason = get_string('apistatusclienterror', 'enrol_arlo');
             $url = new \moodle_url('/enrol/arlo/admin/apirequests.php');
             $description = get_string('pleasecheckrequestlog', 'enrol_arlo', $url->out());
         } else if ($apistatus >= 500 && $apistatus < 599) {
             if ($useimageiconclass) {
-                $statusicon = $OUTPUT->image_icon('t/stop', get_string('notok', 'enrol_arlo'));
+                $statusicon = $OUTPUT->image_icon('t/completion_fail', get_string('notok', 'enrol_arlo'), null);
             } else {
-                $statusicon = $OUTPUT->pix_icon('t/stop', get_string('notok', 'enrol_arlo'));
+                $statusicon = $OUTPUT->pix_icon('t/completion_fail', get_string('notok', 'enrol_arlo'));
             }
             $reason = get_string('apistatusservererror', 'enrol_arlo');
             $url = new \moodle_url('/enrol/arlo/admin/apirequests.php');

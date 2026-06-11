@@ -73,7 +73,7 @@ class username_generator {
      * @param array|null $options
      * @throws coding_exception
      */
-    public function __construct($data = null, string $order = null, array $options = null) {
+    public function __construct($data = null, ?string $order = null, ?array $options = null) {
         $this->register_default_formats();
         if (!is_null($data)) {
             $this->add_data($data);
