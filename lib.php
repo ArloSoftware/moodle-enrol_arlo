@@ -739,19 +739,21 @@ class enrol_arlo_plugin extends enrol_plugin {
                 redirect($redirect, get_string('noeventsoractivitiesfound', 'enrol_arlo'), 1);
             }
             // Type options.
-            array_unshift($typeoptions, get_string('choose') . '...');
+            $typeoptions = ['' => get_string('choose') . '...'] + $typeoptions;
             $mform->addElement('select', 'arlotype', get_string('type', 'enrol_arlo'), $typeoptions);
-            // Event selector.
-            array_unshift($eventoptions, get_string('choose') . '...');
+            // Event selector. Shown only when the Event type is selected.
+            $eventoptions = ['' => ''] + $eventoptions;
             $mform->addElement('autocomplete', 'arloevent', get_string('event', 'enrol_arlo'), $eventoptions);
-            $mform->disabledIf('arloevent', 'arlotype', 'eq', arlo_type::ONLINEACTIVITY);
-            $mform->disabledIf('arloevent', 'arlotype', 'eq', 0);
-            // Online Activity selector.
-            array_unshift($onlineactivityoptions, get_string('choose') . '...');
-            $mform->addElement('autocomplete', 'arloonlineactivity',
-                get_string('onlineactivity', 'enrol_arlo'), $onlineactivityoptions);
-            $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', arlo_type::EVENT);
-            $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', 0);
+            $mform->hideIf('arloevent', 'arlotype', 'neq', arlo_type::EVENT);
+            // Online Activity selector. Shown only when the Online Activity type is selected.
+            $onlineactivityoptions = ['' => ''] + $onlineactivityoptions;
+            $mform->addElement(
+                'autocomplete',
+                'arloonlineactivity',
+                get_string('onlineactivity', 'enrol_arlo'),
+                $onlineactivityoptions
+            );
+            $mform->hideIf('arloonlineactivity', 'arlotype', 'neq', arlo_type::ONLINEACTIVITY);
         }
         // Settings that are editable be instance new or existing.
         $options = $this->get_status_options();
