@@ -701,7 +701,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                 $eventoptions = [
                     $persistent->get('sourceguid') => $persistent->get('code')
                 ];
-                $mform->addElement('select', 'arloevent', get_string('event', 'enrol_arlo'),
+                $mform->addElement('autocomplete', 'arloevent', get_string('event', 'enrol_arlo'),
                     $eventoptions);
                 $mform->setConstant('arloevent', $instance->customchar3);
                 $mform->hardFreeze('arloevent', $instance->customchar3);
@@ -723,7 +723,7 @@ class enrol_arlo_plugin extends enrol_plugin {
                 $eventoptions = [
                     $persistent->get('sourceguid') => $persistent->get('code')
                 ];
-                $mform->addElement('select', 'arloonlineactivity', get_string('onlineactivity',
+                $mform->addElement('autocomplete', 'arloonlineactivity', get_string('onlineactivity',
                     'enrol_arlo'), $eventoptions);
                 $mform->setConstant('arloonlineactivity', $instance->customchar3);
                 $mform->hardFreeze('arloonlineactivity', $instance->customchar3);
@@ -743,12 +743,12 @@ class enrol_arlo_plugin extends enrol_plugin {
             $mform->addElement('select', 'arlotype', get_string('type', 'enrol_arlo'), $typeoptions);
             // Event selector.
             array_unshift($eventoptions, get_string('choose') . '...');
-            $mform->addElement('select', 'arloevent', get_string('event', 'enrol_arlo'), $eventoptions);
+            $mform->addElement('autocomplete', 'arloevent', get_string('event', 'enrol_arlo'), $eventoptions);
             $mform->disabledIf('arloevent', 'arlotype', 'eq', arlo_type::ONLINEACTIVITY);
             $mform->disabledIf('arloevent', 'arlotype', 'eq', 0);
             // Online Activity selector.
             array_unshift($onlineactivityoptions, get_string('choose') . '...');
-            $mform->addElement('select', 'arloonlineactivity',
+            $mform->addElement('autocomplete', 'arloonlineactivity',
                 get_string('onlineactivity', 'enrol_arlo'), $onlineactivityoptions);
             $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', arlo_type::EVENT);
             $mform->disabledIf('arloonlineactivity', 'arlotype', 'eq', 0);

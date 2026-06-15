@@ -108,6 +108,73 @@ class contact_merge_requests_test extends advanced_testcase {
         $this->assertEquals(false,  $result);
     }
 
+    /**
+     * A merge request where both contacts already resolve to the same Moodle user.
+     *
+     * @covers \enrol_arlo\local\handler\contact_merge_requests_handler::apply_all_merge_requests
+     */
+    public function test_source_and_destination_share_same_user(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        /** @var enrol_arlo_generator $plugingenerator */
+        $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
+        $this->resetAfterTest();
+
+        // One Moodle user, email already updated to the new address.
+        $userinfo = new stdClass();
+        $userinfo->firstname = 'Jane';
+        $userinfo->lastname = 'Doe';
+        $userinfo->email = 'jane.new@example.com';
+        $user = $this->getDataGenerator()->create_user($userinfo);
+
+        // Old contact, old email, linked to the user.
+        $sourceinfo = new stdClass();
+        $sourceinfo->firstname = 'Jane';
+        $sourceinfo->lastname = 'Doe';
+        $sourceinfo->email = 'jane.old@example.com';
+
+        $sourcecontact = $plugingenerator->create_contact($sourceinfo);
+
+        // Associate contact and user.
+        $sourcecontact->set('userid', $user->id);
+        $sourcecontact->update();
+
+        // New contact, new email, matched to the same user.
+        $destinationinfo = new stdClass();
+        $destinationinfo->firstname = 'Jane';
+        $destinationinfo->lastname = 'Doe';
+        $destinationinfo->email = 'jane.new@example.com';
+
+        $destinationcontact = $plugingenerator->create_contact($destinationinfo);
+
+        // Associate contact and user.
+        $destinationcontact->set('userid', $user->id);
+        $destinationcontact->update();
+
+        // Create a contact merge request.
+        $contactmergerequest = $plugingenerator->create_contact_merge_request($sourcecontact, $destinationcontact);
+
+        // A single enrolment, counted on both sides because it is the same user.
+        $manualplugin = enrol_get_plugin('manual');
+
+        $studentrole = $DB->get_record('role', ['shortname' => 'student']);
+        $this->assertNotEmpty($studentrole);
+
+        $category = $this->getDataGenerator()->create_category();
+        $course = $this->getDataGenerator()->create_course(['category' => $category->id]);
+        $manualinstance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual'], '*', MUST_EXIST);
+
+        $manualplugin->enrol_user($manualinstance, $user->id, $studentrole->id);
+
+        $handler = new contact_merge_requests_handler($destinationcontact);
+        $result = $handler->apply_all_merge_requests();
+
+        // Current behaviour: the merge fails even though there is nothing to merge.
+        $this->assertEquals(false, $result);
+        $contactmergerequest->read();
+        $this->assertEquals(1, $contactmergerequest->get('mergefailed'));
+    }
+
     public function test_source_has_user_and_destination_has_enrolments() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/enrol/arlo/lib.php');
