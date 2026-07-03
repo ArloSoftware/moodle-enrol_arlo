@@ -39,6 +39,19 @@ class client {
     /** @var $httpclient \GuzzleHttp\Client */
     protected $httpclient;
 
+    /** @var mixed Guzzle handler override used only under PHPUnit. */
+    protected static $testhandler = null;
+
+    /**
+     * Inject a Guzzle handler (e.g. a MockHandler stack) for unit testing. Has no effect
+     * outside PHPUnit. Pass null to reset.
+     *
+     * @param mixed $handler
+     */
+    public static function set_test_handler($handler) {
+        static::$testhandler = $handler;
+    }
+
     /**
      * Construct a guzzle client setup with basic authentication and appropriate
      * options and headers set.
@@ -62,6 +75,9 @@ class client {
             ]
         ];
         $config['headers'] = array_merge($config['headers'], $headers);
+        if (defined('PHPUNIT_TEST') && PHPUNIT_TEST && !is_null(static::$testhandler)) {
+            $config['handler'] = static::$testhandler;
+        }
         $client = new static();
         $client->httpclient = new \GuzzleHttp\Client($config);
         return $client;

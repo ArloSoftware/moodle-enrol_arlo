@@ -1,0 +1,72 @@
+<Registrations>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/Registration" type="application/xml" title="Registration" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1001/">
+<Registration>
+<RegistrationID>1001</RegistrationID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000001001</UniqueIdentifier>
+<Status>Cancelled</Status>
+<CreatedDateTime>2023-02-01T09:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2023-02-10T09:00:00.0000000Z</LastModifiedDateTime>
+<Link rel="self" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1001/"/>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/related/Contact" type="application/xml" title="Contact" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2001/">
+<Contact>
+<ContactID>2001</ContactID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000002001</UniqueIdentifier>
+<FirstName>Test</FirstName>
+<LastName>Learnerone</LastName>
+<Email>learner1@example.com</Email>
+<Status>Active</Status>
+<CreatedDateTime>2022-11-01T10:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2023-03-07T13:11:09.9601334Z</LastModifiedDateTime>
+<Link rel="self" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2001/"/>
+</Contact>
+</Link>
+</Registration>
+</Link>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/Registration" type="application/xml" title="Registration" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1002/">
+<Registration>
+<RegistrationID>1002</RegistrationID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000001002</UniqueIdentifier>
+<Status>Cancelled</Status>
+<CreatedDateTime>2023-04-01T09:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2023-04-10T09:00:00.0000000Z</LastModifiedDateTime>
+<Link rel="self" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1002/"/>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/related/Contact" type="application/xml" title="Contact" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2002/">
+<Contact>
+<ContactID>2002</ContactID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000002002</UniqueIdentifier>
+<FirstName>Test</FirstName>
+<LastName>Learnertwo</LastName>
+<Email>learner2@example.com</Email>
+<Status>Active</Status>
+<CreatedDateTime>2022-12-01T10:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2024-01-15T08:30:00.0000000Z</LastModifiedDateTime>
+<Link rel="self" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2002/"/>
+</Contact>
+</Link>
+</Registration>
+</Link>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/Registration" type="application/xml" title="Registration" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1003/">
+<Registration>
+<RegistrationID>1003</RegistrationID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000001003</UniqueIdentifier>
+<Status>Cancelled</Status>
+<CreatedDateTime>2025-06-01T09:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2025-06-10T09:00:00.0000000Z</LastModifiedDateTime>
+<Link rel="self" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/registrations/1003/"/>
+<Link rel="http://schemas.arlo.co/api/2012/02/auth/related/Contact" type="application/xml" title="Contact" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2003/">
+<Contact>
+<ContactID>2003</ContactID>
+<UniqueIdentifier>00000000-0000-0000-0000-000000002003</UniqueIdentifier>
+<FirstName>Test</FirstName>
+<LastName>Learnerthree</LastName>
+<Email>learner3@example.com</Email>
+<Status>Active</Status>
+<CreatedDateTime>2023-01-01T10:00:00.0000000Z</CreatedDateTime>
+<LastModifiedDateTime>2025-07-17T15:39:56.2075043Z</LastModifiedDateTime>
+<Link rel="self" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/contacts/2003/"/>
+</Contact>
+</Link>
+</Registration>
+</Link>
+<Link rel="next" type="application/xml" href="https://example.arlo.co/api/2012-02-01/auth/resources/onlineactivities/36/registrations/?top=250&amp;expand=Registration,Registration/Contact"/>
+</Registrations>
