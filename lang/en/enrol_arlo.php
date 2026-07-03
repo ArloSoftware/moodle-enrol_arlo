@@ -55,6 +55,8 @@ $string['apipassword'] = 'Arlo password';
 $string['apipassword_desc'] = 'Forgot your password? <a title="{$a->title}" href="{$a->url}" target="_blank">Learn how to reset it.</a>';
 $string['arloauthconfig'] = 'Arlo authentication method';
 $string['arloauthconfig_desc'] = 'Select the authentication method to use for Arlo enrolments.';
+$string['enable_arlo_auth_config'] = 'Enable Arlo authentication configuration';
+$string['enable_arlo_auth_config_desc'] = 'Show options for selecting the authentication method used for Arlo enrolments and its password handling.';
 $string['arloconnection'] = 'Arlo connection';
 $string['arlosettings'] = 'Arlo settings';
 $string['arlocontact'] = 'Arlo contact';

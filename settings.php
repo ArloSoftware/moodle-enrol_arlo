@@ -176,6 +176,10 @@ if ($hassiteconfig) {
     get_string('webhookstatus', 'enrol_arlo'),
     new moodle_url('/enrol/arlo/admin/webhook_status.php')));
 
+    $name = get_string('enable_arlo_auth_config', 'enrol_arlo');
+    $description = get_string('enable_arlo_auth_config_desc', 'enrol_arlo');
+    $settings->add(new admin_setting_configcheckbox('enable_arlo_auth_config', $name, $description, 0));
+
     if (!empty($CFG->enable_arlo_auth_config)) {
         $name = get_string('arloauthconfig', 'enrol_arlo');
         $description = get_string('arloauthconfig_desc', 'enrol_arlo');
@@ -190,7 +194,7 @@ if ($hassiteconfig) {
         // Some auth methods doesn't use a password inside Moodle, so it may be better to disable the force password change feature.
         $name = get_string('disableforcepasswordchange', 'enrol_arlo');
         $description = get_string('disableforcepasswordchange_desc', 'enrol_arlo');
-        $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableforcepasswordchange', $name, $description, 0));
+        $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableforcepasswordchange', $name, $description, 1));
     }
     $settings = null;
 }
