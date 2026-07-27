@@ -18,46 +18,21 @@ Get started today with a [30 day risk-free trial.](https://www.arlo.co/try-arlo)
 In your Moodle site (as admin) go to Settings > Site administration > Notifications (you should get a message saying 
 the plugin is installed).
 
-## Upgrading from version 3.1.1 to version 3.1.9 and higher
-
-Version 3.1.9 and higher of the enrolment plugin is no longer dependant on the local plugin.
-
-1. Perform a full site backup. Information on how to perform a site backup can be found at [MoodleDocs.](https://docs.moodle.org/31/en/Site_backup)
-
-2. Unzip source to enrol/arlo folder on your Moodle server.
-In your Moodle site (as admin) go to Settings > Site administration > Notifications (you should get a message saying 
-the plugin is upgraded).
-
-3. Go to Administration > Site Administration > Plugins > Local plugins > Manage local plugins.
-Then click the Uninstall link opposite the Arlo plugin.
-
-4. Use a file manager to remove/delete the actual plugin directory as instructed, otherwise Moodle will reinstall it next 
-time you access the site administration.
-
 ## Release Notes
 
-### Version 4.1.1 (2023062000)
-* Fix enrollments task processing (ARLO-20)
-* Improvement completion task processing (ARLO-10)
-
-### Version 4.1 (2023021500)
-
-### Version 3.11.3 (2023012000)
-* Sync efficiency improvements using api registration based calls instead of event based api calls (ARLO-7)
-
-### Version 3.11.2 (2022101000)
-* Sort scheduled jobs to improve behavior on PostgreSQL systems. (ARLO-6)
-
-### Version 3.11.1 (2022090100)
-* Add additional information to logs on PATCH failure. (ARLO-5)
-
-### Version 3.11.0 (2022083100)
-* Moodle 3.11 compatibility. (ARLO-1)
-* Improvements for sites with very large numbers of enrollment methods. (DEF-110)
-
-### Version 3.9.2 (2020073112)
-* Bugfig issue #154. Incorrect scope error prevented enrolment task from completing in some instances resulting in enrolments 
-  not being added.
+### Version 5.2.0 (2026061100)
+* Moodle 5.2 compatibility. Deprecated API calls replaced across the plugin.
+* Supported Moodle versions are now 4.5 through 5.2 (4.5, 5.0, 5.1 and 5.2).
+* Registration matching now keys on user and enrolment instance, and skips resources that have not
+  changed since the last sync. Stops the outcome push / membership poll cycle from repeatedly
+  unenrolling and re-enrolling learners.
+* Fix Arlo connection status icons on the settings page.
+* Contact merge failures where both Arlo contacts resolve to the same Moodle user can now be marked
+  as complete from the unsuccessful enrolments page, which retries the enrolment.
+* Event and Online activity selectors on the enrolment instance form are autocomplete fields, each
+  shown only for the matching type.
+* New "Enable Arlo authentication configuration" site setting. "Disable force password change" now
+  defaults to enabled.
 
 ## Support
 
