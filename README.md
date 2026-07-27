@@ -22,7 +22,7 @@ the plugin is installed).
 
 ### Version 5.2.0 (2026061100)
 * Moodle 5.2 compatibility. Deprecated API calls replaced across the plugin.
-* Supported Moodle versions are now 4.5 and 5.2.
+* Supported Moodle versions are now 4.5 through 5.2 (4.5, 5.0, 5.1 and 5.2).
 * Registration matching now keys on user and enrolment instance, and skips resources that have not
   changed since the last sync. Stops the outcome push / membership poll cycle from repeatedly
   unenrolling and re-enrolling learners.
