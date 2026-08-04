@@ -264,6 +264,7 @@ $string['pluginstatus'] = 'Status';
 $string['queued'] = 'Queued';
 $string['reattemptenrolment'] = 'Re-attempt enrolment';
 $string['reattemptenrolmentconfirm'] = 'Please ensure you have actioned all issues found in the failure reports before re-attempting the enrolment or the enrolment will fail again. Re-attempt enrolment?';
+$string['registrationownershipconflict'] = 'Registration {$a} is already linked to a different user or enrolment instance. It was left unchanged and must be reviewed manually.';
 $string['registrationstatus'] = 'Registration status';
 $string['remove'] = 'Remove';
 $string['removetemplatedanger'] = '

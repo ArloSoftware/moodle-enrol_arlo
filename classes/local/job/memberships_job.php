@@ -153,12 +153,16 @@ class memberships_job extends job {
                     $expand = 'Registration/' . $resourcename;
                     $uri->addExpand($expand);
                     $uri->setPagingTop(250);
-                    $filter = "(LastModifiedDateTime gt datetime('" . $jobpersistent->get('lastsourcetimemodified') . "'))";
-                    if ($jobpersistent->get('lastsourceid')) {
+                    $lastsourcetimemodified = static::validate_datetime_cursor(
+                        $jobpersistent->get('lastsourcetimemodified')
+                    );
+                    $lastsourceid = (int) $jobpersistent->get('lastsourceid');
+                    $filter = "(LastModifiedDateTime gt datetime('" . $lastsourcetimemodified . "'))";
+                    if ($lastsourceid) {
                         $filter .= " OR ";
-                        $filter .= "(LastModifiedDateTime eq datetime('" . $jobpersistent->get('lastsourcetimemodified') . "')";
+                        $filter .= "(LastModifiedDateTime eq datetime('" . $lastsourcetimemodified . "')";
                         $filter .= " AND ";
-                        $filter .= "RegistrationID gt " . $jobpersistent->get('lastsourceid') . ")";
+                        $filter .= "RegistrationID gt " . $lastsourceid . ")";
                     }
                     $uri->setFilterBy($filter);
                     $uri->setOrderBy("LastModifiedDateTime ASC,RegistrationID ASC");
@@ -204,6 +208,7 @@ class memberships_job extends job {
      * @return void
      */
     public function sync_resource($resource) {
+        $registration = null;
         try {
             $jobpersistent = $this->get_job_persistent();
             // Save Arlo registration information into Moodle persistents.
@@ -706,14 +711,16 @@ class memberships_job extends job {
             throw new moodle_exception('missingresource',
                 null, null,  null, 'course'); // Course is Event ot Online Activity.
         }
-        // ARLO-77: one registration row per (userid, enrolid). Look up by user+course when we
-        // already know the user, falling back to the incoming sourceguid.
+        // One registration row per user, enrolment instance and Arlo contact. Look up by
+        // user+course scoped to the incoming contact, falling back to the incoming sourceguid.
         $existingcontact = contact_persistent::get_record(['sourceid' => $contactresource->ContactID]);
         $registration = null;
         if ($existingcontact && $existingcontact->get('userid') > 0) {
-            $registration = registration_persistent::get_record(
-                ['userid' => $existingcontact->get('userid'), 'enrolid' => $enrolmentinstance->id]
-            );
+            $registration = registration_persistent::get_record([
+                'userid' => $existingcontact->get('userid'),
+                'enrolid' => $enrolmentinstance->id,
+                'sourcecontactid' => $contactresource->ContactID,
+            ]);
         }
         $registration = $registration ?: registration_persistent::get_record(['sourceguid' => $sourceguid]);
 
@@ -723,11 +730,18 @@ class memberships_job extends job {
             if ($registration->get('sourcemodified') >= $resource->LastModifiedDateTime) {
                 return [$registration, $existingcontact, true];
             }
-            // Pair switched to a new Arlo registration ID. Drop any orphan row already holding
-            // the incoming sourceguid (UNIQUE index) before updating in place.
+            // Before adopting the incoming sourceguid (UNIQUE index), drop a stale row
+            // holding it only when that row belongs to the same owner or was never linked.
             if ($registration->get('sourceguid') !== $sourceguid) {
                 $orphan = registration_persistent::get_record(['sourceguid' => $sourceguid]);
                 if ($orphan && $orphan->get('id') != $registration->get('id')) {
+                    $orphanuserid = (int) $orphan->get('userid');
+                    $orphanenrolid = (int) $orphan->get('enrolid');
+                    $sameowner = ($orphanuserid <= 0 || $orphanuserid === (int) $registration->get('userid'))
+                        && ($orphanenrolid <= 0 || $orphanenrolid === (int) $registration->get('enrolid'));
+                    if (!$sameowner) {
+                        throw new moodle_exception('registrationownershipconflict', 'enrol_arlo', '', $sourceguid);
+                    }
                     $orphan->delete();
                 }
                 $registration->set('sourceguid', $sourceguid);

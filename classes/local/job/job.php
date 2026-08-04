@@ -351,4 +351,21 @@ abstract class job {
     public function get_job_run_identifier() {
         return $this->get_area() . '/' . $this->get_type() . ':' . $this->get_instanceid();
     }
+
+    /**
+     * Validate a datetime cursor value before it is interpolated into an OData filter.
+     *
+     * @param string|null $value
+     * @return string
+     * @throws coding_exception if the value is not an ISO 8601 datetime.
+     */
+    protected static function validate_datetime_cursor(?string $value): string {
+        if ($value === null || $value === '') {
+            return '1970-01-01T00:00:00Z';
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/', $value)) {
+            throw new coding_exception('Invalid datetime cursor value: ' . $value);
+        }
+        return $value;
+    }
 }

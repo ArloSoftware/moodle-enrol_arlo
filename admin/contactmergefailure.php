@@ -58,6 +58,7 @@ $sameuser = $sourcecontact && $destinationcontact
     && $sourcecontact->get('userid') > 0
     && $sourcecontact->get('userid') == $destinationcontact->get('userid');
 if ($action === 'markcomplete' && confirm_sesskey()) {
+    require_capability('moodle/site:config', context_system::instance());
     if (!$sameuser || !enrol_is_enabled('arlo')) {
         throw new moodle_exception('invalidrecord');
     }
@@ -97,7 +98,7 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 if ($sameuser) {
     echo $OUTPUT->notification(get_string('contactmergerequestsameuser', 'enrol_arlo'), 'info');
-    $markcompleteurl = new moodle_url($PAGE->url, ['action' => 'markcomplete', 'sesskey' => sesskey()]);
+    $markcompleteurl = new moodle_url($PAGE->url, ['action' => 'markcomplete']);
     $markcompletebutton = new single_button($markcompleteurl, get_string('markmergecomplete', 'enrol_arlo'), 'post');
     $markcompletebutton->add_confirm_action(get_string('markmergecompleteconfirm', 'enrol_arlo'));
     echo $OUTPUT->render($markcompletebutton);

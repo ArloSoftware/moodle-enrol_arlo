@@ -26,6 +26,7 @@ namespace enrol_arlo\local;
 
 defined('MOODLE_INTERNAL') || die();
 
+use coding_exception;
 use enrol_arlo\api;
 use enrol_arlo\local\persistent\request_log_persistent;
 use Exception;
@@ -43,12 +44,15 @@ class client {
     protected static $testhandler = null;
 
     /**
-     * Inject a Guzzle handler (e.g. a MockHandler stack) for unit testing. Has no effect
-     * outside PHPUnit. Pass null to reset.
+     * Inject a Guzzle handler (e.g. a MockHandler stack) for unit testing. Pass null to reset.
      *
      * @param mixed $handler
+     * @throws coding_exception if called outside of PHPUnit.
      */
     public static function set_test_handler($handler) {
+        if (!defined('PHPUNIT_TEST') || !PHPUNIT_TEST) {
+            throw new coding_exception('client::set_test_handler() is only available during PHPUnit tests.');
+        }
         static::$testhandler = $handler;
     }
 
