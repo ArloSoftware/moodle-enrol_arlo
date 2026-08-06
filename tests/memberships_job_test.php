@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests the one-row-per-(userid, enrolid) invariant in memberships_job (ARLO-77).
+ * Tests registration row reuse and ownership rules in memberships_job.
  *
  * @package   enrol_arlo
  * @category  phpunit
@@ -112,6 +112,63 @@ final class memberships_job_test extends advanced_testcase {
         $row = reset($rows);
         $this->assertSame($sourceguid, $row->sourceguid);
         $this->assertEquals($primary->get('id'), $row->id);
+    }
+
+    /**
+     * An orphan row belonging to a different user must never be deleted by another user's sync.
+     */
+    public function test_cross_user_orphan_row_is_not_deleted(): void {
+        global $DB;
+        $contact = $this->make_linked_contact('learner4@example.com');
+        $primary = $this->generator->create_event_registration($contact, $this->event, $this->enrolinstance);
+
+        $othercontact = $this->make_linked_contact('other@example.com');
+        $orphan = $this->generator->create_event_registration($othercontact, $this->event, $this->enrolinstance);
+
+        try {
+            $this->save($this->make_registration_resource(
+                $contact,
+                lastmodified: $this->future(),
+                sourceid: (int) $orphan->get('sourceid'),
+                sourceguid: $orphan->get('sourceguid'),
+            ));
+            $this->fail('Expected a registrationownershipconflict exception.');
+        } catch (moodle_exception $exception) {
+            $this->assertSame('registrationownershipconflict', $exception->errorcode);
+        }
+
+        // Both rows survive untouched: the other user's row keeps its identity.
+        $this->assertTrue($DB->record_exists('enrol_arlo_registration', ['id' => $orphan->get('id')]));
+        $primary->read();
+        $this->assertNotSame($orphan->get('sourceguid'), $primary->get('sourceguid'));
+        $orphanuserid = $DB->get_field('enrol_arlo_registration', 'userid', ['id' => $orphan->get('id')]);
+        $this->assertEquals($othercontact->get('userid'), $orphanuserid);
+    }
+
+    /**
+     * A (user, course) row referencing a different Arlo contact must not have its identity overwritten.
+     */
+    public function test_row_of_other_contact_for_same_user_is_not_hijacked(): void {
+        global $DB;
+        $user = $this->getDataGenerator()->create_user(['email' => 'shared@example.com']);
+        $info = (object) ['firstname' => 'Shared', 'lastname' => 'User', 'email' => 'shared@example.com'];
+        $contacta = $this->generator->create_contact($info);
+        $contacta->set('userid', $user->id);
+        $contacta->update();
+        $contactb = $this->generator->create_contact($info);
+        $contactb->set('userid', $user->id);
+        $contactb->update();
+        $rowa = $this->generator->create_event_registration($contacta, $this->event, $this->enrolinstance);
+
+        [$rowb] = $this->save($this->make_registration_resource($contactb, lastmodified: $this->future()));
+
+        // Contact A's row keeps its identity; contact B's registration got its own row.
+        $this->assertNotEquals($rowa->get('id'), $rowb->get('id'));
+        $freshrowa = $DB->get_record('enrol_arlo_registration', ['id' => $rowa->get('id')]);
+        $this->assertEquals($rowa->get('sourceguid'), $freshrowa->sourceguid);
+        $this->assertEquals($contacta->get('sourceid'), $freshrowa->sourcecontactid);
+        $this->assertEquals($contactb->get('sourceid'), $rowb->get('sourcecontactid'));
+        $this->assertSame(2, $this->count_registrations());
     }
 
     // ----- helpers -----

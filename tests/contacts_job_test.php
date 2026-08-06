@@ -15,12 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests for contacts_job pagination.
- *
- * Regression coverage for the Batalas incident: a page of registrations that are all
- * Cancelled used to leave the paging cursor (lastsourcetimemodified) unchanged while the
- * Arlo response still advertised a "next" page, so contacts_job::run() re-requested the
- * identical page forever, flooding the Arlo API.
+ * Tests for contacts_job pagination: an all-cancelled page must advance the paging
+ * cursor instead of re-requesting the same page forever.
  *
  * @package   enrol_arlo
  * @category  phpunit
@@ -173,5 +169,24 @@ class contacts_job_test extends advanced_testcase {
         $this->assertEquals(0, $job->get('lastsourceid'));
         $this->assertTrue($contactsjob->has_errors());
         $this->assertContains(get_string('pagingnoprogress', 'enrol_arlo'), $contactsjob->get_errors());
+    }
+
+    /**
+     * A corrupted datetime cursor must be rejected before it reaches the OData filter,
+     * and no request may be sent to the API.
+     */
+    public function test_malformed_datetime_cursor_is_rejected(): void {
+        $instance = $this->create_arlo_instance();
+        $job = $this->get_contacts_job($instance->id);
+        $job->set('lastsourcetimemodified', "x') OR (1 eq 1");
+        $job->save();
+
+        $this->mock_arlo_responses(['registrations_empty_page.xml']);
+
+        $contactsjob = new contacts_job($job);
+        $this->assertFalse($contactsjob->run());
+        $this->assertDebuggingCalled();
+        $this->assertCount(0, $this->history, 'No request must be sent with an invalid cursor.');
+        $this->assertTrue($contactsjob->has_errors());
     }
 }
