@@ -194,7 +194,7 @@ if ($hassiteconfig) {
         // Some auth methods doesn't use a password inside Moodle, so it may be better to disable the force password change feature.
         $name = get_string('disableforcepasswordchange', 'enrol_arlo');
         $description = get_string('disableforcepasswordchange_desc', 'enrol_arlo');
-        $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableforcepasswordchange', $name, $description, 1));
+        $settings->add(new admin_setting_configcheckbox('enrol_arlo/disableforcepasswordchange', $name, $description, 0));
     }
     $settings = null;
 }
