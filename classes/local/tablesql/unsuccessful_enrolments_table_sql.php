@@ -127,6 +127,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                 'eac.usercreationfailure',
                 'eac.userassociationfailure',
                 'eacmr.mergefailed',
+                'ear.errormessage',
                 'ear.timemodified'
             ];
             $select = implode(',', $fields);
@@ -342,6 +343,9 @@ class unsuccessful_enrolments_table_sql extends table_sql {
             $url->param('id', $values->id);
             $text = get_string('contactmergefailurereport', 'enrol_arlo');
             $output .= $OUTPUT->action_link($url, $text, null, null);
+        }
+        if ($output === '' && !empty($values->errormessage)) {
+            $output = s($values->errormessage);
         }
         return $output;
     }

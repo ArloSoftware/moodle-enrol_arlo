@@ -244,6 +244,7 @@ class memberships_job extends job {
             debugging($exception->getMessage(), DEBUG_DEVELOPER);
             $this->add_error($exception->getMessage());
             if ($registration) {
+                $registration->set('enrolmentfailure', 1);
                 $registration->set('errormessage', $exception->getMessage());
                 $errorcounter = $registration->get('errorcounter');
                 $registration->set('errorcounter', ++$errorcounter);
@@ -554,6 +555,9 @@ class memberships_job extends job {
             try {
                 $result = $enrolmentinstance && static::process_enrolment_registration($enrolmentinstance, $registration);
             } catch (moodle_exception $exception) {
+                $registration->set('enrolmentfailure', 1);
+                $registration->set('errormessage', $exception->getMessage());
+                $registration->update();
                 $result = false;
             }
             $success = $success && $result;
@@ -584,6 +588,7 @@ class memberships_job extends job {
         $pluginconfig = new arlo_plugin_config();
         // Reset enrolment failure flag by default.
         $registration->set('enrolmentfailure', 0);
+        $registration->set('errormessage', '');
         if (is_null($contact)) {
             $contact = $registration->get_contact();
             if (empty($contact)) {
@@ -705,7 +710,11 @@ class memberships_job extends job {
             $registration->save();
             // Process enrolment.
             $plugin->enrol($enrolmentinstance, $user->to_record());
-
+            if ($handler->processedcounter > 0) {
+                foreach ($handler->get_resolved_contacts() as $resolvedcontact) {
+                    static::reattempt_failed_registrations($resolvedcontact);
+                }
+            }
         }
         return true;
     }
@@ -749,9 +758,10 @@ class memberships_job extends job {
         $registration = $registration ?: registration_persistent::get_record(['sourceguid' => $sourceguid]);
 
         if ($registration) {
-            // Nothing newer to apply - short-circuit so the outcomes-push -> memberships-poll
-            // loop doesn't re-run the enrolment pipeline every cycle.
-            if ($registration->get('sourcemodified') >= $resource->LastModifiedDateTime) {
+            // Nothing newer to apply to a row that enrolled - short-circuit so the outcomes-push -> memberships-poll
+            // loop doesn't re-run the enrolment pipeline every cycle. Failed rows are always retried.
+            $unchanged = $registration->get('sourcemodified') >= $resource->LastModifiedDateTime;
+            if ($unchanged && !$registration->get('enrolmentfailure')) {
                 return [$registration, $existingcontact, true];
             }
             // Before adopting the incoming sourceguid (UNIQUE index), drop a stale row

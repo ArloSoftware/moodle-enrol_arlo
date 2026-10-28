@@ -169,10 +169,39 @@ class contact_merge_requests_test extends advanced_testcase {
         $handler = new contact_merge_requests_handler($destinationcontact);
         $result = $handler->apply_all_merge_requests();
 
-        // Current behaviour: the merge fails even though there is nothing to merge.
-        $this->assertEquals(false, $result);
+        $this->assertTrue($result);
         $contactmergerequest->read();
-        $this->assertEquals(1, $contactmergerequest->get('mergefailed'));
+        $this->assertEquals(0, $contactmergerequest->get('mergefailed'));
+        $this->assertEquals(0, $contactmergerequest->get('active'));
+        $this->assertEquals(0, $DB->get_field('user', 'suspended', ['id' => $user->id]));
+        $this->assertFalse(contact_persistent::record_exists($sourcecontact->get('id')));
+    }
+
+    /**
+     * A same-user merge where the user has no enrolments must not suspend the shared account.
+     *
+     * @covers \enrol_arlo\local\handler\contact_merge_requests_handler::apply_all_merge_requests
+     */
+    public function test_same_user_without_enrolments_is_not_suspended(): void {
+        global $CFG, $DB;
+        require_once($CFG->dirroot . '/enrol/arlo/lib.php');
+        $this->resetAfterTest();
+        $plugingenerator = $this->getDataGenerator()->get_plugin_generator('enrol_arlo');
+
+        $user = $this->getDataGenerator()->create_user();
+        $contacts = [];
+        foreach (['old', 'new'] as $suffix) {
+            $contact = $plugingenerator->create_contact((object) ['email' => "jane.{$suffix}@example.com"]);
+            $contact->set('userid', $user->id);
+            $contact->update();
+            $contacts[] = $contact;
+        }
+        $plugingenerator->create_contact_merge_request($contacts[0], $contacts[1]);
+
+        $handler = new contact_merge_requests_handler($contacts[1]);
+
+        $this->assertTrue($handler->apply_all_merge_requests());
+        $this->assertEquals(0, $DB->get_field('user', 'suspended', ['id' => $user->id]));
     }
 
     public function test_source_has_user_and_destination_has_enrolments() {

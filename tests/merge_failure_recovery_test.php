@@ -100,6 +100,8 @@ final class merge_failure_recovery_test extends advanced_testcase {
     public function test_task_recovers_stuck_and_orphaned_registrations(): void {
         [$user, $source, $destination] = $this->make_same_user_contacts();
         $merge = $this->generator->create_contact_merge_request($source, $destination);
+        $merge->set('mergefailed', 1);
+        $merge->update();
         $stuckcourses = $this->make_failed_registrations($destination, 2);
 
         $orphanuser = $this->getDataGenerator()->create_user();
@@ -108,7 +110,7 @@ final class merge_failure_recovery_test extends advanced_testcase {
         ]);
         $orphancontact->set('userid', $orphanuser->id);
         $orphancontact->update();
-        [$orphancourse] = $this->make_failed_registrations($orphancontact, 1, false);
+        [$orphancourse] = $this->make_failed_registrations($orphancontact, 1);
 
         $this->expectOutputRegex('/enrolled/');
         (new reattempt_failed_registrations())->execute();
@@ -146,26 +148,49 @@ final class merge_failure_recovery_test extends advanced_testcase {
     }
 
     /**
-     * Create Arlo-linked courses with a registration for the contact that fails to enrol.
+     * Resolving a merge during sync re-attempts every failed registration of both contacts.
+     *
+     * @covers \enrol_arlo\local\job\memberships_job::process_enrolment_registration
+     */
+    public function test_resolving_merge_reattempts_failed_registrations(): void {
+        [$user, $source, $destination] = $this->make_same_user_contacts();
+        $merge = $this->generator->create_contact_merge_request($source, $destination);
+        $failedcourses = $this->make_failed_registrations($destination, 2);
+        [$sourcecourse] = $this->make_failed_registrations($source, 1);
+
+        $course = $this->getDataGenerator()->create_course();
+        $event = $this->generator->create_event($this->generator->create_event_template());
+        $instance = $this->generator->create_event_enrolment_instance($course, $event);
+        $registration = $this->generator->create_event_registration($destination, $event, $instance);
+
+        $this->assertTrue(memberships_job::process_enrolment_registration($instance, $registration));
+
+        $merge->read();
+        $this->assertEquals(0, $merge->get('active'));
+        foreach (array_merge($failedcourses, [$sourcecourse, $course]) as $enrolledcourse) {
+            $this->assertTrue(is_enrolled(context_course::instance($enrolledcourse->id), $user->id));
+        }
+        $this->assertSame(0, registration_persistent::count_records(['enrolmentfailure' => 1]));
+        $this->assertSame(0, registration_persistent::count_records(['sourcecontactguid' => $source->get('sourceguid')]));
+        $this->assertFalse(contact_persistent::record_exists($source->get('id')));
+    }
+
+    /**
+     * Create Arlo-linked courses with a registration for the contact flagged as failed.
      *
      * @param contact_persistent $contact
      * @param int $count
-     * @param bool $process Fail through enrolment processing instead of flagging directly.
      * @return array Created courses.
      */
-    private function make_failed_registrations(contact_persistent $contact, int $count, bool $process = true): array {
+    private function make_failed_registrations(contact_persistent $contact, int $count): array {
         $courses = [];
         for ($i = 0; $i < $count; $i++) {
             $course = $this->getDataGenerator()->create_course();
             $event = $this->generator->create_event($this->generator->create_event_template());
             $instance = $this->generator->create_event_enrolment_instance($course, $event);
             $registration = $this->generator->create_event_registration($contact, $event, $instance);
-            if ($process) {
-                $this->assertFalse(memberships_job::process_enrolment_registration($instance, $registration));
-            } else {
-                $registration->set('enrolmentfailure', 1);
-                $registration->update();
-            }
+            $registration->set('enrolmentfailure', 1);
+            $registration->update();
             $courses[] = $course;
         }
         return $courses;
