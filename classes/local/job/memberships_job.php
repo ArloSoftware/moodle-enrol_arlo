@@ -538,6 +538,30 @@ class memberships_job extends job {
     }
 
     /**
+     * Re-attempt the enrolment of every failed registration of a contact.
+     *
+     * @param contact_persistent $contact
+     * @return bool True when all of them enrolled.
+     */
+    public static function reattempt_failed_registrations(contact_persistent $contact): bool {
+        $plugin = api::get_enrolment_plugin();
+        $registrations = registration_persistent::get_records(
+            ['sourcecontactguid' => $contact->get('sourceguid'), 'enrolmentfailure' => 1]
+        );
+        $success = true;
+        foreach ($registrations as $registration) {
+            $enrolmentinstance = $plugin::get_instance_record($registration->get('enrolid'));
+            try {
+                $result = $enrolmentinstance && static::process_enrolment_registration($enrolmentinstance, $registration);
+            } catch (moodle_exception $exception) {
+                $result = false;
+            }
+            $success = $success && $result;
+        }
+        return $success;
+    }
+
+    /**
      * Method to process an enrolment against a saved registration.
      *
      * @todo Refactor code, separation of concerns etc. Make easier to understand.

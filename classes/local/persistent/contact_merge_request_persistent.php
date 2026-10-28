@@ -116,4 +116,17 @@ class contact_merge_request_persistent extends persistent {
         );
     }
 
+    /**
+     * Whether source and destination contacts are linked to the same Moodle user.
+     *
+     * @return bool
+     */
+    public function resolves_to_same_user(): bool {
+        $sourcecontact = $this->get_source_contact();
+        $destinationcontact = $this->get_destination_contact();
+        return $sourcecontact && $destinationcontact
+            && $sourcecontact->get('userid') > 0
+            && $sourcecontact->get('userid') == $destinationcontact->get('userid');
+    }
+
 }

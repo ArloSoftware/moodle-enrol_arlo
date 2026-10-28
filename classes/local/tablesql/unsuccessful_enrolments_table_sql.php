@@ -285,6 +285,16 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                 }
             }
         }
+        if (empty($values->userassociationfailure) && empty($values->mergefailed)) {
+            $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php', ['id' => $values->id]);
+            $text = get_string('reattemptenrolment', 'enrol_arlo');
+            $actions['reattemptenrolment'] .= $OUTPUT->action_link(
+                $url,
+                $text,
+                null,
+                ['class' => 'btn btn-outline-primary btn-sm']
+            );
+        }
         return implode('', $actions);
     }
 
