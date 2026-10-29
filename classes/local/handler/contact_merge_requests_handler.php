@@ -32,6 +32,7 @@ use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\persistent;
 use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\persistent\registration_persistent;
 
 /**
  * Class for working with contact merge requests for a contact.
@@ -304,17 +305,12 @@ class contact_merge_requests_handler {
      * @param contact_persistent $to
      */
     protected function move_registrations(contact_persistent $from, contact_persistent $to): void {
-        global $DB;
-        $DB->execute(
-            "UPDATE {enrol_arlo_registration}
-                SET sourcecontactid = :sourcecontactid, sourcecontactguid = :sourcecontactguid
-              WHERE sourcecontactguid = :fromguid",
-            [
-                'sourcecontactid' => $to->get('sourceid'),
-                'sourcecontactguid' => $to->get('sourceguid'),
-                'fromguid' => $from->get('sourceguid'),
-            ]
-        );
+        $registrations = registration_persistent::get_records(['sourcecontactguid' => $from->get('sourceguid')]);
+        foreach ($registrations as $registration) {
+            $registration->set('sourcecontactid', $to->get('sourceid'));
+            $registration->set('sourcecontactguid', $to->get('sourceguid'));
+            $registration->update();
+        }
     }
 
 }
