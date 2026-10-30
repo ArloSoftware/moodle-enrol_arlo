@@ -52,11 +52,7 @@ if (!$contactmergerequests) {
 $contactmergerequest = reset($contactmergerequests);
 $sourcecontact = $contactmergerequest->get_source_contact();
 $destinationcontact = $contactmergerequest->get_destination_contact();
-// When both contacts resolve to the same Moodle user there is nothing to merge,
-// so the merge request can be safely marked as complete.
-$sameuser = $sourcecontact && $destinationcontact
-    && $sourcecontact->get('userid') > 0
-    && $sourcecontact->get('userid') == $destinationcontact->get('userid');
+$sameuser = $contactmergerequest->resolves_to_same_user();
 if ($action === 'markcomplete' && confirm_sesskey()) {
     require_capability('moodle/site:config', context_system::instance());
     if (!$sameuser || !enrol_is_enabled('arlo')) {
@@ -66,13 +62,7 @@ if ($action === 'markcomplete' && confirm_sesskey()) {
     $contactmergerequest->set('active', 0);
     $contactmergerequest->set('mergefailed', 0);
     $contactmergerequest->update();
-    // Re-attempt the enrolment now that the merge request is resolved.
-    $plugin = \enrol_arlo\api::get_enrolment_plugin();
-    $enrolmentinstance = $plugin::get_instance_record($registration->get('enrolid'), MUST_EXIST);
-    $result = \enrol_arlo\local\job\memberships_job::process_enrolment_registration(
-        $enrolmentinstance,
-        $registration
-    );
+    $result = \enrol_arlo\local\job\memberships_job::reattempt_failed_registrations($contact);
     $message = ($result) ? get_string('success') : get_string('failed', 'enrol_arlo');
     redirect($returnurl, $message, 1);
 }

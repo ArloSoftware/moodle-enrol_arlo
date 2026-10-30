@@ -127,6 +127,7 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                 'eac.usercreationfailure',
                 'eac.userassociationfailure',
                 'eacmr.mergefailed',
+                'ear.errormessage',
                 'ear.timemodified'
             ];
             $select = implode(',', $fields);
@@ -285,6 +286,16 @@ class unsuccessful_enrolments_table_sql extends table_sql {
                 }
             }
         }
+        if (empty($values->userassociationfailure) && empty($values->mergefailed)) {
+            $url = new moodle_url('/enrol/arlo/admin/reattemptenrolment.php', ['id' => $values->id]);
+            $text = get_string('reattemptenrolment', 'enrol_arlo');
+            $actions['reattemptenrolment'] .= $OUTPUT->action_link(
+                $url,
+                $text,
+                null,
+                ['class' => 'btn btn-outline-primary btn-sm']
+            );
+        }
         return implode('', $actions);
     }
 
@@ -332,6 +343,9 @@ class unsuccessful_enrolments_table_sql extends table_sql {
             $url->param('id', $values->id);
             $text = get_string('contactmergefailurereport', 'enrol_arlo');
             $output .= $OUTPUT->action_link($url, $text, null, null);
+        }
+        if ($output === '' && !empty($values->errormessage)) {
+            $output = s($values->errormessage);
         }
         return $output;
     }
