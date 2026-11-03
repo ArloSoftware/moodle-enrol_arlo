@@ -32,6 +32,7 @@ use enrol_arlo\local\persistent\user_persistent;
 use enrol_arlo\persistent;
 use enrol_arlo\local\persistent\contact_persistent;
 use enrol_arlo\local\persistent\contact_merge_request_persistent;
+use enrol_arlo\local\persistent\registration_persistent;
 
 /**
  * Class for working with contact merge requests for a contact.
@@ -54,6 +55,9 @@ class contact_merge_requests_handler {
     /** @var contact_persistent[] $removecontacts */
     protected $removecontacts;
 
+    /** @var contact_persistent[] $mergedinto Contact each removed contact was merged into, keyed by removed contact id. */
+    protected $mergedinto;
+
     /** @var user_persistent[] $suspendedusers */
     protected $suspendedusers;
 
@@ -72,6 +76,7 @@ class contact_merge_requests_handler {
         $this->appliedcount = 0;
         $this->initialcontact = $contact;
         $this->removecontacts = [];
+        $this->mergedinto = [];
         $this->suspendedusers = [];
         $this->stack = [];
     }
@@ -185,6 +190,10 @@ class contact_merge_requests_handler {
             }
             // Start evaluation. Using switch to take advantage of break.
             switch (true) {
+                // Both contacts already resolve to the same user, nothing to merge.
+                case ($sourceuser && $destinationuser && $sourceuser->get('id') == $destinationuser->get('id')):
+                    $this->removecontacts[$sourcecontact->get('id')] = $sourcecontact;
+                    break;
                 // Both source and destination hav enrolments.
                 case ($sourceuserhasenrolments && $destinationuserhasenrolments):
                     $contactmergerequest->set('mergefailed', 1);
@@ -243,6 +252,9 @@ class contact_merge_requests_handler {
             $contactmergerequest->set('mergefailed', 0);
             $contactmergerequest->update();
             $this->processedcounter++;
+            if ($sourcecontact) {
+                $this->mergedinto[$sourcecontact->get('id')] = $destinationcontact ?: $this->initialcontact;
+            }
             // We previous contact merge request may have related contacts in current merge request.
             if ($destinationcontact) {
                 if ($destinationcontact->get('sourceguid') != $this->initialcontact->get('sourceguid')) {
@@ -257,6 +269,7 @@ class contact_merge_requests_handler {
                 if ($contact->get('sourceguid') == $this->initialcontact->get('sourceguid')) {
                     continue;
                 }
+                $this->move_registrations($contact, $this->mergedinto[$contact->get('id')]);
                 $contact->delete();
             }
         }
@@ -268,6 +281,36 @@ class contact_merge_requests_handler {
         }
         // No active requests for current destination contact so exit.
         return true;
+    }
+
+    /**
+     * Contacts whose failed registrations may now enrol: the initial contact and every merge destination.
+     *
+     * @return contact_persistent[]
+     */
+    public function get_resolved_contacts(): array {
+        $contacts = [$this->initialcontact->get('id') => $this->initialcontact];
+        foreach ($this->mergedinto as $contact) {
+            if (!isset($this->removecontacts[$contact->get('id')])) {
+                $contacts[$contact->get('id')] = $contact;
+            }
+        }
+        return $contacts;
+    }
+
+    /**
+     * Re-point registrations of a merged-away contact to the contact it was merged into.
+     *
+     * @param contact_persistent $from
+     * @param contact_persistent $to
+     */
+    protected function move_registrations(contact_persistent $from, contact_persistent $to): void {
+        $registrations = registration_persistent::get_records(['sourcecontactguid' => $from->get('sourceguid')]);
+        foreach ($registrations as $registration) {
+            $registration->set('sourcecontactid', $to->get('sourceid'));
+            $registration->set('sourcecontactguid', $to->get('sourceguid'));
+            $registration->update();
+        }
     }
 
 }

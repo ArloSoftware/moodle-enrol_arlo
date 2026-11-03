@@ -636,5 +636,11 @@ function xmldb_enrol_arlo_upgrade($oldversion) {
 
         upgrade_plugin_savepoint(true, 2025010900, 'enrol', 'arlo');
     }
+
+    if ($oldversion < 2026102700) {
+        \core\task\manager::queue_adhoc_task(new \enrol_arlo\task\reattempt_failed_registrations(), true);
+
+        upgrade_plugin_savepoint(true, 2026102700, 'enrol', 'arlo');
+    }
     return true;
 }
