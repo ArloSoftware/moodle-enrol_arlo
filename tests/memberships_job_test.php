@@ -29,6 +29,7 @@ use enrol_arlo\Arlo\AuthAPI\Enum\RegistrationStatus;
 use enrol_arlo\Arlo\AuthAPI\Resource\Contact as ContactResource;
 use enrol_arlo\Arlo\AuthAPI\Resource\Event as EventResource;
 use enrol_arlo\Arlo\AuthAPI\Resource\Registration as RegistrationResource;
+use enrol_arlo\local\factory\job_factory;
 use enrol_arlo\local\job\memberships_job;
 use enrol_arlo\local\persistent\contact_persistent;
 use PHPUnit\Framework\Attributes\Group;
@@ -169,6 +170,41 @@ final class memberships_job_test extends advanced_testcase {
         $this->assertEquals($contacta->get('sourceid'), $freshrowa->sourcecontactid);
         $this->assertEquals($contactb->get('sourceid'), $rowb->get('sourcecontactid'));
         $this->assertSame(2, $this->count_registrations());
+    }
+
+    /**
+     * A failed row is processed again when Arlo re-sends it unchanged.
+     *
+     * @covers \enrol_arlo\local\job\memberships_job::save_resource_information_to_persistents
+     */
+    public function test_repeat_sync_of_failed_registration_is_reprocessed(): void {
+        $resource = $this->make_registration_resource($this->make_linked_contact('failed@example.com'));
+        [$registration] = $this->save($resource);
+        $registration->set('enrolmentfailure', 1);
+        $registration->update();
+
+        [, , $skip] = $this->save($resource);
+
+        $this->assertFalse($skip);
+    }
+
+    /**
+     * An exception while processing flags the registration as failed and keeps the message.
+     *
+     * @covers \enrol_arlo\local\job\memberships_job::sync_resource
+     */
+    public function test_processing_exception_flags_registration(): void {
+        global $DB;
+        $info = (object) ['firstname' => 'No', 'lastname' => 'Email', 'email' => ''];
+        $resource = $this->make_registration_resource($this->generator->create_contact($info));
+        $job = job_factory::get_job(['area' => 'enrolment', 'type' => 'memberships', 'instanceid' => $this->enrolinstance->id]);
+
+        $job->sync_resource($resource);
+        $this->assertDebuggingCalled();
+
+        $row = $DB->get_record('enrol_arlo_registration', ['sourceguid' => $resource->UniqueIdentifier], '*', MUST_EXIST);
+        $this->assertEquals(1, $row->enrolmentfailure);
+        $this->assertNotEmpty($row->errormessage);
     }
 
     // ----- helpers -----
