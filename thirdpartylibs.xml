@@ -1,27 +1,6 @@
 <?xml version="1.0"?>
 <libraries>
     <library>
-        <location>vendor</location>
-        <name>Composer</name>
-        <version></version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
-        <location>vendor/psr</location>
-        <name>PHP Framework Interoperability Group</name>
-        <version></version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
-        <location>vendor/guzzlehttp</location>
-        <name>Guzzle PHP HTTP client</name>
-        <version></version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
         <location>classes/Arlo/AuthAPI</location>
         <name>Arlo AuthAPI</name>
         <version></version>
